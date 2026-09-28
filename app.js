@@ -1,303 +1,121 @@
-(() => {
-const STORAGE="alchemistArchives.v1";
-const quickStates=["Anxious","Letting go","Stuck","New beginning","Home reset","Grief","Creative","Boundaries","Abundance","Rest"];
+(()=>{
+'use strict';
 
-const rituals=[
-{id:"grounding",title:"Return to the Ground",category:"Grounding",symbol:"◌",summary:"A short sensory practice for moments when your mind is racing ahead of your body.",why:"You sound like you may need less interpretation and more steadiness first.",needs:["A glass of water","A chair or floor space","5 quiet minutes"],keywords:["anxious","anxiety","overwhelmed","scattered","panic","nervous","tomorrow","stress","stressed","ground"],steps:["Place both feet on the floor. Let your shoulders drop without forcing them.","Take three slow breaths. On each exhale, name one physical sensation you can actually feel.","Drink the water slowly. Notice temperature, weight, and movement instead of trying to solve anything.","Name one thing that is true right now—not tomorrow, not the story around it. Just now.","Choose one small action that would make the next hour gentler."],prompt:"What became simpler once I returned to what is actually happening now?"},
-{id:"release",title:"The Release Bowl",category:"Release",symbol:"≈",summary:"Give a thought, attachment, or burden a physical ending instead of carrying it in loops.",why:"You seem to be carrying something that may need acknowledgment before it can loosen.",needs:["A bowl of water","A small piece of paper","A pen"],keywords:["release","letting go","let go","ex","breakup","done","resentment","grudge","leave","leaving"],steps:["Write one sentence naming what you are ready to stop rehearsing.","Fold the paper once. Hold it over the bowl and say: “I can honor what happened without carrying it forever.”","Place the paper beside the bowl. Touch the water and imagine the emotional charge becoming less concentrated.","Sit quietly for two minutes. Do not force forgiveness or closure. Notice only what you are willing to put down today.","Dispose of the paper in a way that feels complete to you."],prompt:"What am I actually ready to release—and what still needs more time?"},
-{id:"beginning",title:"Threshold Ritual",category:"New Beginnings",symbol:"↗",summary:"Mark the moment between what was and what you are choosing next.",why:"A new beginning often needs a clear threshold more than a perfect plan.",needs:["A doorway","A small object to carry","Paper"],keywords:["new","begin","beginning","starting","start","change","move","job","launch","first","next"],steps:["Stand on one side of a doorway and name, privately, what belongs to the chapter behind you.","Choose a small object to carry through the doorway as a symbol of what you want to bring forward.","Before crossing, write one sentence beginning: “In this next chapter, I practice…”","Cross the threshold slowly with the object in your hand.","Place the object somewhere visible for the next seven days."],prompt:"What do I want to practice becoming, rather than merely achieve?"},
-{id:"home",title:"House Reset",category:"Home Blessing",symbol:"⌂",summary:"A practical ritual for changing the emotional feel of a room by tending to the physical space first.",why:"When a space feels heavy, the most useful magic may begin with attention and care.",needs:["Open window if possible","A cloth","A bowl or cup of water"],keywords:["home","house","room","reset","space","clean","heavy","energy","mess","apartment"],steps:["Choose one room only. Open a window or door if that is practical.","Remove five things that do not belong in the room. Keep the task deliberately small.","Wipe one surface slowly while thinking about how you want this room to feel when you enter it.","Place fresh water in the room for a few minutes as a symbol of clarity and movement.","Stand at the entrance and name one behavior you want this space to support."],prompt:"What do I want this space to make easier for me?"},
-{id:"boundaries",title:"Boundary in Plain Language",category:"Boundaries",symbol:"│",summary:"Turn a vague sense of discomfort into one clear sentence you can actually use.",why:"A boundary becomes more useful when it moves from feeling to language.",needs:["Paper","A pen","10 minutes"],keywords:["boundary","boundaries","people pleasing","no","resent","taken advantage","used","pressure","family","friend"],steps:["Write the situation without explaining or defending anyone: just the observable facts.","Finish this sentence: “What is not working for me is…”","Now write: “What I am available for is…”","Write one boundary sentence using ordinary language. Remove apologies that are only there to make the boundary disappear.","Read it aloud once. Adjust until it sounds like something you could actually say."],prompt:"What boundary becomes possible when I stop trying to make everyone agree with it?"},
-{id:"abundance",title:"Receiving Inventory",category:"Abundance",symbol:"✦",summary:"Shift from vague wanting to noticing what you can receive, support, grow, and ask for.",why:"Abundance work is more useful when it includes receiving and action, not only wishing.",needs:["Paper","A pen","10 minutes"],keywords:["money","abundance","receive","receiving","income","career","opportunity","want","more","financial"],steps:["List five forms of support or resource already available to you, however small.","Circle one thing you routinely dismiss, refuse, or fail to notice because it does not look dramatic enough.","Write one specific thing you are willing to ask for this week.","Write one action you can take that makes receiving easier rather than waiting passively.","End by naming one resource you intend to use well."],prompt:"Where am I asking for more while overlooking what is already trying to support me?"},
-{id:"selflove",title:"Mirror of Regard",category:"Self-Love",symbol:"◇",summary:"A grounded self-regard practice that does not require forcing yourself into positive affirmations.",why:"Sometimes care begins with speaking to yourself without contempt, not with trying to feel amazing.",needs:["A mirror","5 quiet minutes"],keywords:["love","self love","hate myself","ugly","worth","confidence","insecure","alone","lonely","unlovable"],steps:["Look at your face without evaluating it. Notice shapes, color, expression, and breath.","Say your own name once, as you would when trying to get the attention of someone you care about.","Name one thing you have carried recently that required effort.","Say: “I do not have to earn basic tenderness from myself.”","Choose one act of care you can complete today without turning it into self-improvement."],prompt:"What changes when I treat care as a baseline instead of a reward?"},
-{id:"grief",title:"A Place for Grief",category:"Grief",symbol:"◐",summary:"Make room for grief without asking it to teach, resolve, or transform on command.",why:"Not every feeling needs to become a lesson. Some things need a place to be held.",needs:["A candle or soft light","An object connected to what you miss","Time without interruption"],keywords:["grief","loss","died","death","miss","mourning","sad","gone","bereavement"],steps:["Choose a small place to sit with the object or memory you brought.","If safe for you, light a candle or soften the room. Do not create a performance; create enough quiet to notice what is here.","Say or write what you miss in concrete terms.","Let one memory arrive without deciding whether it is good or bad.","Close by naming what you need after this practice: rest, food, company, movement, privacy, or something else."],prompt:"What did I need permission to miss today?"},
-{id:"creative",title:"Open the Channel",category:"Creative Awakening",symbol:"✺",summary:"Use constraint and movement to get past the pressure to make something important.",why:"Creative stuckness often gets worse when every attempt has to justify itself.",needs:["Paper or notes app","A 10-minute timer"],keywords:["creative","create","writer","writing","artist","blocked","stuck","idea","ideas","inspiration","project"],steps:["Set a timer for ten minutes. Choose one medium only: words, sketching, movement, sound, or arranging.","Make one deliberately unimportant thing. It is not allowed to become a project.","When judgment appears, write or say: “Not relevant yet.” Return to making.","At the halfway point, introduce one constraint: only three colors, only questions, only circles, only one beat—anything simple.","Stop when the timer ends, even if you want to continue. Leave yourself somewhere to return."],prompt:"What became possible once the work did not have to prove anything?"},
-{id:"rest",title:"Permission to Stop",category:"Rest",symbol:"—",summary:"A closing ritual for days when the useful next action is to stop extracting more from yourself.",why:"You may not need another task. You may need a clean ending to the day.",needs:["A dimmer light","A place to sit or lie down","Paper"],keywords:["tired","exhausted","rest","burnout","burned out","sleep","drained","done","can't","cannot"],steps:["Write down anything you are afraid you will forget if you stop now.","Choose one item that truly must happen later. Give it a specific tomorrow or future time.","Lower one source of stimulation: light, sound, screen brightness, or conversation.","Say: “Nothing else needs to be solved in this hour.”","Do one closing action—wash your face, make tea, stretch, or lie down—and let it be enough."],prompt:"What am I afraid will happen if I stop for the day?"},
-{id:"intention",title:"One Clear Intention",category:"Intention",symbol:"•",summary:"Reduce a cloud of wanting into one direction you can recognize and act on.",why:"When everything matters, intention can become noise. One direction is easier to live.",needs:["Paper","A pen"],keywords:["intention","focus","goal","goals","direction","confused","want","wish","manifest","manifesting"],steps:["List everything you are currently trying to make happen. Do not organize it yet.","Underline the item that would change how you move through the others.","Rewrite it as a quality of action rather than an outcome: “I practice…”, “I protect…”, “I make room for…”","Write one behavior that would make the intention visible this week.","Put the sentence somewhere you will encounter it without needing an app notification."],prompt:"If I could practice only one direction this week, what would it be?"},
-{id:"protection",title:"Protect the Threshold",category:"Protection",symbol:"⊙",summary:"Clarify what you let into your attention, time, home, or conversation.",why:"Protection can be practical: deciding what gets access to you and what does not.",needs:["A doorway or boundary point","Paper"],keywords:["protect","protection","unsafe","drama","negative","negativity","access","toxic","energy vampire"],steps:["Choose the threshold you are working with: your phone, home, time, inbox, body, or attention.","Write three things currently crossing that threshold too freely.","For each, name one practical gate: silence notifications, close a door, change a schedule, say no, block access, ask for help.","Stand at a physical doorway and say: “Access is not automatic.”","Take one gatekeeping action before the ritual ends."],prompt:"What has had access to me simply because I never decided otherwise?"},
-{id:"clarity",title:"The Unknowing Page",category:"Clarity",symbol:"?",summary:"A reflection for when you do not know what you need and do not want to pretend you do.",why:"Not knowing can be useful information. The goal is to reduce noise, not manufacture certainty.",needs:["Paper","A pen","8 minutes"],keywords:["off","don't know","dont know","unsure","confused","lost","unclear","weird","something wrong"],steps:["Write: “What I know:” and list only facts.","Write: “What I am assuming:” and list the stories your mind is adding.","Write: “What I feel:” without explaining the feeling.","Circle the one line that needs attention today.","Choose a next step that does not require solving the entire situation."],prompt:"What became clearer when I separated facts, assumptions, and feelings?"},
-{id:"courage",title:"Small Courage",category:"Courage",symbol:"△",summary:"Turn fear into one tolerable act instead of demanding fearlessness.",why:"You may not need confidence before acting. You may need a smaller definition of courage.",needs:["Paper","A pen"],keywords:["afraid","fear","scared","courage","brave","avoid","avoiding","procrastinating","procrastination"],steps:["Name the thing you are avoiding in one sentence.","Write the feared outcome without softening it.","Now write the smallest action that would count as moving toward the situation—not finishing it.","Set a ten-minute container and do only that action.","Afterward, record what actually happened rather than what fear predicted."],prompt:"What did courage look like when I made it smaller and more specific?"},
-{id:"connection",title:"Return to Connection",category:"Connection",symbol:"∞",summary:"A gentle check-in for loneliness that focuses on one reachable thread of human contact.",why:"Connection can begin with one honest reach rather than waiting to feel socially ready.",needs:["Your phone or paper","One person you trust enough"],keywords:["lonely","alone","isolated","connection","friend","friends","nobody","unseen"],steps:["Name the kind of connection you actually want: company, listening, laughter, advice, touch, or simply being remembered.","Choose one person who is reasonably safe to contact. Do not choose the most emotionally complicated option.","Send a simple, truthful message. You do not need to perform cheerfulness.","While you wait, do one small act that keeps you connected to the physical world around you.","If no person feels available, write the message you wish you could send. Let that tell you what kind of support you need."],prompt:"What kind of connection was I actually longing for?"}
+const STORAGE='daily-alchemist-v2';
+const clone=o=>JSON.parse(JSON.stringify(o));
+const guardianMeta={
+ Aura:{role:'Archive intelligence · pattern routing',sigil:'✧',accent:'#b6925f'},
+ Ash:{role:'Fire · boundaries · release',sigil:'△',accent:'#a85f3c'},
+ Veil:{role:'Grief · endings · shadow · transformation',sigil:'◐',accent:'#68496d'},
+ Silver:{role:'Rest · intuition · lunar work',sigil:'☾',accent:'#666d8f'},
+ Root:{role:'Grounding · nature · herbs · season',sigil:'❧',accent:'#5f745a'},
+ Gold:{role:'Worth · beauty · abundance · receiving',sigil:'☀',accent:'#b6925f'},
+ Sage:{role:'Knowledge · clarity · patterns · structure',sigil:'◇',accent:'#5d6e68'}
+};
+
+const chambers=[
+ {id:'silver',guardian:'Silver',name:'The Lunar Alchemist',price:'$7.99',seal:'☾',summary:'Deeper lunar timing, dream work, rest rituals and phase-aware reflection.',why:'Useful when your work keeps circling rest, intuition, timing or emotional tides.'},
+ {id:'root',guardian:'Root',name:'Root: Earth & Season',price:'$7.99',seal:'❧',summary:'Herbal correspondences, seasonal rituals, earth practices and grounded sensory work.',why:'Useful when your system needs grounding, embodiment, home, nature or steadiness.'},
+ {id:'ash',guardian:'Ash',name:'Ash: Sacred Fire',price:'$8.99',seal:'△',summary:'Boundary work, rage alchemy, reclamation, endings and disciplined release.',why:'Useful when anger, resentment, violation or the need to reclaim yourself keeps returning.'},
+ {id:'veil',guardian:'Veil',name:'Veil: The Shadow Chamber',price:'$9.99',seal:'◐',summary:'Grief, endings, shadow reflection, liminal seasons and identity transformation.',why:'Useful when something is ending but the next version of you is not clear yet.'},
+ {id:'gold',guardian:'Gold',name:'Gold: Receiving',price:'$8.99',seal:'☀',summary:'Worth, pleasure, beauty, abundance, desire and receiving without apology.',why:'Useful when you are rebuilding self-worth or learning to make room for what you want.'},
+ {id:'sage',guardian:'Sage',name:'Sage: Pattern & Clarity',price:'$7.99',seal:'◇',summary:'Decision rituals, pattern review, values clarification and structured reflection.',why:'Useful when you have too many thoughts, too many options or a repeating decision loop.'},
+ {id:'archivist',guardian:'Aura',name:'The Ritual Archivist',price:'$11.99',seal:'✦',summary:'Expanded ritual construction, substitutions, correspondences and deeper personalized practice building.',why:'Useful when you want the system to build more elaborate practices from what you already own.'}
 ];
 
-const state=load();
-let currentRecommendation=null;
-let activeRitual=null;
-let guideIndex=0;
-let favoritesOnly=false;
+const journeys=[
+ {id:'energy-reset',title:'7-Day Energy Reset',days:7,price:'Included',free:true,featured:true,summary:'Clearing, grounding, intention, protection, receiving, release and integration.'},
+ {id:'calling-back',title:'Calling Yourself Back',days:10,price:'$8.99',summary:'A guided return after overgiving, relationship entanglement or losing your own center.'},
+ {id:'home-reset',title:'21-Day Home Reset',days:21,price:'$12.99',summary:'Turn your home into an active support system through clearing, tending, beauty and rhythm.'},
+ {id:'abundance-season',title:'The Abundance Season',days:14,price:'$9.99',summary:'Worth, receiving, money stories, desire and material stewardship through Gold.'},
+ {id:'shadow-chamber',title:'The Shadow Chamber',days:14,price:'$11.99',summary:'A slower Veil-led passage through recurring patterns, grief, shadow and identity change.'},
+ {id:'new-moon',title:'New Moon Beginning',days:5,price:'$6.99',summary:'Clarify one beginning, prepare the ground and set an intention you can actually carry.'},
+ {id:'full-moon',title:'Full Moon Release',days:5,price:'$6.99',summary:'Notice what has come into view, choose what is complete and release without performance.'}
+];
 
-function load(){
-  try{
-    const s=JSON.parse(localStorage.getItem(STORAGE));
-    return Object.assign({onboarded:false,favorites:[],history:[]},s||{});
-  }catch(e){return {onboarded:false,favorites:[],history:[]};}
-}
+const rituals=[
+ {id:'ash-boundary',guardian:'Ash',title:'The Boundary Sentence',sigil:'△',duration:6,materials:['paper','pen'],themes:['boundaries','anger'],keywords:['angry','mad','pissed','resent','disrespect','boundary','boundaries','used','taken advantage','enough'],summary:'Turn emotional heat into one sentence you can actually use.',reason:'Heat is useful when it becomes information. This separates what happened from the boundary you want next.',steps:['Write: “What I am angry about is…” Do not make it fair. Make it true.','Write: “What this tells me I need is…” Keep the answer concrete.','Write one boundary sentence with no biography or courtroom argument. Start with “I will,” “I won’t,” or “I need.”','Read it once. Remove every word that exists only to make the other person approve of the boundary.'],prompt:'What changed when I stopped explaining the boundary and simply named it?'},
+ {id:'ash-release',guardian:'Ash',title:'The Safe Burn',sigil:'✣',duration:9,materials:['paper','pen','candle'],themes:['anger','release'],keywords:['release','let go','furious','rage','done','over it','cannot stop thinking','obsessing'],summary:'Give looping anger an ending point without pretending it never mattered.',reason:'The mind often repeats what the body still thinks is unfinished. This gives the feeling a physical conclusion.',steps:['Write the uncensored version of what you wish you could say. This page is not communication. It is discharge.','Circle the one sentence carrying the most heat.','Say: “This happened. It mattered. I do not have to carry it every minute to prove that.”','Tear the page into small pieces. If open flame is available and safe, burn the circled sentence in a fireproof vessel. Otherwise discard the pieces outside your main living space.'],prompt:'What am I afraid would happen if I stopped rehearsing this?'},
+ {id:'veil-grief',guardian:'Veil',title:'Sit Beside the Missing',sigil:'◐',duration:10,materials:['water'],themes:['grief','ending'],keywords:['grief','grieving','miss','missing','loss','lost','died','death','sad','heartbroken','ending','ended'],summary:'A grief practice that does not ask you to transform the loss before you are ready.',reason:'Not every feeling needs to become a lesson. Sometimes the useful act is making room for what is absent.',steps:['Set a glass of water near you. Let it stand for the fact that grief is allowed to have weight and volume.','Name what is missing without adding “but.” One person, future, version of yourself or certainty.','Put one hand where the grief feels most physical. Stay there for five slow breaths.','Finish: “I do not need to be over this today. What I need today is…”'],prompt:'What does this grief need from me today, not forever?'},
+ {id:'veil-threshold',guardian:'Veil',title:'The Threshold Inventory',sigil:'◒',duration:12,materials:['paper','pen'],themes:['ending','identity','change'],keywords:['changing','change','transition','ending','new chapter','who am i','identity','stuck between','limbo','uncertain'],summary:'Name what has ended, what has not begun and what remains yours in between.',reason:'Liminal seasons feel confusing because the old identity no longer organizes the day. This gives the in-between a shape.',steps:['Divide a page into three columns: Ended, Not Yet, Still Mine.','List what is genuinely complete under Ended. Do not list what you merely wish were complete.','List what has not formed yet under Not Yet. Leave uncertainty intact.','Under Still Mine, list your skills, values, people, routines, resources and truths that remain available now.'],prompt:'What remains mine even while the next version is still forming?'},
+ {id:'silver-rest',guardian:'Silver',title:'Permission to Descend',sigil:'☾',duration:7,materials:['water'],themes:['rest','overwhelm'],keywords:['tired','exhausted','drained','burned out','burnt out','overwhelmed','too much','rest','sleep','depleted'],summary:'Reduce demand before asking yourself to recover.',reason:'Exhaustion does not always need motivation. It often needs fewer instructions and a smaller field of obligation.',steps:['Drink or hold a glass of water. Let this be the only thing you are required to complete first.','Name three things you are officially not doing tonight or for the next hour.','Choose one maintenance task that would make tomorrow kinder. Keep it under ten minutes.','After that task, stop. Rest is the practice, not the reward for finishing everything.'],prompt:'What demand did I remove, and what did my body do when I removed it?'},
+ {id:'silver-intuition',guardian:'Silver',title:'The Quiet Yes',sigil:'◔',duration:8,materials:['paper','pen'],themes:['intuition','decision'],keywords:['intuition','gut','feel','decision','choose','choice','unsure','confused','sign','knowing'],summary:'Separate the quiet signal from urgency, fear and performance.',reason:'Intuition is hard to hear when every possibility is being argued at full volume. This lowers the volume before asking for an answer.',steps:['Write the decision as a simple either/or, even if reality is more complex.','For option one, notice your first body response before you explain it. Write three physical words only.','Repeat for option two.','Ask: “If nobody could praise or punish me for this choice, what would feel more honest?” Write the first complete sentence.'],prompt:'What did I know before I started arguing with myself?'},
+ {id:'root-ground',guardian:'Root',title:'Five Things That Are Here',sigil:'❧',duration:5,materials:['none'],themes:['grounding','anxiety','overwhelm'],keywords:['anxious','anxiety','panic','spiraling','scattered','overwhelmed','ground','ungrounded','nervous','racing'],summary:'Return attention to the physical world without demanding instant calm.',reason:'When thought becomes too fast, useful information often comes from reducing the size of the moment.',steps:['Press both feet into the floor or ground and notice the pressure back against you.','Name five things you can see that are not screens.','Name three sounds you did not create on purpose.','Touch one textured object and describe it with three precise words.','Ask only: “What is the next ten-minute problem?” Ignore the rest for now.'],prompt:'What became smaller once I returned to what was actually here?'},
+ {id:'root-home',guardian:'Root',title:'Tend One Square',sigil:'⌂',duration:10,materials:['none'],themes:['home','overwhelm','grounding'],keywords:['house','home','mess','dirty','clutter','clean','room','space'],summary:'Use one small area of your home as an anchor instead of turning your whole house into a verdict.',reason:'A home can support regulation when the task is small enough to finish. This is tending, not punishment cleaning.',steps:['Choose one square: a nightstand, sink, chair, counter section or the floor beside your bed.','Remove trash first. Do not organize yet.','Return only what clearly belongs there.','Wipe or straighten the surface, then add one thing that makes the area feel cared for.','Stop at one square unless continuing feels genuinely easy.'],prompt:'How did one completed area change the feeling of the room?'},
+ {id:'gold-receive',guardian:'Gold',title:'Practice Receiving',sigil:'☀',duration:7,materials:['paper','pen'],themes:['worth','receiving','abundance'],keywords:['deserve','worth','worthy','abundance','money','receive','receiving','good things','guilty','guilt','pleasure','want'],summary:'Notice where you turn receiving into debt, proof or apology.',reason:'Receiving is difficult when every good thing immediately becomes something you must repay or justify.',steps:['Write one thing you have received recently: help, money, praise, rest, beauty, time or care.','Notice the first urge to minimize it, repay it immediately or explain why you deserved it.','Write: “I can receive this without turning it into a debt.”','Choose one small pleasure today and let it remain pleasure. Do not make it productive.'],prompt:'What made receiving feel dangerous, excessive or undeserved?'},
+ {id:'gold-desire',guardian:'Gold',title:'Name the Want',sigil:'✺',duration:8,materials:['paper','pen'],themes:['desire','worth','clarity'],keywords:['want','desire','dream','wish','more','goal','goals','future','afraid to want','settling'],summary:'Let desire become information before it becomes a plan.',reason:'You do not have to know how to get something before you are allowed to admit that you want it.',steps:['Write “I want…” ten times and complete each sentence quickly.','Cross out anything that sounds like a performance for somebody else.','Star the want that creates the most energy in your body, even if it feels impractical.','Write one way your current life could make two percent more room for that desire.'],prompt:'Which desire felt most alive once I stopped requiring a plan?'},
+ {id:'sage-clarity',guardian:'Sage',title:'The One Decision',sigil:'◇',duration:8,materials:['paper','pen'],themes:['clarity','decision','overwhelm'],keywords:['confused','decision','decide','too many','options','what should i do','clarity','figure out','stuck','plan'],summary:'Reduce a cloud of problems to the decision that is actually yours to make now.',reason:'Cognitive overload often disguises one real decision inside ten adjacent questions.',steps:['Write every question currently competing for attention in one messy list.','Put a box around the questions you can actually decide today.','Choose the one decision that would make the most other questions easier or irrelevant.','Write the next physical action created by that decision. If it is not physical, it is still too vague.'],prompt:'Which questions stopped mattering once I found the real decision?'},
+ {id:'sage-pattern',guardian:'Sage',title:'The Repeating Thread',sigil:'∞',duration:10,materials:['paper','pen'],themes:['pattern','clarity'],keywords:['again','keep doing','pattern','same thing','repeat','repeating','why do i always','cycle','habit'],summary:'Look at repetition without turning the pattern into a character flaw.',reason:'Patterns become easier to change when you can see what they are protecting, producing or helping you avoid.',steps:['Name the repeating pattern as behavior, not identity. “I keep…” is better than “I am…”','Write what usually happens immediately before the pattern begins.','Write the short-term benefit the pattern gives you, even if you dislike the long-term result.','Choose one interruption that can happen at the earliest point in the cycle, not the latest.'],prompt:'What job has this pattern been doing for me?'},
+ {id:'aura-reset',guardian:'Aura',title:'Three-Part Reset',sigil:'✧',duration:6,materials:['none'],themes:['overwhelm','clarity','grounding'],keywords:['anything','help','bad day','off','weird','not sure','i do not know','idk','everything'],summary:'A neutral reset when the moment is too mixed to name cleanly.',reason:'You do not have to diagnose yourself before receiving support. Start with the smallest reliable signals.',steps:['Name one body fact: tired, tense, hungry, wired, cold, heavy, restless or neutral.','Name one environment fact: noisy, cluttered, bright, quiet, rushed, private or interrupted.','Name one task fact: what is the next thing that actually has a consequence if ignored?','Choose one response for the next ten minutes: regulate the body, change the environment or do the task. Only one.'],prompt:'Which kind of problem was this actually: body, environment or task?'}
+];
+
+const materialOptions=[['paper','Paper'],['pen','Pen'],['water','Water'],['candle','Candle'],['salt','Salt'],['herbs','Herbs'],['bath','Bathtub'],['outside','Outdoor access']];
+const quickStates=['Overwhelmed','Angry','Grieving','Scattered','Tired','Stuck','Lonely','Hopeful'];
+const pulseOptions=[['tender','◌','Tender'],['wired','✦','Wired'],['heavy','●','Heavy'],['steady','◇','Steady']];
+const themeRules={
+ anger:['angry','mad','pissed','furious','rage','resent','disrespect','enough'],boundaries:['boundary','boundaries','used','taken advantage','people pleasing'],grief:['grief','grieving','miss','missing','loss','lost','death','died','heartbroken','sad'],ending:['ending','ended','over','done','breakup','divorce','goodbye','closure'],rest:['tired','exhausted','drained','burnout','burned out','sleep','rest','depleted'],anxiety:['anxious','anxiety','panic','spiral','spiraling','nervous','racing'],overwhelm:['overwhelmed','too much','everything','scattered','chaos','swamped'],decision:['decision','decide','choice','choose','should i','what should'],clarity:['confused','clarity','figure out','stuck','plan','unsure'],grounding:['ground','ungrounded','disconnected','scattered','panic'],home:['house','home','room','clean','clutter','mess'],worth:['worth','worthy','deserve','guilt','guilty','not enough'],receiving:['receive','receiving','help','support','compliment','gift'],abundance:['money','abundance','prosper','wealth','financial'],desire:['want','desire','dream','wish','goal','future'],intuition:['intuition','gut','sign','knowing','feel like'],pattern:['again','pattern','repeat','repeating','cycle','always do'],identity:['who am i','identity','changing','new version','becoming']
+};
+const defaultState={onboarded:false,profile:{name:'',language:'blend',time:10,materials:['paper','pen','water'],noFlame:false,noBath:false,quietOnly:false},pulse:'',history:[],ownedChambers:[],ownedJourneys:[],journeyProgress:{'energy-reset':0},lastCarry:'',lastRecommendation:'',themeCounts:{},currentView:'today'};
+
+let state=load();
+let recommendation=null,recommendationInput='',practice={ritual:null,index:0,input:''},onboardingStep=0,archiveFilter='all',purchaseTarget=null;
+let onboardingDraft={language:'blend',time:10,materials:['paper','pen','water'],name:''};
+
+function load(){try{return merge(clone(defaultState),JSON.parse(localStorage.getItem(STORAGE))||{});}catch(e){return clone(defaultState);}}
+function merge(base,extra){Object.keys(extra||{}).forEach(k=>{if(extra[k]&&typeof extra[k]==='object'&&!Array.isArray(extra[k])&&base[k]&&typeof base[k]==='object'&&!Array.isArray(base[k]))merge(base[k],extra[k]);else base[k]=extra[k];});return base;}
 function save(){localStorage.setItem(STORAGE,JSON.stringify(state));}
-function esc(s=""){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
-function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove("show"),1800);}
-function formatDate(ts){return new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});}
-function todayISO(){return new Date().toISOString();}
+function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));}
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('show'),1800);}
+function titleCase(s){return s.replace(/\b\w/g,c=>c.toUpperCase());}
+function formatDate(ts){return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+function nowISO(){return new Date().toISOString();}
 function getRitual(id){return rituals.find(r=>r.id===id);}
+function chamberForGuardian(g){return chambers.find(c=>c.guardian===g);}
+function chamberOwned(id){return state.ownedChambers.includes(id);}
+function journeyOwned(j){return j.free||state.ownedJourneys.includes(j.id);}
 
-function setView(name){
-  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+name));
-  document.querySelectorAll("[data-view]").forEach(b=>b.classList.toggle("active",b.dataset.view===name));
-  if(name==="rituals")renderRituals();
-  if(name==="archive")renderArchive();
-  if(name==="today"){renderRecent();renderMemory();}
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.view)));
+function analyze(text){const lower=(text||'').toLowerCase(),scores={};Object.entries(themeRules).forEach(([theme,terms])=>terms.forEach(term=>{if(lower.includes(term))scores[theme]=(scores[theme]||0)+(term.includes(' ')?3:2);}));return Object.entries(scores).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);}
+function score(r,text,themes){const lower=text.toLowerCase();let s=0;r.keywords.forEach(k=>{if(lower.includes(k))s+=k.includes(' ')?6:3;});r.themes.forEach(t=>{const i=themes.indexOf(t);if(i>=0)s+=Math.max(2,8-i*2);});s+=r.duration<=Number(state.profile.time||10)?3:-2;const recent=state.history.filter(x=>x.type==='practice').slice(0,3).map(x=>x.ritualId);if(recent.includes(r.id))s-=4;if(state.pulse==='heavy'&&['Silver','Root'].includes(r.guardian))s+=2;if(state.pulse==='wired'&&['Root','Sage'].includes(r.guardian))s+=2;if(state.pulse==='tender'&&['Veil','Silver'].includes(r.guardian))s+=2;return s;}
+function choose(text,exclude=''){const themes=analyze(text);const ranked=rituals.filter(r=>r.id!==exclude).map(r=>({r,score:score(r,text,themes)})).sort((a,b)=>b.score-a.score);return{ritual:(ranked[0]&&ranked[0].score>0)?ranked[0].r:getRitual('aura-reset'),themes};}
+function materialLabel(key){return materialOptions.find(x=>x[0]===key)?.[1]||titleCase(key);}
+function adaptedMaterials(r){return r.materials.map(m=>m==='candle'&&state.profile.noFlame?'lamp or phone light':m==='bath'&&state.profile.noBath?'bowl of warm water':materialLabel(m));}
+function adaptStep(step){return state.profile.noFlame?step.replace(/If open flame is available and safe, burn the circled sentence in a fireproof vessel\. Otherwise discard the pieces outside your main living space\./i,'Tear the circled sentence into tiny pieces and discard them outside your main living space. No flame is needed.'):step;}
+function oracleRead(r,themes){const top=themes[0],n=top?(state.themeCounts[top]||0):0,mode=state.profile.language;if(n>=2)return mode==='grounded'?`You have returned to ${top} more than once. I am treating the repetition as useful context, not as a failure to move on.`:mode==='mystical'?`${r.guardian} is answering a thread you have carried before. ${titleCase(top)} has returned, so the Archive should not pretend this is brand new.`:`This is not the first time ${top} has appeared in your Archive. ${r.guardian} is meeting the repeating thread instead of asking you to start from zero.`;return mode==='grounded'?`Your words point most strongly toward ${top||'a mixed state'}. I filtered for your time limit and a low-friction practice you can actually do now.`:mode==='mystical'?`${r.guardian} is closest to the shape of this moment. The practice below asks for very little, but gives the feeling somewhere to go.`:`${r.guardian} is closest to the shape of this moment. I matched your words with your time, recent history and the materials you actually keep around.`;}
 
-function setupOnboarding(){
-  const el=document.getElementById("onboarding");
-  el.classList.toggle("hidden",state.onboarded);
-  document.getElementById("beginOnboarding").addEventListener("click",()=>{
-    state.onboarded=true;save();el.classList.add("hidden");document.getElementById("carryText").focus();toast("Your Archive is ready.");
-  });
-}
+function recommend(text,exclude=''){const input=(text||document.getElementById('carryText').value||'').trim();if(!input){toast('Tell me what is happening first.');return;}recommendationInput=input;recommendation=choose(input,exclude);state.lastCarry=input;state.lastRecommendation=recommendation.ritual.id;save();renderRecommendation();}
+function renderRecommendation(){const {ritual:r,themes}=recommendation,g=guardianMeta[r.guardian];document.getElementById('emptyOracle').classList.add('hidden');document.getElementById('recommendationCard').classList.remove('hidden');document.getElementById('guardianBadge').textContent=r.guardian.toUpperCase();document.getElementById('guardianRole').textContent=g.role;document.getElementById('oracleRead').textContent=oracleRead(r,themes);document.getElementById('ritualSigil').textContent=r.sigil;document.getElementById('ritualMeta').textContent=`${r.duration} min · ${adaptedMaterials(r).join(' · ')}`;document.getElementById('ritualTitle').textContent=r.title;document.getElementById('ritualSummary').textContent=r.summary;document.getElementById('ritualReason').textContent=`${r.reason} I am reading this moment primarily as ${themes.slice(0,2).join(' + ')||'mixed signals'}.`;const chamber=chamberForGuardian(r.guardian),deep=document.getElementById('deepeningCard');if(chamber&&!chamberOwned(chamber.id)&&r.guardian!=='Aura'){deep.classList.remove('hidden');document.getElementById('deepeningTitle').textContent=chamber.name;document.getElementById('deepeningCopy').textContent=`You are working with ${themes[0]||r.themes[0]}. ${chamber.name} adds deeper ${r.guardian}-led tools when the foundational practice is not enough.`;document.getElementById('deepeningButton').onclick=()=>openPurchase('chamber',chamber);}else deep.classList.add('hidden');document.getElementById('recommendationCard').scrollIntoView({behavior:'smooth',block:'center'});}
 
-function setupQuickStates(){
-  document.getElementById("quickStates").innerHTML=quickStates.map(s=>'<button class="chip" data-state="'+esc(s)+'">'+esc(s)+'</button>').join("");
-  document.querySelectorAll("[data-state]").forEach(b=>b.addEventListener("click",()=>{
-    document.getElementById("carryText").value=b.dataset.state;
-    recommend(b.dataset.state);
-  }));
-}
+function openPractice(r,input=''){practice={ritual:r,index:0,input};document.getElementById('practiceSheet').classList.remove('hidden');renderPractice();}
+function renderPractice(){const r=practice.ritual,total=r.steps.length+2,i=practice.index;document.getElementById('practiceProgress').style.width=`${(i+1)/total*100}%`;document.getElementById('sheetGuardian').textContent=r.guardian.toUpperCase();document.getElementById('sheetGuardianRole').textContent=guardianMeta[r.guardian].role;document.getElementById('sheetSigil').textContent=r.sigil;document.getElementById('practiceSheetTitle').textContent=r.title;document.getElementById('practiceBack').disabled=i===0;const body=document.getElementById('practiceBody'),m=document.getElementById('practiceMaterials'),next=document.getElementById('practiceNext');if(i===0){document.getElementById('practiceStepLabel').textContent='Before you begin';body.innerHTML=`<p>${esc(r.summary)}</p><p>${esc(r.reason)}</p>`;m.innerHTML=adaptedMaterials(r).map(x=>`<span class="material-pill">${esc(x)}</span>`).join('');next.textContent='Begin';}else if(i===total-1){document.getElementById('practiceStepLabel').textContent='Close the practice';body.innerHTML=`<p><strong>${esc(r.prompt)}</strong></p><textarea id="practiceReflection" placeholder="What do you want your future self to remember about this?"></textarea>`;m.innerHTML='';next.textContent='Complete & archive';}else{document.getElementById('practiceStepLabel').textContent=`Step ${i} of ${r.steps.length}`;body.innerHTML=`<p>${esc(adaptStep(r.steps[i-1]))}</p>`;m.innerHTML='';next.textContent=i===total-2?'Reflect':'Continue';}}
+function completePractice(){const r=practice.ritual,reflection=(document.getElementById('practiceReflection')?.value||'').trim(),themes=analyze(practice.input||recommendationInput||r.keywords.join(' '));themes.forEach(t=>state.themeCounts[t]=(state.themeCounts[t]||0)+1);state.history.unshift({id:`p-${Date.now()}`,type:'practice',ritualId:r.id,title:r.title,guardian:r.guardian,themes,date:nowISO(),source:practice.input||recommendationInput||'',reflection});if(reflection)state.history.unshift({id:`j-${Date.now()+1}`,type:'journal',title:`Reflection: ${r.title}`,body:reflection,themes:analyze(reflection),date:nowISO(),linkedRitual:r.id});save();closeSheet('practiceSheet');renderMemory();renderArchive();renderPrompt();toast('Practice saved to your Archive.');}
 
-function scoreRitual(r,text){
-  const t=text.toLowerCase();
-  let score=0;
-  r.keywords.forEach(k=>{if(t.includes(k))score+=k.includes(" ")?5:3;});
-  if(t.includes(r.category.toLowerCase()))score+=4;
-  return score;
-}
-function recommend(text){
-  const input=(text||document.getElementById("carryText").value||"").trim();
-  let ranked=rituals.map(r=>({r,score:scoreRitual(r,input)})).sort((a,b)=>b.score-a.score);
-  let chosen=ranked[0].score>0?ranked[0].r:rituals.find(r=>r.id==="clarity");
-  currentRecommendation=chosen;
-  renderRecommendation(chosen,input);
-}
-function renderRecommendation(r,input){
-  const section=document.getElementById("recommendationSection");
-  section.classList.remove("hidden");
-  document.getElementById("recommendationCard").innerHTML=
-    '<article class="card recommendation-card"><div><div class="eyebrow">'+esc(r.category)+'</div><h3>'+esc(r.title)+'</h3><p>'+esc(r.why)+'</p>'+
-    '<div class="rec-meta"><span class="tag">'+esc(r.summary)+'</span><span class="tag">'+r.steps.length+' guided steps</span></div></div>'+
-    '<div class="rec-actions"><button class="primary" data-begin="'+r.id+'">Begin ritual</button><button class="secondary" data-details="'+r.id+'">Preview</button></div></article>';
-  section.querySelector("[data-begin]").addEventListener("click",()=>beginRitual(r.id,input));
-  section.querySelector("[data-details]").addEventListener("click",()=>openRitual(r.id));
-  section.scrollIntoView({behavior:"smooth",block:"center"});
-}
-document.getElementById("recommendBtn").addEventListener("click",()=>recommend());
-document.getElementById("carryText").addEventListener("keydown",e=>{if((e.metaKey||e.ctrlKey)&&e.key==="Enter")recommend();});
-document.getElementById("changeRecommendation").addEventListener("click",()=>{
-  if(!currentRecommendation)return;
-  const pool=rituals.filter(r=>r.id!==currentRecommendation.id);
-  currentRecommendation=pool[Math.floor(Math.random()*pool.length)];
-  renderRecommendation(currentRecommendation,document.getElementById("carryText").value);
-});
+function moonPhase(d){const syn=29.53058867,new0=Date.UTC(2000,0,6,18,14),a=((((d.getTime()-new0)/86400000)%syn)+syn)%syn;if(a<1.85||a>=27.68)return'New Moon';if(a<5.54)return'Waxing Crescent';if(a<9.23)return'First Quarter';if(a<12.92)return'Waxing Gibbous';if(a<16.61)return'Full Moon';if(a<20.30)return'Waning Gibbous';if(a<23.99)return'Last Quarter';return'Waning Crescent';}
+function season(d){const m=d.getMonth()+1,day=d.getDate();if((m===3&&day>=20)||m===4||m===5||(m===6&&day<21))return'Spring';if((m===6&&day>=21)||m===7||m===8||(m===9&&day<22))return'Summer';if((m===9&&day>=22)||m===10||m===11||(m===12&&day<21))return'Autumn';return'Winter';}
+function renderToday(){const d=new Date(),name=state.profile.name?.trim();document.getElementById('todayDate').textContent=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});document.getElementById('todayTitle').textContent=name&&state.history.length?`What are you carrying, ${name}?`:d.getHours()<12?'What are you carrying this morning?':d.getHours()<18?'What are you carrying today?':'What are you carrying tonight?';document.getElementById('timeChip').textContent=`About ${state.profile.time} min`;document.getElementById('profileInitial').textContent=(name?.[0]||'A').toUpperCase();document.getElementById('moonPhase').textContent=moonPhase(d);document.getElementById('seasonName').textContent=season(d);document.getElementById('pulseLabel').textContent=state.pulse?titleCase(state.pulse):'Unsaid';renderPulse();renderMemory();if(state.lastCarry&&!document.getElementById('carryText').value)document.getElementById('carryText').placeholder=`Last time: “${state.lastCarry.slice(0,52)}${state.lastCarry.length>52?'…':''}”`;}
+function renderQuick(){document.getElementById('quickStates').innerHTML=quickStates.map(x=>`<button class="quick-state" data-quick="${x}">${x}</button>`).join('');document.querySelectorAll('[data-quick]').forEach(b=>b.onclick=()=>{document.getElementById('carryText').value=`I feel ${b.dataset.quick.toLowerCase()}.`;recommend();});}
+function renderPulse(){const e=document.getElementById('pulseGrid');e.innerHTML=pulseOptions.map(([id,s,l])=>`<button class="pulse-button ${state.pulse===id?'active':''}" data-pulse="${id}"><span>${s}</span>${l}</button>`).join('');e.querySelectorAll('[data-pulse]').forEach(b=>b.onclick=()=>{state.pulse=b.dataset.pulse;save();renderPulse();document.getElementById('pulseLabel').textContent=titleCase(state.pulse);toast('Pulse remembered for today.');});}
+function topThemes(){return Object.entries(state.themeCounts).sort((a,b)=>b[1]-a[1]);}
+function renderMemory(){const h=document.getElementById('memoryHeadline'),c=document.getElementById('memoryCopy'),top=topThemes()[0],recent=state.history[0];if(!recent){h.textContent='Nothing to remember yet. That is okay.';c.textContent='As you use The Daily Alchemist, it will notice what you return to and carry that context forward so you do not have to.';return;}if(top&&top[1]>=2){h.textContent=`${titleCase(top[0])} has returned ${top[1]} times.`;c.textContent=`The Archive is treating repetition as context. The next time ${top[0]} appears, it can begin from what you have already learned instead of asking you to explain the whole story again.`;}else{h.textContent=`Your latest thread: ${recent.title}.`;c.textContent='This is now part of the context the system can use later. You can continue from here instead of rebuilding the story from memory.';}}
+function renderPrompt(){const top=topThemes()[0]?.[0],p={anger:'What boundary is the anger trying to protect?',boundaries:'Where am I still explaining something I am allowed to simply decide?',grief:'What do I miss that I have been trying to make smaller?',ending:'What is complete even if I do not feel complete?',rest:'What demand can I remove instead of becoming better at carrying it?',anxiety:'What is actually happening now, not in the imagined next hour?',overwhelm:'Which problem is truly mine to solve first?',decision:'What choice would I make if I did not have to defend it?',clarity:'What question am I actually trying to answer?',grounding:'What does my body know about this moment before my mind narrates it?',home:'What would make one corner of home feel like support?',worth:'Where am I treating worthiness like something I have to earn again?',receiving:'What would I accept if I did not immediately convert it into debt?',abundance:'What resource is already present that I have stopped noticing?',desire:'What do I want before I ask whether it is practical?',intuition:'What did I know before I started arguing with myself?',pattern:'What short-term job is this repeating pattern doing for me?',identity:'What remains mine while I am becoming someone new?'};document.getElementById('suggestedPrompt').textContent=p[top]||'What has been asking for your attention lately?';}
 
-function moonContext(){
-  const synodic=29.53058867;
-  const knownNew=Date.UTC(2000,0,6,18,14);
-  const days=(Date.now()-knownNew)/86400000;
-  const age=((days%synodic)+synodic)%synodic;
-  const phases=[
-    [1.85,"New Moon","A symbolic invitation to simplify, listen, and begin small."],
-    [7.38,"Waxing Crescent","A symbolic frame for building momentum without rushing the process."],
-    [9.23,"First Quarter","A symbolic frame for action, friction, and choosing what deserves effort."],
-    [14.77,"Waxing Gibbous","A symbolic frame for refining what is already underway."],
-    [16.61,"Full Moon","A symbolic frame for visibility, fullness, and noticing what has come into view."],
-    [22.15,"Waning Gibbous","A symbolic frame for integration, gratitude, and sharing what has been learned."],
-    [23.99,"Last Quarter","A symbolic frame for release, editing, and making space."],
-    [29.54,"Waning Crescent","A symbolic frame for rest, closure, and reducing demand."]
-  ];
-  const p=phases.find(x=>age<x[0])||phases[0];
-  document.getElementById("moonName").textContent=p[1];
-  document.getElementById("moonCopy").textContent=p[2];
-}
+function renderArchive(){const practices=state.history.filter(x=>x.type==='practice').length,journals=state.history.filter(x=>x.type==='journal').length,themeN=Object.keys(state.themeCounts).length;document.getElementById('statsRow').innerHTML=`<div class="stat-card"><strong>${practices}</strong><span>Practices</span></div><div class="stat-card"><strong>${journals}</strong><span>Journal</span></div><div class="stat-card"><strong>${themeN}</strong><span>Themes</span></div>`;const top=topThemes()[0];document.getElementById('patternHeading').textContent=top?`The strongest thread is ${top[0]}.`:'Your patterns will appear here.';document.getElementById('patternCopy').textContent=top?(top[1]>=2?`You have returned to ${top[0]} ${top[1]} times. That does not mean you are stuck. It means this theme deserves continuity instead of another fresh start.`:`${titleCase(top[0])} is beginning to appear in your Archive. More context will make this pattern more useful.`):'The Archive looks for repetition without turning your life into a scorecard.';const list=state.history.filter(i=>archiveFilter==='all'||i.type===archiveFilter),el=document.getElementById('archiveList');if(!list.length){el.innerHTML='<div class="empty-state">Your Archive is empty here. Complete a practice or save a journal entry and it will begin carrying context forward for you.</div>';return;}el.innerHTML=list.map(i=>{const text=i.type==='journal'?i.body:(i.reflection||i.source||'Practice completed.'),tags=(i.themes||[]).slice(0,3).map(t=>`<span class="theme-tag">${esc(t)}</span>`).join('');return`<article class="archive-item"><div class="archive-item-head"><span class="archive-type">${i.type==='practice'?esc(i.guardian||'Practice'):'Journal'}</span><span class="archive-date">${formatDate(i.date)}</span></div><h3>${esc(i.title)}</h3><p>${esc(text.length>220?text.slice(0,220)+'…':text)}</p><div class="theme-tags">${tags}</div></article>`;}).join('');}
+function renderChambers(){const el=document.getElementById('chamberList');el.innerHTML=chambers.map(ch=>{const owned=chamberOwned(ch.id),meta=guardianMeta[ch.guardian];return`<article class="chamber-card" style="--guardian-accent:${meta.accent}"><div class="chamber-seal">${ch.seal}</div><div class="chamber-copy"><span class="quiet-label">${ch.guardian} chamber</span><h2>${esc(ch.name)}</h2><p>${esc(ch.summary)}</p></div><div class="chamber-footer"><span class="${owned?'owned-label':'price-pill'}">${owned?'Installed':ch.price}</span><button class="mini-button" data-chamber="${ch.id}">${owned?'Open':'See chamber'}</button></div></article>`;}).join('');el.querySelectorAll('[data-chamber]').forEach(b=>b.onclick=()=>{const ch=chambers.find(x=>x.id===b.dataset.chamber);chamberOwned(ch.id)?toast(`${ch.name} is active in your Alchemist.`):openPurchase('chamber',ch);});}
+function renderJourneys(){const el=document.getElementById('journeyList');el.innerHTML=journeys.map(j=>{const owned=journeyOwned(j),progress=Number(state.journeyProgress[j.id]||0),pct=Math.min(100,progress/j.days*100);return`<article class="journey-card ${j.featured?'featured':''}"><div class="journey-meta"><span class="journey-badge">${j.days} days · ${owned?'Available':'Guided journey'}</span><span class="price-pill">${owned?(j.free?'Included':'Owned'):j.price}</span></div><h2>${esc(j.title)}</h2><p>${esc(j.summary)}</p><div class="journey-footer"><div class="progress-track"><span style="width:${pct}%"></span></div><button class="mini-button" data-journey="${j.id}">${owned?(progress?'Continue':'Begin'):'Unlock'}</button></div></article>`;}).join('');el.querySelectorAll('[data-journey]').forEach(b=>b.onclick=()=>{const j=journeys.find(x=>x.id===b.dataset.journey);if(!journeyOwned(j)){openPurchase('journey',j);return;}const current=Number(state.journeyProgress[j.id]||0);if(current>=j.days){toast('This Journey is complete. Revisit it anytime.');return;}state.journeyProgress[j.id]=current+1;save();renderJourneys();toast(`${j.title}: Day ${current+1}`);});}
+function openPurchase(type,item){purchaseTarget={type,item};document.getElementById('purchaseSeal').textContent=item.seal||'✧';document.getElementById('purchaseTitle').textContent=item.name||item.title;document.getElementById('purchaseCopy').textContent=item.why||item.summary;document.getElementById('purchasePrice').textContent=item.price;document.getElementById('purchaseSheet').classList.remove('hidden');}
+function demoUnlock(){if(!purchaseTarget)return;const {type,item}=purchaseTarget;if(type==='chamber'&&!state.ownedChambers.includes(item.id))state.ownedChambers.push(item.id);if(type==='journey'&&!state.ownedJourneys.includes(item.id))state.ownedJourneys.push(item.id);save();closeSheet('purchaseSheet');renderChambers();renderJourneys();toast('Demo paid-state unlocked on this device.');}
 
-function renderCategories(){
-  const cats=[...new Set(rituals.map(r=>r.category))].sort();
-  document.getElementById("ritualCategory").innerHTML='<option value="all">All themes</option>'+cats.map(c=>'<option>'+esc(c)+'</option>').join("");
-}
-function renderRituals(){
-  const q=document.getElementById("ritualSearch").value.toLowerCase().trim();
-  const cat=document.getElementById("ritualCategory").value;
-  const list=rituals.filter(r=>{
-    const hay=(r.title+" "+r.category+" "+r.summary+" "+r.keywords.join(" ")).toLowerCase();
-    return (!q||hay.includes(q))&&(cat==="all"||r.category===cat)&&(!favoritesOnly||state.favorites.includes(r.id));
-  });
-  const grid=document.getElementById("ritualGrid");
-  if(!list.length){grid.innerHTML='<div class="empty">No practices match those filters.</div>';return;}
-  grid.innerHTML=list.map(r=>'<article class="card ritual-card">'+
-    '<div class="ritual-icon">'+esc(r.symbol)+'</div><div class="eyebrow">'+esc(r.category)+'</div><h3>'+esc(r.title)+'</h3><p>'+esc(r.summary)+'</p>'+
-    '<div class="ritual-foot"><button class="secondary" data-details="'+r.id+'">View practice</button><button class="fav '+(state.favorites.includes(r.id)?"active":"")+'" data-fav="'+r.id+'" aria-label="Favorite">'+(state.favorites.includes(r.id)?"♥":"♡")+'</button></div></article>').join("");
-  grid.querySelectorAll("[data-details]").forEach(b=>b.addEventListener("click",()=>openRitual(b.dataset.details)));
-  grid.querySelectorAll("[data-fav]").forEach(b=>b.addEventListener("click",()=>toggleFavorite(b.dataset.fav)));
-}
-function toggleFavorite(id){
-  const i=state.favorites.indexOf(id);
-  if(i>=0)state.favorites.splice(i,1); else state.favorites.push(id);
-  save();renderRituals();toast(i>=0?"Removed from favorites":"Saved to favorites");
-}
-document.getElementById("ritualSearch").addEventListener("input",renderRituals);
-document.getElementById("ritualCategory").addEventListener("change",renderRituals);
-document.getElementById("favoritesOnly").addEventListener("click",e=>{
-  favoritesOnly=!favoritesOnly;e.currentTarget.textContent=favoritesOnly?"♥ Favorites only":"♡ Favorites";renderRituals();
-});
+function renderMaterials(id,selected){document.getElementById(id).innerHTML=materialOptions.map(([k,l])=>`<label class="check-row"><input type="checkbox" value="${k}" ${selected.includes(k)?'checked':''}><span>${l}</span></label>`).join('');}
+function checked(id){return[...document.querySelectorAll(`#${id} input[type="checkbox"]:checked`)].map(x=>x.value);}
+function openProfile(){document.getElementById('profileName').value=state.profile.name||'';document.getElementById('languageMode').value=state.profile.language;document.getElementById('timePreference').value=String(state.profile.time);document.getElementById('noFlame').checked=!!state.profile.noFlame;document.getElementById('noBath').checked=!!state.profile.noBath;document.getElementById('quietOnly').checked=!!state.profile.quietOnly;renderMaterials('materialsGrid',state.profile.materials||[]);document.getElementById('profileSheet').classList.remove('hidden');}
+function showView(name){state.currentView=name;save();document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===`view-${name}`));document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));if(name==='today')renderToday();if(name==='journal')renderPrompt();if(name==='archive')renderArchive();if(name==='journeys')renderJourneys();if(name==='chambers')renderChambers();window.scrollTo({top:0,behavior:'smooth'});}
+function closeSheet(id){document.getElementById(id)?.classList.add('hidden');}
 
-function openRitual(id){
-  const r=getRitual(id);if(!r)return;
-  const modal=document.getElementById("ritualModal");
-  document.getElementById("ritualModalContent").innerHTML=
-    '<div class="ritual-icon">'+esc(r.symbol)+'</div><div class="eyebrow">'+esc(r.category)+'</div><h2 class="modal-title">'+esc(r.title)+'</h2>'+
-    '<p class="modal-copy">'+esc(r.summary)+'</p><div class="modal-list">'+r.needs.map(n=>'<span class="need">'+esc(n)+'</span>').join("")+'</div>'+
-    '<p class="modal-copy"><strong>Why this exists:</strong> '+esc(r.why)+'</p>'+
-    '<div class="modal-actions"><button class="primary" data-modal-begin="'+r.id+'">Begin guided ritual</button><button class="secondary" data-modal-fav="'+r.id+'">'+(state.favorites.includes(r.id)?"♥ Favorited":"♡ Favorite")+'</button></div>';
-  modal.classList.remove("hidden");
-  modal.querySelector("[data-modal-begin]").addEventListener("click",()=>{closeModal();beginRitual(r.id,"");});
-  modal.querySelector("[data-modal-fav]").addEventListener("click",()=>{toggleFavorite(r.id);closeModal();});
-}
-function closeModal(){document.getElementById("ritualModal").classList.add("hidden");}
-document.querySelectorAll("[data-close-modal]").forEach(x=>x.addEventListener("click",closeModal));
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal();});
+function setupOnboarding(){if(state.onboarded)return;document.getElementById('onboarding').classList.remove('hidden');renderOnboarding();}
+function renderOnboarding(){document.getElementById('onboardingProgress').innerHTML=Array.from({length:4},(_,i)=>`<span class="${i<=onboardingStep?'active':''}"></span>`).join('');document.getElementById('onboardingBack').classList.toggle('hidden',onboardingStep===0);document.getElementById('onboardingNext').textContent=onboardingStep===3?'Enter The Daily Alchemist':'Continue';const c=document.getElementById('onboardingContent');if(onboardingStep===0)c.innerHTML=`<span class="kicker">Welcome</span><h1>You do not need another library to manage.</h1><p>Tell The Daily Alchemist what is happening. Aura will read the moment, remember what matters and bring forward one useful practice. The system carries the remembering, sorting and searching so you can do the actual living.</p><input class="onboarding-input" id="onboardingName" placeholder="What should I call you? (optional)" value="${esc(onboardingDraft.name)}">`;else if(onboardingStep===1){c.innerHTML=`<span class="kicker">Voice</span><h1>How should the Archive speak to you?</h1><p>The intelligence stays the same. The language can meet you where you are.</p><div class="onboarding-choice-list"><button class="onboarding-choice ${onboardingDraft.language==='blend'?'active':''}" data-language="blend"><span>✧</span><span><strong>Mystical + grounded</strong><small>Old-world ritual language with plainspoken practical guidance.</small></span></button><button class="onboarding-choice ${onboardingDraft.language==='mystical'?'active':''}" data-language="mystical"><span>☾</span><span><strong>More mystical</strong><small>More oracle, symbol, moon, element and ritual language.</small></span></button><button class="onboarding-choice ${onboardingDraft.language==='grounded'?'active':''}" data-language="grounded"><span>◇</span><span><strong>More grounded</strong><small>Keep the ritual architecture, reduce the mystical framing.</small></span></button></div>`;c.querySelectorAll('[data-language]').forEach(b=>b.onclick=()=>{onboardingDraft.language=b.dataset.language;renderOnboarding();});}else if(onboardingStep===2){c.innerHTML=`<span class="kicker">Friction matters</span><h1>What can a practice realistically ask of you?</h1><p>The app should adapt to your life, not hand you a forty-minute ritual when you have seven minutes and no rosemary.</p><div class="onboarding-choice-list"><button class="onboarding-choice ${onboardingDraft.time===5?'active':''}" data-time="5"><span>5</span><span><strong>Five minutes</strong><small>Small, immediate, low-friction.</small></span></button><button class="onboarding-choice ${onboardingDraft.time===10?'active':''}" data-time="10"><span>10</span><span><strong>About ten minutes</strong><small>Enough space for a real practice without a production.</small></span></button><button class="onboarding-choice ${onboardingDraft.time===20?'active':''}" data-time="20"><span>20</span><span><strong>I can go deeper</strong><small>Longer ritual work is welcome when it earns the time.</small></span></button></div>`;c.querySelectorAll('[data-time]').forEach(b=>b.onclick=()=>{onboardingDraft.time=Number(b.dataset.time);renderOnboarding();});}else{c.innerHTML=`<span class="kicker">What you already have</span><h1>Let the system remember the supplies.</h1><p>Pick what is usually around. Missing ingredients should create substitutions, not homework.</p><div class="check-grid" id="onboardingMaterials"></div>`;renderMaterials('onboardingMaterials',onboardingDraft.materials);}}
+function nextOnboarding(){if(onboardingStep===0)onboardingDraft.name=(document.getElementById('onboardingName')?.value||'').trim();if(onboardingStep===3)onboardingDraft.materials=checked('onboardingMaterials');if(onboardingStep<3){onboardingStep++;renderOnboarding();return;}state.profile.name=onboardingDraft.name;state.profile.language=onboardingDraft.language;state.profile.time=onboardingDraft.time;state.profile.materials=onboardingDraft.materials;state.onboarded=true;save();document.getElementById('onboarding').classList.add('hidden');renderToday();toast('Your Alchemist is ready.');}
 
-function beginRitual(id,source){
-  activeRitual=getRitual(id);if(!activeRitual)return;
-  guideIndex=0;
-  activeRitual._source=source||"";
-  setView("guide");renderGuide();
-}
-function renderGuide(){
-  const r=activeRitual;if(!r)return;
-  const total=r.steps.length+2;
-  const final=guideIndex===total-1;
-  const intro=guideIndex===0;
-  document.getElementById("guideTitle").textContent=r.title;
-  document.getElementById("guideCategory").textContent=r.category;
-  document.getElementById("guideSymbol").textContent=r.symbol;
-  document.getElementById("guideStepCount").textContent=(guideIndex+1)+" of "+total;
-  document.getElementById("guideProgressBar").style.width=((guideIndex+1)/total*100)+"%";
-  document.getElementById("guideBack").disabled=guideIndex===0;
-  const needs=document.getElementById("guideNeeds");
-  const copy=document.getElementById("guideCopy");
-  const next=document.getElementById("guideNext");
-  if(intro){
-    copy.innerHTML='<p>'+esc(r.summary)+'</p>';
-    needs.innerHTML=r.needs.map(n=>'<span class="need">'+esc(n)+'</span>').join("");
-    next.textContent="Begin";
-  }else if(final){
-    copy.innerHTML='<p><strong>Reflect before you close.</strong></p><p style="font-size:15px;margin-top:10px">'+esc(r.prompt)+'</p>'+
-      '<textarea id="ritualReflection" rows="6" style="width:100%;margin-top:18px;border:1px solid var(--line);border-radius:14px;padding:13px;resize:vertical;background:#fff" placeholder="Write what came up. This becomes part of your Archive."></textarea>';
-    needs.innerHTML="";
-    next.textContent="Complete & archive";
-  }else{
-    copy.innerHTML='<p>'+esc(r.steps[guideIndex-1])+'</p>';
-    needs.innerHTML="";
-    next.textContent=guideIndex===total-2?"Reflect":"Continue";
-  }
-}
-document.getElementById("guideNext").addEventListener("click",()=>{
-  if(!activeRitual)return;
-  const total=activeRitual.steps.length+2;
-  if(guideIndex===total-1){
-    const reflection=(document.getElementById("ritualReflection")?.value||"").trim();
-    state.history.unshift({id:"h"+Date.now(),type:"ritual",ritualId:activeRitual.id,title:activeRitual.title,category:activeRitual.category,reflection,source:activeRitual._source||"",date:todayISO()});
-    if(reflection)state.history.unshift({id:"j"+Date.now(),type:"journal",title:"Reflection: "+activeRitual.title,body:reflection,prompt:activeRitual.prompt,ritualId:activeRitual.id,date:todayISO()});
-    save();toast("Practice saved to your Archive");activeRitual=null;setView("today");return;
-  }
-  guideIndex++;renderGuide();
-});
-document.getElementById("guideBack").addEventListener("click",()=>{if(guideIndex>0){guideIndex--;renderGuide();}});
-document.getElementById("exitGuide").addEventListener("click",()=>{activeRitual=null;setView("today");});
+function setupEvents(){document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>showView(b.dataset.view));document.getElementById('recommendButton').onclick=()=>recommend();document.getElementById('carryText').addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter')recommend();});document.getElementById('beginPractice').onclick=()=>recommendation&&openPractice(recommendation.ritual,recommendationInput);document.getElementById('swapPractice').onclick=()=>recommendation&&recommend(recommendationInput,recommendation.ritual.id);document.getElementById('practiceBack').onclick=()=>{if(practice.index>0){practice.index--;renderPractice();}};document.getElementById('practiceNext').onclick=()=>{const total=practice.ritual.steps.length+2;if(practice.index===total-1)completePractice();else{practice.index++;renderPractice();}};document.querySelectorAll('[data-close-sheet]').forEach(x=>x.onclick=()=>closeSheet(x.dataset.closeSheet));document.getElementById('profileButton').onclick=openProfile;document.getElementById('profileForm').onsubmit=e=>{e.preventDefault();state.profile.name=document.getElementById('profileName').value.trim();state.profile.language=document.getElementById('languageMode').value;state.profile.time=Number(document.getElementById('timePreference').value);state.profile.materials=checked('materialsGrid');state.profile.noFlame=document.getElementById('noFlame').checked;state.profile.noBath=document.getElementById('noBath').checked;state.profile.quietOnly=document.getElementById('quietOnly').checked;save();closeSheet('profileSheet');renderToday();toast('Your preferences are remembered.');};document.getElementById('resetApp').onclick=()=>{if(confirm('Reset The Daily Alchemist prototype on this device? This clears your Archive and demo unlocks.')){localStorage.removeItem(STORAGE);location.reload();}};document.getElementById('journalForm').onsubmit=e=>{e.preventDefault();const body=document.getElementById('journalBody').value.trim();if(!body){toast('Write something before saving.');return;}const title=document.getElementById('journalEntryTitle').value.trim()||'Journal entry',themes=analyze(body);themes.forEach(t=>state.themeCounts[t]=(state.themeCounts[t]||0)+1);state.history.unshift({id:`j-${Date.now()}`,type:'journal',title,body,themes,date:nowISO()});save();e.currentTarget.reset();renderArchive();renderMemory();renderPrompt();toast('Journal entry saved to your Archive.');};document.getElementById('useSuggestedPrompt').onclick=()=>{const p=document.getElementById('suggestedPrompt').textContent;document.getElementById('journalBody').value=`${p}\n\n`;document.getElementById('journalBody').focus();};document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{archiveFilter=b.dataset.filter;document.querySelectorAll('[data-filter]').forEach(x=>x.classList.toggle('active',x===b));renderArchive();});document.getElementById('demoUnlock').onclick=demoUnlock;document.getElementById('onboardingNext').onclick=nextOnboarding;document.getElementById('onboardingBack').onclick=()=>{if(onboardingStep>0){onboardingStep--;renderOnboarding();}};document.addEventListener('keydown',e=>{if(e.key==='Escape')['practiceSheet','profileSheet','purchaseSheet'].forEach(closeSheet);});}
 
-function setupJournal(){
-  document.querySelectorAll("[data-prompt]").forEach(b=>b.addEventListener("click",()=>{
-    document.getElementById("journalPrompt").value="";
-    document.getElementById("journalBody").value=b.dataset.prompt+"\n\n";
-    document.getElementById("journalBody").focus();
-  }));
-  document.getElementById("journalForm").addEventListener("submit",e=>{
-    e.preventDefault();
-    const body=document.getElementById("journalBody").value.trim();
-    if(!body){toast("Write something before saving.");return;}
-    const title=document.getElementById("journalTitle").value.trim()||"Journal entry";
-    const prompt=document.getElementById("journalPrompt").value;
-    state.history.unshift({id:"j"+Date.now(),type:"journal",title,body,prompt,date:todayISO()});
-    save();e.currentTarget.reset();document.getElementById("journalSaveState").textContent="Saved to your Archive.";toast("Journal entry archived");
-  });
-}
-
-function historyText(item){
-  if(item.type==="journal")return item.body||"";
-  return item.reflection||item.source||"";
-}
-function renderRecent(){
-  const el=document.getElementById("recentTimeline");
-  const items=state.history.slice(0,4);
-  if(!items.length){el.innerHTML='<div class="empty">Your Archive is waiting for its first entry. Complete a practice or save a journal reflection and it will appear here.</div>';return;}
-  el.innerHTML=items.map(renderHistoryItem).join("");
-}
-function renderHistoryItem(item){
-  const r=item.ritualId?getRitual(item.ritualId):null;
-  const title=item.title||(r?r.title:"Archive entry");
-  const text=historyText(item);
-  return '<article class="card timeline-item"><div class="timeline-date">'+esc(formatDate(item.date))+'</div><div><h3>'+esc(title)+'</h3>'+
-    (text?'<p>'+esc(text.length>240?text.slice(0,240)+"…":text)+'</p>':'<p>Practice completed and added to your history.</p>')+
-    '<span class="timeline-badge">'+esc(item.type==="ritual"?(item.category||"Ritual"):"Journal")+'</span></div></article>';
-}
-function renderArchive(){
-  const q=document.getElementById("archiveSearch").value.toLowerCase().trim();
-  const filter=document.getElementById("archiveFilter").value;
-  const items=state.history.filter(x=>(filter==="all"||x.type===filter)&&(!q||(x.title+" "+historyText(x)+" "+(x.category||"")).toLowerCase().includes(q)));
-  document.getElementById("archiveTimeline").innerHTML=items.length?items.map(renderHistoryItem).join(""):'<div class="empty">Nothing in this part of your Archive yet.</div>';
-  const completed=state.history.filter(x=>x.type==="ritual");
-  const journals=state.history.filter(x=>x.type==="journal");
-  const cats=new Set(completed.map(x=>x.category).filter(Boolean));
-  document.getElementById("archiveStats").innerHTML=
-    '<article class="card stat"><strong>'+completed.length+'</strong><span>Practices completed</span></article>'+
-    '<article class="card stat"><strong>'+journals.length+'</strong><span>Journal entries</span></article>'+
-    '<article class="card stat"><strong>'+cats.size+'</strong><span>Themes explored</span></article>'+
-    '<article class="card stat"><strong>'+state.favorites.length+'</strong><span>Favorite rituals</span></article>';
-}
-document.getElementById("archiveSearch").addEventListener("input",renderArchive);
-document.getElementById("archiveFilter").addEventListener("change",renderArchive);
-
-function renderMemory(){
-  const ritualsDone=state.history.filter(x=>x.type==="ritual");
-  const journal=state.history.filter(x=>x.type==="journal");
-  if(!ritualsDone.length&&!journal.length){
-    document.getElementById("memoryPattern").textContent="Example: “Three months ago, you wrote about boundaries. Would you like to revisit what changed?”";
-    document.getElementById("memoryTheme").textContent="Example: “You’ve returned to release practices several times lately. Would a receiving practice offer a useful counterweight?”";
-    document.getElementById("memoryIntention").textContent="Example: “You set this intention 90 days ago. Here’s what you wrote then.”";
-    return;
-  }
-  const counts={};ritualsDone.forEach(x=>counts[x.category]=(counts[x.category]||0)+1);
-  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
-  const old=[...state.history].sort((a,b)=>new Date(a.date)-new Date(b.date))[0];
-  const latest=state.history[0];
-  document.getElementById("memoryPattern").textContent=old?"Your earliest saved thread is “"+old.title+".” Your Archive can bring it back when it becomes relevant again.":"Your history is beginning.";
-  document.getElementById("memoryTheme").textContent=top?"You’ve returned most often to "+top[0].toLowerCase()+" work ("+top[1]+" "+(top[1]===1?"time":"times")+"). That pattern may be worth noticing.":"Your journal is beginning to reveal themes.";
-  document.getElementById("memoryIntention").textContent=latest?"Most recently: “"+latest.title+".” You do not have to restart from zero when you come back.":"Your next entry will become future context.";
-}
-
-function setupReset(){
-  document.getElementById("resetDemo").addEventListener("click",()=>{
-    if(!confirm("Reset the Alchemist Archives prototype on this device? This clears your saved local entries and favorites."))return;
-    localStorage.removeItem(STORAGE);location.reload();
-  });
-}
-
-setupOnboarding();
-setupQuickStates();
-moonContext();
-renderCategories();
-setupJournal();
-setupReset();
-renderRecent();
-renderMemory();
-renderRituals();
+function init(){renderQuick();setupEvents();renderToday();renderPrompt();renderArchive();renderChambers();renderJourneys();showView(state.currentView||'today');setupOnboarding();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});}
+init();
 })();
