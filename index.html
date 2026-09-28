@@ -2,218 +2,317 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#241b2d">
-  <title>Alchemist Archives</title>
-  <meta name="description" content="A personal spiritual practice system with memory.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#14251f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Daily Alchemist">
+  <meta name="description" content="The Daily Alchemist remembers your world and brings forward the right practice for the moment you are actually in.">
+  <title>The Daily Alchemist</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-<div class="app-shell">
-  <header class="topbar">
-    <div class="topbar-inner">
-      <button class="brand" data-view="today" aria-label="Alchemist Archives home">
-        <span class="brand-mark">☾</span>
-        <span><strong>Alchemist Archives</strong><small>Personal practice with memory</small></span>
+  <div class="ambient" aria-hidden="true"></div>
+
+  <div class="phone-shell" id="appShell">
+    <header class="app-header">
+      <button class="brand-button" data-view="today" aria-label="The Daily Alchemist home">
+        <span class="brand-seal">☾</span>
+        <span class="brand-copy">
+          <strong>The Daily Alchemist</strong>
+          <small>Your life is the material</small>
+        </span>
       </button>
-      <nav class="desktop-nav" aria-label="Main navigation">
-        <button class="nav-link active" data-view="today">Today</button>
-        <button class="nav-link" data-view="rituals">Rituals</button>
-        <button class="nav-link" data-view="journal">Journal</button>
-        <button class="nav-link" data-view="archive">Archive</button>
-      </nav>
-      <button class="icon-button" id="resetDemo" title="Reset local demo data" aria-label="Reset demo data">↺</button>
-    </div>
-  </header>
+      <button class="profile-button" id="profileButton" aria-label="Open your Alchemist settings">
+        <span id="profileInitial">A</span>
+      </button>
+    </header>
 
-  <main class="main">
-    <section class="view active" id="view-today">
-      <div id="onboarding" class="onboarding card">
-        <div class="onboarding-art"><span>☾</span><i>✦</i></div>
-        <div>
-          <div class="eyebrow">Welcome to your Archive</div>
-          <h1>You don’t need to know which ritual you need.</h1>
-          <p>Tell Alchemist Archives what you’re carrying. It will help you choose one useful practice, walk you through it, and remember what mattered for later.</p>
-          <button class="primary" id="beginOnboarding">Enter the Archive</button>
+    <main class="app-main">
+      <section class="view active" id="view-today" aria-labelledby="todayTitle">
+        <div class="today-intro">
+          <p class="kicker" id="todayDate">Today</p>
+          <h1 id="todayTitle">What are you carrying?</h1>
+          <p class="lede">You do not need to know what practice you need. Tell me what is happening. I will do the sorting.</p>
         </div>
-      </div>
 
-      <div class="hero-grid">
-        <section class="card hero-card">
-          <div class="eyebrow">Today’s guidance</div>
-          <h1>What are you carrying today?</h1>
-          <p class="subtle">No browsing required. Start with the moment you’re actually in.</p>
-          <div class="carry-input">
-            <textarea id="carryText" rows="3" placeholder="I feel scattered and anxious about tomorrow…"></textarea>
-            <button class="primary" id="recommendBtn">Find my practice</button>
+        <section class="carry-card botanical-card">
+          <label class="sr-only" for="carryText">What are you carrying today?</label>
+          <textarea id="carryText" rows="4" placeholder="I am angry, tired, stuck, grieving, hopeful, overwhelmed…"></textarea>
+          <div class="carry-actions">
+            <div class="time-chip" id="timeChip">About 10 min</div>
+            <button class="primary-button" id="recommendButton">Read the moment</button>
           </div>
-          <div class="quick-states" id="quickStates"></div>
+          <div class="quick-states" id="quickStates" aria-label="Quick feelings"></div>
         </section>
 
-        <aside class="card moon-card">
-          <div class="moon-orb" id="moonOrb"></div>
-          <div class="eyebrow light">Optional context</div>
-          <h2 id="moonName">Moon context</h2>
-          <p id="moonCopy">A gentle symbolic frame for today—not a requirement for your practice.</p>
-          <div class="moon-note">Use it if it helps. Ignore it if it doesn’t.</div>
-        </aside>
-      </div>
+        <section class="context-strip" aria-label="Current context">
+          <div class="context-pill">
+            <span class="context-icon">☾</span>
+            <span><small>Lunar context</small><strong id="moonPhase">Waxing</strong></span>
+          </div>
+          <div class="context-pill">
+            <span class="context-icon">❧</span>
+            <span><small>Season</small><strong id="seasonName">Autumn</strong></span>
+          </div>
+          <div class="context-pill">
+            <span class="context-icon">✦</span>
+            <span><small>Pulse</small><strong id="pulseLabel">Unsaid</strong></span>
+          </div>
+        </section>
 
-      <section id="recommendationSection" class="recommendation-section hidden">
-        <div class="section-heading">
-          <div><div class="eyebrow">Recommended for this moment</div><h2>Your next useful practice</h2></div>
-          <button class="text-button" id="changeRecommendation">Choose something else</button>
-        </div>
-        <div id="recommendationCard"></div>
-      </section>
+        <section id="recommendationArea" class="recommendation-area" aria-live="polite">
+          <article class="oracle-card empty-oracle" id="emptyOracle">
+            <div class="oracle-topline">
+              <span class="aura-mark">AURA</span>
+              <span class="quiet-label">Archive intelligence</span>
+            </div>
+            <div class="empty-sigil">✧</div>
+            <h2>The Archive is listening.</h2>
+            <p>Your words, your recent patterns, your time and the materials you actually have will shape what comes forward.</p>
+          </article>
 
-      <section class="memory-section">
-        <div class="section-heading">
-          <div><div class="eyebrow">Your Archive is memory</div><h2>Past practice can become present context.</h2></div>
-        </div>
-        <div class="memory-grid">
-          <article class="card memory-card">
+          <article class="oracle-card hidden" id="recommendationCard">
+            <div class="oracle-topline">
+              <span class="guardian-badge" id="guardianBadge">ASH</span>
+              <span class="quiet-label" id="guardianRole">Fire · boundaries · release</span>
+            </div>
+            <p class="oracle-read" id="oracleRead"></p>
+            <div class="ritual-title-row">
+              <div class="ritual-sigil" id="ritualSigil">△</div>
+              <div>
+                <small id="ritualMeta">8 min · paper</small>
+                <h2 id="ritualTitle">The Burned Word</h2>
+              </div>
+            </div>
+            <p class="ritual-summary" id="ritualSummary"></p>
+            <div class="reason-box">
+              <span>Why this now</span>
+              <p id="ritualReason"></p>
+            </div>
+            <div class="oracle-actions">
+              <button class="primary-button wide" id="beginPractice">Begin practice</button>
+              <button class="ghost-button" id="swapPractice">Give me another</button>
+            </div>
+          </article>
+
+          <article class="deepening-card hidden" id="deepeningCard">
+            <div class="deepening-copy">
+              <span class="quiet-label">A deeper tool exists here</span>
+              <h3 id="deepeningTitle">The Ash Chamber</h3>
+              <p id="deepeningCopy"></p>
+            </div>
+            <button class="mini-button" id="deepeningButton">See chamber</button>
+          </article>
+        </section>
+
+        <section class="pulse-section">
+          <div class="section-head compact">
+            <div>
+              <span class="quiet-label">One tap is enough</span>
+              <h2>How is your nervous system arriving?</h2>
+            </div>
+          </div>
+          <div class="pulse-grid" id="pulseGrid"></div>
+        </section>
+
+        <section class="memory-card botanical-card" id="memoryCard">
+          <div class="memory-top">
             <span class="memory-icon">↺</span>
-            <h3>Revisit a pattern</h3>
-            <p id="memoryPattern">Complete a ritual and reflection. Alchemist Archives will begin surfacing relevant themes back to you.</p>
-          </article>
-          <article class="card memory-card">
-            <span class="memory-icon">✦</span>
-            <h3>Notice what repeats</h3>
-            <p id="memoryTheme">Your history is not just storage. It becomes context for choosing what may help next.</p>
-          </article>
-          <article class="card memory-card">
-            <span class="memory-icon">→</span>
-            <h3>Continue, don’t restart</h3>
-            <p id="memoryIntention">When you return, the app can pick up where you left off instead of asking you to remember everything yourself.</p>
-          </article>
-        </div>
+            <span class="quiet-label">The Archive remembers</span>
+          </div>
+          <h2 id="memoryHeadline">Nothing to remember yet. That is okay.</h2>
+          <p id="memoryCopy">As you use The Daily Alchemist, it will notice what you return to and carry that context forward so you do not have to.</p>
+          <button class="text-button" data-view="archive">Open my Archive</button>
+        </section>
       </section>
 
-      <section class="recent-section">
-        <div class="section-heading">
-          <div><div class="eyebrow">Recent practice</div><h2>What you’ve been working with</h2></div>
-          <button class="text-button" data-view="archive">Open full Archive</button>
+      <section class="view" id="view-journal" aria-labelledby="journalTitleHeading">
+        <div class="page-heading">
+          <span class="kicker">Journal</span>
+          <h1 id="journalTitleHeading">Put the moment somewhere.</h1>
+          <p>The Journal does not demand meaning from you. It becomes context when meaning is useful later.</p>
         </div>
-        <div id="recentTimeline" class="timeline"></div>
-      </section>
-    </section>
 
-    <section class="view" id="view-rituals">
-      <div class="page-head">
-        <div class="eyebrow">Ritual library</div>
-        <h1>The library supports the guidance. It is not the homework.</h1>
-        <p>Browse when you want to. Otherwise, let Today bring forward a practice for you.</p>
-      </div>
-      <div class="toolbar">
-        <input id="ritualSearch" class="search" type="search" placeholder="Search rituals, intentions, or themes">
-        <select id="ritualCategory" class="search select">
-          <option value="all">All themes</option>
-        </select>
-        <button class="secondary" id="favoritesOnly">♡ Favorites</button>
-      </div>
-      <div id="ritualGrid" class="ritual-grid"></div>
-    </section>
+        <section class="journal-prompt botanical-card">
+          <span class="quiet-label">Suggested from your current thread</span>
+          <p id="suggestedPrompt">What has been asking for your attention lately?</p>
+          <button class="mini-button" id="useSuggestedPrompt">Use this prompt</button>
+        </section>
 
-    <section class="view" id="view-journal">
-      <div class="page-head narrow">
-        <div class="eyebrow">Journal</div>
-        <h1>Put the moment somewhere.</h1>
-        <p>Your journal can stand alone or attach to a ritual. Either way, it becomes part of the Archive.</p>
-      </div>
-      <div class="journal-layout">
-        <form class="card journal-card" id="journalForm">
-          <label for="journalTitle">Title</label>
-          <input id="journalTitle" placeholder="What is this entry about?">
-          <label for="journalPrompt">Prompt</label>
-          <select id="journalPrompt">
-            <option value="">Free write</option>
-            <option>What am I ready to stop carrying?</option>
-            <option>What feels different after this practice?</option>
-            <option>What am I asking myself to trust?</option>
-            <option>What boundary needs clearer language?</option>
-            <option>What do I want to remember about this moment?</option>
-          </select>
+        <form class="journal-form" id="journalForm">
+          <label for="journalEntryTitle">Title</label>
+          <input id="journalEntryTitle" type="text" placeholder="Give this moment a name">
           <label for="journalBody">Reflection</label>
-          <textarea id="journalBody" rows="12" placeholder="Write without polishing it…"></textarea>
-          <div class="journal-actions">
-            <span id="journalSaveState">Saved locally when you submit.</span>
-            <button class="primary" type="submit">Save to Archive</button>
-          </div>
+          <textarea id="journalBody" rows="12" placeholder="Write what is true before you make it pretty."></textarea>
+          <div class="form-note">Saved on this device in this prototype. Your entries inform patterns and recommendations.</div>
+          <button class="primary-button wide" type="submit">Save to my Archive</button>
         </form>
-        <aside class="card journal-side">
-          <div class="eyebrow">A quieter way in</div>
-          <h2>You do not have to make meaning immediately.</h2>
-          <p>Write what is true now. The Archive can help you notice patterns later.</p>
-          <div class="prompt-stack">
-            <button class="prompt-pill" data-prompt="What am I carrying that may not actually belong to me?">What am I carrying that may not belong to me?</button>
-            <button class="prompt-pill" data-prompt="What has been asking for my attention lately?">What has been asking for my attention lately?</button>
-            <button class="prompt-pill" data-prompt="What would feel like a small act of self-trust today?">What would self-trust look like today?</button>
-          </div>
-        </aside>
-      </div>
-    </section>
+      </section>
 
-    <section class="view" id="view-archive">
-      <div class="page-head">
-        <div class="eyebrow">My Archive</div>
-        <h1>Your personal alchemical history.</h1>
-        <p>Rituals, intentions, and reflections in one place—so the system can help you remember what you were becoming.</p>
-      </div>
-      <div class="stats-grid" id="archiveStats"></div>
-      <div class="toolbar archive-toolbar">
-        <input id="archiveSearch" class="search" type="search" placeholder="Search your Archive">
-        <select id="archiveFilter" class="search select">
-          <option value="all">Everything</option>
-          <option value="ritual">Completed rituals</option>
-          <option value="journal">Journal entries</option>
-        </select>
-      </div>
-      <div id="archiveTimeline" class="timeline archive-timeline"></div>
-    </section>
-
-    <section class="view" id="view-guide">
-      <div class="guide-wrap">
-        <div class="guide-head">
-          <button class="text-button" id="exitGuide">← Leave ritual</button>
-          <div class="guide-progress"><span id="guideProgressBar"></span></div>
-          <span id="guideStepCount">1 of 5</span>
+      <section class="view" id="view-journeys" aria-labelledby="journeysHeading">
+        <div class="page-heading">
+          <span class="kicker">Journeys</span>
+          <h1 id="journeysHeading">Transformation with a thread.</h1>
+          <p>When one ritual is not enough, a Journey carries the sequence for you. You only see the next useful step.</p>
         </div>
-        <article class="guide-stage card">
-          <div class="ritual-symbol" id="guideSymbol">☾</div>
-          <div class="eyebrow" id="guideCategory">Practice</div>
-          <h1 id="guideTitle">Guided Ritual</h1>
-          <div class="guide-copy" id="guideCopy"></div>
-          <div class="guide-needs" id="guideNeeds"></div>
-          <div class="guide-actions">
-            <button class="secondary" id="guideBack">Back</button>
-            <button class="primary" id="guideNext">Continue</button>
+        <div class="journey-list" id="journeyList"></div>
+      </section>
+
+      <section class="view" id="view-archive" aria-labelledby="archiveHeading">
+        <div class="page-heading">
+          <span class="kicker">My Archive</span>
+          <h1 id="archiveHeading">You do not have to remember everything.</h1>
+          <p>Your practices, reflections, repeating themes and unfinished threads live here.</p>
+        </div>
+
+        <div class="stats-row" id="statsRow"></div>
+
+        <section class="pattern-panel" id="patternPanel">
+          <span class="quiet-label">Pattern intelligence</span>
+          <h2 id="patternHeading">Your patterns will appear here.</h2>
+          <p id="patternCopy">The Archive looks for repetition without turning your life into a scorecard.</p>
+        </section>
+
+        <div class="archive-filters" id="archiveFilters">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="practice">Practices</button>
+          <button class="filter-chip" data-filter="journal">Journal</button>
+        </div>
+        <div class="archive-list" id="archiveList"></div>
+      </section>
+
+      <section class="view" id="view-chambers" aria-labelledby="chambersHeading">
+        <div class="page-heading">
+          <span class="kicker">Chambers</span>
+          <h1 id="chambersHeading">Build the Alchemist you need.</h1>
+          <p>The core stays useful for free. Chambers deepen the system only when your life gives them a reason to matter.</p>
+        </div>
+
+        <article class="core-card">
+          <span class="included-pill">Included</span>
+          <div class="core-seal">A</div>
+          <div>
+            <span class="quiet-label">The Daily Alchemist Core</span>
+            <h2>Aura + foundational practice</h2>
+            <p>Today, Journal, Archive memory, foundational rituals and the 7-Day Energy Reset.</p>
           </div>
         </article>
-      </div>
-    </section>
-  </main>
 
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <button class="mobile-link active" data-view="today"><span>☾</span>Today</button>
-    <button class="mobile-link" data-view="rituals"><span>✦</span>Rituals</button>
-    <button class="mobile-link" data-view="journal"><span>⌁</span>Journal</button>
-    <button class="mobile-link" data-view="archive"><span>↺</span>Archive</button>
-  </nav>
-</div>
+        <div class="chamber-list" id="chamberList"></div>
+      </section>
+    </main>
 
-<div class="modal hidden" id="ritualModal" role="dialog" aria-modal="true">
-  <div class="modal-backdrop" data-close-modal></div>
-  <div class="modal-card card">
-    <button class="modal-close" data-close-modal aria-label="Close">×</button>
-    <div id="ritualModalContent"></div>
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="nav-button active" data-view="today"><span>☾</span><small>Today</small></button>
+      <button class="nav-button" data-view="journal"><span>⌁</span><small>Journal</small></button>
+      <button class="nav-button" data-view="journeys"><span>✧</span><small>Journeys</small></button>
+      <button class="nav-button" data-view="archive"><span>↺</span><small>Archive</small></button>
+      <button class="nav-button" data-view="chambers"><span>◈</span><small>Chambers</small></button>
+    </nav>
   </div>
-</div>
 
-<div class="toast" id="toast" role="status"></div>
-<script src="./app.js"></script>
+  <div class="sheet hidden" id="practiceSheet" role="dialog" aria-modal="true" aria-labelledby="practiceSheetTitle">
+    <div class="sheet-backdrop" data-close-sheet="practiceSheet"></div>
+    <div class="sheet-panel ritual-sheet-panel">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" data-close-sheet="practiceSheet" aria-label="Close practice">×</button>
+      <div class="practice-progress"><span id="practiceProgress"></span></div>
+      <div class="guardian-line">
+        <span class="guardian-badge" id="sheetGuardian">ASH</span>
+        <span id="sheetGuardianRole">Fire · boundaries · release</span>
+      </div>
+      <div class="practice-sigil" id="sheetSigil">△</div>
+      <span class="quiet-label" id="practiceStepLabel">Before you begin</span>
+      <h2 id="practiceSheetTitle">Practice title</h2>
+      <div class="practice-body" id="practiceBody"></div>
+      <div class="practice-materials" id="practiceMaterials"></div>
+      <div class="practice-actions">
+        <button class="ghost-button" id="practiceBack">Back</button>
+        <button class="primary-button" id="practiceNext">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="profileSheet" role="dialog" aria-modal="true" aria-labelledby="profileSheetTitle">
+    <div class="sheet-backdrop" data-close-sheet="profileSheet"></div>
+    <div class="sheet-panel settings-panel">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" data-close-sheet="profileSheet" aria-label="Close settings">×</button>
+      <span class="kicker">Your Alchemist</span>
+      <h2 id="profileSheetTitle">What the system should remember</h2>
+      <form id="profileForm" class="settings-form">
+        <label for="profileName">Name</label>
+        <input id="profileName" type="text" placeholder="What should I call you?">
+
+        <label for="languageMode">Language</label>
+        <select id="languageMode">
+          <option value="blend">Mystical + grounded</option>
+          <option value="mystical">More mystical</option>
+          <option value="grounded">More grounded</option>
+        </select>
+
+        <label for="timePreference">Usual practice time</label>
+        <select id="timePreference">
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="20">20 minutes</option>
+          <option value="30">I can go deeper</option>
+        </select>
+
+        <fieldset>
+          <legend>Materials I usually have</legend>
+          <div class="check-grid" id="materialsGrid"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Practical boundaries</legend>
+          <label class="toggle-row"><input type="checkbox" id="noFlame"><span>No open flame</span></label>
+          <label class="toggle-row"><input type="checkbox" id="noBath"><span>No bath practices</span></label>
+          <label class="toggle-row"><input type="checkbox" id="quietOnly"><span>Keep practices quiet / low disruption</span></label>
+        </fieldset>
+
+        <button class="primary-button wide" type="submit">Save what matters</button>
+        <button class="danger-link" type="button" id="resetApp">Reset this prototype</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="sheet hidden" id="purchaseSheet" role="dialog" aria-modal="true" aria-labelledby="purchaseTitle">
+    <div class="sheet-backdrop" data-close-sheet="purchaseSheet"></div>
+    <div class="sheet-panel purchase-panel">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" data-close-sheet="purchaseSheet" aria-label="Close purchase preview">×</button>
+      <span class="kicker">Add-on</span>
+      <div class="purchase-seal" id="purchaseSeal">☾</div>
+      <h2 id="purchaseTitle">Chamber</h2>
+      <p id="purchaseCopy"></p>
+      <div class="purchase-price" id="purchasePrice">$7.99</div>
+      <button class="primary-button wide" id="demoUnlock">Demo unlock</button>
+      <p class="fine-print">Checkout is intentionally not connected in this prototype. Demo unlock lets you test the paid-state experience on this device.</p>
+    </div>
+  </div>
+
+  <div class="onboarding hidden" id="onboarding" aria-live="polite">
+    <div class="onboarding-stage">
+      <div class="onboarding-ornament">☾</div>
+      <div class="onboarding-progress" id="onboardingProgress"></div>
+      <div id="onboardingContent"></div>
+      <div class="onboarding-actions">
+        <button class="ghost-button hidden" id="onboardingBack">Back</button>
+        <button class="primary-button" id="onboardingNext">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="./app.js"></script>
 </body>
 </html>
