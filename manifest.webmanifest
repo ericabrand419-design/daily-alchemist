@@ -1,0 +1,14 @@
+{
+  "name": "The Daily Alchemist",
+  "short_name": "Daily Alchemist",
+  "description": "A context-aware personal ritual and reflection companion with memory.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#14251f",
+  "theme_color": "#14251f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
