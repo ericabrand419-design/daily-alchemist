@@ -67,6 +67,19 @@
           </div>
         </section>
 
+        <section class="daily-tools" aria-label="Daily alchemy tools">
+          <button class="daily-tool botanical-card" id="openAlmanac">
+            <span class="daily-tool-icon">☼</span>
+            <span><small>Living Almanac</small><strong id="almanacTeaser">Today’s seasonal thread</strong></span>
+            <span class="daily-tool-arrow">›</span>
+          </button>
+          <button class="daily-tool botanical-card" id="drawCard">
+            <span class="daily-tool-icon">✦</span>
+            <span><small>Altar Draw</small><strong>Pull one symbol</strong></span>
+            <span class="daily-tool-arrow">›</span>
+          </button>
+        </section>
+
         <section id="recommendationArea" class="recommendation-area" aria-live="polite">
           <article class="oracle-card empty-oracle" id="emptyOracle">
             <div class="oracle-topline">
@@ -216,6 +229,20 @@
       <button class="nav-button" data-view="archive"><span>↺</span><small>Archive</small></button>
       <button class="nav-button" data-view="chambers"><span>◈</span><small>Chambers</small></button>
     </nav>
+  </div>
+
+  <div class="sheet hidden" id="insightSheet" role="dialog" aria-modal="true" aria-labelledby="insightTitle">
+    <div class="sheet-backdrop" data-close-sheet="insightSheet"></div>
+    <div class="sheet-panel insight-panel">
+      <div class="sheet-handle"></div>
+      <button class="sheet-close" data-close-sheet="insightSheet" aria-label="Close">×</button>
+      <span class="kicker" id="insightKicker">Living Almanac</span>
+      <div class="insight-seal" id="insightSeal">☼</div>
+      <h2 id="insightTitle">Today’s thread</h2>
+      <p class="insight-lede" id="insightLead"></p>
+      <div class="insight-body" id="insightBody"></div>
+      <button class="primary-button wide" id="insightAction">Use this</button>
+    </div>
   </div>
 
   <div class="sheet hidden" id="practiceSheet" role="dialog" aria-modal="true" aria-labelledby="practiceSheetTitle">
