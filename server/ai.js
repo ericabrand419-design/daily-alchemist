@@ -1,5 +1,9 @@
 // Guardian and Aura replies through Anthropic's Messages API, with daily limits.
-import { json, env, getUser, getProfile, isMember, isAdult, adultRequired, ensureTrial, getUsage, bumpUsage, LIMITS } from "../api/_lib.js";
+import { json, env, getUser, getProfile, isMember, isPaid, isAdult, adultRequired, ensureTrial, getUsage, bumpUsage, LIMITS, isAdminEmail } from "../api/_lib.js";
+
+const SAFE_BASE = "Content rules for every reply: never sexual content involving anyone under 18, and never anything non-consensual, coercive or illegal. If sex or sexual technique comes up, keep it warm and non-explicit, and suggest Vesper, the guardian for desire and intimacy, for members 21 and older.";
+const VESPER = "You are speaking as Vesper, for a verified adult member who is 21 or older. You may talk frankly and warmly about desire, pleasure, sex, intimacy, positions and sex magic, as an educated, sex positive guide: practical, tasteful and specific enough to be useful, never graphic pornographic description. Always center enthusiastic consent, communication, comfort and safer sex. Solo and partnered, every orientation and body. Never sexual content involving anyone under 18, never non-consensual, coercive, incest or illegal scenarios. If she describes pain, pressure or harm, drop the topic and care for her.";
+const VESPER_STORE = "You are speaking as Vesper, for a verified adult member who is 21 or older, inside an app store version of the app. Talk about desire, confidence, intimacy, communication and connection, warmly and honestly, but keep it non-explicit: no detailed sexual technique or positions. If she wants that, tell her the full Night Garden is on dailyalchemist.com. Never sexual content involving anyone under 18, never anything non-consensual.";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -13,6 +17,9 @@ export async function POST(request) {
   const [p0, usage] = await Promise.all([getProfile(user.id), getUsage(user.id)]);
   const profile = await ensureTrial(user, p0);
   if (!isAdult(profile)) return adultRequired();
+  const vesper = String(body.g || "") === "vesper";
+  if (vesper && !(profile.adult21_at && (isPaid(profile) || isAdminEmail(user.email)))) return json({ error: "vesper_locked" }, 403);
+  const system = vesper ? (body.native ? VESPER_STORE : VESPER) : SAFE_BASE;
   const tier = isMember(profile) ? "member" : "free";
   if ((usage[kind] || 0) >= LIMITS[tier][kind]) return json({ error: "limit", tier }, 429);
 
@@ -22,6 +29,7 @@ export async function POST(request) {
     body: JSON.stringify({
       model: env("ANTHROPIC_MODEL") || "claude-haiku-4-5-20251001",
       max_tokens: kind === "talk" ? 500 : 1400,
+      system,
       messages: clean,
     }),
   });

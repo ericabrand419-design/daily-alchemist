@@ -5,7 +5,8 @@ import crypto from "node:crypto";
 import { json, env, getUser, getProfile, ensureTrial, isMember, isAdult, adultRequired, getUsage, bumpUsage, LIMITS, CORS } from "../api/_lib.js";
 
 // Each guardian's voice from the ElevenLabs Voice Library: [full name, voice ID, library owner ID].
-// 14 women, 4 men and one voice that isn't clearly either (Lily). Chosen with Erica, Sept 30 2026.
+// 13 women, 4 men and two voices that aren't clearly either (Lily and Vesper). Chosen with Erica, Sept 30 2026.
+// Rowan (movement) took Moss's voice; Vesper uses River, one of ElevenLabs' built-in voices.
 // Override any of these with ELEVENLABS_VOICES in Vercel, e.g. {"aura":"<voice id>"}.
 const VOICES = {
   aura:     ["Samara X - Smooth Classy British", "19STyYD15bswVz51nqLf", "6643afd1d55a6987b18e340e00bb89ed60329c878a01823e0c10a50fb522bd76"],
@@ -15,7 +16,6 @@ const VOICES = {
   marigold: ["Jessica - Playful, Bright, Warm", "r1KmysJdVYZjJCm4mL3b", "d5a057fa67bd4518fbf13eb08503860c528f1b11bb306922220aa0c561744e90"],
   rue:      ["Mariana - Intimacy with Authority", "OB0Jj6v9DGLLgz8dD57i", "375c86e675d6d8b2b50d4c33cc6b7ef407a68953e41de9fc9f98a70b88bb21d9"],
   aurora:   ["Tiffany - Natural and Welcoming", "6aDn1KB0hjpdcocrUkmq", "64cbc624eb5aab4e95a968e1f41d75402277cca6e549036ed17e56ea33bbbc9e"],
-  sol:      ["Cecily - Pro Black Woman Voice Over", "NQMJRVvPew6HsaebYnZj", "6b4cf07e3d6a1bd3fba4d6a45848a7ce28bc3ccde1e06085bc44948fdd6310db"],
   ember:    ["Ivy - Spirited, Lively, Daring", "i4CzbCVWoqvD0P1QJCUL", "db90e9d28d86510262ed2a7235586923c68c9c8ae2e533739754741e8965a616"],
   willow:   ["Lauren - Friendly, Comforting and Soft", "DODLEQrClDo8wCz460ld", "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6"],
   wren:     ["Priyanka - Calm, Neutral and Relaxed", "BpjGufoPiobT79j2vtj4", "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6"],
@@ -24,7 +24,8 @@ const VOICES = {
   cypress:  ["Annie K - Grounded Narrator", "XW70ikSsadUbinwLMZ5w", "61a1827b7c3cd70efa264bee820ad4af827f9663372914fcdd46a091d9656f03"],
   onyx:     ["Donovan - Articulate, Strong and Deep", "DMyrgzQFny3JI1Y1paM5", "37242178387aa74ac807790c7307e81312f0791cf06777a4791b86d941a77525"],
   juniper:  ["Milo - Calm, Soothing and Meditative", "GUDYcgRAONiI1nXDcNQQ", "465295810ef94f8627fad34ba88551a02745957d1c3b09877a3fc3de528d6f2f"],
-  moss:     ["Dan - African American calm & friendly", "1cuDPO8sIMatoOE4Z2Zv", "ed61d975d16c815a99c1bfed80609b8724afe0fbdc886513a3e74e0e2ef2ea9b"],
+  rowan:     ["Dan - African American calm & friendly", "1cuDPO8sIMatoOE4Z2Zv", "ed61d975d16c815a99c1bfed80609b8724afe0fbdc886513a3e74e0e2ef2ea9b"],
+  vesper:   ["River - Relaxed, Neutral, Informative", "SAz9YHcvj6GT2YYXdXww", ""],
   lumen:    ["Brian Nguyen - Balanced, Wise and Calm", "bP8FJDHmWVEgXJDitdQd", "93c2227787fb299736de409d00bcdd04791a4b4ad1c1c0b11a4c5a40695850b2"],
   lily:     ["Elowen - Upbeat Modern Narrator", "dvbL7qkNGZY1IqPGZAjM", ""],
 };

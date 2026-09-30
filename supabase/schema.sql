@@ -17,6 +17,9 @@ alter table public.profiles add column if not exists monitor_started timestamptz
 alter table public.profiles add column if not exists monitor_until timestamptz;
 -- Adults only: when this person confirmed they're 18 or older (no birth date is collected).
 alter table public.profiles add column if not exists adult_confirmed_at timestamptz;
+-- Vesper's room (members 21 and older). Only the yes or no is kept, never the birthday.
+alter table public.profiles add column if not exists adult21_at timestamptz;
+alter table public.profiles add column if not exists under21_at timestamptz;
 create table if not exists public.prefs (
   user_id uuid primary key references auth.users(id) on delete cascade,
   data jsonb not null default '{}'::jsonb,
