@@ -497,7 +497,13 @@ body:has(#gate) .scrim{z-index:60}
 .sndbar{display:flex;gap:6px;align-items:center}
 .snd{width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.45);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;padding:0;position:relative}
 .snd svg,.talk .hd .snd svg,.rite .bar .snd svg{width:17px;height:17px;filter:none}
-.snd.off{opacity:.6}
+.snd.off{opacity:.75}
+.snd.lab{width:auto;height:32px;border-radius:999px;padding:0 11px 0 9px;display:inline-flex;gap:5px;font-family:var(--f-ui);font-size:13px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.snd.lab.off::after{left:9px;right:auto;width:17px}
+.rite .snd.lab,.talk .snd.lab{width:38px;height:38px;padding:0;justify-content:center;gap:0}
+.rite .snd.lab span,.talk .snd.lab span{display:none}
+.rite .snd.lab.off::after,.talk .snd.lab.off::after{left:10px;width:18px}
+.toast{z-index:80!important}
 .snd.off::after{content:"";position:absolute;left:7px;right:7px;top:50%;height:2px;background:currentColor;transform:rotate(-45deg);border-radius:2px}
 .rite .snd{color:#6E1142;border-color:rgba(154,116,20,.5);background:rgba(255,255,255,.35);width:36px;height:36px}
 .talk .snd{width:38px;height:38px}
@@ -2275,7 +2281,7 @@ function musicFor(g){musicPlay(g||MUSIC.base);}
 function musicBack(){musicPlay(MUSIC.base);}
 function musicDuck(on){MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
 /* Browsers only allow sound after a tap, so the music starts with the first one. */
-function musicStart(){if(MUSIC.started)return;MUSIC.started=true;musicPlay(MUSIC.want);}
+function musicStart(ev){if(MUSIC.started)return;if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-snd="music"]')){MUSIC.started=true;return;}MUSIC.started=true;musicPlay(MUSIC.want);}
 document.addEventListener("pointerdown",musicStart,{capture:true});
 document.addEventListener("keydown",musicStart,{capture:true});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(MUSIC.cur)try{MUSIC.cur.pause();}catch(e){}}else if(MUSIC.cur&&musicOn()){MUSIC.cur.play().catch(()=>{});}});
@@ -2284,10 +2290,13 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 const SND_MUSIC='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/></svg>';
 const SND_VOICE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 function voiceMuted(){return S.prefVoiceOff===true;}
+/* Main pages and the welcome screen only have music, so only the music switch shows there.
+   Chats and rituals, where the guardians speak, also get the voice switch. */
 function renderSnd(){
   document.body.classList.toggle("novoice",voiceMuted());
-  document.querySelectorAll(".sndbar").forEach(b=>{const m=musicOn(),v=!voiceMuted();
-    b.innerHTML='<button class="snd'+(m?"":" off")+'" data-snd="music" aria-pressed="'+m+'" aria-label="'+(m?"Turn music off":"Turn music on")+'" title="Music">'+SND_MUSIC+'</button><button class="snd'+(v?"":" off")+'" data-snd="voice" aria-pressed="'+v+'" aria-label="'+(v?"Turn voices off":"Turn voices on")+'" title="Voices">'+SND_VOICE+'</button>';});
+  document.querySelectorAll(".sndbar").forEach(b=>{const m=musicOn(),v=!voiceMuted(),both=!!b.closest(".talk,.rite");
+    b.innerHTML='<button class="snd lab'+(m?"":" off")+'" data-snd="music" aria-pressed="'+m+'" aria-label="'+(m?"Music is on. Tap to turn it off":"Music is off. Tap to turn it on")+'">'+SND_MUSIC+'<span>'+(m?"Music on":"Music off")+'</span></button>'+
+      (both?'<button class="snd lab'+(v?"":" off")+'" data-snd="voice" aria-pressed="'+v+'" aria-label="'+(v?"Voices are on. Tap to turn them off":"Voices are off. Tap to turn them on")+'">'+SND_VOICE+'<span>'+(v?"Voice on":"Voice off")+'</span></button>':'');});
 }
 function syncSnd(){S.profile.snd={music:S.prefMusic||"on",vol:S.prefMusicVol||"normal",voiceOff:!!S.prefVoiceOff,voice:S.prefVoice||"natural"};saveLocal();try{remotePut("prefs");}catch(e){}}
 function applySnd(x){if(!x)return;S.prefMusic=x.music==="off"?"off":"on";S.prefMusicVol=x.vol==="quiet"?"quiet":"normal";S.prefVoiceOff=!!x.voiceOff;S.prefVoice=x.voice==="device"?"device":"natural";if(!musicOn())musicStop();if(voiceMuted())stopAudio();renderSnd();}
