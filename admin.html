@@ -57,6 +57,7 @@ tr.sel td{background:rgba(191,30,115,.14)}
 .drop .bar{height:10px;border-radius:5px;background:var(--fuchsia)}
 .linkbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--night3);border-radius:12px;padding:10px 12px;word-break:break-all}
 .linkbox code{flex:1 1 260px;font-size:15px;color:var(--gold)}
+a.btn{text-decoration:none;display:inline-block}
 .btn.small{padding:8px 14px;font-size:15px}
 </style>
 </head>
@@ -214,6 +215,11 @@ function showPerson(id){
 let INV=[],USES=[];
 const siteURL=()=>(C.siteUrl||location.origin).replace(/\/$/,"");
 const invLink=c=>siteURL()+"/?friend="+c;
+/* A ready-made text message. On a phone, "Text it" opens Messages with this filled in. */
+const invText=(c,name)=>"Hi"+(name?" "+name.split(/\s+/)[0]:"")+"! I made an app, The Daily Alchemist, and I'd love for you to try it before anyone else. This link is just for you and gives you everything free, for life: "+invLink(c);
+const smsHref=(c,name)=>"sms:?&body="+encodeURIComponent(invText(c,name));
+function textBtns(c,name,small){const n=esc(name||"");return '<a class="btn'+(small?' ghost small':'')+'" href="'+esc(smsHref(c,name))+'">Text it</a> <button class="btn ghost'+(small?' small':'')+'" data-share="'+esc(c)+'" data-name="'+n+'">Share</button>';}
+async function shareInv(c,name){const text=invText(c,name);if(navigator.share){try{await navigator.share({title:"The Daily Alchemist",text});return;}catch(e){if(e&&e.name==="AbortError")return;}}copyLink(c);}
 async function invites(action,extra){
   const res=await fetch(API+"/api/invites",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,...(extra||{})})});
   const d=await res.json().catch(()=>({}));if(d.invites){INV=d.invites;USES=d.uses||[];renderInvites();}return d;
@@ -231,12 +237,12 @@ function renderShares(){
 }
 function renderInvites(){
   renderShares();const INV1=INV.filter(v=>!v.owner);
-  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV1.length?INV1.map(v=>{const open=!v.used_by&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?'<button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
+  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV1.length?INV1.map(v=>{const open=!v.used_by&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?textBtns(v.code,v.label,true)+' <button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
 }
 async function copyLink(c,btn){try{await navigator.clipboard.writeText(invLink(c));if(btn){const t=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=t,1500);}}catch(e){prompt("Copy this link:",invLink(c));}}
 $("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const before=new Set(INV.map(v=>v.code));await invites("create",{label:$("#invName").value});b.disabled=false;const nw=INV.find(v=>!before.has(v.code));
-  if(nw){$("#invName").value="";$("#invNew").hidden=false;$("#invNew").innerHTML='<div class="linkbox"><code>'+esc(invLink(nw.code))+'</code><button class="btn small" data-copy="'+esc(nw.code)+'">Copy link</button></div><p class="note">Send this to '+esc(nw.label||"your friend")+' only. It stops working once they use it.</p>';}};
-document.addEventListener("click",e=>{const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
+  if(nw){$("#invName").value="";$("#invNew").hidden=false;$("#invNew").innerHTML='<div class="linkbox"><code>'+esc(invLink(nw.code))+'</code><button class="btn small" data-copy="'+esc(nw.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(nw.code,nw.label,false)+'</div><p class="note">Send this to '+esc(nw.label||"your friend")+' only. It stops working once they use it.</p>';}};
+document.addEventListener("click",e=>{const sh=e.target.closest("[data-share]");if(sh){shareInv(sh.dataset.share,sh.dataset.name);return;}const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
 const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",sol:"Sol",ember:"Ember",willow:"Willow",moss:"Moss",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 let MUS={tracks:{},url:""},musBusy=false;
 async function music(action,g){
