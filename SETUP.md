@@ -82,3 +82,11 @@ Your friends get everything, for life, free.
 ## Guardian music
 
 Each guardian has a 90 second instrumental theme made with ElevenLabs Music (about 1,350 credits each, roughly 25,650 for all 19). Once the site is live, open **dailyalchemist.com/admin**, sign in, and press **Make all missing tracks** in the Music section. Listen to each one there and press **Remake** on any you don't like. The tracks are stored in Supabase Storage (public bucket `music`) and play for everyone: Aura's on the main pages, a guardian's on their page, rituals and chats. People can choose On, Softer or Off in Settings.
+
+## Sign in by text message (Twilio)
+
+1. Make an account at twilio.com and add a payment method. Twilio Verify costs about 6 cents per sign-in code in the US.
+2. In Twilio, open **Verify > Services**, click **Create new**, name it "The Daily Alchemist", turn on **SMS**, and create it. Copy its **Service SID** (starts with VA).
+3. From the Twilio console home, copy your **Account SID** (starts with AC) and **Auth Token**.
+4. In Supabase: **Authentication > Sign In / Providers > Phone**. Turn Phone on, choose **Twilio Verify**, paste the Account SID, Auth Token and Verify Service SID, and save. These stay in Supabase; never put them in config.js.
+5. Tell Claude (or set `phoneSignIn: true` in config.js). The app then asks for a mobile number first, with "Use email instead" underneath.

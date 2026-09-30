@@ -21,7 +21,7 @@ export async function POST(request) {
   await sb("invite_uses", { method: "POST", prefer: "resolution=ignore-duplicates", body: { code, user_id: user.id } });
   const shared = !!inv.owner;
   await sb("profiles?id=eq." + user.id, { method: "PATCH", body: { lifetime: true, cohort: shared ? "shared" : "friends", invited_by: inv.owner || null } });
-  let who = user.email || "Someone";
+  let who = (user.email || (user.phone ? "+" + String(user.phone).replace(/^\+/, "") : "")) || "Someone";
   if (shared) {
     const left = Math.max(0, (inv.max_uses || 3) - (inv.uses || 0));
     await notifyAdmin("Someone joined through a friend", who + " joined through " + (inv.label || "a friend's share link").replace(/^Shared by /, "") + "'s link. " + left + " left on that link.");

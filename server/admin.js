@@ -36,7 +36,7 @@ export async function POST(request) {
     const p = P[u.id] || {};
     const sharing = p.monitor_answer === "yes" || p.monitor_answer === "stopped";
     return {
-      id: u.id, email: u.email, name: N[u.id] || "", joined: p.joined_at || u.created_at, last_sign_in: u.last_sign_in_at || null,
+      id: u.id, email: u.email || (u.phone ? "+" + String(u.phone).replace(/^\+/, "") : ""), name: N[u.id] || "", joined: p.joined_at || u.created_at, last_sign_in: u.last_sign_in_at || null,
       cohort: p.cohort || null, invited_by: p.invited_by || null, lifetime: !!p.lifetime, adult_confirmed_at: p.adult_confirmed_at || null, member_until: p.member_until || null, trial_until: p.trial_until || null,
       sharing: p.monitor_answer || null, sharing_started: sharing ? p.monitor_started : null, sharing_until: sharing ? p.monitor_until : null,
     };

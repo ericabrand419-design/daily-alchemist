@@ -86,7 +86,7 @@ export const TRIAL_DAYS = 7;
 export const GRACE_DAYS = 30; // after the trial, Aura keeps writing, sealed, for this long
 // Give every new account a 7-day trial, counted from when the account was created. Never resets.
 export async function ensureTrial(user, profile) {
-  if (!profile) await notifyAdmin("New sign-up", (user.email || "Someone") + " just joined The Daily Alchemist.");
+  if (!profile) await notifyAdmin("New sign-up", ((user.email || (user.phone ? "+" + String(user.phone).replace(/^\+/, "") : "")) || "Someone") + " just joined The Daily Alchemist.");
   if (profile && profile.trial_until) return profile;
   const start = user.created_at ? new Date(user.created_at).getTime() : Date.now();
   const trial_until = new Date(start + TRIAL_DAYS * 864e5).toISOString();

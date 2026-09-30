@@ -14,7 +14,7 @@ export async function POST(request) {
     "line_items[0][price]": price,
     "line_items[0][quantity]": 1,
     client_reference_id: user.id,
-    ...(profile?.stripe_customer ? { customer: profile.stripe_customer } : { customer_email: user.email }),
+    ...(profile?.stripe_customer ? { customer: profile.stripe_customer } : (user.email ? { customer_email: user.email } : {})),
     subscription_data: { metadata: { user_id: user.id } },
     allow_promotion_codes: true,
     success_url: site + "/?checkout=success",

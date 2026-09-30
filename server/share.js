@@ -15,7 +15,7 @@ export async function POST(request) {
   let rows = await sb("invites?owner=eq." + user.id + "&revoked=eq.false&select=code,uses,max_uses&order=created_at.asc&limit=1");
   let inv = rows && rows[0];
   if (!inv) {
-    inv = { code: crypto.randomBytes(18).toString("base64url"), label: "Shared by " + (user.email || "a friend"), owner: user.id, max_uses: MAX, uses: 0, expires_at: null };
+    inv = { code: crypto.randomBytes(18).toString("base64url"), label: "Shared by " + ((user.email || (user.phone ? "+" + String(user.phone).replace(/^\+/, "") : "")) || "a friend"), owner: user.id, max_uses: MAX, uses: 0, expires_at: null };
     await sb("invites", { method: "POST", body: inv });
   }
   return json({ code: inv.code, uses: inv.uses || 0, max: inv.max_uses || MAX });

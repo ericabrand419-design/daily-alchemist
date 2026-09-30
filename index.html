@@ -487,6 +487,7 @@ a.btn{text-decoration:none}
 .chc .cn{grid-area:n;font-size:17px;line-height:1.2;overflow-wrap:break-word}
 .gate{position:fixed;inset:0;z-index:55;overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(24px + env(safe-area-inset-bottom,0px));background:radial-gradient(900px 500px at 110% -10%,rgba(191,30,115,.25),transparent 60%),radial-gradient(800px 520px at -20% 40%,rgba(58,132,132,.18),transparent 60%),var(--night)}
 body:has(#gate) .scrim{z-index:60}
+.field input[type=tel]{border-radius:12px;border:1px solid rgba(231,196,90,.35);background:rgba(22,19,42,.7);padding:11px 14px;font-size:20.5px;color:var(--glow);width:100%}
 .gate .gatesnd{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px}
 .gate .in{max-width:420px;width:100%;display:grid;gap:16px}
 .gate h1{margin:0;text-align:center;font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1.1}
@@ -1611,6 +1612,21 @@ async function initWeb(){
   const qs=new URLSearchParams(location.search);
   if(qs.get("checkout")==="success"){history.replaceState(null,"",location.pathname);toast("Welcome to "+PLAN.name+".");setTimeout(refreshMe,2500);}
 }
+/* Sign in with a code by text (when texting is set up) or by email. New and returning people
+   do the same thing. */
+function phoneOn(){return !!(window.DA_CONFIG&&window.DA_CONFIG.phoneSignIn);}
+function normPhone(v){let d=String(v||"").replace(/[^\d+]/g,"");if(d.startsWith("+"))return /^\+\d{8,15}$/.test(d)?d:null;d=d.replace(/\D/g,"");if(d.length===10)return "+1"+d;if(d.length===11&&d[0]==="1")return "+"+d;return null;}
+function signInForm(gate,byEmail){
+  const phone=phoneOn()&&!byEmail;
+  return '<div id="siForm" data-by="'+(phone?"phone":"email")+'">'+(phone
+    ?'<div class="field" id="siEmailRow"><label for="siPhone">Your mobile number</label><input type="tel" inputmode="tel" autocomplete="tel" id="siPhone" placeholder="(555) 123 4567"></div>'
+    :'<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>')+
+    '<button class="btn btn-main full" id="siSend" style="margin-top:12px">'+(phone?"Text me a code":"Send my code")+'</button>'+
+    '<div class="field" id="siCodeRow" hidden style="margin-top:12px"><label for="siCode">'+(phone?"Code from your texts":"Code from your email")+'</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
+    '<button class="btn btn-main full" id="siVerify" hidden style="margin-top:12px">'+(gate?"Come in":"Sign in")+'</button>'+
+    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(phone?"New here or coming back, it\'s the same: we text you a 6-digit code. No password.":"New here or coming back, it\'s the same: we email you a 6-digit code. No password.")+'</p>'+
+    (phoneOn()?'<p class="small" style="text-align:center"><button class="linkish" id="siSwitch" data-gate="'+(gate?1:0)+'">'+(phone?"Use email instead":"Use my phone number instead")+'</button></p>':'')+'</div>';
+}
 /* On the live app everyone signs in or makes a free account first, so Aura can give her
    full reading from the very first question. */
 function showGate(){
@@ -1618,10 +1634,7 @@ function showGate(){
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
     auraSays(S.friendCode?"You came in on an invitation. Make your account and everything opens for you, for life.":"Come in. Sign in, or make your free account, so I can read what you bring me and remember it for you.","Aura · welcome")+
-    '<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
-    '<button class="btn btn-main full" id="siSend">Send my code</button>'+
-    '<div class="field" id="siCodeRow" hidden><label for="siCode">Code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
-    '<button class="btn btn-main full" id="siVerify" hidden>Come in</button><p class="small muted" id="siMsg" style="text-align:center">New here or coming back, it\'s the same: we email you a 6-digit code. No password.</p>'+legalLine()+'</div>';
+    signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }
 function hideGate(){const g=$("#gate");if(g){g.remove();document.body.style.overflow="";setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},500);}}
@@ -1633,7 +1646,7 @@ async function refreshMe(){
   setTimeout(auraPopup,500);
 }
 async function onSignedIn(session){
-  ACCT.user=session.user;ACCT.email=session.user.email||"";hideGate();
+  ACCT.user=session.user;ACCT.email=session.user.email||(session.user.phone?"+"+String(session.user.phone).replace(/^\+/,""):"");hideGate();
   const sb=ACCT.sb,uid=session.user.id;
   try{
     const [e,c,p]=await Promise.all([
@@ -1690,11 +1703,8 @@ function openPaywall(reason){
 }
 function openSignIn(next){
   if(MODE!=="web"||!ACCT.sb){toast("Accounts open on the live app.");return;}
-  openSheet('<div class="stack"><div><div class="label">Your account</div><h2>'+(S.friendCode?"Claim your lifetime access.":"Keep your Archive safe.")+'</h2><p class="muted" style="margin-top:6px">'+(S.friendCode?"You came in on an invitation. Make your account and everything opens, for life. ":"")+'We\'ll email you a 6-digit code. No password to remember.</p></div>'+
-   '<div class="field" id="siEmailRow"><label for="siEmail">Email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
-   '<button class="btn btn-main full" id="siSend" data-next="'+esc(next||"")+'">Send my code</button>'+
-   '<div class="field" id="siCodeRow" hidden><label for="siCode">Code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
-   '<button class="btn btn-main full" id="siVerify" hidden data-next="'+esc(next||"")+'">Sign in</button><p class="small muted" id="siMsg"></p>'+legalLine()+'</div>');
+  openSheet('<div class="stack"><div><div class="label">Your account</div><h2>'+(S.friendCode?"Claim your lifetime access.":"Keep your Archive safe.")+'</h2><p class="muted" style="margin-top:6px">'+(S.friendCode?"You came in on an invitation. Make your account and everything opens, for life. ":"")+'</p></div>'+
+   signInForm(false)+legalLine()+'</div>');
 }
 function legalLine(){return '<p class="small muted" style="text-align:center">For reflection and ritual. Not medical, mental health, legal or financial advice. <button class="linkish" data-legal="terms">Terms</button> · <button class="linkish" data-legal="privacy">Privacy</button></p>';}
 const LEGAL={
@@ -3319,7 +3329,7 @@ let rec=null,recBtn=null;
 function stopMic(){if(rec){try{rec.stop();}catch(e){}}}
 /* A mic in every place you can type. Boxes built with their own mic keep it; every other
    text box gets one added automatically, wherever and whenever it appears. */
-const NO_MIC=new Set(["siEmail","siCode","delConfirm","email","code"]);
+const NO_MIC=new Set(["siEmail","siPhone","siCode","delConfirm","email","code"]);
 let micSeq=0;
 function addMics(root){
   (root||document).querySelectorAll('textarea, input[type="text"], input[type="search"], input:not([type])').forEach(el=>{
@@ -3520,8 +3530,10 @@ document.addEventListener("click",async ev=>{
   if(d.previewMember){S.previewMember=!isMember();saveLocal();closeSheet();renderAll();toast(isMember()?"Previewing as a member.":"Previewing as free.");return;}
   if(d.legal){openSheet('<div class="stack legal">'+LEGAL[d.legal]+'</div>');return;}
   if(t.id==="siOpen"){openSignIn();return;}
-  if(t.id==="siSend"){const em=($("#siEmail").value||"").trim();if(!/^\S+@\S+\.\S+$/.test(em)){$("#siMsg").textContent="Check that email address.";return;}t.disabled=true;const {error}=await ACCT.sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});t.disabled=false;if(error){$("#siMsg").textContent="Couldn't send the code. Try again in a minute.";return;}ACCT.pendingEmail=em;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;t.hidden=true;$("#siMsg").textContent="Code sent to "+em+". Check spam if it's not there in a minute.";$("#siCode").focus();return;}
-  if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");t.disabled=true;const {data,error}=await ACCT.sb.auth.verifyOtp({email:ACCT.pendingEmail,token:code,type:"email"});t.disabled=false;if(error){$("#siMsg").textContent="That code didn't work. Check it, or send a new one.";return;}closeSheet();toast("Signed in. Your Archive is safe.");if(data&&data.session)await onSignedIn(data.session);return;}
+  if(t.id==="siSwitch"){const f=$("#siForm");if(f)f.outerHTML=signInForm(t.dataset.gate==="1",f.dataset.by==="phone");return;}
+  if(t.id==="siSend"&&$("#siPhone")){const ph=normPhone($("#siPhone").value);if(!ph){$("#siMsg").textContent="Check that number. Include the area code.";return;}t.disabled=true;const {error}=await ACCT.sb.auth.signInWithOtp({phone:ph,options:{shouldCreateUser:true}});t.disabled=false;if(error){$("#siMsg").textContent="Couldn't text the code. Check the number, or use email instead.";return;}ACCT.pendingPhone=ph;ACCT.pendingEmail=null;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;t.hidden=true;$("#siMsg").textContent="Code texted to "+ph+". It can take a minute.";$("#siCode").focus();return;}
+  if(t.id==="siSend"){const em=($("#siEmail").value||"").trim();if(!/^\S+@\S+\.\S+$/.test(em)){$("#siMsg").textContent="Check that email address.";return;}t.disabled=true;const {error}=await ACCT.sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});t.disabled=false;if(error){$("#siMsg").textContent="Couldn't send the code. Try again in a minute.";return;}ACCT.pendingEmail=em;ACCT.pendingPhone=null;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;t.hidden=true;$("#siMsg").textContent="Code sent to "+em+". Check spam if it's not there in a minute.";$("#siCode").focus();return;}
+  if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");t.disabled=true;const {data,error}=await ACCT.sb.auth.verifyOtp(ACCT.pendingPhone?{phone:ACCT.pendingPhone,token:code,type:"sms"}:{email:ACCT.pendingEmail,token:code,type:"email"});t.disabled=false;if(error){$("#siMsg").textContent="That code didn't work. Check it, or send a new one.";return;}closeSheet();toast("Signed in. Your Archive is safe.");if(data&&data.session)await onSignedIn(data.session);return;}
   if(t.id==="checkoutBtn"){track("checkout",{plan:payPlan});if(!ACCT.user){openSignIn();return;}t.disabled=true;t.textContent="Opening checkout...";const r=await api("/api/checkout",{plan:payPlan});if(r.url){openExternal(r.url);}else{t.disabled=false;t.textContent="Join "+PLAN.name;toast("Checkout isn't available right now. Try again soon.");}return;}
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
   if(t.id==="signOut"){await ACCT.sb.auth.signOut();ACCT.user=null;ACCT.member=false;closeSheet();renderAll();toast("Signed out.");return;}
