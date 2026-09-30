@@ -3290,9 +3290,12 @@ function toggleMic(btn){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){micBlocked();return;}
   const ta=document.getElementById(btn.dataset.mic);if(!ta)return;
-  const base=ta.value.trim()?ta.value.trim()+" ":"";let finalT="";
+  const base=ta.value.trim()?ta.value.trim()+" ":"";
   rec=new SR();rec.lang=navigator.language||"en-US";rec.interimResults=true;rec.continuous=true;recBtn=btn;
-  rec.onresult=e=>{let interim="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalT+=t;else interim+=t;}ta.value=base+finalT+interim;ta.dispatchEvent(new Event("input",{bubbles:true}));};
+  /* Rebuild the words from every result each time. Android Chrome repeats the whole sentence so far
+     in each new result ("I", "I said", "I said I'm"), so a result that starts with what we already
+     have replaces it instead of being added again. */
+  rec.onresult=e=>{let out="";for(let i=0;i<e.results.length;i++){const t=String(e.results[i][0].transcript||"").trim();if(!t)continue;const lo=out.toLowerCase(),tl=t.toLowerCase();if(!out||tl.startsWith(lo))out=t;else if(lo.endsWith(tl))continue;else out=out+" "+t;}ta.value=base+out;ta.dispatchEvent(new Event("input",{bubbles:true}));};
   rec.onerror=e=>{if(["not-allowed","service-not-allowed","audio-capture"].includes(e.error))micBlocked();};
   rec.onend=()=>{rec=null;if(recBtn){recBtn.classList.remove("on");recBtn.setAttribute("aria-pressed","false");recBtn.setAttribute("aria-label","Speak instead of typing");}};
   try{rec.start();btn.classList.add("on");btn.setAttribute("aria-pressed","true");btn.setAttribute("aria-label","Stop listening");}catch(e){rec=null;micBlocked();}
