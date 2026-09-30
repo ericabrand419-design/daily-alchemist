@@ -3119,7 +3119,7 @@ function renderToday(){
     (known&&b.observation?'<p class="obs">'+esc(b.observation)+'</p>':'')+'</div>';
   h+='<div class="aura" id="auraBox"><div class="speaker">'+glyph("aura")+'<span class="who">Aura is listening</span><button class="howbtn" id="howOpen" aria-label="How it works">?</button></div>'+
      '<p class="q">What happened?</p>'+
-     '<label class="sr" for="carry">What happened</label><div class="composer"><textarea id="carry" placeholder="Say it or type it, as messy as it is. I\'ll figure out what would help."></textarea>'+micBtn("carry")+'</div><p class="small muted" id="carryHint" hidden style="margin-top:6px"></p>'+
+     '<label class="sr" for="carry">What happened</label><div class="composer"><textarea id="carry" placeholder="Say it or type it. Messy is fine."></textarea>'+micBtn("carry")+'</div><p class="small muted" id="carryHint" hidden style="margin-top:6px"></p>'+
      '<details class="feelset"'+(feelSel.length?' open':'')+'><summary class="small">Or tap how you feel</summary><div class="chips" style="margin-top:8px" id="quick">'+QUICK.map(q=>'<button class="chip" data-q="'+esc(q[0])+'" aria-pressed="'+feelSel.includes(q[0])+'">'+esc(q[0])+'</button>').join("")+'<button class="chip calm" id="cantThink">Can\'t think</button></div></details>'+
      '<button class="btn btn-main full" id="askBtn" style="margin-top:14px">Tell Aura</button></div>';
   h+='<div id="readingSlot">'+(lastRead?readingHTML(lastRead):"")+'</div>';
@@ -3780,7 +3780,8 @@ document.addEventListener("click",async ev=>{
   if(t.id==="altarBtn"){track("settings_open");openAltar(false);return;}
   if(t.id==="sheetX"){closeSheet();return;}
   if(d.talkafter){const [k,eid]=d.talkafter.split(":");const e=S.entries.find(x=>x.id===eid);const l=S.chats[k]=S.chats[k]||[];
-    l.push({role:"them",ts:Date.now(),text:(firstName()?firstName()+", you":"You")+" just finished "+(e?e.ritualTitle:"a ritual")+" with me."+(e&&e.text?' You wrote: "'+e.text.slice(0,120)+'".':"")+" What came up for you?"});
+    while(l.length&&l[l.length-1].role==="them"&&(l[l.length-1].after||/ just finished .* with me\./.test(l[l.length-1].text||"")))l.pop();
+    l.push({role:"them",after:true,ts:Date.now(),text:(firstName()?firstName()+", you":"You")+" just finished "+(e?e.ritualTitle:"a ritual")+" with me."+(e&&e.text?' You wrote: "'+e.text.slice(0,120)+'".':"")+" What came up for you?"});
     saveLocal();remotePut("chat",k,{kind:"chat",msgs:l});openTalk(k);return;}
   if(t.id==="popClose"){closeSheet();return;}
   if(d.hear){const holder=t.closest(".bub,.voice");if(t.classList.contains("on")){stopAudio();return;}const txt=holder?[...holder.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join(" ").trim():"";if(txt){stopAudio();t.classList.add("on");speak(txt,()=>t.classList.remove("on"),d.hear,false);track("hear",{g:d.hear});}return;}
