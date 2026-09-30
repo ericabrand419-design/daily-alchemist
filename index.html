@@ -485,6 +485,15 @@ a.btn{text-decoration:none}
 .chc>svg{grid-area:g}
 .chc .cl{grid-area:l;justify-self:end;font-size:12.5px;letter-spacing:.12em;padding:2px 8px;border-radius:999px;border:1px solid rgba(231,196,90,.35)}
 .chc .cn{grid-area:n;font-size:17px;line-height:1.2;overflow-wrap:break-word}
+.topctl{display:grid;justify-items:center;gap:8px;flex:none}
+.sndbar{display:flex;gap:6px;align-items:center}
+.snd{width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.45);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;padding:0;position:relative}
+.snd svg,.talk .hd .snd svg,.rite .bar .snd svg{width:17px;height:17px;filter:none}
+.snd.off{opacity:.6}
+.snd.off::after{content:"";position:absolute;left:7px;right:7px;top:50%;height:2px;background:currentColor;transform:rotate(-45deg);border-radius:2px}
+.rite .snd{color:#6E1142;border-color:rgba(154,116,20,.5);background:rgba(255,255,255,.35);width:36px;height:36px}
+.talk .snd{width:38px;height:38px}
+body.novoice .hear{display:none}
 .hear{float:right;margin:-4px -4px 4px 8px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.4);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;font-style:normal}
 .hear.on{background:var(--fuchsia);border-color:var(--fuchsia);color:#fff;box-shadow:0 0 0 5px rgba(191,30,115,.2)}
 </style>
@@ -495,7 +504,10 @@ a.btn{text-decoration:none}
       <div class="eyebrow"><span class="badge gold" id="memBadge" hidden>Inner Circle</span></div>
       <h1 class="foil shine">The Daily Alchemist</h1>
     </div>
+    <div class="topctl">
     <button class="seal-btn gear" id="altarBtn" aria-label="Settings"><svg viewBox="0 0 72 72" aria-hidden="true"><defs><radialGradient id="wx" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#E4579B"/><stop offset=".55" stop-color="#BF1E73"/><stop offset="1" stop-color="#7E0F49"/></radialGradient><linearGradient id="gf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1B8"/><stop offset=".5" stop-color="#E7C45A"/><stop offset="1" stop-color="#A57C18"/></linearGradient></defs><path d="M68.4 36.0 Q68.4 36.0 67.9 38.8 Q67.4 41.5 67.4 44.5 Q67.5 47.5 66.4 50.2 Q65.3 52.9 63.3 55.1 Q61.4 57.3 59.2 59.1 Q56.9 61.0 54.4 62.2 Q51.8 63.4 49.5 65.2 Q47.3 67.0 44.4 67.0 Q41.5 67.0 38.7 67.9 Q36.0 68.8 33.3 68.0 Q30.5 67.1 27.8 66.5 Q25.2 65.8 21.8 66.0 Q18.5 66.3 16.3 64.2 Q14.1 62.1 12.9 59.3 Q11.6 56.4 9.9 54.2 Q8.2 52.1 6.4 49.7 Q4.6 47.4 3.3 44.7 Q2.1 42.0 2.4 39.0 Q2.8 36.0 3.3 33.2 Q3.8 30.3 3.7 27.3 Q3.6 24.2 5.2 21.7 Q6.8 19.1 8.3 16.6 Q9.8 14.1 12.5 12.6 Q15.2 11.2 17.6 9.8 Q20.1 8.4 22.6 7.3 Q25.1 6.1 27.8 5.1 Q30.4 4.1 33.2 3.0 Q36.0 2.0 38.8 3.2 Q41.6 4.5 44.5 4.6 Q47.4 4.7 50.6 4.9 Q53.8 5.1 55.4 8.1 Q56.9 11.0 59.2 12.9 Q61.4 14.7 62.4 17.4 Q63.4 20.2 64.5 22.7 Q65.7 25.2 66.6 27.8 Q67.6 30.4 68.0 33.2Z" fill="url(#wx)"/><circle cx="36" cy="36" r="26" fill="none" stroke="#7E0F49" stroke-opacity=".55" stroke-width="2.4"/><circle cx="36" cy="36" r="24.5" fill="none" stroke="url(#gf)" stroke-width="1.6"/><circle cx="36" cy="36" r="21.8" fill="none" stroke="url(#gf)" stroke-width=".8" stroke-opacity=".8"/><path d="M51.8 33.5 L51.8 38.5 L48.3 38.1 L46.2 43.2 L49.0 45.4 L45.4 49.0 L43.2 46.2 L38.1 48.3 L38.5 51.8 L33.5 51.8 L33.9 48.3 L28.8 46.2 L26.6 49.0 L23.0 45.4 L25.8 43.2 L23.7 38.1 L20.2 38.5 L20.2 33.5 L23.7 33.9 L25.8 28.8 L23.0 26.6 L26.6 23.0 L28.8 25.8 L33.9 23.7 L33.5 20.2 L38.5 20.2 L38.1 23.7 L43.2 25.8 L45.4 23.0 L49.0 26.6 L46.2 28.8 L48.3 33.9Z" fill="url(#gf)" stroke="#7E0F49" stroke-opacity=".5" stroke-width=".6"/><circle cx="36" cy="36" r="6.2" fill="#A3175F" stroke="#FFF1B8" stroke-opacity=".7" stroke-width=".8"/><path d="M36 32.2l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1z" fill="#FFF1B8"/><path d="M17 24c4-7 11-11 19-11" stroke="#fff" stroke-opacity=".28" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="gl">Settings</span></button>
+      <div class="sndbar"></div>
+    </div>
   </header>
 
   <div class="sky" id="sky"></div>
@@ -1725,7 +1737,7 @@ const KW = {
   onora:["grandmother","grandma","grandfather","ancestor","heritage","family history"],
   poppy:["creative","creativity","art","paint","draw","write","writing","writer's block","music","song","blocked","muse","make something","project","inspired","uninspired"],
   ember:["scared","afraid","fear","courage","leap","quit my","confront"],
-  sol:["nervous","interview","presentation","hype","first day"],
+  sol:["nervous","interview","presentation","hype","first day","momentum","keep going","keep it going","keep this going","on a roll","productive","getting a lot done","got a lot done","getting things done","feeling good","feel good","feeling great","feel great","feeling really good","energized","energised","motivated","unstoppable","crushing it","winning","keep it up","good streak","flow state","in the zone"],
   aurora:["morning","clarity","confused","decide","decision"],
   fern:["tired","exhausted","rest","sleep","overwhelm","drained","burnout","burnt out","cry","crying","sad","depleted","heavy heart","numb"],
   lily:["anxious","anxiety","panic","overthink","racing","scattered","nervous","worried","worry","stress","foggy","can't think","cant think","spiral"],
@@ -1912,10 +1924,14 @@ function introFor(k){
 }
 function markMet(k){if(!S.met)S.met={};S.met[k]=(S.met[k]||0)+1;saveLocal();}
 let EXCLUDE=null;
+/* A keyword counts only as a whole word ("mom" is not in "momentum"); long keywords like
+   "boundar" or "procrastinat" also match their endings. */
+const kwRe={};
+function hasWord(t,w){const re=kwRe[w]||(kwRe[w]=new RegExp("(^|[^a-z])"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+(w.length>=6?"":"(?![a-z])")));return re.test(t);}
 function localRead(text,mins){
   const t=" "+text.toLowerCase()+" ";let best="aura",bs=0;
-  for(const k of [...ORDER,...EXP]){if(EXCLUDE&&EXCLUDE===k)continue;let s=0;for(const w of (KW[k]||[]))if(t.includes(w))s++;
-    for(const r of R)if(r.g===k)for(const tg of r.tags)if(t.includes(" "+tg))s+=.5;
+  for(const k of [...ORDER,...EXP]){if(EXCLUDE&&EXCLUDE===k)continue;let s=0;for(const w of (KW[k]||[]))if(hasWord(t,w))s++;
+    for(const r of R)if(r.g===k)for(const tg of r.tags)if(hasWord(t,tg))s+=.5;
     if(s>bs){bs=s;best=k;}}
   const pool=R.filter(r=>canUse(r)&&(r.g===best||(best==="aura"&&r.id==="anchor")));
   pool.sort((a,b)=>score(b,mins)-score(a,mins)||(b.tags.filter(tg=>t.includes(tg)).length-a.tags.filter(tg=>t.includes(tg)).length));
@@ -1936,7 +1952,7 @@ function localRead(text,mins){
   const why = (quote?'You said <b>"'+esc(quote)+'"</b>. ':"")+"That reads as "+theme+" work, which is "+g.name+"'s domain. "+
 
     "This one takes "+r.min+" minutes"+(missingFor(r).length?"":" and uses what you have")+".";
-  const rest=ritualsToday()>=2;
+  const rest=ritualsToday()>=2&&best!=="sol"&&!/\britual|\bpractice|\bspell\b/.test(t);
   const pre=localRoute(text);
   if(pre&&pre.action!=="build"&&pre.action!=="answer"){const pr={guardian:pre.guardian,ritual:(pre.guardian&&R.find(z=>z.g===pre.guardian&&canUse(z)))||r,why:"",theme:THEME[pre.guardian]||theme,memory,source:"local",...pre};pr.thread=theme.charAt(0).toUpperCase()+theme.slice(1);return pr;}
   return {thread:theme.charAt(0).toUpperCase()+theme.slice(1),action:rest?"rest":"ritual",guardian:r.g==="aura"?"aura":best,ritual:r,reading:rest?"You've already done "+ritualsToday()+" rituals today. That's enough. Let it work.":reading,why,theme,aura,memory,source:"local"};
@@ -2209,6 +2225,19 @@ document.addEventListener("pointerdown",musicStart,{capture:true});
 document.addEventListener("keydown",musicStart,{capture:true});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(MUSIC.cur)try{MUSIC.cur.pause();}catch(e){}}else if(MUSIC.cur&&musicOn()){MUSIC.cur.play().catch(()=>{});}});
 
+/* Sound controls on every page: music on or off, voices on or off, each separately. */
+const SND_MUSIC='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/></svg>';
+const SND_VOICE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+function voiceMuted(){return S.prefVoiceOff===true;}
+function renderSnd(){
+  document.body.classList.toggle("novoice",voiceMuted());
+  document.querySelectorAll(".sndbar").forEach(b=>{const m=musicOn(),v=!voiceMuted();
+    b.innerHTML='<button class="snd'+(m?"":" off")+'" data-snd="music" aria-pressed="'+m+'" aria-label="'+(m?"Turn music off":"Turn music on")+'" title="Music">'+SND_MUSIC+'</button><button class="snd'+(v?"":" off")+'" data-snd="voice" aria-pressed="'+v+'" aria-label="'+(v?"Turn voices off":"Turn voices on")+'" title="Voices">'+SND_VOICE+'</button>';});
+}
+function setMusic(on){S.prefMusic=on?"on":"off";saveLocal();if(on){MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}else musicStop();renderSnd();}
+function setVoice(on){S.prefVoiceOff=!on;saveLocal();if(!on){stopAudio();if(voiceOn){stopVoice();if(run)drawStep();}}renderSnd();}
+new MutationObserver(()=>{if(document.querySelector(".sndbar:empty"))renderSnd();}).observe(document.documentElement,{childList:true,subtree:true});
+
 /* Voice-guided ritual */
 let voiceOn=false,vrec=null;
 /* Voices: each guardian speaks in their own ElevenLabs voice on the live app. If that isn't
@@ -2231,6 +2260,7 @@ async function voiceURL(g,text,cache){
   return null;
 }
 async function speak(text,onend,g,cache){
+  if(voiceMuted())return;
   g=g||(run&&run.r.g)||"aura";stopAudio();musicDuck(true);
   const done0=onend;onend=()=>{musicDuck(false);done0&&done0();};
   if(naturalVoices()){
@@ -3063,7 +3093,7 @@ function endRitual(){stopEyes();stopVoice();clearInterval(tick);const el=$("#rit
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar">'+glyph(r.g)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><button class="close voice'+(voiceOn?" on":"")+'" id="voiceBtn" aria-pressed="'+voiceOn+'" aria-label="Guide me aloud">'+(voiceOn?"◉":"♪")+'</button><button class="close" id="eyesBtn" aria-label="Eyes-closed mode">◐</button><button class="close" id="riteX" aria-label="Leave ritual">×</button></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar">'+glyph(r.g)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><button class="close voice'+(voiceOn?" on":"")+'" id="voiceBtn" aria-pressed="'+voiceOn+'" aria-label="Guide me aloud">'+(voiceOn?"◉":"▶")+'</button><button class="close" id="eyesBtn" aria-label="Eyes-closed mode">◐</button><span class="sndbar"></span><button class="close" id="riteX" aria-label="Leave ritual">×</button></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){ /* intro */ }
   if(i<total){
     const s=r.steps[i];
@@ -3145,7 +3175,7 @@ function openTalk(k){
   track("chat_open",{g:k});
   closeSheet();talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
-  el.innerHTML='<div class="hd">'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><button class="iconbtn" id="talkX" aria-label="Close">×</button></div><div class="msgs" id="msgs"></div>'+
+  el.innerHTML='<div class="hd">'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span><button class="iconbtn" id="talkX" aria-label="Close">×</button></div><div class="msgs" id="msgs"></div>'+
     '<div class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Talk to '+esc(g.name)+'"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></div>';
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawMsgs();
@@ -3423,7 +3453,8 @@ document.addEventListener("click",async ev=>{
   if(d.thread!==undefined){q=q===d.thread?"":d.thread;renderArchive();return;}
   if(t.id==="archAskBtn"){const qq=($("#archAsk").value||"").trim();if(!qq)return;t.disabled=true;$("#archAnswer").innerHTML='<p class="small muted" style="margin-top:10px">Reading your Archive...</p>';const a=await askArchive(qq);t.disabled=false;$("#archAnswer").innerHTML='<p style="margin-top:12px;font-size:18px">'+esc(a.answer)+'</p>'+(a.cites.length?'<div class="entries" style="margin-top:8px">'+a.cites.map(id=>{const e=S.entries.find(z=>z.id===id);return e?'<button class="entry" data-entry="'+esc(id)+'">'+glyph(e.guardian)+'<span><div class="t">'+esc(e.ritualTitle)+'</div><div class="m">'+fmtDate(e.ts)+'</div>'+(e.text?'<div class="x">'+esc(e.text)+'</div>':'')+'</span></button>':"";}).join("")+'</div>':'');return;}
   if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];list.push({role:"them",ts:Date.now(),text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
-  if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(!naturalVoices()&&!("speechSynthesis" in window)){voiceOn=false;toast("Spoken guidance isn't available on this device.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
+  if(d.snd){if(d.snd==="music"){const on=!musicOn();setMusic(on);toast(on?"Music on.":"Music off. Tap the note to bring it back.");}else{const on=voiceMuted();setVoice(on);toast(on?"Voices on.":"Voices off. Tap the speaker to hear them again.");}track("music",{set:d.snd+(d.snd==="music"?(musicOn()?"_on":"_off"):(voiceMuted()?"_off":"_on"))});return;}
+  if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(voiceMuted())setVoice(true);if(!naturalVoices()&&!("speechSynthesis" in window)){voiceOn=false;toast("Spoken guidance isn't available on this device.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
   if(d.own){const [tg,yn]=d.own.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);refreshCards();toast(yn==="1"?"Got it. Aura will remember.":"Got it. Aura rewrote it around what you have.");return;}
   if(d.donthave){const el=document.querySelector('[data-dh="'+d.donthave+'"]');if(el)el.hidden=!el.hidden;return;}
   if(d.forget){const [k,i]=d.forget.split(":");forgetLedger(k,+i);renderArchive();toast("Forgotten.");return;}
@@ -3462,7 +3493,7 @@ document.addEventListener("click",async ev=>{
     saveLocal();remotePut("chat",k,{kind:"chat",msgs:l});openTalk(k);return;}
   if(t.id==="popClose"){closeSheet();return;}
   if(d.hear){const holder=t.closest(".bub,.voice");if(t.classList.contains("on")){stopAudio();return;}const txt=holder?[...holder.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join(" ").trim():"";if(txt){stopAudio();t.classList.add("on");speak(txt,()=>t.classList.remove("on"),d.hear,false);track("hear",{g:d.hear});}return;}
-  if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}return;}
+  if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}renderSnd();return;}
   if(d.pvoice){S.prefVoice=d.pvoice;saveLocal();t.parentElement.querySelectorAll("[data-pvoice]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="toConsent"){openConsent();return;}
   if(t.id==="endFriendPreview"){S.previewFriend=false;S.previewMonitor=0;S.previewMonitorAnswer=null;saveLocal();closeSheet();renderAll();toast("Back to your own view.");return;}
