@@ -276,7 +276,7 @@ function csv(){
 }
 document.addEventListener("click",e=>{const r=e.target.closest("tr.row");if(r)showPerson(r.dataset.id);});
 $("#refresh").onclick=load;$("#csv").onclick=()=>DATA&&csv();
-$("#send").onclick=async()=>{const em=$("#email").value.trim();if(!em)return;msg("Sending...");const {error}=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:false}});if(error){msg("Couldn't send a code. Use the email you signed up with in the app.");return;}msg("Check your email for a 6-digit code.");$("#code").hidden=false;$("#verify").hidden=false;$("#code").focus();};
+$("#send").onclick=async()=>{const em=$("#email").value.trim();if(!em)return;msg("Sending...");const {error}=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});if(error){msg("Couldn't send a code ("+(error.message||"unknown error")+"). Try again in a minute.");return;}msg("Check your email for a 6-digit code.");$("#code").hidden=false;$("#verify").hidden=false;$("#code").focus();};
 $("#verify").onclick=async()=>{const {error}=await sb.auth.verifyOtp({email:$("#email").value.trim(),token:$("#code").value.trim(),type:"email"});if(error){msg("That code didn't work. Try again.");return;}start();};
 async function start(){$("#signin").hidden=true;$("#dash").hidden=false;await load();await invites("list");await music("list");}
 (async()=>{
