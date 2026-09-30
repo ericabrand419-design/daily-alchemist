@@ -1,5 +1,5 @@
 // Guardian and Aura replies through Anthropic's Messages API, with daily limits.
-import { json, env, getUser, getProfile, isMember, isAdult, adultRequired, ensureTrial, getUsage, bumpUsage, LIMITS } from "./_lib.js";
+import { json, env, getUser, getProfile, isMember, isAdult, adultRequired, ensureTrial, getUsage, bumpUsage, LIMITS } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -32,4 +32,4 @@ export async function POST(request) {
   return json({ text });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

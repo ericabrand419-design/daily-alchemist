@@ -1,7 +1,7 @@
 // Your dashboard's data (dailyalchemist.com/admin). Only emails listed in ADMIN_EMAIL can read it.
 // For people who said yes to sharing: what they tapped and when. Never what anyone wrote or said.
 // For everyone else: only that they joined.
-import { json, env, sb, getUser, isAdminEmail } from "./_lib.js";
+import { json, env, sb, getUser, isAdminEmail } from "../api/_lib.js";
 
 async function allUsers() {
   const out = [];
@@ -50,4 +50,4 @@ export async function POST(request) {
   });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

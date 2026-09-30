@@ -1,5 +1,5 @@
 // Stripe tells us when someone subscribes, renews or cancels.
-import { json, env, sb, stripe, verifyStripeSignature } from "./_lib.js";
+import { json, env, sb, stripe, verifyStripeSignature } from "../api/_lib.js";
 
 async function setMembership(userId, customer, sub) {
   const active = sub && ["active", "trialing", "past_due"].includes(sub.status);

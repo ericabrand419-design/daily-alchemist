@@ -1,7 +1,7 @@
 // Friends Week: each friend gets their own invitation link (dailyalchemist.com/?friend=<code>),
 // created in your dashboard. A code works once, for one account, and expires after 30 days.
 // Using it turns on lifetime access for that account.
-import { json, sb, getUser, getProfile, isAdult, adultRequired, ensureTrial, notifyAdmin } from "./_lib.js";
+import { json, sb, getUser, getProfile, isAdult, adultRequired, ensureTrial, notifyAdmin } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -26,4 +26,4 @@ export async function POST(request) {
   return json({ ok: true, lifetime: true });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

@@ -1,6 +1,6 @@
 // Your dashboard's invitations: create one link per friend, see which are used, revoke any.
 import crypto from "node:crypto";
-import { json, sb, getUser, isAdminEmail } from "./_lib.js";
+import { json, sb, getUser, isAdminEmail } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -19,4 +19,4 @@ export async function POST(request) {
   return json({ invites });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

@@ -1,7 +1,7 @@
 // The guardians' music, made with ElevenLabs Music and kept in Supabase Storage (public bucket
 // "music", one file per guardian, e.g. music/aura.mp3). Only you (ADMIN_EMAIL) can make or remake
 // a track, from the dashboard. Each 90 second track costs about 1,350 ElevenLabs credits.
-import { json, env, getUser, isAdminEmail } from "./_lib.js";
+import { json, env, getUser, isAdminEmail } from "../api/_lib.js";
 
 export const maxDuration = 60;
 
@@ -74,4 +74,4 @@ export async function POST(request) {
   return json({ tracks: await status(), url: base() + "/object/public/music/" });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

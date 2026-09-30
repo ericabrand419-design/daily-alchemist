@@ -2,7 +2,7 @@
 // Ritual steps are the same for everyone, so their audio is made once and kept (public, by an
 // unguessable name). Anything personal (a guardian's reply, a reading) is spoken fresh and never stored.
 import crypto from "node:crypto";
-import { json, env, getUser, getProfile, ensureTrial, isMember, isAdult, adultRequired, getUsage, bumpUsage, LIMITS, CORS } from "./_lib.js";
+import { json, env, getUser, getProfile, ensureTrial, isMember, isAdult, adultRequired, getUsage, bumpUsage, LIMITS, CORS } from "../api/_lib.js";
 
 // Each guardian's voice from the ElevenLabs Voice Library: [full name, voice ID, library owner ID].
 // 14 women, 4 men and one voice that isn't clearly either (Lily). Chosen with Erica, Sept 30 2026.
@@ -137,4 +137,4 @@ export async function POST(request) {
   return new Response(bytes, { status: 200, headers: { "content-type": "audio/mpeg", "cache-control": "no-store", ...CORS } });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

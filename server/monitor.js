@@ -1,6 +1,6 @@
 // The opt-in week: if she says yes, the app records what she taps and when (never what she
 // writes or says) for 7 days. She can stop any time; it also ends by itself.
-import { json, sb, getUser, getProfile, ensureTrial, notifyAdmin } from "./_lib.js";
+import { json, sb, getUser, getProfile, ensureTrial, notifyAdmin } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -17,4 +17,4 @@ export async function POST(request) {
   return json({ ok: true, monitor_answer: patch.monitor_answer, monitor_until: patch.monitor_until });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

@@ -1,4 +1,4 @@
-import { json, sb, getUser } from "./_lib.js";
+import { json, sb, getUser } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -10,4 +10,4 @@ export async function POST(request) {
   return json({ ok: true });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

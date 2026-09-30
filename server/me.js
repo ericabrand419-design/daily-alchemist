@@ -1,4 +1,4 @@
-import { json, sb, getUser, getProfile, isMember, isPaid, isAdminEmail, ensureTrial, getUsage } from "./_lib.js";
+import { json, sb, getUser, getProfile, isMember, isPaid, isAdminEmail, ensureTrial, getUsage } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -24,4 +24,4 @@ export async function POST(request) {
   });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

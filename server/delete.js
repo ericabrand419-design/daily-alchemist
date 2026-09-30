@@ -1,5 +1,5 @@
 // Permanently delete a user's account and everything they wrote. Cancels any membership first.
-import { json, env, getUser, getProfile, stripe } from "./_lib.js";
+import { json, env, getUser, getProfile, stripe } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -22,4 +22,4 @@ export async function POST(request) {
   return json({ deleted: true });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

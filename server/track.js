@@ -1,7 +1,7 @@
 // Records what kind of thing happened and when, only for people sharing this week.
 // The app never sends what anyone wrote, or which guardian Aura chose from their words;
 // this also drops any field that isn't on the list.
-import { json, sb, getUser, getProfile } from "./_lib.js";
+import { json, sb, getUser, getProfile } from "../api/_lib.js";
 
 const EVENTS = new Set(["open", "session", "tab", "reading", "draw_pick", "ritual_start", "ritual_step", "ritual_exit", "ritual",
   "chat_open", "chat_send", "letter_open", "nudge_reply", "nudge_later", "paywall", "checkout", "feedback", "settings_open", "how_open", "cant_think", "hear", "music"]);
@@ -24,4 +24,4 @@ export async function POST(request) {
   return json({ ok: true, recorded: rows.length });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

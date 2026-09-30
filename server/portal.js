@@ -1,4 +1,4 @@
-import { json, getUser, getProfile, stripe, siteUrl } from "./_lib.js";
+import { json, getUser, getProfile, stripe, siteUrl } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -9,4 +9,4 @@ export async function POST(request) {
   return json({ url: s.url });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";

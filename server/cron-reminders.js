@@ -4,7 +4,7 @@
 // What's been sent is tracked server-side in push_sent, keyed by item AND due date,
 // so snoozing a promise ("Not yet") makes it eligible to notify again at its new time.
 import webpush from "web-push";
-import { json, env, sb, isMember, isPaid, GRACE_DAYS } from "./_lib.js";
+import { json, env, sb, isMember, isPaid, GRACE_DAYS } from "../api/_lib.js";
 
 const GNAME = {sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",sol:"Sol",ember:"Ember",willow:"Willow",moss:"Moss",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 function easternWeekday(d) {

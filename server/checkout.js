@@ -1,4 +1,4 @@
-import { json, env, getUser, getProfile, isAdult, adultRequired, stripe, siteUrl } from "./_lib.js";
+import { json, env, getUser, getProfile, isAdult, adultRequired, stripe, siteUrl } from "../api/_lib.js";
 
 export async function POST(request) {
   const user = await getUser(request);
@@ -23,4 +23,4 @@ export async function POST(request) {
   return json({ url: session.url });
 }
 
-export { preflight as OPTIONS } from "./_lib.js";
+export { preflight as OPTIONS } from "../api/_lib.js";
