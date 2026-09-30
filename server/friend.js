@@ -1,6 +1,7 @@
-// Friends Week: each friend gets their own invitation link (dailyalchemist.com/?friend=<code>),
-// created in your dashboard. A code works once, for one account, and expires after 30 days.
-// Using it turns on lifetime access for that account.
+// Invitations. Two kinds, both at dailyalchemist.com/?friend=<code>:
+// - a personal invitation you make in your dashboard: works once, expires after 30 days;
+// - a friend's share link, made in the app by someone you invited: works for up to 3 people.
+// Either one turns on lifetime access for the account that uses it.
 import { json, sb, getUser, getProfile, isAdult, adultRequired, ensureTrial, notifyAdmin } from "../api/_lib.js";
 
 export async function POST(request) {
@@ -13,17 +14,21 @@ export async function POST(request) {
   await ensureTrial(user, p0);
   if (!isAdult(p0)) return adultRequired(); // checked before the invite is claimed, so the link stays usable
   if (p0 && p0.lifetime) return json({ ok: true, lifetime: true });
-  const now = new Date().toISOString();
-  // Claim the code only if it is unused, not revoked and not expired. Doing it in one conditional
-  // update means two people can never both use the same link.
-  const claimed = await sb(
-    "invites?code=eq." + encodeURIComponent(code) + "&used_by=is.null&revoked=eq.false&expires_at=gt." + now,
-    { method: "PATCH", prefer: "return=representation", body: { used_by: user.id, used_at: now } }
-  );
-  if (!Array.isArray(claimed) || !claimed.length) return json({ error: "bad_code" }, 400);
-  await sb("profiles?id=eq." + user.id, { method: "PATCH", body: { lifetime: true, cohort: "friends" } });
-  await notifyAdmin("A friend joined", (claimed[0].label || user.email || "A friend") + " joined with their invitation. Lifetime access is on.");
-  return json({ ok: true, lifetime: true });
+  // Claims one use in a single database step, so a link can never go past its limit.
+  const claimed = await sb("rpc/claim_invite", { method: "POST", body: { p_code: code, p_user: user.id } });
+  const inv = Array.isArray(claimed) ? claimed[0] : null;
+  if (!inv) return json({ error: "bad_code" }, 400);
+  await sb("invite_uses", { method: "POST", prefer: "resolution=ignore-duplicates", body: { code, user_id: user.id } });
+  const shared = !!inv.owner;
+  await sb("profiles?id=eq." + user.id, { method: "PATCH", body: { lifetime: true, cohort: shared ? "shared" : "friends", invited_by: inv.owner || null } });
+  let who = user.email || "Someone";
+  if (shared) {
+    const left = Math.max(0, (inv.max_uses || 3) - (inv.uses || 0));
+    await notifyAdmin("Someone joined through a friend", who + " joined through " + (inv.label || "a friend's share link").replace(/^Shared by /, "") + "'s link. " + left + " left on that link.");
+  } else {
+    await notifyAdmin("A friend joined", (inv.label || who) + " joined with their invitation. Lifetime access is on.");
+  }
+  return json({ ok: true, lifetime: true, cohort: shared ? "shared" : "friends" });
 }
 
 export { preflight as OPTIONS } from "../api/_lib.js";

@@ -125,3 +125,29 @@ create table if not exists public.invites (
   used_at timestamptz
 );
 alter table public.invites enable row level security;
+
+-- Share links: each invited friend gets one link they can pass on, good for up to 3 people,
+-- who also get lifetime access. Personal invitations stay single-use (max_uses 1).
+alter table public.invites add column if not exists max_uses int not null default 1;
+alter table public.invites add column if not exists uses int not null default 0;
+alter table public.invites add column if not exists owner uuid references auth.users(id) on delete set null;
+update public.invites set uses = 1 where used_by is not null and uses = 0;
+create table if not exists public.invite_uses (
+  code text references public.invites(code) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade,
+  used_at timestamptz default now(),
+  primary key (code, user_id)
+);
+alter table public.invite_uses enable row level security;
+alter table public.profiles add column if not exists invited_by uuid references auth.users(id) on delete set null;
+-- Claims one use of a link in a single step, so a link can never go past its limit.
+create or replace function public.claim_invite(p_code text, p_user uuid)
+returns setof public.invites language sql security definer set search_path = public as $$
+  update public.invites
+     set uses = uses + 1, used_by = coalesce(used_by, p_user), used_at = coalesce(used_at, now())
+   where code = p_code and not revoked and (expires_at is null or expires_at > now()) and uses < max_uses
+     and not exists (select 1 from public.invite_uses u where u.code = p_code and u.user_id = p_user)
+  returning *;
+$$;
+revoke all on function public.claim_invite(text, uuid) from public, anon, authenticated;
+grant execute on function public.claim_invite(text, uuid) to service_role;

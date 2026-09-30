@@ -1616,7 +1616,7 @@ function showGate(){
   if(MODE!=="web"||!ACCT.sb||$("#gate"))return;
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays(S.friendCode?"You came in on an invitation from "+esc(ownerName())+". Make your account and everything opens for you, for life.":"Come in. Sign in, or make your free account, so I can read what you bring me and remember it for you.","Aura · welcome")+
+    auraSays(S.friendCode?"You came in on an invitation. Make your account and everything opens for you, for life.":"Come in. Sign in, or make your free account, so I can read what you bring me and remember it for you.","Aura · welcome")+
     '<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
     '<button class="btn btn-main full" id="siSend">Send my code</button>'+
     '<div class="field" id="siCodeRow" hidden><label for="siCode">Code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
@@ -1689,7 +1689,7 @@ function openPaywall(reason){
 }
 function openSignIn(next){
   if(MODE!=="web"||!ACCT.sb){toast("Accounts open on the live app.");return;}
-  openSheet('<div class="stack"><div><div class="label">Your account</div><h2>'+(S.friendCode?"Claim your lifetime access.":"Keep your Archive safe.")+'</h2><p class="muted" style="margin-top:6px">'+(S.friendCode?"You came in on an invitation from "+esc(ownerName())+". Make your account and everything opens, for life. ":"")+'We\'ll email you a 6-digit code. No password to remember.</p></div>'+
+  openSheet('<div class="stack"><div><div class="label">Your account</div><h2>'+(S.friendCode?"Claim your lifetime access.":"Keep your Archive safe.")+'</h2><p class="muted" style="margin-top:6px">'+(S.friendCode?"You came in on an invitation. Make your account and everything opens, for life. ":"")+'We\'ll email you a 6-digit code. No password to remember.</p></div>'+
    '<div class="field" id="siEmailRow"><label for="siEmail">Email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
    '<button class="btn btn-main full" id="siSend" data-next="'+esc(next||"")+'">Send my code</button>'+
    '<div class="field" id="siCodeRow" hidden><label for="siCode">Code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
@@ -2732,6 +2732,26 @@ function openHow(){
 ------------------------------------------------------------------ */
 function ownerName(){return (window.DA_CONFIG&&window.DA_CONFIG.ownerName)||"Erica";}
 function isFriend(){return accountsOn()?(ACCT.lifetime&&ACCT.cohort==="friends"):!!S.previewFriend;}
+function isShared(){return accountsOn()&&ACCT.lifetime&&ACCT.cohort==="shared";}
+/* Friends you invited can each bring in 3 people, free for life. */
+let SHARE=null;
+function shareURL(){return ((window.DA_CONFIG&&window.DA_CONFIG.siteUrl)||location.origin).replace(/\/$/,"")+"/?friend="+SHARE.code;}
+function shareHTML(){
+  if(!isFriend())return "";
+  if(!accountsOn())return '<details class="group" open><summary>Bring three people in</summary><p class="small muted">Share your own link with up to 3 people. They get everything, free for life, just like you. (This works on the live app.)</p></details>';
+  const left=SHARE?Math.max(0,SHARE.max-SHARE.uses):null;
+  return '<details class="group" open id="shareGroup"><summary>Bring three people in</summary><p class="small muted">Your own link, for up to 3 people you choose. They get everything, free for life, just like you.</p>'+
+    (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div>':'<p class="small" style="margin-top:8px">All 3 have come in. Thank you for bringing them.</p>')
+      :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';
+}
+async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
+async function doShare(copyOnly){
+  if(!SHARE)await loadShare();if(!SHARE)return;
+  const url=shareURL(),text="I've been using The Daily Alchemist. Here's a free invitation, everything open for life. It works for 3 people, so use it soon.";
+  track("share",{reason:copyOnly?"copy":"share"});
+  if(!copyOnly&&navigator.share){try{await navigator.share({title:"The Daily Alchemist",text,url});return;}catch(e){if(e&&e.name==="AbortError")return;}}
+  try{await navigator.clipboard.writeText(url);toast("Link copied. Send it to up to 3 people.");}catch(e){prompt("Copy your link:",url);}
+}
 function isLifetime(){return accountsOn()?ACCT.lifetime:!!S.previewFriend;}
 function openAdultCheck(){
   if(document.querySelector("#adultSheet"))return;
@@ -2749,7 +2769,7 @@ async function redeemFriend(){
   const r=await api("/api/friend",{code:S.friendCode});
   if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();}
   else if(r&&r.error==="adult_confirmation_required"){return;}
-  else if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used or has expired. Ask "+ownerName()+" for a new one.");}
+  else if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");}
 }
 function monitorOn(){if(!accountsOn())return S.previewMonitor&&S.previewMonitor>Date.now();return !!(ACCT.user&&ACCT.monitorUntil&&Date.parse(ACCT.monitorUntil)>Date.now());}
 function monitorAnswered(){return accountsOn()?!!ACCT.monitorAnswer:!!S.previewMonitorAnswer;}
@@ -2777,8 +2797,10 @@ function auraPopup(){
   const nm=firstName(), te=trialEnds();
   let key=null,body="",label="Aura",btns="";
   if(isFriend()&&!S.seenPop["friend-welcome"]){S.seenPop["friend-welcome"]=Date.now();saveLocal();
-    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", you\'re":"You\'re")+" one of the first. Everything in the Inner Circle is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. Thank you for helping me grow.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
+    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", you\'re":"You\'re")+" one of the first. Everything in the Inner Circle is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. You can bring in 3 people of your own, free for life too. Your link is in Settings. Thank you for helping me grow.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
   if(isFriend()&&!monitorAnswered()&&!S.seenPop.consent){openConsent();return;}
+  if(isShared()&&!S.seenPop["shared-welcome"]){S.seenPop["shared-welcome"]=Date.now();saveLocal();
+    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", a":"A")+" friend brought you in, so everything here is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. I\'m so glad you\'re here.","Aura · lifetime access")+'<button class="btn btn-main full" id="popClose">Let\'s begin</button></div>');return;}
   if(isLifetime())return;
   if(inTrial()&&trialDaysLeft()>1){key="trial-start";label="Aura · your free week";body=(nm?esc(nm)+", your":"Your")+" first week is on me. Every chamber is open, I\'ll write to you, and the guardians will check in on you. "+trialDaysLeft()+" days to explore all of it.";btns='<button class="btn btn-main full" id="popClose">Let\'s begin</button>';}
   else if(inTrial()){key="trial-last:"+te;label="Aura · last day";body="Tomorrow your free week ends and the chambers close. I\'ll keep writing to you for another month, but my letters will stay sealed in your mailbox until you join. Everything you wrote stays yours.";btns='<button class="btn btn-main full" data-paywall="Stay close">Stay in the Inner Circle</button><button class="btn btn-ghost full" id="popClose">Not now</button>';}
@@ -3398,7 +3420,7 @@ function openAltar(first){
   if(!first){
     h+='<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
      '<details class="group" open><summary>What you have</summary><p class="small muted">Tap what you own. Aura builds rituals around it and rewrites steps for what you don\'t.</p><div class="lbl" style="margin-top:10px">Everyday things</div>'+chipset("pHave",HAVE)+'<div class="lbl" style="margin-top:14px">More advanced tools</div>'+chipset("pAdv",HAVE_ADV)+'<div class="lbl" style="margin-top:14px">Your own</div>'+custom+'</details>'+
-     ''+sharingHTML()+(ACCT.admin?'<a class="btn btn-main full" href="/admin" style="margin:6px 0">Open your dashboard</a>':'')+'<details class="group"><summary>Share feedback</summary><p class="small muted">Tell me what confused you, what you loved, or what\'s missing. It goes straight to the person who made this app.</p><button class="btn btn-ghost full" id="fbOpen">Share a thought</button></details><details class="group"><summary>Dates that matter</summary><p class="small muted">Birthdays, move-in days, anniversaries, losses, fresh starts. Aura will remember and mark them with you.</p>'+S.dates.map(d=>'<div class="li"><span>'+esc(d.name)+'<br><span class="small muted">'+new Date(2000,d.month-1,d.day).toLocaleDateString(undefined,{month:"long",day:"numeric"})+(d.year?", "+d.year:"")+'</span></span><button class="x2" data-deldate="'+d.id+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="dateName">What happened</label><input type="text" id="dateName" placeholder="Moved into the house"><label class="sr" for="dateWhen">Date</label><input type="date" id="dateWhen"><button class="btn btn-ghost" id="dateAdd">Add</button></div></details>'+
+     ''+sharingHTML()+shareHTML()+(ACCT.admin?'<a class="btn btn-main full" href="/admin" style="margin:6px 0">Open your dashboard</a>':'')+'<details class="group"><summary>Share feedback</summary><p class="small muted">Tell me what confused you, what you loved, or what\'s missing. It goes straight to the person who made this app.</p><button class="btn btn-ghost full" id="fbOpen">Share a thought</button></details><details class="group"><summary>Dates that matter</summary><p class="small muted">Birthdays, move-in days, anniversaries, losses, fresh starts. Aura will remember and mark them with you.</p>'+S.dates.map(d=>'<div class="li"><span>'+esc(d.name)+'<br><span class="small muted">'+new Date(2000,d.month-1,d.day).toLocaleDateString(undefined,{month:"long",day:"numeric"})+(d.year?", "+d.year:"")+'</span></span><button class="x2" data-deldate="'+d.id+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="dateName">What happened</label><input type="text" id="dateName" placeholder="Moved into the house"><label class="sr" for="dateWhen">Date</label><input type="date" id="dateWhen"><button class="btn btn-ghost" id="dateAdd">Add</button></div></details>'+
      '<details class="group"><summary>What things mean to you</summary><p class="small muted">Aura uses your meanings over the traditional ones. If your grandmother grew lavender, lavender is hers.</p>'+S.corr.map((c,i)=>'<div class="li"><span><b style="font-weight:500">'+esc(c.symbol)+'</b> · '+esc(c.meaning)+'</span><button class="x2" data-delcorr="'+i+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="corrSym">Symbol</label><input type="text" id="corrSym" placeholder="Lavender"><label class="sr" for="corrMean">What it means to you</label><input type="text" id="corrMean" placeholder="My grandmother\'s garden"><button class="btn btn-ghost" id="corrAdd">Add</button></div></details>'+
      '<details class="group"><summary>Your season</summary><p class="small muted">Beyond the moon and the Wheel of the Year. Name the chapter you\'re in, and Aura will hold it in mind.</p>'+(S.pseason?'<div class="li"><span>'+esc(S.pseason.name)+'<br><span class="small muted">Since '+fmtDate(S.pseason.start)+'</span></span><button class="x2" id="seasonEnd" aria-label="End this season">×</button></div>':'')+'<div class="addrow"><label class="sr" for="seasonName">Name your season</label><input type="text" id="seasonName" placeholder="Rebuilding season"><button class="btn btn-ghost" id="seasonSet">'+(S.pseason?"Change":"Name it")+'</button></div></details>'+
      '<details class="group"><summary>Voices</summary><p class="small muted">Each guardian has their own voice for guided rituals and when you tap the speaker. You can use your phone\'s voice instead.</p><div class="chips" style="margin-top:8px"><button class="chip" data-pvoice="natural" aria-pressed="'+(S.prefVoice!=="device")+'">Guardian voices</button><button class="chip" data-pvoice="device" aria-pressed="'+(S.prefVoice==="device")+'">My phone\'s voice</button></div></details><details class="group"><summary>Music</summary><p class="small muted">Each guardian has their own music. Aura\'s plays on the main pages, and a guardian\'s plays when you\'re with them. It softens whenever someone speaks.</p><div class="chips" style="margin-top:8px"><button class="chip" data-pmusic="on" aria-pressed="'+(S.prefMusic!=="off"&&S.prefMusicVol!=="quiet")+'">On</button><button class="chip" data-pmusic="quiet" aria-pressed="'+(S.prefMusic!=="off"&&S.prefMusicVol==="quiet")+'">Softer</button><button class="chip" data-pmusic="off" aria-pressed="'+(S.prefMusic==="off")+'">Off</button></div></details><details class="group"><summary>How Aura speaks</summary><div class="chips" id="pTone" style="margin-top:8px">'+[["grounded","Grounded and practical"],["balanced","Balanced"],["mystical","Full spell language"]].map(t=>'<button class="chip" data-tone="'+t[0]+'" aria-pressed="'+(p.tone===t[0])+'">'+t[1]+'</button>').join("")+'</div></details>'+
@@ -3589,6 +3611,9 @@ document.addEventListener("click",async ev=>{
   if(d.have){t.setAttribute("aria-pressed",String(t.getAttribute("aria-pressed")!=="true"));return;}
   if(d.tone){t.parentElement.querySelectorAll("[data-tone]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="adultOk"){confirmAdultNow();return;}
+  if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";await loadShare();return;}
+  if(t.id==="shareGo"){doShare(false);return;}
+  if(t.id==="shareCopy"){doShare(true);return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").checked){toast("The Daily Alchemist is for adults 18 and over. Please confirm your age to begin.");$("#age18").focus();return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){S.profile.adult=true;if(accountsOn()&&ACCT.user&&!ACCT.adultAt)api("/api/me",{confirmAdult:true}).then(r=>{if(r&&r.adult_confirmed_at){ACCT.adultAt=r.adult_confirmed_at;if(S.friendCode&&!ACCT.lifetime)redeemFriend();}});}
   if(t.id==="pSave"||t.id==="pSkip"){

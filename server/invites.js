@@ -11,12 +11,15 @@ export async function POST(request) {
     const code = crypto.randomBytes(18).toString("base64url"); // 24 random characters
     const label = String(body.label || "").trim().slice(0, 60) || null;
     const expires_at = new Date(Date.now() + 30 * 864e5).toISOString();
-    await sb("invites", { method: "POST", body: { code, label, expires_at } });
+    await sb("invites", { method: "POST", body: { code, label, expires_at, max_uses: 1 } });
   } else if (body.action === "revoke" && body.code) {
     await sb("invites?code=eq." + encodeURIComponent(String(body.code)), { method: "PATCH", body: { revoked: true } });
   }
-  const invites = (await sb("invites?select=code,label,created_at,expires_at,revoked,used_by,used_at&order=created_at.desc&limit=200")) || [];
-  return json({ invites });
+  const [invites, uses] = await Promise.all([
+    sb("invites?select=code,label,created_at,expires_at,revoked,used_by,used_at,uses,max_uses,owner&order=created_at.desc&limit=300"),
+    sb("invite_uses?select=code,user_id,used_at&order=used_at.asc&limit=2000"),
+  ]);
+  return json({ invites: invites || [], uses: uses || [] });
 }
 
 export { preflight as OPTIONS } from "../api/_lib.js";

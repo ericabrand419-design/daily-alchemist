@@ -87,6 +87,12 @@ tr.sel td{background:rgba(191,30,115,.14)}
       <div class="tablewrap" style="margin-top:14px"><table id="invites" style="min-width:640px"></table></div>
     </div>
 
+    <h2>Shared by your friends</h2>
+    <div class="card">
+      <p style="margin:0">Every friend you invite gets their own link in the app to pass on. Each one works for up to 3 people, who also get lifetime access.</p>
+      <div class="tablewrap" style="margin-top:14px"><table id="shares" style="min-width:560px"></table></div>
+    </div>
+
     <h2>Music</h2>
     <div class="card">
       <p style="margin:0">Each guardian's instrumental theme. Make the missing ones once, listen, and remake any you don't like. Each track uses about 1,350 of your ElevenLabs credits.</p>
@@ -174,7 +180,7 @@ function render(){
   const P=DATA.people.slice().sort((a,b)=>new Date(b.joined)-new Date(a.joined));
   const sharers=P.filter(p=>p.sharing_started), S=Object.fromEntries(P.map(p=>[p.id,stats(p.id)]));
   const tot=k=>sharers.reduce((a,p)=>a+S[p.id][k],0);
-  const tiles=[[P.length,"Joined",P.filter(p=>p.cohort==="friends").length+" with an invitation"],[sharers.length,"Said yes to sharing",P.filter(p=>p.sharing==="no").length+" said no"],[sharers.filter(p=>S[p.id].day2).length,"Came back on day 2+","of "+sharers.length+" sharing"],[tot("rituals"),"Rituals finished",tot("readings")+" times asking Aura"],[tot("letters"),"Letters opened",tot("checkins")+" check-ins answered"],[DATA.feedback.length,"Feedback notes",""]];
+  const tiles=[[P.length,"Joined",P.filter(p=>p.cohort==="friends").length+" you invited, "+P.filter(p=>p.cohort==="shared").length+" through friends"],[sharers.length,"Said yes to sharing",P.filter(p=>p.sharing==="no").length+" said no"],[sharers.filter(p=>S[p.id].day2).length,"Came back on day 2+","of "+sharers.length+" sharing"],[tot("rituals"),"Rituals finished",tot("readings")+" times asking Aura"],[tot("letters"),"Letters opened",tot("checkins")+" check-ins answered"],[DATA.feedback.length,"Feedback notes",""]];
   $("#tiles").innerHTML=tiles.map(t=>'<div class="card tile"><div class="v">'+t[0]+'</div><div class="k">'+t[1]+'</div><div class="h">'+esc(t[2])+'</div></div>').join("");
   // day-by-day active sharers, last 14 days
   const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(dayK(d));}
@@ -184,7 +190,7 @@ function render(){
     [0,.5,1].map(f=>'<line x1="0" x2="'+W+'" y1="'+(H-f*H+4)+'" y2="'+(H-f*H+4)+'" stroke="rgba(244,241,230,.08)"/>').join("")+
     act.map((v,i)=>{const h=v/mx*(H-20);return '<rect x="'+(i*bw+6)+'" y="'+(H-h+4)+'" width="'+(bw-12)+'" height="'+Math.max(h,v?2:0)+'" rx="4" fill="#BF1E73"><title>'+days[i]+': '+v+'</title></rect>'+(v?'<text x="'+(i*bw+bw/2)+'" y="'+(H-h-2)+'" text-anchor="middle" font-size="13" fill="#F4F1E6">'+v+'</text>':'')+'<text x="'+(i*bw+bw/2)+'" y="'+(H+26)+'" text-anchor="middle" font-size="12" fill="#ADA5C4">'+new Date(days[i]+"T12:00").toLocaleDateString(undefined,{month:"numeric",day:"numeric"})+'</text>';}).join("")+'</svg>';
   $("#people").innerHTML='<thead><tr><th>Person</th><th>Joined</th><th>Sharing</th><th class="n">Days active</th><th>Last active</th><th class="n">Rituals</th><th class="n">Asked Aura</th><th class="n">Messages</th><th class="n">Letters</th><th class="n">Check-ins</th></tr></thead><tbody>'+
-    P.map(p=>{const s=S[p.id],sh=!!p.sharing_started;return '<tr class="row'+(SEL===p.id?' sel':'')+'" data-id="'+p.id+'"><td><b>'+esc(p.name||"(no name yet)")+'</b><br><span class="muted">'+esc(p.email)+'</span>'+(p.cohort==="friends"?'<br><span class="muted">Friend · lifetime</span>':'')+'</td><td>'+fmt(p.joined)+'</td><td>'+pill(p)+'</td>'+
+    P.map(p=>{const s=S[p.id],sh=!!p.sharing_started;return '<tr class="row'+(SEL===p.id?' sel':'')+'" data-id="'+p.id+'"><td><b>'+esc(p.name||"(no name yet)")+'</b><br><span class="muted">'+esc(p.email)+'</span>'+(p.cohort==="friends"?'<br><span class="muted">Friend · lifetime</span>':'')+(p.cohort==="shared"?'<br><span class="muted">Through '+esc(who(p.invited_by))+' · lifetime</span>':'')+'</td><td>'+fmt(p.joined)+'</td><td>'+pill(p)+'</td>'+
       (sh?'<td class="n">'+s.days+'</td><td>'+fmt(s.last)+'</td><td class="n">'+s.rituals+'</td><td class="n">'+s.readings+'</td><td class="n">'+s.chats+'</td><td class="n">'+s.letters+'</td><td class="n">'+s.checkins+'</td>':'<td colspan="7" class="muted">Not sharing</td>')+'</tr>';}).join("")+'</tbody>';
   // rituals left early
   const ex=DATA.events.filter(e=>e.ev==="ritual_exit"),byStep={};
@@ -205,12 +211,12 @@ function showPerson(id){
   $("#timeline").innerHTML=Object.keys(by).sort().reverse().map(k=>'<div><div class="day">'+new Date(k+"T12:00").toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+'</div>'+by[k].map(e=>'<div class="ev"><span class="t">'+new Date(e.created_at).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+'</span><span>'+esc(say(e))+'</span></div>').join("")+'</div>').join("")||'<p class="muted" style="margin:0">No taps yet.</p>';
   $("#detail").scrollIntoView({behavior:"smooth",block:"start"});
 }
-let INV=[];
+let INV=[],USES=[];
 const siteURL=()=>(C.siteUrl||location.origin).replace(/\/$/,"");
 const invLink=c=>siteURL()+"/?friend="+c;
 async function invites(action,extra){
   const res=await fetch(API+"/api/invites",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,...(extra||{})})});
-  const d=await res.json().catch(()=>({}));if(d.invites){INV=d.invites;renderInvites();}return d;
+  const d=await res.json().catch(()=>({}));if(d.invites){INV=d.invites;USES=d.uses||[];renderInvites();}return d;
 }
 function invStatus(v){
   if(v.used_by){const p=(DATA&&DATA.people||[]).find(x=>x.id===v.used_by);return '<span class="pill yes">Used by '+esc(p?(p.name||p.email):"a friend")+', '+new Date(v.used_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+'</span>';}
@@ -218,8 +224,14 @@ function invStatus(v){
   if(v.expires_at&&new Date(v.expires_at)<new Date())return '<span class="pill no">Expired</span>';
   return '<span class="pill wait">Not used yet</span>';
 }
+function who(id){const p=(DATA&&DATA.people||[]).find(x=>x.id===id);return p?(p.name||p.email):"someone";}
+function renderShares(){
+  const S=INV.filter(v=>v.owner);
+  $("#shares").innerHTML='<thead><tr><th>Friend</th><th>Used</th><th>Who came in</th><th></th></tr></thead><tbody>'+(S.length?S.map(v=>{const joined=USES.filter(u=>u.code===v.code).map(u=>esc(who(u.user_id))+' <span class="muted">'+new Date(u.used_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+'</span>').join("<br>");return '<tr><td>'+esc(who(v.owner))+'</td><td>'+(v.uses||0)+' of '+(v.max_uses||3)+'</td><td>'+(joined||'<span class="muted">No one yet</span>')+'</td><td>'+(v.revoked?'<span class="pill stop">Turned off</span>':'<button class="btn ghost small" data-revoke="'+esc(v.code)+'">Turn off</button>')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">None yet. A friend\'s link appears here once they open it in the app.</td></tr>')+'</tbody>';
+}
 function renderInvites(){
-  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV.length?INV.map(v=>{const open=!v.used_by&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?'<button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
+  renderShares();const INV1=INV.filter(v=>!v.owner);
+  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV1.length?INV1.map(v=>{const open=!v.used_by&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?'<button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
 }
 async function copyLink(c,btn){try{await navigator.clipboard.writeText(invLink(c));if(btn){const t=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=t,1500);}}catch(e){prompt("Copy this link:",invLink(c));}}
 $("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const before=new Set(INV.map(v=>v.code));await invites("create",{label:$("#invName").value});b.disabled=false;const nw=INV.find(v=>!before.has(v.code));

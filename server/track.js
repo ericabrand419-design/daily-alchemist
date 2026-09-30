@@ -4,7 +4,7 @@
 import { json, sb, getUser, getProfile } from "../api/_lib.js";
 
 const EVENTS = new Set(["open", "session", "tab", "reading", "draw_pick", "ritual_start", "ritual_step", "ritual_exit", "ritual",
-  "chat_open", "chat_send", "letter_open", "nudge_reply", "nudge_later", "paywall", "checkout", "feedback", "settings_open", "how_open", "cant_think", "hear", "music"]);
+  "chat_open", "chat_send", "letter_open", "nudge_reply", "nudge_later", "paywall", "checkout", "feedback", "settings_open", "how_open", "cant_think", "hear", "music", "share"]);
 const META = ["g", "tab", "step", "of", "wrote", "feelings", "typed", "sec", "day", "stage", "plat", "reason", "id", "mood", "set"];
 
 export async function POST(request) {

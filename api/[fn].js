@@ -17,6 +17,7 @@ const ROUTES = {
   "music": () => import("../server/music.js"),
   "portal": () => import("../server/portal.js"),
   "push-subscribe": () => import("../server/push-subscribe.js"),
+  "share": () => import("../server/share.js"),
   "stripe-webhook": () => import("../server/stripe-webhook.js"),
   "track": () => import("../server/track.js"),
   "voice": () => import("../server/voice.js"),
