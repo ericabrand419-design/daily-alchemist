@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#16132A">
+<title>Friends Week Dashboard</title>
+<link rel="icon" href="/icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+:root{--night:#16132A;--night2:#211C3B;--night3:#2C2650;--glow:#F4F1E6;--dim:#D8D1E6;--faint:#ADA5C4;--gold:#E7C45A;--fuchsia:#BF1E73;--line:rgba(231,196,90,.28);--serif:"Lora",Georgia,serif;--sans:"Atkinson Hyperlegible","Segoe UI",system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--night);color:var(--glow);font-family:var(--sans);font-size:17px;line-height:1.5}
+[hidden]{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 16px 60px}
+h1{font-family:var(--serif);font-weight:400;font-size:32px;margin:0;color:var(--gold)}
+h2{font-family:var(--serif);font-weight:400;font-size:24px;margin:34px 0 10px}
+.sub{color:var(--faint);margin:4px 0 0}
+.label{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.card{background:var(--night2);border:1px solid rgba(244,241,230,.1);border-radius:16px;padding:16px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:20px}
+.tile .v{font-family:var(--serif);font-size:36px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .k{color:var(--dim);font-size:15px;margin-top:4px}
+.tile .h{color:var(--faint);font-size:13.5px;margin-top:2px}
+.btn{border:0;border-radius:999px;padding:12px 20px;font:inherit;font-weight:700;cursor:pointer;background:linear-gradient(180deg,#D8358A,#A3175F);color:#fff}
+.btn.ghost{background:none;color:var(--glow);box-shadow:inset 0 0 0 1px rgba(244,241,230,.35)}
+input{font:inherit;color:var(--glow);background:rgba(22,19,42,.7);border:1px solid rgba(231,196,90,.35);border-radius:12px;padding:12px 14px;width:100%}
+.signin{max-width:420px;margin:60px auto;display:grid;gap:12px}
+.tablewrap{overflow-x:auto;border-radius:16px;border:1px solid rgba(244,241,230,.1)}
+table{border-collapse:collapse;width:100%;min-width:860px;background:var(--night2)}
+th,td{padding:11px 12px;text-align:left;border-bottom:1px solid rgba(244,241,230,.07);font-size:15.5px;vertical-align:top}
+th{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:700;background:var(--night3);position:sticky;top:0}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+th.n{text-align:right}
+tr.row{cursor:pointer}tr.row:hover td{background:rgba(231,196,90,.06)}
+tr.sel td{background:rgba(191,30,115,.14)}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:13.5px;font-weight:700;white-space:nowrap}
+.yes{background:rgba(58,132,132,.3);color:#9FE0DA}.no{background:rgba(244,241,230,.08);color:var(--faint)}.stop{background:rgba(228,87,46,.2);color:#F5B39A}.wait{background:rgba(231,196,90,.14);color:var(--gold)}
+.muted{color:var(--faint)}
+.chart svg{width:100%;height:auto;display:block}
+.tl{display:grid;gap:18px}
+.tl .day{font-family:var(--serif);font-size:19px;color:var(--gold);margin-bottom:6px}
+.tl .ev{display:grid;grid-template-columns:78px 1fr;gap:10px;padding:5px 0;border-bottom:1px solid rgba(244,241,230,.05);font-size:15.5px}
+.tl .ev .t{color:var(--faint);font-variant-numeric:tabular-nums}
+.fb{display:grid;gap:10px}
+.fb .item{border-left:2px solid var(--gold);padding:4px 0 4px 12px}
+.fb .meta{color:var(--faint);font-size:14px}
+.note{color:var(--faint);font-size:14.5px;margin-top:10px}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.drop{display:grid;gap:6px;margin-top:6px}
+.drop .r{display:grid;grid-template-columns:130px 1fr 40px;gap:10px;align-items:center;font-size:15px}
+.drop .bar{height:10px;border-radius:5px;background:var(--fuchsia)}
+.linkbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--night3);border-radius:12px;padding:10px 12px;word-break:break-all}
+.linkbox code{flex:1 1 260px;font-size:15px;color:var(--gold)}
+.btn.small{padding:8px 14px;font-size:15px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="signin" id="signin">
+    <h1>Friends Week</h1>
+    <p class="sub">Sign in with your own email to see who joined and how they're using the app.</p>
+    <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
+    <button class="btn" id="send">Send my code</button>
+    <input type="text" id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" hidden>
+    <button class="btn" id="verify" hidden>Sign in</button>
+    <p class="muted" id="msg"></p>
+  </div>
+
+  <div id="dash" hidden>
+    <div class="head">
+      <div><h1>Friends Week</h1><p class="sub" id="asof"></p></div>
+      <div style="display:flex;gap:8px"><button class="btn ghost" id="refresh">Refresh</button><button class="btn ghost" id="csv">Download taps (CSV)</button></div>
+    </div>
+    <div class="tiles" id="tiles"></div>
+
+    <h2>Invitations</h2>
+    <div class="card">
+      <p style="margin:0">Make one link per friend. Each link works once, for one account, and expires after 30 days. Send it to that friend only.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><input type="text" id="invName" placeholder="Friend's name, for your list" style="flex:1 1 220px"><button class="btn" id="invMake">Create invitation link</button></div>
+      <div id="invNew" hidden style="margin-top:12px"></div>
+      <div class="tablewrap" style="margin-top:14px"><table id="invites" style="min-width:640px"></table></div>
+    </div>
+
+    <h2>Music</h2>
+    <div class="card">
+      <p style="margin:0">Each guardian's instrumental theme. Make the missing ones once, listen, and remake any you don't like. Each track uses about 1,350 of your ElevenLabs credits.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center"><button class="btn" id="musMakeAll">Make all missing tracks</button><span class="note" id="musMsg" style="margin:0"></span></div>
+      <div class="tablewrap" style="margin-top:14px"><table id="music" style="min-width:560px"></table></div>
+    </div>
+
+    <h2>Who used it, day by day</h2>
+    <div class="card chart" id="chart"></div>
+    <p class="note">People who said yes to sharing and opened the app that day.</p>
+
+    <h2>People</h2>
+    <div class="tablewrap"><table id="people"></table></div>
+    <p class="note">You only see taps for people who said yes, and only for their 7 days. You never see anything anyone wrote, said, or told Aura or the guardians. Tap a row to see that person's week.</p>
+
+    <div id="detail" hidden>
+      <h2 id="dname"></h2>
+      <div class="card"><div class="tl" id="timeline"></div></div>
+    </div>
+
+    <h2>Where rituals get left</h2>
+    <div class="card"><div id="drops"></div></div>
+
+    <h2>Feedback they chose to send you</h2>
+    <div class="card"><div class="fb" id="feedback"></div></div>
+  </div>
+</div>
+<script>
+(function(){
+const C=window.DA_CONFIG||{};const API=(C.apiBase||"");
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const GN={aura:"Aura",sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",sol:"Sol",ember:"Ember",willow:"Willow",moss:"Moss",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const TABN={today:"Today",journeys:"Journeys",circle:"Circle",archive:"Archive"};
+const nice=id=>String(id||"").replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+function say(e){const m=e.meta||{},g=GN[m.g]||"a guardian";
+  switch(e.ev){
+    case "open":return "Opened the app";
+    case "session":return "Closed the app after "+(m.sec>=60?Math.floor(m.sec/60)+" min ":"")+(m.sec%60)+" sec";
+    case "tab":return "Went to "+(TABN[m.tab]||m.tab);
+    case "reading":return "Asked Aura"+(m.feelings?" ("+m.feelings+" feeling"+(m.feelings>1?"s":"")+" tapped"+(m.typed?", and typed":"")+")":m.typed?" (typed)":"");
+    case "draw_pick":return "Picked a card: "+g;
+    case "ritual_start":return "Started "+nice(m.id)+(m.of?" ("+m.of+" steps)":"");
+    case "ritual_step":return "Reached step "+m.step+" of "+m.of;
+    case "ritual_exit":return "Left "+nice(m.id)+" at step "+m.step+" of "+m.of;
+    case "ritual":return "Finished "+nice(m.id)+(m.wrote?", and wrote a reflection":"");
+    case "chat_open":return "Opened a chat with "+g;
+    case "chat_send":return "Sent a message to "+g;
+    case "letter_open":return "Opened a letter from Aura";
+    case "nudge_reply":return "Answered "+g+"'s check-in";
+    case "nudge_later":return "Put off "+g+"'s check-in";
+    case "paywall":return "Looked at membership";
+    case "checkout":return "Started checkout";
+    case "feedback":return "Sent feedback"+(m.mood?" ("+m.mood+")":"");
+    case "settings_open":return "Opened Settings";
+    case "how_open":return "Opened How it works";
+    case "cant_think":return "Tapped Can't think";
+    default:return e.ev;}}
+let sb=null,DATA=null,SEL=null;
+function msg(t){$("#msg").textContent=t;}
+async function token(){const {data}=await sb.auth.getSession();return data.session&&data.session.access_token;}
+async function load(){
+  $("#asof").textContent="Loading...";
+  const res=await fetch(API+"/api/admin",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:"{}"});
+  const d=await res.json().catch(()=>({}));
+  if(d.error==="not_admin"){$("#dash").hidden=true;$("#signin").hidden=false;msg("This email isn't on the admin list. Add it to ADMIN_EMAIL in Vercel.");return;}
+  if(d.error){$("#asof").textContent="Couldn't load. Try Refresh.";return;}
+  DATA=d;render();
+}
+function dayK(t){const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function stats(uid){
+  const ev=DATA.events.filter(e=>e.user_id===uid),c=k=>ev.filter(e=>e.ev===k).length;
+  const days=new Set(ev.map(e=>dayK(e.created_at)));
+  return {ev,days:days.size,last:ev.length?ev[ev.length-1].created_at:null,rituals:c("ritual"),readings:c("reading"),chats:c("chat_send"),letters:c("letter_open"),checkins:c("nudge_reply"),day2:ev.some(e=>e.ev==="open"&&(e.meta||{}).day>=1)};
+}
+function pill(p){
+  if(p.sharing==="yes"){const on=new Date(p.sharing_until)>new Date();return '<span class="pill yes">'+(on?"Yes, until "+new Date(p.sharing_until).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"Yes, week done")+'</span>';}
+  if(p.sharing==="stopped")return '<span class="pill stop">Stopped</span>';
+  if(p.sharing==="no")return '<span class="pill no">No</span>';
+  return '<span class="pill wait">Not asked yet</span>';
+}
+function fmt(t){return t?new Date(t).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";}
+function render(){
+  $("#asof").textContent="Updated "+fmt(DATA.generated);
+  const P=DATA.people.slice().sort((a,b)=>new Date(b.joined)-new Date(a.joined));
+  const sharers=P.filter(p=>p.sharing_started), S=Object.fromEntries(P.map(p=>[p.id,stats(p.id)]));
+  const tot=k=>sharers.reduce((a,p)=>a+S[p.id][k],0);
+  const tiles=[[P.length,"Joined",P.filter(p=>p.cohort==="friends").length+" with an invitation"],[sharers.length,"Said yes to sharing",P.filter(p=>p.sharing==="no").length+" said no"],[sharers.filter(p=>S[p.id].day2).length,"Came back on day 2+","of "+sharers.length+" sharing"],[tot("rituals"),"Rituals finished",tot("readings")+" times asking Aura"],[tot("letters"),"Letters opened",tot("checkins")+" check-ins answered"],[DATA.feedback.length,"Feedback notes",""]];
+  $("#tiles").innerHTML=tiles.map(t=>'<div class="card tile"><div class="v">'+t[0]+'</div><div class="k">'+t[1]+'</div><div class="h">'+esc(t[2])+'</div></div>').join("");
+  // day-by-day active sharers, last 14 days
+  const days=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(dayK(d));}
+  const act=days.map(k=>new Set(DATA.events.filter(e=>dayK(e.created_at)===k).map(e=>e.user_id)).size);
+  const mx=Math.max(1,...act),W=700,H=180,bw=W/days.length;
+  $("#chart").innerHTML='<svg viewBox="0 0 '+W+' '+(H+34)+'" role="img" aria-label="People active each day">'+
+    [0,.5,1].map(f=>'<line x1="0" x2="'+W+'" y1="'+(H-f*H+4)+'" y2="'+(H-f*H+4)+'" stroke="rgba(244,241,230,.08)"/>').join("")+
+    act.map((v,i)=>{const h=v/mx*(H-20);return '<rect x="'+(i*bw+6)+'" y="'+(H-h+4)+'" width="'+(bw-12)+'" height="'+Math.max(h,v?2:0)+'" rx="4" fill="#BF1E73"><title>'+days[i]+': '+v+'</title></rect>'+(v?'<text x="'+(i*bw+bw/2)+'" y="'+(H-h-2)+'" text-anchor="middle" font-size="13" fill="#F4F1E6">'+v+'</text>':'')+'<text x="'+(i*bw+bw/2)+'" y="'+(H+26)+'" text-anchor="middle" font-size="12" fill="#ADA5C4">'+new Date(days[i]+"T12:00").toLocaleDateString(undefined,{month:"numeric",day:"numeric"})+'</text>';}).join("")+'</svg>';
+  $("#people").innerHTML='<thead><tr><th>Person</th><th>Joined</th><th>Sharing</th><th class="n">Days active</th><th>Last active</th><th class="n">Rituals</th><th class="n">Asked Aura</th><th class="n">Messages</th><th class="n">Letters</th><th class="n">Check-ins</th></tr></thead><tbody>'+
+    P.map(p=>{const s=S[p.id],sh=!!p.sharing_started;return '<tr class="row'+(SEL===p.id?' sel':'')+'" data-id="'+p.id+'"><td><b>'+esc(p.name||"(no name yet)")+'</b><br><span class="muted">'+esc(p.email)+'</span>'+(p.cohort==="friends"?'<br><span class="muted">Friend · lifetime</span>':'')+'</td><td>'+fmt(p.joined)+'</td><td>'+pill(p)+'</td>'+
+      (sh?'<td class="n">'+s.days+'</td><td>'+fmt(s.last)+'</td><td class="n">'+s.rituals+'</td><td class="n">'+s.readings+'</td><td class="n">'+s.chats+'</td><td class="n">'+s.letters+'</td><td class="n">'+s.checkins+'</td>':'<td colspan="7" class="muted">Not sharing</td>')+'</tr>';}).join("")+'</tbody>';
+  // rituals left early
+  const ex=DATA.events.filter(e=>e.ev==="ritual_exit"),byStep={};
+  for(const e of ex){const k="Step "+(e.meta||{}).step+" of "+(e.meta||{}).of;byStep[k]=(byStep[k]||0)+1;}
+  const rows=Object.entries(byStep).sort((a,b)=>b[1]-a[1]),mxx=Math.max(1,...rows.map(r=>r[1]));
+  const fin=DATA.events.filter(e=>e.ev==="ritual").length,st=DATA.events.filter(e=>e.ev==="ritual_start").length;
+  $("#drops").innerHTML='<p style="margin:0">'+st+' rituals started, '+fin+' finished, '+ex.length+' left early.</p>'+(rows.length?'<div class="drop">'+rows.map(r=>'<div class="r"><span>'+esc(r[0])+'</span><span class="bar" style="width:'+(r[1]/mxx*100)+'%"></span><span>'+r[1]+'</span></div>').join("")+'</div>':'');
+  $("#feedback").innerHTML=DATA.feedback.length?DATA.feedback.map(f=>'<div class="item"><div class="meta">'+fmt(f.created_at)+' · '+esc(f.email||"")+(f.mood?' · '+esc(f.mood):'')+(f.day!=null?' · day '+(f.day+1):'')+'</div><div>'+esc(f.text||"")+'</div></div>').join(""):'<p class="muted" style="margin:0">Nothing yet. Aura asks each person on their second day.</p>';
+  if(SEL)showPerson(SEL);
+}
+function showPerson(id){
+  SEL=id;document.querySelectorAll("tr.row").forEach(r=>r.classList.toggle("sel",r.dataset.id===id));
+  const p=DATA.people.find(x=>x.id===id);if(!p)return;
+  $("#detail").hidden=false;$("#dname").textContent=(p.name||p.email)+"'s week";
+  const ev=DATA.events.filter(e=>e.user_id===id);
+  if(!p.sharing_started){$("#timeline").innerHTML='<p class="muted" style="margin:0">'+esc(p.name||"They")+' '+(p.sharing==="no"?"said no to sharing":"hasn't been asked yet")+', so there is nothing to show. That\'s their choice.</p>';return;}
+  const by={};for(const e of ev){(by[dayK(e.created_at)]=by[dayK(e.created_at)]||[]).push(e);}
+  $("#timeline").innerHTML=Object.keys(by).sort().reverse().map(k=>'<div><div class="day">'+new Date(k+"T12:00").toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+'</div>'+by[k].map(e=>'<div class="ev"><span class="t">'+new Date(e.created_at).toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+'</span><span>'+esc(say(e))+'</span></div>').join("")+'</div>').join("")||'<p class="muted" style="margin:0">No taps yet.</p>';
+  $("#detail").scrollIntoView({behavior:"smooth",block:"start"});
+}
+let INV=[];
+const siteURL=()=>(C.siteUrl||location.origin).replace(/\/$/,"");
+const invLink=c=>siteURL()+"/?friend="+c;
+async function invites(action,extra){
+  const res=await fetch(API+"/api/invites",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,...(extra||{})})});
+  const d=await res.json().catch(()=>({}));if(d.invites){INV=d.invites;renderInvites();}return d;
+}
+function invStatus(v){
+  if(v.used_by){const p=(DATA&&DATA.people||[]).find(x=>x.id===v.used_by);return '<span class="pill yes">Used by '+esc(p?(p.name||p.email):"a friend")+', '+new Date(v.used_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+'</span>';}
+  if(v.revoked)return '<span class="pill stop">Revoked</span>';
+  if(v.expires_at&&new Date(v.expires_at)<new Date())return '<span class="pill no">Expired</span>';
+  return '<span class="pill wait">Not used yet</span>';
+}
+function renderInvites(){
+  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV.length?INV.map(v=>{const open=!v.used_by&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?'<button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
+}
+async function copyLink(c,btn){try{await navigator.clipboard.writeText(invLink(c));if(btn){const t=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=t,1500);}}catch(e){prompt("Copy this link:",invLink(c));}}
+$("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const before=new Set(INV.map(v=>v.code));await invites("create",{label:$("#invName").value});b.disabled=false;const nw=INV.find(v=>!before.has(v.code));
+  if(nw){$("#invName").value="";$("#invNew").hidden=false;$("#invNew").innerHTML='<div class="linkbox"><code>'+esc(invLink(nw.code))+'</code><button class="btn small" data-copy="'+esc(nw.code)+'">Copy link</button></div><p class="note">Send this to '+esc(nw.label||"your friend")+' only. It stops working once they use it.</p>';}};
+document.addEventListener("click",e=>{const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
+const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",sol:"Sol",ember:"Ember",willow:"Willow",moss:"Moss",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+let MUS={tracks:{},url:""},musBusy=false;
+async function music(action,g){
+  const res=await fetch(API+"/api/music",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,g})});
+  const d=await res.json().catch(()=>({}));if(d.tracks){MUS=d;renderMusic();}return d;
+}
+function renderMusic(){
+  const bust="?v="+Date.now();
+  $("#music").innerHTML='<thead><tr><th>Guardian</th><th>Track</th><th></th></tr></thead><tbody>'+Object.keys(GNAMES).map(g=>{const has=MUS.tracks[g];return '<tr><td>'+GNAMES[g]+'</td><td>'+(has?'<audio controls preload="none" src="'+esc(MUS.url+g+".mp3"+bust)+'" style="height:36px;max-width:260px"></audio>':'<span class="pill wait">Not made yet</span>')+'</td><td><button class="btn ghost small" data-mus="'+g+'">'+(has?"Remake":"Make")+'</button></td></tr>';}).join("")+'</tbody>';
+}
+async function makeOne(g){
+  $("#musMsg").textContent="Making "+GNAMES[g]+"'s music, about 20 seconds...";
+  const d=await music("make",g);
+  if(d.error){$("#musMsg").textContent="Couldn't make "+GNAMES[g]+"'s track ("+d.error+"). Try again in a minute.";return false;}
+  return true;
+}
+$("#musMakeAll").onclick=async()=>{if(musBusy)return;musBusy=true;const b=$("#musMakeAll");b.disabled=true;
+  const todo=Object.keys(GNAMES).filter(g=>!MUS.tracks[g]);let n=0;
+  for(const g of todo){if(!(await makeOne(g)))break;n++;}
+  $("#musMsg").textContent=todo.length?(n===todo.length?"All done. Press play to listen.":n+" of "+todo.length+" made."):"Every guardian already has music.";
+  b.disabled=false;musBusy=false;};
+document.addEventListener("click",async e=>{const m=e.target.closest("[data-mus]");if(!m||musBusy)return;const g=m.dataset.mus;if(MUS.tracks[g]&&!confirm("Remake "+GNAMES[g]+"'s music? This replaces the current track."))return;musBusy=true;m.disabled=true;if(await makeOne(g))$("#musMsg").textContent=GNAMES[g]+"'s new track is ready.";musBusy=false;});
+function csv(){
+  const N=Object.fromEntries(DATA.people.map(p=>[p.id,p]));
+  const lines=[["time","person","email","event","what happened"].join(",")].concat(DATA.events.map(e=>[e.created_at,(N[e.user_id]||{}).name||"",(N[e.user_id]||{}).email||"",e.ev,say(e)].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([lines.join("\n")],{type:"text/csv"}));a.download="friends-week-taps.csv";a.click();
+}
+document.addEventListener("click",e=>{const r=e.target.closest("tr.row");if(r)showPerson(r.dataset.id);});
+$("#refresh").onclick=load;$("#csv").onclick=()=>DATA&&csv();
+$("#send").onclick=async()=>{const em=$("#email").value.trim();if(!em)return;msg("Sending...");const {error}=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:false}});if(error){msg("Couldn't send a code. Use the email you signed up with in the app.");return;}msg("Check your email for a 6-digit code.");$("#code").hidden=false;$("#verify").hidden=false;$("#code").focus();};
+$("#verify").onclick=async()=>{const {error}=await sb.auth.verifyOtp({email:$("#email").value.trim(),token:$("#code").value.trim(),type:"email"});if(error){msg("That code didn't work. Try again.");return;}start();};
+async function start(){$("#signin").hidden=true;$("#dash").hidden=false;await load();await invites("list");await music("list");}
+(async()=>{
+  if(!C.supabaseUrl||!window.supabase){msg("Fill in config.js first (see SETUP.md).");return;}
+  sb=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
+  const {data}=await sb.auth.getSession();if(data.session)start();
+})();
+})();
+</script>
+</body>
+</html>
