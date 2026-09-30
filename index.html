@@ -485,6 +485,11 @@ a.btn{text-decoration:none}
 .chc>svg{grid-area:g}
 .chc .cl{grid-area:l;justify-self:end;font-size:12.5px;letter-spacing:.12em;padding:2px 8px;border-radius:999px;border:1px solid rgba(231,196,90,.35)}
 .chc .cn{grid-area:n;font-size:17px;line-height:1.2;overflow-wrap:break-word}
+.gate{position:fixed;inset:0;z-index:55;overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(24px + env(safe-area-inset-bottom,0px));background:radial-gradient(900px 500px at 110% -10%,rgba(191,30,115,.25),transparent 60%),radial-gradient(800px 520px at -20% 40%,rgba(58,132,132,.18),transparent 60%),var(--night)}
+body:has(#gate) .scrim{z-index:60}
+.gate .in{max-width:420px;width:100%;display:grid;gap:16px}
+.gate h1{margin:0;text-align:center;font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1.1}
+.gate .aurasays p{font-size:20px;line-height:1.5}
 .topctl{display:grid;justify-items:center;gap:8px;flex:none}
 .sndbar{display:flex;gap:6px;align-items:center}
 .snd{width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.45);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;padding:0;position:relative}
@@ -1596,15 +1601,29 @@ async function initWeb(){
   if(!accountsOn()||!C.supabaseAnonKey){ACCT.ready=true;return;}
   ACCT.sb=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
   const {data}=await ACCT.sb.auth.getSession();
-  if(data.session)await onSignedIn(data.session);
+  if(data.session)await onSignedIn(data.session);else showGate();
   ACCT.sb.auth.onAuthStateChange((ev,session)=>{
     if(ev==="SIGNED_IN"&&session&&(!ACCT.user||ACCT.user.id!==session.user.id))onSignedIn(session);
-    if(ev==="SIGNED_OUT"){ACCT.user=null;ACCT.member=false;renderAll();}
+    if(ev==="SIGNED_OUT"){ACCT.user=null;ACCT.member=false;renderAll();showGate();}
   });
   ACCT.ready=true;
   const qs=new URLSearchParams(location.search);
   if(qs.get("checkout")==="success"){history.replaceState(null,"",location.pathname);toast("Welcome to "+PLAN.name+".");setTimeout(refreshMe,2500);}
 }
+/* On the live app everyone signs in or makes a free account first, so Aura can give her
+   full reading from the very first question. */
+function showGate(){
+  if(MODE!=="web"||!ACCT.sb||$("#gate"))return;
+  const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
+  g.innerHTML='<div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
+    auraSays(S.friendCode?"You came in on an invitation from "+esc(ownerName())+". Make your account and everything opens for you, for life.":"Come in. Sign in, or make your free account, so I can read what you bring me and remember it for you.","Aura · welcome")+
+    '<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
+    '<button class="btn btn-main full" id="siSend">Send my code</button>'+
+    '<div class="field" id="siCodeRow" hidden><label for="siCode">Code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
+    '<button class="btn btn-main full" id="siVerify" hidden>Come in</button><p class="small muted" id="siMsg" style="text-align:center">New here or coming back, it\'s the same: we email you a 6-digit code. No password.</p>'+legalLine()+'</div>';
+  document.body.appendChild(g);document.body.style.overflow="hidden";
+}
+function hideGate(){const g=$("#gate");if(g){g.remove();document.body.style.overflow="";setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},500);}}
 async function refreshMe(){
   const r=await api("/api/me",S.profile.adult?{confirmAdult:true}:{});
   if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt&&!S.profile.adult){S.profile.adult=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.admin=!!r.admin;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
@@ -1613,7 +1632,7 @@ async function refreshMe(){
   setTimeout(auraPopup,500);
 }
 async function onSignedIn(session){
-  ACCT.user=session.user;ACCT.email=session.user.email||"";
+  ACCT.user=session.user;ACCT.email=session.user.email||"";hideGate();
   const sb=ACCT.sb,uid=session.user.id;
   try{
     const [e,c,p]=await Promise.all([
@@ -3598,7 +3617,7 @@ function refreshCards(){
 function renderBadge(){const b=$("#memBadge");if(!b)return;b.hidden=!isMember();b.textContent=isLifetime()?"Inner Circle · Lifetime":inTrial()?"Inner Circle · "+trialDaysLeft()+(trialDaysLeft()===1?" day":" days")+" free":"Inner Circle";}
 function renderAll(){renderBadge();renderSky();renderToday();renderJourneys();renderCircle();renderArchive();}
 drawSeal();renderAll();setTimeout(()=>{auraPopup();setTimeout(maybeAskFeedback,400);trackOpen();},1200);
-if(!S.profile.onboarded)setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim"))openAltar(true);},700);
+if(!S.profile.onboarded)setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},700);
 initCloud();initWeb();
 })();
 </script>
