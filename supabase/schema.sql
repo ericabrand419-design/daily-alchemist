@@ -151,3 +151,6 @@ returns setof public.invites language sql security definer set search_path = pub
 $$;
 revoke all on function public.claim_invite(text, uuid) from public, anon, authenticated;
 grant execute on function public.claim_invite(text, uuid) to service_role;
+
+-- Friends Week: what each person ticked to share (only taps and times, never words).
+alter table public.profiles add column if not exists monitor_scope text[];

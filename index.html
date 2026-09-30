@@ -492,6 +492,7 @@ body:has(#gate) .scrim{z-index:60}
 .gate .in{max-width:420px;width:100%;display:grid;gap:16px}
 .gate h1{margin:0;text-align:center;font-family:var(--f-display);font-weight:400;font-size:34px;line-height:1.1}
 .gate .aurasays p{font-size:20px;line-height:1.5}
+.switch input{flex:none}
 .topctl{display:grid;justify-items:center;gap:8px;flex:none}
 .sndbar{display:flex;gap:6px;align-items:center}
 .snd{width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.45);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;padding:0;position:relative}
@@ -1664,7 +1665,7 @@ function showGate(){
 function hideGate(){const g=$("#gate");if(g){g.remove();document.body.style.overflow="";setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},500);}}
 async function refreshMe(){
   const r=await api("/api/me",S.profile.adult?{confirmAdult:true}:{});
-  if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt&&!S.profile.adult){S.profile.adult=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.admin=!!r.admin;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
+  if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt&&!S.profile.adult){S.profile.adult=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.monitorScope=Array.isArray(r.monitor_scope)?r.monitor_scope:null;ACCT.admin=!!r.admin;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
   renderAll();
   if(!r.error&&S.friendCode&&!ACCT.lifetime){await redeemFriend();return;}
   setTimeout(auraPopup,500);
@@ -2533,7 +2534,7 @@ function stopEyes(){eyes=false;clearTimeout(eyesTimer);try{speechSynthesis.cance
 async function enablePush(){
   const C=window.DA_CONFIG||{};
   if(MODE!=="web"||!ACCT.user){toast("Sign in on the live app to let Aura reach you.");return false;}
-  if(!("serviceWorker" in navigator)||!("PushManager" in window)||!C.vapidPublicKey){toast(isNative()?"Messages from me are coming to this app in the next update.":"This browser can't receive messages from me yet. Download The Daily Alchemist from the App Store or Google Play.");return false;}
+  if(!("serviceWorker" in navigator)||!("PushManager" in window)||!C.vapidPublicKey){toast(isNative()?"Messages from me are coming to this app in the next update.":/iPhone|iPad|iPod/.test(navigator.userAgent)?"On iPhone, first add me to your Home Screen: tap Share, then Add to Home Screen. Open me from there and turn this on.":"This browser can't receive messages from me. Try Chrome on your phone.");return false;}
   const perm=await Notification.requestPermission(); if(perm!=="granted"){toast("No problem. Aura will show things when you open the app.");return false;}
   const reg=await navigator.serviceWorker.ready;
   const key=Uint8Array.from(atob(C.vapidPublicKey.replace(/-/g,"+").replace(/_/g,"/")+"===".slice((C.vapidPublicKey.length+3)%4)),c=>c.charCodeAt(0));
@@ -2809,22 +2810,44 @@ async function redeemFriend(){
   else if(r&&r.error==="adult_confirmation_required"){return;}
   else if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");}
 }
+/* Friends Week sharing, by category. Nothing is on unless they tick it. Words are never shared. */
+const SHARE_OPTS=[
+  ["time","When I open the app and how long I stay"],
+  ["pages","Which pages I visit"],
+  ["rituals","Which rituals I start, finish or leave, and at which step"],
+  ["readings","When I ask Aura or draw a card (never what I asked)"],
+  ["chats","When I open a guardian chat and send a message (never the words)"],
+  ["letters","When I open letters and check ins"],
+  ["sound","When I use voices or music"],
+  ["membership","When I look at the membership page"]];
+const EVCAT={open:"time",session:"time",tab:"pages",settings_open:"pages",how_open:"pages",cant_think:"pages",share:"pages",feedback:"pages",
+  ritual_start:"rituals",ritual_step:"rituals",ritual_exit:"rituals",ritual:"rituals",reading:"readings",draw_pick:"readings",
+  chat_open:"chats",chat_send:"chats",letter_open:"letters",nudge_reply:"letters",nudge_later:"letters",hear:"sound",music:"sound",paywall:"membership",checkout:"membership"};
+function shareScope(){if(!accountsOn())return S.previewScope||SHARE_OPTS.map(o=>o[0]);return Array.isArray(ACCT.monitorScope)?ACCT.monitorScope:SHARE_OPTS.map(o=>o[0]);}
+function inFriendsWeek(){return (isFriend()||isShared())&&(!accountsOn()||!ACCT.trialUntil||Date.parse(ACCT.trialUntil)>Date.now());}
+function shareChecklist(sel){return '<div class="stack" id="shareList" style="gap:4px">'+SHARE_OPTS.map(o=>'<label class="switch" for="sc_'+o[0]+'"><span>'+esc(o[1])+'</span><input type="checkbox" id="sc_'+o[0]+'" data-scope="'+o[0]+'"'+(sel.includes(o[0])?" checked":"")+'></label>').join("")+'</div>';}
+function checkedScope(){return [...document.querySelectorAll("#shareList [data-scope]")].filter(x=>x.checked).map(x=>x.dataset.scope);}
 function monitorOn(){if(!accountsOn())return S.previewMonitor&&S.previewMonitor>Date.now();return !!(ACCT.user&&ACCT.monitorUntil&&Date.parse(ACCT.monitorUntil)>Date.now());}
 function monitorAnswered(){return accountsOn()?!!ACCT.monitorAnswer:!!S.previewMonitorAnswer;}
 function openConsent(){
   S.seenPop=S.seenPop||{};S.seenPop.consent=Date.now();saveLocal();
   const o=esc(ownerName());
-  openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays(o+", who made me, is asking a few friends for help this week. Would you let her see <b>what you tap and when</b> for the next 7 days? She will <b>never</b> see anything you write, say, or tell me or the guardians. It stops by itself after a week, and you can stop it any time in Settings.","Aura · a favor for "+o)+
-    '<button class="btn btn-main full" data-consent="1">Yes, I\'ll help</button><button class="btn btn-ghost full" data-consent="0">No thanks</button><p class="small muted" style="text-align:center">Either way, everything stays open to you, for life.</p></div>');
+  openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Before we begin, one promise. <b>Everything you write, say, or tell me and the guardians is private.</b> It stays between you and your guardians. "+o+", who made me, never sees it. Not now, not ever.","Aura · your privacy")+
+    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only <b>what you tap and when</b>. Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
+    '<button class="btn btn-main full" id="consentSave">Share what I ticked</button><button class="btn btn-ghost full" data-consent="0">Don\'t share anything</button>'+
+    '<p class="small muted" style="text-align:center">You can change this any time this week in Settings. It ends by itself after 7 days. Either way, everything stays open to you, for life.</p></div>');
 }
-async function setConsent(yes){
+async function setConsent(yes,scope){
+  scope=yes?(scope||SHARE_OPTS.map(o=>o[0])):[];if(!scope.length)yes=false;
   closeSheet();
-  if(!accountsOn()){S.previewMonitorAnswer=yes?"yes":"no";S.previewMonitor=yes?Date.now()+7*864e5:0;saveLocal();}
-  else{const r=await api("/api/monitor",{consent:!!yes});if(r&&!r.error){ACCT.monitorAnswer=r.monitor_answer;ACCT.monitorUntil=r.monitor_until;}}
-  if(yes){track("open");toast("Thank you. "+ownerName()+" will only see taps, never your words.");}else toast("No problem at all. Everything is still yours.");
-  renderAll();
+  if(!accountsOn()){S.previewMonitorAnswer=yes?"yes":"no";S.previewMonitor=yes?(S.previewMonitor&&S.previewMonitor>Date.now()?S.previewMonitor:Date.now()+7*864e5):0;S.previewScope=scope;saveLocal();}
+  else{const r=await api("/api/monitor",{consent:!!yes,scope});if(r&&!r.error){ACCT.monitorAnswer=r.monitor_answer;ACCT.monitorUntil=r.monitor_until;ACCT.monitorScope=r.monitor_scope||scope;}}
+  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the taps you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
+  renderAll();setTimeout(auraPopup,600);
 }
 function sharingHTML(){
+  if(inFriendsWeek()){const on=monitorOn(),sel=on?shareScope():[];
+    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only what you tap and when'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
   if(!monitorOn())return "";
   const until=accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor;
   return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see what you tap and when. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
@@ -2836,9 +2859,11 @@ function auraPopup(){
   let key=null,body="",label="Aura",btns="";
   if(isFriend()&&!S.seenPop["friend-welcome"]){S.seenPop["friend-welcome"]=Date.now();saveLocal();
     openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", you\'re":"You\'re")+" one of the first. Everything in the Inner Circle is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. You can bring in 3 people of your own, free for life too. Your link is in Settings. Thank you for helping me grow.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
-  if(isFriend()&&!monitorAnswered()&&!S.seenPop.consent){openConsent();return;}
+  if((isFriend()||isShared())&&!monitorAnswered()&&!S.seenPop.consent){if(isShared()&&!S.seenPop["shared-welcome"]){}else{openConsent();return;}}
   if(isShared()&&!S.seenPop["shared-welcome"]){S.seenPop["shared-welcome"]=Date.now();saveLocal();
-    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", a":"A")+" friend brought you in, so everything here is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. I\'m so glad you\'re here.","Aura · lifetime access")+'<button class="btn btn-main full" id="popClose">Let\'s begin</button></div>');return;}
+    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", a":"A")+" friend brought you in, so everything here is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. I\'m so glad you\'re here.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
+  if(accountsOn()&&ACCT.user&&!S.profile.push&&!S.seenPop["push-offer"]){S.seenPop["push-offer"]=Date.now();saveLocal();
+    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Can I reach you? I\'d love to tell you when a letter from me arrives, and when a guardian checks in on you. Only when it means something, never nagging.","Aura · letters and check ins")+'<button class="btn btn-main full" id="pushOffer">Yes, let Aura reach me</button><button class="btn btn-ghost full" id="popClose">Not now</button><p class="small muted" style="text-align:center">You can change this any time in Settings.</p></div>');return;}
   if(isLifetime())return;
   if(inTrial()&&trialDaysLeft()>1){key="trial-start";label="Aura · your free week";body=(nm?esc(nm)+", your":"Your")+" first week is on me. Every chamber is open, I\'ll write to you, and the guardians will check in on you. "+trialDaysLeft()+" days to explore all of it.";btns='<button class="btn btn-main full" id="popClose">Let\'s begin</button>';}
   else if(inTrial()){key="trial-last:"+te;label="Aura · last day";body="Tomorrow your free week ends and the chambers close. I\'ll keep writing to you for another month, but my letters will stay sealed in your mailbox until you join. Everything you wrote stays yours.";btns='<button class="btn btn-main full" data-paywall="Stay close">Stay in the Inner Circle</button><button class="btn btn-ghost full" id="popClose">Not now</button>';}
@@ -2874,6 +2899,7 @@ function plat(){if(isNative())return window.Capacitor.getPlatform();const u=navi
 function track(ev,meta){
   try{
     if(!monitorOn())return;
+    if(!shareScope().includes(EVCAT[ev]||"pages"))return;
     evQ.push({ev,t:Date.now(),meta:{...(meta||{}),day:dayNum(),stage:typeof stage==="function"?stage():0,plat:plat()}});
     if(evQ.length>=40)flushEvents();else if(!evTimer)evTimer=setTimeout(flushEvents,8000);
   }catch(e){}
@@ -2906,13 +2932,29 @@ async function sendFeedback(where){
   const row={text:text.slice(0,4000),mood,screen:where||"",day:dayNum(),name:firstName()};
   try{
     if(MODE==="artifact"&&cloud.db){await cloud.db.collection("feedback").doc("fb"+Date.now().toString(36)).set({...row,dev:S.dev,ts:Date.now()});}
-    else if(ACCT.sb&&ACCT.user){await ACCT.sb.from("feedback").insert({user_id:ACCT.user.id,email:ACCT.email||null,text:row.text,mood,screen:row.screen,day:row.day});}
+    else if(ACCT.sb&&ACCT.user){const r=await api("/api/feedback",{text:row.text,mood,screen:row.screen,day:row.day,name:row.name});if(r&&r.error)await ACCT.sb.from("feedback").insert({user_id:ACCT.user.id,email:ACCT.email||null,text:row.text,mood,screen:row.screen,day:row.day});}
     else{S.fbQueue=(S.fbQueue||[]).concat([{...row,ts:Date.now()}]);saveLocal();}
   }catch(e){}
-  track("feedback",{mood});S.fbAsked=true;saveLocal();closeSheet();toast("Thank you. I read every word.");
+  track("feedback",{mood,reason:where==="after visit"?"after visit":"sent"});S.fbAsked=true;saveLocal();closeSheet();toast(where==="after visit"?"Thank you. "+ownerName()+" will read every word.":"Thank you. I read every word.");
 }
+/* Friends Week: each time someone comes back to the app during their first 7 days, Aura offers
+   a quick, optional note for Erica about their last visit. Nothing is required; they can close it. */
+function openVisitNote(){
+  if(!inFriendsWeek()||$("#scrim")||$("#rite")||$("#talk")||$("#gate")||$("#phoneOnly"))return;
+  track("feedback",{reason:"offered"});
+  openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Quick one, and only if you feel like it. Anything about your last visit you\'d tell "+esc(ownerName())+"? What felt good, what was confusing, what you wish was here. Close this if not.","Aura · a note for "+esc(ownerName()))+
+   '<div class="chips" id="fbMood">'+["Loved it","It was okay","Confusing","Something broke"].map(m=>'<button class="chip" data-fbmood="'+m+'" aria-pressed="false">'+m+'</button>').join("")+'</div>'+
+   '<div class="composer"><label class="sr" for="fbText">Your note</label><textarea id="fbText" placeholder="Type anything, or tap the mic and say it. Or nothing at all."></textarea>'+micBtn("fbText")+'</div>'+
+   '<button class="btn btn-main full" id="fbSend" data-where="after visit">Send to '+esc(ownerName())+'</button><button class="btn btn-ghost full" id="popClose">Close</button>'+
+   '<p class="small muted" style="text-align:center">This goes to '+esc(ownerName())+' with your name. It\'s separate from your private words with the guardians. This note only appears during your first week.</p></div>');
+}
+(function(){let hiddenAt=0;
+  document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){hiddenAt=Date.now();S.lastHidden=hiddenAt;saveLocal();}else if(hiddenAt&&Date.now()-hiddenAt>3*60*1000){hiddenAt=0;setTimeout(openVisitNote,1200);}});
+  setTimeout(()=>{if(S.lastHidden&&Date.now()-S.lastHidden>3*60*1000&&S.profile.onboarded)openVisitNote();},4500);
+})();
 /* On day 2 or later, once, Aura asks for a thought. */
 function maybeAskFeedback(){
+  if(inFriendsWeek())return;
   if(!askFeedback()||S.fbAsked||dayNum()<1||S.entries.length<1||$("#scrim")||$("#rite")||$("#talk"))return;
   S.fbAsked=true;saveLocal();openFeedback("day2");
 }
@@ -3577,6 +3619,9 @@ document.addEventListener("click",async ev=>{
   if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});syncSnd();if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}renderSnd();return;}
   if(d.pvoice){if(d.pvoice==="off")setVoice(false);else{S.prefVoice=d.pvoice;setVoice(true);}t.parentElement.querySelectorAll("[data-pvoice]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="toConsent"){openConsent();return;}
+  if(t.id==="consentSave"){const sc=checkedScope();setConsent(sc.length>0,sc);return;}
+  if(t.id==="scopeSave"){const sc=checkedScope();await setConsent(sc.length>0,sc);return;}
+  if(t.id==="pushOffer"){closeSheet();await enablePush();return;}
   if(t.id==="endFriendPreview"){S.previewFriend=false;S.previewMonitor=0;S.previewMonitorAnswer=null;saveLocal();closeSheet();renderAll();toast("Back to your own view.");return;}
   if(d.consent!=null){setConsent(d.consent==="1");return;}
   if(d.previewfriend){S.previewFriend=true;S.seenPop=S.seenPop||{};delete S.seenPop["friend-welcome"];delete S.seenPop.consent;S.previewMonitorAnswer=null;saveLocal();closeSheet();renderAll();auraPopup();return;}

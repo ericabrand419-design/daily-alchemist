@@ -20,7 +20,7 @@ export async function POST(request) {
   return json({
     email: user.email, member: isMember(profile), paid: isPaid(profile), lifetime: !!profile.lifetime, cohort: profile.cohort || null,
     trial_until: profile.trial_until || null, member_until: profile.member_until || null,
-    adult_confirmed_at: profile.adult_confirmed_at || null, monitor_answer: profile.monitor_answer || null, monitor_until: profile.monitor_until || null, admin, usage,
+    adult_confirmed_at: profile.adult_confirmed_at || null, monitor_answer: profile.monitor_answer || null, monitor_until: profile.monitor_until || null, monitor_scope: profile.monitor_scope || null, admin, usage,
   });
 }
 

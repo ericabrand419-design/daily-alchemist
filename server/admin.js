@@ -25,7 +25,7 @@ export async function POST(request) {
   const since = new Date(Date.now() - 45 * 864e5).toISOString();
   const [users, profiles, prefs, events, feedback] = await Promise.all([
     allUsers(),
-    sb("profiles?select=id,cohort,lifetime,trial_until,member_until,monitor_answer,monitor_started,monitor_until,joined_at,is_admin,adult_confirmed_at,invited_by"),
+    sb("profiles?select=id,cohort,lifetime,trial_until,member_until,monitor_answer,monitor_started,monitor_until,monitor_scope,joined_at,is_admin,adult_confirmed_at,invited_by"),
     sb("prefs?select=user_id,data->profile->>name"),
     sb("events?select=user_id,ev,meta,created_at&created_at=gte." + since + "&order=created_at.asc&limit=20000"),
     sb("feedback?select=user_id,email,mood,text,screen,day,created_at&order=created_at.desc&limit=500"),
@@ -38,7 +38,7 @@ export async function POST(request) {
     return {
       id: u.id, email: u.email || (u.phone ? "+" + String(u.phone).replace(/^\+/, "") : ""), name: N[u.id] || "", joined: p.joined_at || u.created_at, last_sign_in: u.last_sign_in_at || null,
       cohort: p.cohort || null, invited_by: p.invited_by || null, lifetime: !!p.lifetime, adult_confirmed_at: p.adult_confirmed_at || null, member_until: p.member_until || null, trial_until: p.trial_until || null,
-      sharing: p.monitor_answer || null, sharing_started: sharing ? p.monitor_started : null, sharing_until: sharing ? p.monitor_until : null,
+      sharing: p.monitor_answer || null, sharing_started: sharing ? p.monitor_started : null, sharing_until: sharing ? p.monitor_until : null, sharing_scope: sharing ? (p.monitor_scope || null) : null,
     };
   });
   const shared = new Set(people.filter((p) => p.sharing_started).map((p) => p.id));

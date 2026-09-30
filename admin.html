@@ -118,7 +118,7 @@ a.btn{text-decoration:none;display:inline-block}
     <h2>Where rituals get left</h2>
     <div class="card"><div id="drops"></div></div>
 
-    <h2>Feedback they chose to send you</h2>
+    <h2>Notes and feedback they chose to send you</h2>
     <div class="card"><div class="fb" id="feedback"></div></div>
   </div>
 </div>
@@ -170,10 +170,12 @@ function stats(uid){
   const days=new Set(ev.map(e=>dayK(e.created_at)));
   return {ev,days:days.size,last:ev.length?ev[ev.length-1].created_at:null,rituals:c("ritual"),readings:c("reading"),chats:c("chat_send"),letters:c("letter_open"),checkins:c("nudge_reply"),day2:ev.some(e=>e.ev==="open"&&(e.meta||{}).day>=1)};
 }
+const SCOPE_NAMES={time:"visits and time",pages:"pages",rituals:"rituals",readings:"readings and cards",chats:"chats (no words)",letters:"letters and check ins",sound:"voices and music",membership:"membership page"};
+function scopeLine(p){return Array.isArray(p.sharing_scope)&&p.sharing_scope.length?'<br><span class="muted" style="font-size:13px">Shares: '+p.sharing_scope.map(k=>esc(SCOPE_NAMES[k]||k)).join(", ")+'</span>':'';}
 function pill(p){
-  if(p.sharing==="yes"){const on=new Date(p.sharing_until)>new Date();return '<span class="pill yes">'+(on?"Yes, until "+new Date(p.sharing_until).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"Yes, week done")+'</span>';}
+  if(p.sharing==="yes"){const on=new Date(p.sharing_until)>new Date();return '<span class="pill yes">'+(on?"Yes, until "+new Date(p.sharing_until).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"Yes, week done")+'</span>'+scopeLine(p);}
   if(p.sharing==="stopped")return '<span class="pill stop">Stopped</span>';
-  if(p.sharing==="no")return '<span class="pill no">No</span>';
+  if(p.sharing==="no")return '<span class="pill no">Chose not to share</span>';
   return '<span class="pill wait">Not asked yet</span>';
 }
 function fmt(t){return t?new Date(t).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";}
