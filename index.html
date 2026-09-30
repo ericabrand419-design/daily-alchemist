@@ -502,6 +502,8 @@ body:has(#gate) .scrim{z-index:60}
 .sky{grid-template-columns:auto 1fr;padding:8px 0 14px!important}.sky svg{width:40px!important;height:40px!important}.sky .phase{font-size:19px!important}.sky .meta{font-size:14px!important}
 .g .e.job{text-transform:none;letter-spacing:0;font-size:13.5px;line-height:1.25;color:var(--glow-dim)}
 .memline{margin-top:4px}
+textarea{min-height:124px}.talk textarea{min-height:48px}
+input::placeholder,textarea::placeholder{text-overflow:ellipsis}
 .topctl{display:grid;justify-items:center;gap:8px;flex:none}
 .sndbar{display:flex;gap:6px;align-items:center}
 .snd{width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.45);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;padding:0;position:relative}
@@ -1758,6 +1760,10 @@ function journeyDays(id){return [...new Set(S.entries.filter(e=>e.journey===id).
 
 const MIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M8.5 21h7"/></svg>';
 const SEND='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg>';
+/* One rule for every chat: when a guardian opens the conversation (after a ritual, a check in,
+   a handoff, something you asked to bring back), any earlier opening you never answered is
+   replaced, never stacked. */
+function guardianOpens(list,msg){while(list.length&&list[list.length-1].role==="them"&&list[list.length-1].auto)list.pop();list.push({...msg,role:"them",auto:true,ts:Date.now()});return list;}
 function micBtn(id){return '<button class="mic" data-mic="'+id+'" aria-pressed="false" aria-label="Speak instead of typing">'+MIC+'</button>';}
 /* helpers */
 const $=s=>document.querySelector(s);
@@ -1911,7 +1917,7 @@ function openMemory(){
   const L=ledger(),rows=LEDGER_KEYS.filter(([k])=>(L[k]||[]).length),th=allThreads().slice(0,12),on=memOn();
   openSheet('<div class="stack"><div class="popseal">'+glyph("aura",56)+'</div>'+auraSays("I remember the people, goals, patterns and moments you share, so you never have to explain yourself twice. You decide what I keep. Nobody else sees any of it.","Aura · what I remember")+
     '<div class="chips"><button class="chip" data-mem="on" aria-pressed="'+on+'">Remember what I share</button><button class="chip" data-mem="off" aria-pressed="'+!on+'">Don\'t remember anything</button></div>'+
-    (on?'<div class="card"><div class="label">Tell me something to remember</div><div class="addrow"><label class="sr" for="memIn">Something to remember</label><input type="text" id="memIn" placeholder="My sister\'s name is Tasha. I start the new job in March."><button class="btn btn-ghost" id="memAdd">Remember this</button></div>'+
+    (on?'<div class="card"><div class="label">Tell me something to remember</div><div class="addrow"><label class="sr" for="memIn">Something to remember</label><input type="text" id="memIn" placeholder="My sister\'s name is Tasha."><button class="btn btn-ghost" id="memAdd">Remember this</button></div>'+
       ((S.memNotes||[]).length?'<div class="ledg">'+S.memNotes.map(n=>'<div class="li"><span>'+esc(n.text)+'</span><button class="x2" data-memnote="'+esc(n.id)+'" aria-label="Forget this">×</button></div>').join("")+'</div>':'')+'</div>':'')+
     (on&&rows.length?'<div class="card"><div class="label">What I carry for you</div><p class="small muted" style="margin-top:4px">Tap × to make me forget something.</p>'+rows.map(([k,l])=>'<div class="ledg"><div class="lk">'+esc(l)+'</div>'+L[k].map((it,i)=>'<div class="li"><span>'+esc(it)+'</span><button class="x2" data-forget="'+k+':'+i+'" aria-label="Forget this">×</button></div>').join("")+'</div>').join("")+'</div>':'')+
     (on&&th.length?'<div class="card"><div class="label">The threads I follow</div><p class="small muted" style="margin-top:4px">Forget a thread and I stop bringing it up. Your own entries stay in your Archive, marked private.</p>'+th.map(([t,n])=>'<div class="li"><span>'+esc(t)+' <span class="muted small">· '+n+'</span></span><button class="chip" data-forgetthread="'+esc(t)+'">Forget this thread</button></div>').join("")+'</div>':'')+
@@ -2085,7 +2091,7 @@ function followHTML(){
 }
 function followStep2(a,picked){
   const box=$("#fuMore");if(!box)return;$("#fuBtns").innerHTML='<span class="small muted">'+esc(picked)+'</span>';
-  box.innerHTML='<div class="composer" style="margin-top:10px"><label class="sr" for="fuText">What changed?</label><textarea id="fuText" placeholder="What changed? One line is plenty. Or leave it blank."></textarea>'+micBtn("fuText")+'</div><p class="small" style="margin-top:10px">Want me to carry this forward?</p><div class="row" style="margin-top:6px"><button class="btn btn-main" data-fusave="carry">Yes, keep it with me</button><button class="btn btn-ghost" data-fusave="rest">Let it rest</button></div>';
+  box.innerHTML='<div class="composer" style="margin-top:10px"><label class="sr" for="fuText">What changed?</label><textarea id="fuText" placeholder="What changed? One line is plenty."></textarea>'+micBtn("fuText")+'</div><p class="small" style="margin-top:10px">Want me to carry this forward?</p><div class="row" style="margin-top:6px"><button class="btn btn-main" data-fusave="carry">Yes, keep it with me</button><button class="btn btn-ghost" data-fusave="rest">Let it rest</button></div>';
 }
 function saveFollow(a,carry){
   const f=a._fu||{};const changed=(($("#fuText")||{}).value||"").trim().slice(0,600);
@@ -2335,7 +2341,7 @@ function myRitualsHTML(){
   return '<div class="card"><div class="row between"><span class="label">My rituals</span><button class="linkish" id="writeOwn">Write your own</button></div>'+(S.myRituals.length?S.myRituals.map(r=>'<div class="li"><span><b style="font-weight:500">'+(r.family?'🌿 ':'')+esc(r.title)+'</b><br><span class="small muted">'+(r.origin?esc(r.origin):esc((G[r.g]||G.aura).name))+' · '+r.min+' min</span></span><button class="chip" data-begin="'+esc(r.id)+'">Begin</button></div>').join(""):'<p class="small muted" style="margin-top:4px">Rituals Aura writes for you, and ones you write yourself, live here.</p>')+'</div>';
 }
 function openWriteOwn(){
-  openSheet('<div class="stack"><div class="label">Write your own ritual</div><h2>Your practice, your words.</h2><div class="field"><label for="ownTitle">Name it</label><input type="text" id="ownTitle" placeholder="Sunday Kitchen Blessing"></div><div class="field"><label for="ownSteps">Steps, one per line</label><textarea id="ownSteps" style="min-height:140px" placeholder="Light the stove candle&#10;Stir the pot clockwise three times&#10;Say who you are cooking for"></textarea></div><div class="field"><label for="ownSay">Something you say (optional)</label><input type="text" id="ownSay" placeholder="This home is fed and so am I."></div><div class="field"><label for="ownOrigin">Where does it come from? (optional)</label><input type="text" id="ownOrigin" placeholder="My grandmother did this every New Year\'s Day"></div><label class="switch" for="ownFamily">This is a family tradition<input type="checkbox" id="ownFamily"></label><div class="field"><span class="lbl">Minutes</span><div class="chips" id="ownMin">'+[5,10,15,20].map(m=>'<button class="chip" data-ownmin="'+m+'" aria-pressed="'+(m===10)+'">'+m+'</button>').join("")+'</div></div><button class="btn btn-main full" id="ownSave">Save to my rituals</button></div>');
+  openSheet('<div class="stack"><div class="label">Write your own ritual</div><h2>Your practice, your words.</h2><div class="field"><label for="ownTitle">Name it</label><input type="text" id="ownTitle" placeholder="Sunday Kitchen Blessing"></div><div class="field"><label for="ownSteps">Steps, one per line</label><textarea id="ownSteps" style="min-height:140px" placeholder="Light the stove candle&#10;Stir the pot clockwise three times&#10;Say who you are cooking for"></textarea></div><div class="field"><label for="ownSay">Something you say (optional)</label><input type="text" id="ownSay" placeholder="This home is fed and so am I."></div><div class="field"><label for="ownOrigin">Where does it come from? (optional)</label><input type="text" id="ownOrigin" placeholder="Grandma, every New Year\'s"></div><label class="switch" for="ownFamily">This is a family tradition<input type="checkbox" id="ownFamily"></label><div class="field"><span class="lbl">Minutes</span><div class="chips" id="ownMin">'+[5,10,15,20].map(m=>'<button class="chip" data-ownmin="'+m+'" aria-pressed="'+(m===10)+'">'+m+'</button>').join("")+'</div></div><button class="btn btn-main full" id="ownSave">Save to my rituals</button></div>');
 }
 
 /* Threads */
@@ -2857,7 +2863,7 @@ function nudgeHTML(){
 function nudgeAction(id,act){
   const nd=S.nudges.find(n=>n.id===id);if(!nd)return;
   track("nudge_"+act,{g:nd.g});
-  if(act==="reply"){nd.status="replied";const l=S.chats[nd.g]=S.chats[nd.g]||[];l.push({role:"them",ts:Date.now(),text:nd.text,ts:Date.now()});saveLocal();remotePut("chat",nd.g,{kind:"chat",msgs:l});remotePut("prefs");openTalk(nd.g);}
+  if(act==="reply"){nd.status="replied";const l=S.chats[nd.g]=S.chats[nd.g]||[];guardianOpens(l,{text:nd.text});saveLocal();remotePut("chat",nd.g,{kind:"chat",msgs:l});remotePut("prefs");openTalk(nd.g);}
   else{nd.status="dismissed";saveLocal();remotePut("prefs");}
   const slot=$("#nudgeSlot");if(slot)slot.innerHTML=nudgeHTML();
 }
@@ -3033,7 +3039,7 @@ function askFeedback(){return !window.DA_CONFIG||window.DA_CONFIG.askFeedback!==
 function openFeedback(where){
   openSheet('<div class="stack"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("I\'m still new, and you\'re helping shape me. What confused you? What did you love? What\'s missing? Anything goes.","Aura")+
    '<div class="chips" id="fbMood">'+["I love it","It\'s okay","I\'m confused","Something broke"].map(m=>'<button class="chip" data-fbmood="'+m+'" aria-pressed="false">'+m+'</button>').join("")+'</div>'+
-   '<div class="composer"><label class="sr" for="fbText">Your feedback</label><textarea id="fbText" placeholder="Type it, or tap the mic and say it."></textarea>'+micBtn("fbText")+'</div>'+
+   '<div class="composer"><label class="sr" for="fbText">Your feedback</label><textarea id="fbText" placeholder="Type it or say it."></textarea>'+micBtn("fbText")+'</div>'+
    '<button class="btn btn-main full" id="fbSend" data-where="'+esc(where||"")+'">Send</button><button class="btn btn-ghost full" id="popClose">Not now</button></div>');
 }
 async function sendFeedback(where){
@@ -3054,7 +3060,7 @@ function openVisitNote(){
   track("feedback",{reason:"offered"});
   openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Quick one, and only if you feel like it. Anything about your last visit you\'d tell "+esc(ownerName())+"? What felt good, what was confusing, what you wish was here. Close this if not.","Aura · a note for "+esc(ownerName()))+
    '<div class="chips" id="fbMood">'+["Loved it","It was okay","Confusing","Something broke"].map(m=>'<button class="chip" data-fbmood="'+m+'" aria-pressed="false">'+m+'</button>').join("")+'</div>'+
-   '<div class="composer"><label class="sr" for="fbText">Your note</label><textarea id="fbText" placeholder="Type anything, or tap the mic and say it. Or nothing at all."></textarea>'+micBtn("fbText")+'</div>'+
+   '<div class="composer"><label class="sr" for="fbText">Your note</label><textarea id="fbText" placeholder="Type or say anything. Or nothing."></textarea>'+micBtn("fbText")+'</div>'+
    '<button class="btn btn-main full" id="fbSend" data-where="after visit">Send to '+esc(ownerName())+'</button><button class="btn btn-ghost full" id="popClose">Close</button>'+
    '<p class="small muted" style="text-align:center">This goes to '+esc(ownerName())+' with your name. It\'s separate from your private words with the guardians. This note only appears during your first week.</p></div>');
 }
@@ -3320,7 +3326,7 @@ function renderArchive(){
     const [t,c]=topT[0];
     h+='<div class="card"><div class="label">Aura notices</div><p style="margin-top:6px">'+(c>=3?"You have come back to <b>"+esc(t)+"</b> "+c+" times this month. That's not a coincidence, it's a thread worth pulling.":"This month you've worked mostly with <b>"+esc(t)+"</b>.")+'</p><div class="chips" style="margin-top:10px">'+topT.slice(0,6).map(([k,v])=>'<span class="tag">'+esc(k)+' · '+v+'</span>').join("")+'</div></div>';
   }
-  h+='<div class="card"><div class="label">Ask your Archive</div><div class="composer" style="margin-top:8px"><label class="sr" for="archAsk">Ask your Archive</label><textarea id="archAsk" style="min-height:56px" placeholder="When did I first start talking about leaving this job?"></textarea>'+micBtn("archAsk")+'</div><button class="btn btn-ghost full" style="margin-top:8px" id="archAskBtn">Ask</button><div id="archAnswer"></div></div>';
+  h+='<div class="card"><div class="label">Ask your Archive</div><div class="composer" style="margin-top:8px"><label class="sr" for="archAsk">Ask your Archive</label><textarea id="archAsk" style="min-height:56px" placeholder="When did this first come up?"></textarea>'+micBtn("archAsk")+'</div><button class="btn btn-ghost full" style="margin-top:8px" id="archAskBtn">Ask</button><div id="archAnswer"></div></div>';
   const th=threadsOf();
   if(q&&th.some(x=>x[0]===q))h+=beforeAfterHTML(q);
   if(th.length)h+='<div><div class="label">Your threads</div><div class="chips" style="margin-top:8px">'+th.slice(0,10).map(([k,v])=>'<button class="chip" data-thread="'+esc(k)+'" aria-pressed="'+(q===k)+'">'+esc(k)+' · '+v+'</button>').join("")+'</div></div>';
@@ -3639,7 +3645,7 @@ function accountHTML(){
 function openAltar(first){
   const p=S.profile;
   const chipset=(id,list)=>'<div class="chips" id="'+id+'">'+list.map(hv=>'<button class="chip" data-have="'+hv[0]+'" aria-pressed="'+p.have.includes(hv[0])+'">'+esc(hv[1])+'</button>').join("")+'</div>';
-  const custom='<div class="chips" id="pCustom" style="margin-top:8px">'+p.custom.map((c,i)=>'<span class="chip" aria-pressed="true">'+esc(c)+' <button class="x2 in" data-delcustom="'+i+'" aria-label="Remove '+esc(c)+'">×</button></span>').join("")+'</div><div class="addrow"><label class="sr" for="customIn">Add your own item</label><input type="text" id="customIn" placeholder="Add your own: rose quartz, mugwort, a singing bowl..."><button class="btn btn-ghost" id="customAdd">Add</button></div>';
+  const custom='<div class="chips" id="pCustom" style="margin-top:8px">'+p.custom.map((c,i)=>'<span class="chip" aria-pressed="true">'+esc(c)+' <button class="x2 in" data-delcustom="'+i+'" aria-label="Remove '+esc(c)+'">×</button></span>').join("")+'</div><div class="addrow"><label class="sr" for="customIn">Add your own item</label><input type="text" id="customIn" placeholder="Add your own item"><button class="btn btn-ghost" id="customAdd">Add</button></div>';
   let h;
   if(first){
     const tabs=[["today","Today","Tell me what you're carrying. Tap the feelings that fit, type it, or tap the mic and say it. I'll find the right guardian."],
@@ -3705,7 +3711,7 @@ document.addEventListener("click",async ev=>{
   if(d.altar){openAltarItems(d.altar);return;}
   if(d.tend){const sp=S.spaces.find(z=>z.id===d.tend);const r=tendRitual(sp);startRitual(r,{space:sp.id,theme:"space",thread:"Home"});return;}
   if(d.delspace){S.spaces=S.spaces.filter(z=>z.id!==d.delspace);persistAll();renderArchive();return;}
-  if(t.id==="addSpace"){openSheet('<div class="stack"><div class="label">Add a space</div><div class="addrow"><label class="sr" for="spaceName">Space name</label><input type="text" id="spaceName" placeholder="Office, porch, the baby\'s room..."><button class="btn btn-main" id="spaceSave">Add</button></div></div>');return;}
+  if(t.id==="addSpace"){openSheet('<div class="stack"><div class="label">Add a space</div><div class="addrow"><label class="sr" for="spaceName">Space name</label><input type="text" id="spaceName" placeholder="Office, porch, bedroom"><button class="btn btn-main" id="spaceSave">Add</button></div></div>');return;}
   if(t.id==="spaceSave"){const nm=($("#spaceName").value||"").trim();if(!nm)return;S.spaces.push({id:uid(),name:nm,log:[]});persistAll();closeSheet();renderArchive();return;}
   if(d.markdate){const dd=S.dates.find(z=>z.id===d.markdate);tab("today");$("#carry").value=dd.name+" is coming up. I want to mark it.";$("#askBtn").click();return;}
   if(d.makemine){const b=byId[d.makemine];saveMyRitual({...b,id:"mine-"+uid(),title:"My "+b.title});renderArchive();toast("It's yours now. Aura will reach for it first.");return;}
@@ -3717,7 +3723,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="cantThink"||t.id==="simpleGo"){openSimple();return;}
   if(t.id==="simpleDone"){closeSimple();toast("Good. That was enough.");return;}
   if(d.promise){const [id,act]=d.promise.split(":");const pr=S.promises.find(z=>z.id===id);if(pr){if(act==="done"){pr.status="done";pr.doneAt=Date.now();toast("That's the alchemy. Real life changed.");if(!S.entries.some(e=>e.id===pr.source&&e.private))updateLedger("She kept a promise to herself: "+pr.text);}else if(act==="later"){pr.due=Date.now()+3*864e5;delete pr.notified;toast("I'll ask again in three days.");}else{pr.status="let";toast("Let go. No guilt.");}persistAll();renderToday();if(!$("#v-archive").hidden)renderArchive();}return;}
-  if(d.later){const [id,act]=d.later.split(":");const l=S.later.find(z=>z.id===id);if(l){l.done=true;persistAll();renderToday();if(act==="open"){if(l.kind==="entry")openEntry(l.ref);else{const k=l.g||"aura",list=S.chats[k]=S.chats[k]||[];list.push({role:"them",ts:Date.now(),text:"You asked me to bring this back: \""+l.label+"\" Where are you with it now?"});saveLocal();openTalk(k);}}}return;}
+  if(d.later){const [id,act]=d.later.split(":");const l=S.later.find(z=>z.id===id);if(l){l.done=true;persistAll();renderToday();if(act==="open"){if(l.kind==="entry")openEntry(l.ref);else{const k=l.g||"aura",list=S.chats[k]=S.chats[k]||[];guardianOpens(list,{text:"You asked me to bring this back: \""+l.label+"\" Where are you with it now?"});saveLocal();openTalk(k);}}}return;}
   if(d.laterread&&lastRead){openLaterSheet("reading",null,lastRead.carrying||lastRead.reading,lastRead.guardian);return;}
   if(d.laterentry){const e=S.entries.find(z=>z.id===d.laterentry);openLaterSheet("entry",e.id,e.ritualTitle+(e.text?": "+e.text.slice(0,120):""),e.guardian);return;}
   if(d.laterwhen&&window.__later){const L=window.__later;S.later.push({id:uid(),kind:L.kind,ref:L.ref,label:L.label,g:L.g,due:laterDue(d.laterwhen),done:false});persistAll();closeSheet();toast("Aura will bring it back "+t.textContent.toLowerCase()+".");return;}
@@ -3741,7 +3747,7 @@ document.addEventListener("click",async ev=>{
   if(d.cartdel){S.cart=S.cart.filter(c=>c.tag!==d.cartdel);persistAll();closeSheet();openAltar(false);return;}
   if(d.thread!==undefined){q=q===d.thread?"":d.thread;renderArchive();return;}
   if(t.id==="archAskBtn"){const qq=($("#archAsk").value||"").trim();if(!qq)return;t.disabled=true;$("#archAnswer").innerHTML='<p class="small muted" style="margin-top:10px">Reading your Archive...</p>';const a=await askArchive(qq);t.disabled=false;$("#archAnswer").innerHTML='<p style="margin-top:12px;font-size:18px">'+esc(a.answer)+'</p>'+(a.cites.length?'<div class="entries" style="margin-top:8px">'+a.cites.map(id=>{const e=S.entries.find(z=>z.id===id);return e?'<button class="entry" data-entry="'+esc(id)+'">'+glyph(e.guardian)+'<span><div class="t">'+esc(e.ritualTitle)+'</div><div class="m">'+fmtDate(e.ts)+'</div>'+(e.text?'<div class="x">'+esc(e.text)+'</div>':'')+'</span></button>':"";}).join("")+'</div>':'');return;}
-  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];list.push({role:"them",ts:Date.now(),text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
+  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
   if(d.snd){if(d.snd==="music"){const on=!musicOn();setMusic(on);toast(on?"Music on.":"Music off. Tap the note to bring it back.");}else{const on=voiceMuted();setVoice(on);toast(on?"Voices on.":"Voices off. Tap the speaker to hear them again.");}track("music",{set:d.snd+(d.snd==="music"?(musicOn()?"_on":"_off"):(voiceMuted()?"_off":"_on"))});return;}
   if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(voiceMuted())setVoice(true);if(!naturalVoices()&&!("speechSynthesis" in window)){voiceOn=false;toast("Spoken guidance isn't available on this device.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
   if(d.own){const [tg,yn]=d.own.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);refreshCards();toast(yn==="1"?"Got it. Aura will remember.":"Got it. Aura rewrote it around what you have.");return;}
@@ -3780,8 +3786,8 @@ document.addEventListener("click",async ev=>{
   if(t.id==="altarBtn"){track("settings_open");openAltar(false);return;}
   if(t.id==="sheetX"){closeSheet();return;}
   if(d.talkafter){const [k,eid]=d.talkafter.split(":");const e=S.entries.find(x=>x.id===eid);const l=S.chats[k]=S.chats[k]||[];
-    while(l.length&&l[l.length-1].role==="them"&&(l[l.length-1].after||/ just finished .* with me\./.test(l[l.length-1].text||"")))l.pop();
-    l.push({role:"them",after:true,ts:Date.now(),text:(firstName()?firstName()+", you":"You")+" just finished "+(e?e.ritualTitle:"a ritual")+" with me."+(e&&e.text?' You wrote: "'+e.text.slice(0,120)+'".':"")+" What came up for you?"});
+    for(const m of l)if(m.role==="them"&&/ just finished .* with me\./.test(m.text||""))m.auto=true;
+    guardianOpens(l,{text:(firstName()?firstName()+", you":"You")+" just finished "+(e?e.ritualTitle:"a ritual")+" with me."+(e&&e.text?' You wrote: "'+e.text.slice(0,120)+'".':"")+" What came up for you?"});
     saveLocal();remotePut("chat",k,{kind:"chat",msgs:l});openTalk(k);return;}
   if(t.id==="popClose"){closeSheet();return;}
   if(d.hear){const holder=t.closest(".bub,.voice");if(t.classList.contains("on")){stopAudio();return;}const txt=holder?[...holder.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join(" ").trim():"";if(txt){stopAudio();t.classList.add("on");speak(txt,()=>t.classList.remove("on"),d.hear,false);track("hear",{g:d.hear});}return;}
@@ -3807,7 +3813,7 @@ document.addEventListener("click",async ev=>{
   if(d.min){pickedMins=+d.min;t.parentElement.querySelectorAll("[data-min]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="askBtn"){
     const typed=$("#carry").value.trim(), text=[feelText(),typed].filter(Boolean).join(" ");
-    if(!text){$("#carry").focus();$("#carry").placeholder="Tap a feeling or tell Aura anything. One word is enough.";return;}
+    if(!text){$("#carry").focus();$("#carry").placeholder="One word is enough.";return;}
     const mins=pickedMins||S.profile.minutes;
     t.disabled=true;
     $("#readingSlot").innerHTML='<div class="reading"><div class="thinking"><span class="orb"></span>Aura is reading the Archive...</div></div>';
@@ -3820,7 +3826,7 @@ document.addEventListener("click",async ev=>{
   if(d.talkread&&lastRead){const k=d.talkread,list=S.chats[k]=S.chats[k]||[];list.push({role:"me",ts:Date.now(),text:lastRead.carrying||""},{role:"them",ts:Date.now(),text:lastRead.reading,ritual:canUse(lastRead.ritual)&&!lastRead.ritual.composed?lastRead.ritual.id:null});saveLocal();remotePut("chat",k,{kind:"chat",msgs:list});openTalk(k);return;}
   if(d.fromhere&&lastRead){const e=S.entries.find(x=>x.id===d.fromhere),k=lastRead.guardian,list=S.chats[k]=S.chats[k]||[];
     list.push({role:"me",ts:Date.now(),text:(lastRead.carrying||"")+" (Working from "+fmtDate(e.ts)+", after "+e.ritualTitle+", when I wrote: \""+(e.text||"").slice(0,400)+"\")"});
-    list.push({role:"them",ts:Date.now(),text:"Then let's start there. On "+fmtDate(e.ts)+" you wrote \""+quoteOf(e)+"\" What feels the same tonight, and what's different?"});
+    guardianOpens(list,{text:"Then let's start there. On "+fmtDate(e.ts)+" you wrote \""+quoteOf(e)+"\" What feels the same tonight, and what's different?"});
     saveLocal();remotePut("chat",k,{kind:"chat",msgs:list});openTalk(k);return;}
   if(t.id==="freshBtn"){const rc=$("#recall");if(rc)rc.remove();if(lastRead)lastRead.memory=null;return;}
   if(t.id==="againBtn"){lastRead=null;feelSel=[];renderToday();$("#carry").focus();return;}
