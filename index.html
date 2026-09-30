@@ -1597,8 +1597,32 @@ async function api(path,body){
     return j;
   }catch(e){return {error:"network"};}
 }
+/* The Daily Alchemist is a phone app. On a computer or tablet, the live site shows a page that
+   sends you to your phone (with a code to scan) instead of the app. */
+function isPhone(){
+  const ua=navigator.userAgent||"";
+  if(/iPad|Tablet|PlayBook|Silk|Kindle/i.test(ua))return false;
+  if(/Macintosh/i.test(ua)&&navigator.maxTouchPoints>1)return false; /* iPad pretending to be a Mac */
+  if(navigator.userAgentData&&typeof navigator.userAgentData.mobile==="boolean"&&!navigator.userAgentData.mobile&&!/Android/i.test(ua))return false;
+  const phoneUA=/iPhone|iPod|Android.+Mobile|Windows Phone|Mobile Safari|BlackBerry|Opera Mini|IEMobile/i.test(ua)||(navigator.userAgentData&&navigator.userAgentData.mobile);
+  const short=Math.min(screen.width,screen.height)<=600;
+  return !!(phoneUA&&short);
+}
+function showPhoneOnly(){
+  const url=location.href;
+  const d=document.createElement("div");d.className="gate";d.id="phoneOnly";
+  d.innerHTML='<div class="in auraPop" style="text-align:center"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
+    auraSays("I live on your phone. Scan this with your phone\'s camera, or open dailyalchemist.com there, and I\'ll meet you.","Aura · open on your phone")+
+    '<div id="qrBox" style="display:grid;place-items:center;margin:6px auto;background:#F4F1E6;border-radius:16px;padding:14px;width:max-content"></div>'+
+    '<p class="small muted">'+esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))+'</p></div>';
+  document.body.appendChild(d);document.body.style.overflow="hidden";
+  const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";
+  sc.onload=()=>{try{const q=qrcode(0,"M");q.addData(url);q.make();$("#qrBox").innerHTML=q.createSvgTag({cellSize:6,margin:0});}catch(e){}};
+  document.head.appendChild(sc);
+}
 async function initWeb(){
   if(MODE!=="web")return;
+  if(!isPhone()){showPhoneOnly();ACCT.ready=true;return;}
   const C=window.DA_CONFIG||{};
   if(!accountsOn()||!C.supabaseAnonKey){ACCT.ready=true;return;}
   ACCT.sb=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
@@ -2750,6 +2774,7 @@ function isShared(){return accountsOn()&&ACCT.lifetime&&ACCT.cohort==="shared";}
 let SHARE=null;
 function shareURL(){return ((window.DA_CONFIG&&window.DA_CONFIG.siteUrl)||location.origin).replace(/\/$/,"")+"/?friend="+SHARE.code;}
 function shareHTML(){
+  if(accountsOn()&&ACCT.admin){return '<details class="group" open id="shareGroup"><summary>Your open link</summary><p class="small muted">One link, no limit. Everyone who joins with it gets lifetime access and their own link for 3 more.</p>'+(SHARE?'<p class="small" style="margin:8px 0">'+SHARE.uses+' joined so far</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div>':'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';}
   if(!isFriend())return "";
   if(!accountsOn())return '<details class="group" open><summary>Bring three people in</summary><p class="small muted">Share your own link with up to 3 people. They get everything, free for life, just like you. (This works on the live app.)</p></details>';
   const left=SHARE?Math.max(0,SHARE.max-SHARE.uses):null;
@@ -2760,10 +2785,10 @@ function shareHTML(){
 async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
 async function doShare(copyOnly){
   if(!SHARE)await loadShare();if(!SHARE)return;
-  const url=shareURL(),text="I've been using The Daily Alchemist. Here's a free invitation, everything open for life. It works for 3 people, so use it soon.";
+  const url=shareURL(),text=SHARE.open?"I made an app, The Daily Alchemist, and I'd love for you to try it. Open this on your phone and everything is free for you, for life.":"I've been using The Daily Alchemist. Here's a free invitation, everything open for life. It works for 3 people, so use it soon.";
   track("share",{reason:copyOnly?"copy":"share"});
   if(!copyOnly&&navigator.share){try{await navigator.share({title:"The Daily Alchemist",text,url});return;}catch(e){if(e&&e.name==="AbortError")return;}}
-  try{await navigator.clipboard.writeText(url);toast("Link copied. Send it to up to 3 people.");}catch(e){prompt("Copy your link:",url);}
+  try{await navigator.clipboard.writeText(url);toast(SHARE.open?"Link copied. Send it to anyone you like.":"Link copied. Send it to up to 3 people.");}catch(e){prompt("Copy your link:",url);}
 }
 function isLifetime(){return accountsOn()?ACCT.lifetime:!!S.previewFriend;}
 function openAdultCheck(){
@@ -2805,7 +2830,7 @@ function sharingHTML(){
   return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see what you tap and when. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
 }
 function auraPopup(){
-  if(!S.profile.onboarded||$("#scrim")||$("#rite")||$("#talk"))return;
+  if($("#phoneOnly")||!S.profile.onboarded||$("#scrim")||$("#rite")||$("#talk"))return;
   S.seenPop=S.seenPop||{};
   const nm=firstName(), te=trialEnds();
   let key=null,body="",label="Aura",btns="";
@@ -3657,7 +3682,7 @@ function refreshCards(){
 function renderBadge(){const b=$("#memBadge");if(!b)return;b.hidden=!isMember();b.textContent=isLifetime()?"Inner Circle · Lifetime":inTrial()?"Inner Circle · "+trialDaysLeft()+(trialDaysLeft()===1?" day":" days")+" free":"Inner Circle";}
 function renderAll(){renderBadge();renderSky();renderToday();renderJourneys();renderCircle();renderArchive();}
 drawSeal();renderAll();setTimeout(()=>{auraPopup();setTimeout(maybeAskFeedback,400);trackOpen();},1200);
-if(!S.profile.onboarded)setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},700);
+if(!S.profile.onboarded)setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate")&&!$("#phoneOnly"))openAltar(true);},700);
 initCloud();initWeb();
 })();
 </script>

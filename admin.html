@@ -85,6 +85,7 @@ a.btn{text-decoration:none;display:inline-block}
       <p style="margin:0">Make one link per friend. Each link works once, for one account, and expires after 30 days. Send it to that friend only.</p>
       <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><input type="text" id="invName" placeholder="Friend's name, for your list" style="flex:1 1 220px"><button class="btn" id="invMake">Create invitation link</button></div>
       <div id="invNew" hidden style="margin-top:12px"></div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(244,241,230,.12)"><p style="margin:0">Or use your <b>open link</b>: one link, no limit, for as many people as you like. Everyone who joins with it gets lifetime access and their own link for 3 more.</p><button class="btn ghost" id="openLink" style="margin-top:10px">Get my open link</button><div id="openBox" hidden style="margin-top:12px"></div></div>
       <div class="tablewrap" style="margin-top:14px"><table id="invites" style="min-width:640px"></table></div>
     </div>
 
@@ -216,7 +217,7 @@ let INV=[],USES=[];
 const siteURL=()=>(C.siteUrl||location.origin).replace(/\/$/,"");
 const invLink=c=>siteURL()+"/?friend="+c;
 /* A ready-made text message. On a phone, "Text it" opens Messages with this filled in. */
-const invText=(c,name)=>"Hi"+(name?" "+name.split(/\s+/)[0]:"")+"! I made an app, The Daily Alchemist, and I'd love for you to try it before anyone else. This link is just for you and gives you everything free, for life: "+invLink(c);
+const invText=(c,name)=>name?"Hi "+name.split(/\s+/)[0]+"! I made an app, The Daily Alchemist, and I'd love for you to try it before anyone else. This link is just for you and gives you everything free, for life: "+invLink(c):"I made an app, The Daily Alchemist, and I'd love for you to try it. Open this on your phone and everything is free for you, for life: "+invLink(c);
 const smsHref=(c,name)=>"sms:?&body="+encodeURIComponent(invText(c,name));
 function textBtns(c,name,small){const n=esc(name||"");return '<a class="btn'+(small?' ghost small':'')+'" href="'+esc(smsHref(c,name))+'">Text it</a> <button class="btn ghost'+(small?' small':'')+'" data-share="'+esc(c)+'" data-name="'+n+'">Share</button>';}
 async function shareInv(c,name){const text=invText(c,name);if(navigator.share){try{await navigator.share({title:"The Daily Alchemist",text});return;}catch(e){if(e&&e.name==="AbortError")return;}}copyLink(c);}
@@ -225,6 +226,7 @@ async function invites(action,extra){
   const d=await res.json().catch(()=>({}));if(d.invites){INV=d.invites;USES=d.uses||[];renderInvites();}return d;
 }
 function invStatus(v){
+  if((v.max_uses||1)>1)return v.revoked?'<span class="pill stop">Turned off</span>':'<span class="pill yes">No limit · '+(v.uses||0)+' joined</span>';
   if(v.used_by){const p=(DATA&&DATA.people||[]).find(x=>x.id===v.used_by);return '<span class="pill yes">Used by '+esc(p?(p.name||p.email):"a friend")+', '+new Date(v.used_at).toLocaleDateString(undefined,{month:"short",day:"numeric"})+'</span>';}
   if(v.revoked)return '<span class="pill stop">Revoked</span>';
   if(v.expires_at&&new Date(v.expires_at)<new Date())return '<span class="pill no">Expired</span>';
@@ -237,11 +239,13 @@ function renderShares(){
 }
 function renderInvites(){
   renderShares();const INV1=INV.filter(v=>!v.owner);
-  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV1.length?INV1.map(v=>{const open=!v.used_by&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?textBtns(v.code,v.label,true)+' <button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
+  $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV1.length?INV1.map(v=>{const open=((v.max_uses||1)>1||!v.used_by)&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?textBtns(v.code,v.label,true)+' <button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
 }
 async function copyLink(c,btn){try{await navigator.clipboard.writeText(invLink(c));if(btn){const t=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=t,1500);}}catch(e){prompt("Copy this link:",invLink(c));}}
 $("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const before=new Set(INV.map(v=>v.code));await invites("create",{label:$("#invName").value});b.disabled=false;const nw=INV.find(v=>!before.has(v.code));
   if(nw){$("#invName").value="";$("#invNew").hidden=false;$("#invNew").innerHTML='<div class="linkbox"><code>'+esc(invLink(nw.code))+'</code><button class="btn small" data-copy="'+esc(nw.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(nw.code,nw.label,false)+'</div><p class="note">Send this to '+esc(nw.label||"your friend")+' only. It stops working once they use it.</p>';}};
+$("#openLink").onclick=async()=>{const res=await fetch(API+"/api/share",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:"{}"});const d=await res.json().catch(()=>({}));if(!d.code){$("#openBox").hidden=false;$("#openBox").textContent="Couldn't get your link. Try again in a minute.";return;}
+  $("#openBox").hidden=false;$("#openBox").innerHTML='<div class="linkbox"><code>'+esc(invLink(d.code))+'</code><button class="btn small" data-copy="'+esc(d.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(d.code,"",false)+'</div><p class="note">'+(d.uses||0)+' people have joined with it so far. You can turn it off below any time.</p>';await invites("list");};
 document.addEventListener("click",e=>{const sh=e.target.closest("[data-share]");if(sh){shareInv(sh.dataset.share,sh.dataset.name);return;}const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
 const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",sol:"Sol",ember:"Ember",willow:"Willow",moss:"Moss",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 let MUS={tracks:{},url:""},musBusy=false;
