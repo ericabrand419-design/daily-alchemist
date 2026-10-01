@@ -7,21 +7,17 @@ export async function POST(request) {
   let profile = await ensureTrial(user, p0);
   const admin = isAdminEmail(user.email);
   let body = {}; try { body = await request.json(); } catch {}
-  // Record, once, that this account confirmed they're 18 or older.
-  if (body.confirmAdult && !profile.adult_confirmed_at) {
-    const at = new Date().toISOString();
-    await sb("profiles?id=eq." + user.id, { method: "PATCH", body: { adult_confirmed_at: at } });
-    profile = { ...profile, adult_confirmed_at: at };
-  }
-  // Vesper's room: record, once, whether this account is 21 or older. The birthday itself is never stored,
-  // and the answer can't be changed afterwards.
-  if (body.dob && !profile.adult21_at && !profile.under21_at) {
+  // One birthday, asked once, decides access: under 18 no account, 18 to 20 everything but Vesper,
+  // 21 and older everything. Only the answers are kept here, never the birthday, and they can't be changed.
+  if (body.dob && !profile.adult21_at && !profile.under21_at && !profile.under18_at) {
     const d = new Date(String(body.dob).slice(0, 10) + "T12:00:00Z"), n = new Date();
     if (!isNaN(d)) {
-      let a = n.getUTCFullYear() - d.getUTCFullYear();
-      if (n.getUTCMonth() < d.getUTCMonth() || (n.getUTCMonth() === d.getUTCMonth() && n.getUTCDate() < d.getUTCDate())) a--;
-      if (a >= 0 && a <= 120) {
-        const patch = a >= 21 ? { adult21_at: new Date().toISOString() } : { under21_at: new Date().toISOString() };
+      let age = n.getUTCFullYear() - d.getUTCFullYear();
+      if (n.getUTCMonth() < d.getUTCMonth() || (n.getUTCMonth() === d.getUTCMonth() && n.getUTCDate() < d.getUTCDate())) age--;
+      if (age >= 0 && age <= 120) {
+        const at = new Date().toISOString();
+        const patch = age < 18 ? { under18_at: at, under21_at: at } : age < 21 ? { under21_at: at } : { adult21_at: at };
+        if (age >= 18 && !profile.adult_confirmed_at) patch.adult_confirmed_at = at;
         try { await sb("profiles?id=eq." + user.id, { method: "PATCH", body: patch }); profile = { ...profile, ...patch }; } catch {}
       }
     }
@@ -34,7 +30,7 @@ export async function POST(request) {
     email: user.email, member: isMember(profile), paid: isPaid(profile), lifetime: !!profile.lifetime, cohort: profile.cohort || null,
     trial_until: profile.trial_until || null, member_until: profile.member_until || null,
     adult_confirmed_at: profile.adult_confirmed_at || null, monitor_answer: profile.monitor_answer || null, monitor_until: profile.monitor_until || null, monitor_scope: profile.monitor_scope || null, admin, usage,
-    adult21_at: profile.adult21_at || null, under21_at: profile.under21_at || null,
+    adult21_at: profile.adult21_at || null, under21_at: profile.under21_at || null, under18_at: profile.under18_at || null,
   });
 }
 

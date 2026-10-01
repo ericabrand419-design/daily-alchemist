@@ -20,6 +20,7 @@ alter table public.profiles add column if not exists adult_confirmed_at timestam
 -- Vesper's room (members 21 and older). Only the yes or no is kept, never the birthday.
 alter table public.profiles add column if not exists adult21_at timestamptz;
 alter table public.profiles add column if not exists under21_at timestamptz;
+alter table public.profiles add column if not exists under18_at timestamptz;
 create table if not exists public.prefs (
   user_id uuid primary key references auth.users(id) on delete cascade,
   data jsonb not null default '{}'::jsonb,

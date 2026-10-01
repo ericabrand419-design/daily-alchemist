@@ -486,7 +486,7 @@ a.btn{text-decoration:none}
 .chc .cl{grid-area:l;justify-self:end;font-size:12.5px;letter-spacing:.12em;padding:2px 8px;border-radius:999px;border:1px solid rgba(231,196,90,.35)}
 .chc .cn{grid-area:n;font-size:17px;line-height:1.2;overflow-wrap:break-word}
 .gate{position:fixed;inset:0;z-index:55;overflow:auto;display:flex;align-items:center;justify-content:center;padding:calc(24px + env(safe-area-inset-top,0px)) 18px calc(24px + env(safe-area-inset-bottom,0px));background:radial-gradient(900px 500px at 110% -10%,rgba(191,30,115,.25),transparent 60%),radial-gradient(800px 520px at -20% 40%,rgba(58,132,132,.18),transparent 60%),var(--night)}
-body:has(#gate) .scrim{z-index:60}
+body:has(#talk) .scrim{z-index:40}body:has(#gate) .scrim{z-index:60}
 .field input[type=tel]{border-radius:12px;border:1px solid rgba(231,196,90,.35);background:rgba(22,19,42,.7);padding:11px 14px;font-size:20.5px;color:var(--glow);width:100%}
 .gate .gatesnd{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px}
 .gate .in{max-width:420px;width:100%;display:grid;gap:16px}
@@ -504,6 +504,7 @@ body:has(#gate) .scrim{z-index:60}
 .memline{margin-top:4px}
 .rhythm .speaker{display:flex;align-items:center;gap:10px}.rhythm .who{font-family:var(--f-ui);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.rhythm .q2{font-family:var(--f-display);font-size:20px}
 .addnums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.addnums div{text-align:center}.addnums b{display:block;font-family:var(--f-display);font-size:26px;color:var(--gold)}.addnums span{display:block;font-family:var(--f-ui);font-size:13px;line-height:1.3;color:var(--glow-dim);margin-top:2px}
+select{background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 10px;font:inherit;font-size:17px;color-scheme:dark;flex:1}
 input[type=date]{width:100%;background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 14px;font:inherit;font-size:17px;color-scheme:dark}
 .dots{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;margin-top:6px}.dots i{aspect-ratio:1;border-radius:50%;background:rgba(244,241,230,.09)}.dots i.on{background:var(--gold);box-shadow:0 0 8px rgba(231,196,90,.45)}
 textarea{min-height:124px}.talk textarea{min-height:48px}
@@ -1383,7 +1384,7 @@ R.push(
  secret:"Desire starts with feeling at home in your own skin. Slow, kind attention breaks the habit of scanning for flaws.",
  prompts:["What did you like?","What do you want more of?"],
  tags:["body","confidence","desire","sexy","insecure","pleasure"]},
-{id:"yes-no-maybe",g:"vesper",adult21:true,member:true,title:"Yes, No, Maybe",el:"Night",moon:"Any",min:20,
+{id:"yes-no-maybe",g:"vesper",love:"partner",adult21:true,member:true,title:"Yes, No, Maybe",el:"Night",moon:"Any",min:20,
  purpose:"Say what you want out loud, with a partner or just to yourself.",needs:[],
  steps:[{t:"Three columns",d:"On paper, write Yes, No and Maybe across the top. If you have a partner, you each get your own sheet."},
   {t:"Fill it honestly",d:"Touch, pace, places, words, fantasies, things you've wondered about. Anything can go on the page. Nothing on it is a promise.",hold:300},
@@ -1402,7 +1403,7 @@ R.push(
  secret:"Sex magic ties a goal to one of the strongest states your body can make. Even without the magic, a vivid picture held at a peak moment tends to stay with you.",
  prompts:["What was the intention?","What did it feel like to hold it there?"],
  tags:["sex magic","manifest","desire","pleasure","intention","sex"]},
-{id:"slow-burn",g:"vesper",adult21:true,member:true,explicit:true,title:"Slow Burn",el:"Night",moon:"Any",min:30,
+{id:"slow-burn",g:"vesper",love:"partner",adult21:true,member:true,explicit:true,title:"Slow Burn",el:"Night",moon:"Any",min:30,
  purpose:"Three positions built for closeness, eye contact and taking your time.",needs:[],
  steps:[{t:"Agree first",d:"Check in: what's a yes tonight and what's a no. Pick a word that means stop, and honor it instantly."},
   {t:"Seated lotus",d:"One partner sits cross legged. The other sits in their lap facing them, legs wrapped around. Move slowly, foreheads close, breathing together.",hold:300},
@@ -1412,6 +1413,42 @@ R.push(
  secret:"Positions that keep you face to face and moving slowly build more connection than any fancy move. Slowing down gives both bodies time to catch up.",
  prompts:["Which one felt best?","What do you want to try next time?"],
  tags:["sex","positions","intimacy","partner","in bed","sex life","connection"]},
+{id:"love-map",g:"marigold",love:"partner",title:"The Love Map",el:"Light",moon:"Any",min:15,
+ purpose:"Find your way back to each other when life has been louder than love.",needs:[],
+ steps:[{t:"Face each other",d:"Sit facing each other. Phones in another room."},
+  {t:"Three questions",d:"Take turns: What are you looking forward to? What's been heavy lately? When did you last feel loved by me?",hold:300},
+  {t:"Name one thing",d:"Each of you says one specific thing you appreciate about the other. Specific, not general."},
+  {t:"Plan one date",d:"Pick a date in the next two weeks and put it in both calendars right now.",say:"I still choose you."}],
+ secret:"Couples drift when they stop updating what they know about each other. Three questions redraw the map.",
+ prompts:["What did you learn about them?","When is the date?"],
+ tags:["partner","relationship","disconnected","marriage","love","distant"]},
+{id:"first-move",g:"marigold",love:"crush",title:"The First Move",el:"Light",moon:"Waxing",min:10,
+ purpose:"Get brave enough to find out, without bending anyone's heart.",needs:[],
+ steps:[{t:"What you like",d:"Write three things you like about them that have nothing to do with looks."},
+  {t:"Check the fear",d:"Write the worst thing that could happen. Read it out loud. Notice you would survive it."},
+  {t:"Dress for you",d:"Put on something that makes you feel most like yourself."},
+  {t:"One small step",d:"Choose one move: say hi, send the text, ask one real question. Do it within two days.",say:"I'm allowed to want this."}],
+ secret:"This doesn't change anyone else's feelings. It gets yours brave enough to find out, and that's the only part you control.",
+ prompts:["What's your move?","How did it go?"],
+ tags:["crush","dating","nervous","flirt","attraction","like someone"]},
+{id:"magnetic-hour",g:"vesper",love:"crush",adult21:true,member:true,title:"Magnetic Hour",el:"Night",moon:"Waxing",min:15,
+ purpose:"Feel desirable to yourself first, before you ever walk into the room.",needs:[],
+ steps:[{t:"Dress for yourself",d:"Put on whatever makes you feel most like your sexiest self."},
+  {t:"Body first",d:"Music on. Move slowly. Hands on your hips, your chest, your neck. Feel your own body.",hold:180},
+  {t:"Write the moment",d:"In a few lines, write the moment you'd want with them, as clearly as you dare. Keep it private."},
+  {t:"Carry it",d:"Breathe it in, then put the page away.",say:"I'm magnetic, and I choose who gets close."}],
+ secret:"Feeling wanted by yourself first changes how you carry yourself. That's the only spell that ever reaches them.",
+ prompts:["What did you write?","How do you want to walk in next time?"],
+ tags:["crush","desire","sexy","attraction","confidence"]},
+{id:"birthday-threshold",g:"aura",title:"The Birthday Threshold",el:"Light",moon:"Any",min:12,
+ purpose:"Close one year of you and open the next on purpose.",needs:[["candle","A candle"]],
+ steps:[{t:"Light it",d:"Light the candle. This one is just for you."},
+  {t:"Last year",d:"Name three things the last year taught you. Out loud or on paper."},
+  {t:"Leave one",d:"Name one thing you are not carrying into the new year."},
+  {t:"Call it in",d:"Say how you want this year to feel, in three words.",say:"A new year of me begins now."}],
+ secret:"Your birthday is your own new year. A threshold you mark is one you actually cross.",
+ prompts:["What are you leaving behind?","What three words did you choose?"],
+ tags:["birthday"]},
 {id:"heart-gate",g:"marigold",title:"Open the Heart Gate",el:"Light",moon:"Waxing",min:10,
  purpose:"Get ready to let love in, from a date, a partner or yourself.",needs:[],
  steps:[{t:"Hand on heart",d:"Sit up. One hand on your heart, one on your belly. Three slow breaths."},
@@ -1621,6 +1658,7 @@ function migrateCircle(){
   }
 }
 migrateCircle();
+if(S.profile.minor)setTimeout(()=>showMinor(),300);
 const cloud={db:null,uid:null,on:false};
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function col(){return cloud.db.collection("data/users/"+cloud.uid);}
@@ -1693,11 +1731,50 @@ function vesperOK(){if(accountsOn())return !!(ACCT.adult21&&(ACCT.paid||ACCT.lif
 function allowedG(k){return k!=="vesper"||vesperOK();}
 function circleKeys(){return ALL.filter(allowedG);}
 function okG(k){return G[k]?(allowedG(k)?k:"marigold"):null;}
-function canUse(r){return !!r&&(!r.member||isMember())&&(!r.adult21||vesperOK())&&(!r.explicit||!NATIVE);}
+function canUse(r){return !!r&&(!r.member||isMember())&&(!r.adult21||vesperOK())&&(!r.explicit||!NATIVE)&&(!r.love||!S.profile.person||r.love===S.profile.person.mode);}
+const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const SIGNS=[["Capricorn",120,"earth"],["Aquarius",219,"air"],["Pisces",321,"water"],["Aries",420,"fire"],["Taurus",521,"earth"],["Gemini",621,"air"],["Cancer",723,"water"],["Leo",823,"fire"],["Virgo",923,"earth"],["Libra",1023,"air"],["Scorpio",1122,"water"],["Sagittarius",1222,"fire"],["Capricorn",1300,"earth"]];
+function signOf(md){if(!md)return null;const [m,d]=String(md).split("-").map(Number);if(!m||!d)return null;const n=m*100+d;const x=SIGNS.find(z=>n<z[1]);return {name:x[0],el:x[2]};}
+function mdText(md){const [m,d]=String(md||"").split("-").map(Number);return m&&d?MONTHS[m-1]+" "+d:"";}
+function compat(a,b){if(!a||!b)return "";const pair=[a.el,b.el].sort().join("+");
+  if(a.el===b.el)return "You're both "+a.el+" signs. You get each other without trying.";
+  if(pair==="air+fire"||pair==="earth+water")return "Your elements feed each other.";
+  return "Your elements balance each other. It takes a little more talking, and that's where the heat is.";}
+function needBirthday(){if(S.profile.minor)return false;if(!S.profile.bday)return true;return accountsOn()&&ACCT.user&&!ACCT.adult21&&!ACCT.under21;}
+let bdayAfter=null;
+function openBirthday(reason,after){
+  bdayAfter=after||null;if(document.querySelector("#bdaySheet"))return;
+  openSheet('<div class="stack auraPop" id="bdaySheet"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays(reason||"One quick thing before we go on. When's your birthday?","Aura · one small thing")+
+   '<div class="field"><label for="bdayIn">Your birthday</label><input type="date" id="bdayIn" max="'+new Date().toISOString().slice(0,10)+'"></div><button class="btn btn-main full" id="bdayGo">Continue</button>'+
+   '<p class="small muted">The Daily Alchemist is for adults. I keep your month and day for your sign and your birthday, never the year.</p></div>');
+}
+function showMinor(){
+  closeSheet();if($("#minorGate"))return;
+  const g=document.createElement("div");g.className="gate";g.id="minorGate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");
+  g.innerHTML='<div class="in auraPop" style="text-align:center"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+auraSays("The Daily Alchemist is made for adults 18 and older, so I can\'t open it for you yet. I\'ll be here when you\'re older.","Aura")+'</div>';
+  document.body.appendChild(g);document.body.style.overflow="hidden";
+}
+async function setBirthday(v,after){
+  const a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return false;}
+  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;
+  if(a<18){S.profile.minor=true;S.profile.adult=false;saveLocal();if(accountsOn()&&ACCT.user)await api("/api/me",{dob:v});showMinor();return false;}
+  S.profile.adult=true;saveLocal();remotePut("prefs");
+  if(accountsOn()&&ACCT.user){S.pendingDob=v;saveLocal();const r=await api("/api/me",{dob:v});
+    if(r&&!r.error){delete S.pendingDob;saveLocal();ACCT.adultAt=r.adult_confirmed_at||ACCT.adultAt;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;if(S.friendCode&&!ACCT.lifetime)redeemFriend();}}
+  return true;
+}
+async function submitBirthday(){
+  const v=($("#bdayIn")||{}).value;if(!v){toast("Choose your birthday.");return;}
+  const ok=await setBirthday(v);if(!ok)return;
+  closeSheet();renderAll();
+  if(bdayAfter==="vesper"){bdayAfter=null;if(vesperOK())openTalk("vesper");else vesperGate();}
+  else toast("Thank you. You're all set.");
+}
 function vesperGate(){
   const g=G.vesper;
   if(accountsOn()&&ACCT.under21||S.profile.under21){openSheet('<div class="stack">'+glyph("vesper",56)+'<h2>Vesper is for 21 and older</h2><p>Marigold is here for love, dating and feeling good in your skin.</p><button class="btn btn-main full" data-talk="marigold">Talk to Marigold</button></div>');return;}
-  if(!(accountsOn()?ACCT.adult21:S.profile.adult21)){openSheet('<div class="stack">'+glyph("vesper",56)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+'</div><h2>Vesper\'s room is for 21 and older</h2></div><p>Enter your date of birth to continue.</p><label class="sr" for="dob21">Date of birth</label><input type="date" id="dob21" max="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-main full" id="dob21Go">Continue</button><p class="small muted">We only keep whether you are 21 or older, not your birthday.</p></div>');return;}
+  if(!(accountsOn()?ACCT.adult21:S.profile.adult21)){openBirthday("Vesper\'s room is for 21 and older. When\'s your birthday?","vesper");return;}
+  if(false){openSheet('<div class="stack">'+glyph("vesper",56)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+'</div><h2>Vesper\'s room is for 21 and older</h2></div><p>Enter your date of birth to continue.</p><label class="sr" for="dob21">Date of birth</label><input type="date" id="dob21" max="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-main full" id="dob21Go">Continue</button><p class="small muted">We only keep whether you are 21 or older, not your birthday.</p></div>');return;}
   closeSheet();openPaywall("Vesper's room is for members");
 }
 function age21(v){const d=new Date(v+"T12:00:00");if(isNaN(d))return null;const n=new Date();let a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a;}
@@ -1800,9 +1877,12 @@ function showGate(){
 }
 function hideGate(){const g=$("#gate");if(g){g.remove();document.body.style.overflow="";setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},500);}}
 async function refreshMe(){
-  const r=await api("/api/me",S.profile.adult?{confirmAdult:true}:{});
+  const r=await api("/api/me",S.pendingDob?{dob:S.pendingDob}:{});
+  if(!r.error&&S.pendingDob&&(r.adult21_at||r.under21_at||r.under18_at)){delete S.pendingDob;saveLocal();}
+  if(!r.error&&r.under18_at){S.profile.minor=true;saveLocal();showMinor();return;}
   if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt&&!S.profile.adult){S.profile.adult=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.monitorScope=Array.isArray(r.monitor_scope)?r.monitor_scope:null;ACCT.admin=!!r.admin;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
   renderAll();
+  if(!r.error&&S.profile.onboarded&&needBirthday()&&!$("#scrim")){setTimeout(()=>openBirthday(),600);return;}
   if(!r.error&&S.friendCode&&!ACCT.lifetime){await redeemFriend();return;}
   setTimeout(auraPopup,500);
 }
@@ -2618,6 +2698,8 @@ function personalText(){
     "HER PERSONAL SEASON: "+(S.pseason?S.pseason.name+" since "+fmtDate(S.pseason.start):"none named")+"\n"+
     "DATES THAT MATTER COMING UP: "+(upcomingDates(14).map(d=>d.name+" on "+d.next.toDateString()).join("; ")||"none")+"\n"+
     "HER HOME: "+spaceText()+"\n"+
+    (S.profile.bday?"HER SIGN: "+signOf(S.profile.bday).name+" (birthday "+mdText(S.profile.bday)+"). Mention astrology lightly and only when it adds something.\n":"")+
+    (S.profile.person?"ON HER HEART: "+personLine()+" Love and sex rituals and advice should fit this, not the other.\n":"")+
     "EVERYTHING SHE OWNS FOR RITUAL (prefer these, including advanced tools): "+(ownedNames().join(", ")||"basics only");
 }
 
@@ -3028,6 +3110,8 @@ async function doShare(copyOnly){
 }
 function isLifetime(){return accountsOn()?ACCT.lifetime:!!S.previewFriend;}
 function openAdultCheck(){
+  if(S.profile.minor){showMinor();return;}
+  openBirthday("The Daily Alchemist is made for adults, so before we go on: when\'s your birthday?");return;
   if(document.querySelector("#adultSheet"))return;
   openSheet('<div class="stack auraPop" id="adultSheet"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("The Daily Alchemist is made for adults, so before we go on, I need you to tell me you're 18 or older.","Aura · one small thing")+
     '<label class="switch agecheck" for="age18b">I\'m 18 or older.<input type="checkbox" id="age18b"></label><button class="btn btn-main full" id="adultOk">Continue</button></div>');
@@ -3259,6 +3343,14 @@ function rhythmInsight(){
 function lowTank(){const d=S.days[dayKey(new Date())];return !!(d&&((d.sleep&&d.sleep<=1)||(d.energy&&d.energy<=1)));}
 function chipsQ(name,list,cur){return '<div class="chips" style="margin-top:8px">'+list.map(([l,v])=>'<button class="chip" data-'+name+'="'+v+'" aria-pressed="'+(cur===v)+'">'+esc(l)+'</button>').join("")+'</div>';}
 const WATCH_NOTE=NATIVE?"":'<p class="small muted" style="margin-top:10px">Sleep and workouts from your Apple Watch or Fitbit come with the App Store and Google Play app on November 1.</p>';
+function daysUntilMD(md){const [m,d]=String(md||"").split("-").map(Number);if(!m||!d)return null;const n=new Date();n.setHours(0,0,0,0);let t=new Date(n.getFullYear(),m-1,d);if(t<n)t=new Date(n.getFullYear()+1,m-1,d);return Math.round((t-n)/864e5);}
+function bdayHTML(){
+  let h="";const mine=daysUntilMD(S.profile.bday),pn=S.profile.person;
+  if(mine===0)h+='<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura · today</span></div><p style="margin-top:8px">Happy birthday'+(firstName()?", "+esc(firstName()):"")+'. It\'s your own new year'+(signOf(S.profile.bday)?', and '+esc(signOf(S.profile.bday).name)+' season is yours':'')+'. Let\'s mark it.</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="birthday-threshold">The Birthday Threshold</button></div></div>';
+  const pd=pn&&daysUntilMD(pn.bday);
+  if(pn&&pd!=null&&pd<=7)h+='<div class="card rhythm"><div class="speaker">'+glyph("marigold",30)+'<span class="who" style="color:'+G.marigold.color+'">Marigold · coming up</span></div><p style="margin-top:8px">'+esc(pn.name||(pn.mode==="partner"?"Your partner":"Your crush"))+'\'s birthday is '+(pd===0?"today":pd===1?"tomorrow":"in "+pd+" days")+'. Want help making it feel like you meant it?</p><div class="row" style="margin-top:10px"><button class="btn btn-ghost" data-talk="marigold">Plan it with Marigold</button></div></div>';
+  return h;
+}
 function rhythmHTML(){
   const part=partOfDay(),d=dayRec(),ins=rhythmInsight();
   const head=(g,t)=>'<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+G[g].color+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';
@@ -3293,7 +3385,7 @@ function renderToday(){
      '<button class="btn btn-main full" id="askBtn" style="margin-top:14px">Tell Aura</button></div>';
   h+='<div id="readingSlot">'+(lastRead?readingHTML(lastRead):"")+'</div>';
   if(!lastRead){
-    h+=rhythmHTML();
+    h+=bdayHTML()+rhythmHTML();
     const fu=followHTML()||checkinHTML();if(fu)h+=fu;
     h+='<div id="nudgeSlot">'+nudgeHTML()+'</div>'+letterCardHTML();
     const dp=deeperHTML();
@@ -3662,11 +3754,35 @@ function guardianDaily(k){
   if(!pool.length)return byId.anchor;
   return pickForNow(pool,new Date(),k);
 }
+let PN={mode:null};
+function personLine(){const pn=S.profile.person;if(!pn)return "";const ms=signOf(S.profile.bday),ps=signOf(pn.bday);
+  return (pn.mode==="partner"?"Her partner":"Her crush")+(pn.name?" "+pn.name:"")+(ps?", a "+ps.name+" ("+ps.el+")":"")+(pn.bday?", birthday "+mdText(pn.bday):"")+". "+(ms&&ps?compat(ms,ps):"");}
+function personCardHTML(k){
+  const pn=S.profile.person,g=G[k];
+  if(!pn)return '<div class="card heart" style="margin-top:10px"><div class="label" style="color:'+g.color+'">On your heart</div><p class="small" style="margin-top:6px">Tell '+esc(g.name)+' who this is about, your partner or your crush, and the rituals follow.</p><button class="btn btn-ghost" id="pnOpen" style="margin-top:8px">Choose</button></div>';
+  const ms=signOf(S.profile.bday),ps=signOf(pn.bday);
+  return '<div class="card heart" style="margin-top:10px"><div class="label" style="color:'+g.color+'">On your heart</div><p style="margin-top:6px"><b>'+(pn.mode==="partner"?"Your partner":"Your crush")+(pn.name?": "+esc(pn.name):"")+'</b>'+(ps?' · '+esc(ps.name):'')+'</p>'+(ms&&ps?'<p class="small muted" style="margin-top:4px">You: '+esc(ms.name)+'. '+esc(compat(ms,ps))+'</p>':'')+'<button class="linkish" id="pnOpen" style="margin-top:6px">Still right? Change it</button></div>';
+}
+function openPerson(){
+  const pn=S.profile.person||{};PN={mode:pn.mode||null};const [m,d]=String(pn.bday||"").split("-").map(Number);
+  openSheet('<div class="stack" id="pnSheet"><div><div class="label">On your heart</div><h2>Who is this about?</h2><p class="small muted" style="margin-top:6px">Pick one. You can change it whenever things change.</p></div>'+
+   '<div class="chips"><button class="chip" data-pmode="partner" aria-pressed="'+(PN.mode==="partner")+'">My partner</button><button class="chip" data-pmode="crush" aria-pressed="'+(PN.mode==="crush")+'">My crush</button></div>'+
+   '<div class="field"><label for="pnName">Their name or a nickname (optional)</label><input type="text" id="pnName" value="'+esc(pn.name||"")+'" placeholder="Jordan"></div>'+
+   '<div class="field"><label for="pnM">Their birthday (optional)</label><div class="row" style="gap:8px"><select id="pnM" aria-label="Month"><option value="">Month</option>'+MONTHS.map((x,i)=>'<option value="'+(i+1)+'"'+(m===i+1?" selected":"")+'>'+x+'</option>').join("")+'</select><select id="pnD" aria-label="Day"><option value="">Day</option>'+Array.from({length:31},(_,i)=>'<option'+(d===i+1?" selected":"")+'>'+(i+1)+'</option>').join("")+'</select></div><p class="small muted" style="margin-top:6px">Just the month and day, for their sign. Never shared.</p></div>'+
+   '<button class="btn btn-main full" id="pnSave">Save</button><button class="linkish" id="pnClear" style="text-align:center">Just me for now</button></div>');
+}
+function savePerson(){
+  if(!PN.mode){toast("Pick partner or crush.");return;}
+  const m=$("#pnM").value,d=$("#pnD").value;
+  S.profile.person={mode:PN.mode,name:($("#pnName").value||"").trim().slice(0,40),bday:m&&d?String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0"):""};
+  saveLocal();remotePut("prefs");closeSheet();if(talkG)drawMsgs();renderAll();toast(PN.mode==="partner"?"Got it. Rituals for the two of you.":"Got it. Rituals for the crush.");
+}
 function introHTML(k){
   const g=G[k], r=guardianDaily(k), line=(DECK[k]||g.phrases)[hash(dayKey(today)+k+"d")%(DECK[k]||g.phrases).length];
   return '<div class="intro"><div class="top2">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">Who is '+esc(g.name)+'</div><h3 style="margin-top:2px">'+esc(g.title)+'</h3></div></div>'+
    '<p class="kv"><b>Element:</b> '+esc(g.element)+'<br><b>Job:</b> '+esc(JOB[k]||g.domain)+'<br><b>Comes to you for:</b> '+esc(g.domain)+'<br><b>How '+esc(g.name)+' talks:</b> '+esc(g.voice)+'</p>'+
    '<p style="font-family:var(--f-display);font-style:italic;font-size:18px">"'+esc(line)+'"</p>'+
+   (k==="marigold"||k==="vesper"?personCardHTML(k):'')+
    '<div class="label">'+esc(g.name)+'\'s ritual for today · '+esc(M.name)+'</div>'+ritualCard(r,{ctx:"talk",why:true})+'</div>';
 }
 function drawMsgs(){
@@ -3839,7 +3955,7 @@ function openAltar(first){
       '<div><div class="label">A few things about you</div><p class="small muted" style="margin-top:6px">Only your name matters today. I\'ll learn the rest as we go, and only ask once. For reflection and ritual, not medical or mental health care.</p></div>'+
       '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>'+
       (first?'<div class="card" id="memChoice"><div class="label">What I remember</div><p class="small" style="margin-top:6px">I can remember the people, goals, patterns and moments you share, so I can support you over time. You decide what I keep, and you can see it or make me forget it any time.</p><div class="chips" style="margin-top:8px"><button class="chip" data-mem="on" aria-pressed="'+memOn()+'">Remember what I share</button><button class="chip" data-mem="off" aria-pressed="'+!memOn()+'">Don\'t remember anything</button></div></div>':'')+
-      (accountsOn()&&ACCT.adultAt?'':'<label class="switch agecheck" for="age18">I\'m 18 or older. The Daily Alchemist is for adults.<input type="checkbox" id="age18"'+(p.adult?' checked':'')+'></label>');
+      (p.bday&&!needBirthday()?'':'<div class="field"><label for="age18">Your birthday</label><input type="date" id="age18" max="'+new Date().toISOString().slice(0,10)+'"><p class="small muted" style="margin-top:6px">The Daily Alchemist is for adults. I keep your month and day for your sign and your birthday, never the year.</p></div>');
   }else{
     h='<div class="stack"><div><div class="label">'+(first?"Before we begin":"Settings")+'</div><h2>'+(first?"Aura would like to know you.":"What Aura knows")+'</h2><p class="muted" style="margin-top:6px">So you never have to explain it twice.'+(first?' That\'s all Aura needs to start. She\'ll learn the rest as you go, and only ask once.':' Everything here shapes what Aura gives you.')+'</p>'+(first?'<p class="small muted" style="margin-top:8px">The Daily Alchemist is for reflection and ritual. It is not medical or mental health care. You must be 18 or older to use it.</p>':'')+'</div>'+
    '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>';
@@ -4055,6 +4171,11 @@ document.addEventListener("click",async ev=>{
   if(d.tone){t.parentElement.querySelectorAll("[data-tone]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="adultOk"){confirmAdultNow();return;}
   if(t.id==="dob21Go"){submitDob();return;}
+  if(t.id==="bdayGo"){submitBirthday();return;}
+  if(d.pmode){PN.mode=d.pmode;document.querySelectorAll("[data-pmode]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pmode===d.pmode));return;}
+  if(t.id==="pnOpen"||t.closest&&t.closest("#pnOpen")){openPerson();return;}
+  if(t.id==="pnSave"){savePerson();return;}
+  if(t.id==="pnClear"){S.profile.person=null;saveLocal();remotePut("prefs");closeSheet();if(talkG)drawMsgs();renderAll();toast("Just you for now.");return;}
   if(t.id==="memOpen"){openMemory();return;}
   if(d.mem){const on=d.mem==="on";setMemory(on);t.parentElement.querySelectorAll("[data-mem]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));if($("#memIn")||!on||t.closest(".sheet .stack")&&!t.closest("#altarBody")){if(!$("#pName")){closeSheet();openMemory();}}toast(on?"I'll remember what you share. You can change this any time.":"Memory is off. I won't keep anything new.");renderToday();return;}
   if(t.id==="memAdd"){const v=($("#memIn").value||"").trim().slice(0,200);if(!v)return;S.memNotes.unshift({id:uid(),text:v,ts:Date.now()});persistAll();closeSheet();openMemory();toast("I'll remember that.");return;}
@@ -4074,8 +4195,8 @@ document.addEventListener("click",async ev=>{
   if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";await loadShare();return;}
   if(t.id==="shareGo"){doShare(false);return;}
   if(t.id==="shareCopy"){doShare(true);return;}
-  if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").checked){toast("The Daily Alchemist is for adults 18 and over. Please confirm your age to begin.");$("#age18").focus();return;}
-  if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){S.profile.adult=true;if(accountsOn()&&ACCT.user&&!ACCT.adultAt)api("/api/me",{confirmAdult:true}).then(r=>{if(r&&r.adult_confirmed_at){ACCT.adultAt=r.adult_confirmed_at;if(S.friendCode&&!ACCT.lifetime)redeemFriend();}});}
+  if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").value){toast("Add your birthday to begin.");$("#age18").focus();return;}
+  if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){const v=$("#age18").value,a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return;}if(a<18){setBirthday(v);return;}setBirthday(v);}
   if(t.id==="pSave"||t.id==="pSkip"){
     if(t.id==="pSave"){
       const p=S.profile;
