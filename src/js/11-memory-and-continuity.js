@@ -284,6 +284,7 @@ function localRead(text,mins){
    can see patterns, follow up, and answer from her history later. */
 function logAsk(text,x){
   const a={id:uid(),ts:Date.now(),text:memOn()?String(text).slice(0,400):"",thread:x.thread||"",theme:x.theme||"",guardian:x.guardian||"aura",action:x.action||"ritual",ritualId:x.ritual&&!x.ritual.composed?x.ritual.id:null,ritualTitle:x.ritual?x.ritual.title:"",noMem:!memOn(),follow:null,tomorrow:x.tomorrow||""};
+  a.priority=isHeavy(a)?"unresolved":"normal";
   S.asks.unshift(a);S.asks=S.asks.slice(0,200);persistAll();return a;
 }
 function asksText(){return S.asks.filter(a=>!a.noMem&&a.text).slice(0,12).map(a=>"- "+fmtDate(a.ts)+" | "+(a.thread||a.theme)+" | "+G[a.guardian].name+" | said: "+a.text.slice(0,140)+(a.follow?" | afterwards: "+(a.follow.did===false?"didn't do it":a.follow.helped||"did it")+(a.follow.changed?", "+a.follow.changed.slice(0,100):""):"")).join("\n")||"(nothing yet)";}
