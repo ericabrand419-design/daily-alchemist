@@ -4,7 +4,11 @@
 // What's been sent is tracked server-side in push_sent, keyed by item AND due date,
 // so snoozing a promise ("Not yet") makes it eligible to notify again at its new time.
 import webpush from "web-push";
+import { readFileSync } from "node:fs";
 import { json, env, sb, isMember, isPaid, GRACE_DAYS } from "../api/_lib.js";
+
+const PRODUCT_RULES = JSON.parse(readFileSync(new URL("../shared/product-rules.json", import.meta.url), "utf8"));
+const HEAVY = new RegExp(PRODUCT_RULES.heavyPattern, "i");
 
 const GNAME = {sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",sol:"Sol",cypress:"Sol",aurora:"Aurora",rowan:"Rowan",ember:"Sage",iris:"Iris",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 function easternWeekday(d) {
@@ -93,8 +97,7 @@ export async function GET(request) {
     }
     // Real life outranks the rhythm here too: an unresolved thing she told Aura leads the message.
     // Her words never go on the lock screen.
-    const HEAVY = /humiliat|embarrass|boss|fight|argu|cried|scared|anxious|panic|angry|furious|hurt|betray|lied|ashamed|disrespect|overwhelm|broke up|divorce|died|funeral|hospital|grief/i;
-    const sit = (x.asks || []).filter((a) => !a.noMem && a.text && !a.settled && !a.fuDismiss && (!a.follow || a.follow.still) && now - a.ts < 36 * 36e5 && !(a.sitSnooze && a.sitSnooze > now) && (HEAVY.test(a.text) || (a.follow && a.follow.still))).sort((p, q) => q.ts - p.ts)[0];
+    const sit = (x.asks || []).filter((a) => !a.noMem && a.text && !a.settled && !a.fuDismiss && (!a.follow || a.follow.still) && now - a.ts < 36 * 36e5 && !(a.sitSnooze && a.sitSnooze > now) && (a.priority === "unresolved" || HEAVY.test(a.text) || (a.follow && a.follow.still))).sort((p, q) => q.ts - p.ts)[0];
     if (sit && !(x.later || []).some((l) => l.ref === sit.id && !l.done)) {
       const key = "sit:" + sit.id;
       if (!already.has(key)) due.unshift({ key, title: "Aura", body: hi + "I'm still holding what you told me yesterday. Where are you with it?" });

@@ -200,7 +200,7 @@ function yourGuardians(){
   return Object.entries(c).filter(x=>x[1]>=2).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0]);
 }
 const LOCAL_VOICE={sage:"Tonight isn't asking you to understand it again. It's asking you to discharge it.",onyx:"You already know what this is about. Let's stop protecting it.",fern:"You have been holding the whole tide up by yourself. Put it down for a few minutes.",lily:"Your mind is loud because it's trying to keep you safe. Give it one clear thing to do.",thistle:"This doesn't make you mean. It makes you someone with an edge.",marigold:"You have been giving everyone the good version of you. Your turn.",juniper:"The space is holding what happened in it. Let's reset the container.",rue:"Not everyone gets access. We're changing the locks.",sol:"Stuck is just a plan without a date. Let's give it one, and I'll hold you to it.",
-  poppy:"Your spark isn't gone. It's bored. Let's play.",aurora:"Something is trying to become clear. Let's give it some light.",rowan:"Your body is holding what your head keeps replaying. Let's move it through.",ember:"This is the moment before the leap. Let's make you brave enough.",willow:"You can be soft here. Let's give the grief somewhere to go.",vesper:"What you want is information. Let's listen to it, slowly.",wren:"You've been noticing things. Let's find out what they mean.",lumen:"You can already see it. Now let's name it.",onora:"You come from people. Let's call them in."};
+  poppy:"Your spark isn't gone. It's bored. Let's play.",aurora:"Something is trying to become clear. Let's give it some light.",rowan:"Your body is holding what your head keeps replaying. Let's move it through.",iris:"Your body has a rhythm worth noticing. Let's work with what it is actually doing today.",willow:"You can be soft here. Let's give the grief somewhere to go.",vesper:"What you want is information. Let's listen to it, slowly.",wren:"You've been noticing things. Let's find out what they mean.",lumen:"You can already see it. Now let's name it.",onora:"You come from people. Let's call them in."};
 
 const GSPEC={
  aura:{sig:"unclear, mixed or first time feelings",avoid:"never when one guardian clearly fits",next:"the guardian who fits",mem:"everything, especially open threads"},
@@ -284,6 +284,7 @@ function localRead(text,mins){
    can see patterns, follow up, and answer from her history later. */
 function logAsk(text,x){
   const a={id:uid(),ts:Date.now(),text:memOn()?String(text).slice(0,400):"",thread:x.thread||"",theme:x.theme||"",guardian:x.guardian||"aura",action:x.action||"ritual",ritualId:x.ritual&&!x.ritual.composed?x.ritual.id:null,ritualTitle:x.ritual?x.ritual.title:"",noMem:!memOn(),follow:null,tomorrow:x.tomorrow||""};
+  a.priority=isHeavy(a)?"unresolved":"normal";
   S.asks.unshift(a);S.asks=S.asks.slice(0,200);persistAll();return a;
 }
 function asksText(){return S.asks.filter(a=>!a.noMem&&a.text).slice(0,12).map(a=>"- "+fmtDate(a.ts)+" | "+(a.thread||a.theme)+" | "+G[a.guardian].name+" | said: "+a.text.slice(0,140)+(a.follow?" | afterwards: "+(a.follow.did===false?"didn't do it":a.follow.helped||"did it")+(a.follow.changed?", "+a.follow.changed.slice(0,100):""):"")).join("\n")||"(nothing yet)";}

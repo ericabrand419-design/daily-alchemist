@@ -35,7 +35,7 @@ function renderCircle(){
   const met=metList(), full=S.showAll||met.length>=3;
   if(!full){
     h+='<button class="card link lead" data-guardian="aura">'+glyph("aura")+'<span><div class="label">Keeper of the Archive</div><h3 style="margin-top:2px">Aura</h3><p class="small muted" style="margin-top:4px">'+esc(G.aura.domain)+'</p></span></button>';
-    if(met.length)h+='<div><div class="label">Your circle so far</div></div><div class="circle">'+met.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+Array.from({length:(3-met.length%3)%3},()=>'<button class="g ghost" id="showAll2" aria-label="Show everyone"><span class="gq">?</span><span class="n">Waiting</span></button>').join("")+'</div>';
+    if(met.length)h+='<div><div class="label">Your circle so far</div></div><div class="circle">'+met.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+Array.from({length:(3-met.length%3)%3},()=>'<button class="g ghost" data-showall="1" aria-label="Show everyone"><span class="gq">?</span><span class="n">Waiting</span></button>').join("")+'</div>';
     {const gs=guardianSeasons();if(gs)h+='<div class="card">'+auraSays(esc(gs.join(" ")),"Aura · the seasons of your circle")+'</div>';}
     const left=ALL.length-1-met.length;
     h+='<div class="card waiting">'+auraSays((met.length?left+" more guardians":"Eighteen guardians")+" are waiting to meet you. You don\'t have to pick. When you tell me what you\'re carrying, I\'ll send you to the one who can hold it, and introduce you.")+
