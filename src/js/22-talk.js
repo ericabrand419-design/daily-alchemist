@@ -38,7 +38,7 @@ function closeTalk(){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[])
 function msgHTML(m,k){
   if(m.role==="me")return '<div class="bub me">'+esc(m.text)+'</div>';
   const r=m.ritual&&byId[m.ritual];
-  return '<div class="bub them" style="border-color:'+G[k].color+'55">'+'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>'+esc(m.text)+(m.handoff&&G[m.handoff]?'<br><button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<br><button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<br><button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
+  return '<div class="bub them" style="border-color:'+G[k].color+'55">'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+(m.handoff&&G[m.handoff]?'<br><button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<br><button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<br><button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
 }
 function guardianDaily(k){
   const own=R.filter(r=>r.g===k&&!r.reset&&canUse(r)), pool=own.length?own:R.filter(r=>r.g===(KIN[k]||k)&&canUse(r));
