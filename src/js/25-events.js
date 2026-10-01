@@ -207,7 +207,7 @@ document.addEventListener("click",async ev=>{
   /* ritual mode */
   if(t.id==="riteX"){if(run)track("ritual_exit",{id:run.r.id,step:run.i+1,of:run.r.steps.length});endRitual();return;}
   if(t.id==="nextBtn"){run.i++;track("ritual_step",{id:run.r.id,step:run.i+1,of:run.r.steps.length});drawStep();return;}
-  if(t.id==="prevBtn"){run.i=Math.max(0,run.i-1);drawStep();return;}
+  if(t.id==="prevBtn"){run.i=Math.max(-1,run.i-1);drawStep();return;}
   if(t.id==="holdBtn"){
     const s=run.r.steps[run.i];let left=s.hold;t.disabled=true;t.textContent="Holding";
     let wl=null;try{if(navigator.wakeLock)wl=await navigator.wakeLock.request("screen");}catch(e){}
