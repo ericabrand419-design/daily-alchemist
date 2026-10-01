@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#16132A">
-<meta name="description" content="Small rituals, kept daily, become who you are. Tell Aura what happened, and the right guardian brings one ritual that fits your day.">
+<meta name="description" content="The Daily Alchemist remembers what you're living through, recognizes your patterns and brings you the right ritual, reflection or guide when you need it. Small rituals, kept daily, become who you are.">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,7 +13,7 @@
 <link rel="icon" href="/icons/icon-192.png">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta property="og:title" content="The Daily Alchemist">
-<meta property="og:description" content="Small rituals, kept daily, become who you are. Rituals for real life, from a circle of nineteen guardians.">
+<meta property="og:description" content="The Daily Alchemist remembers what you're living through, recognizes your patterns and brings you the right ritual, reflection or guide when you need it. Small rituals, kept daily, become who you are.">
 <meta property="og:image" content="/icons/icon-512.png">
 <style>html,body{height:100%}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}</style>
 <script src="/config.js"></script>
@@ -503,7 +503,8 @@ body:has(#talk) .scrim{z-index:40}body:has(#gate) .scrim{z-index:60}
 .g .e.job{text-transform:none;letter-spacing:0;font-size:13.5px;line-height:1.25;color:var(--glow-dim)}
 .memline{margin-top:4px}
 .rhythm .speaker{display:flex;align-items:center;gap:10px}.rhythm .who{font-family:var(--f-ui);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.rhythm .q2{font-family:var(--f-display);font-size:20px}
-.gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}.gplus{width:40px;height:40px;border-radius:50%;border:1px dashed rgba(231,196,90,.6);display:grid;place-items:center;font-size:22px;color:var(--gold)}.gchip{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--glow);font-family:var(--f-ui);font-size:14px;min-width:68px;padding:4px;cursor:pointer}
+.gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}details.more{margin:6px 0 4px}details.more>summary{list-style:none;cursor:pointer;font-family:var(--f-ui);font-size:15.5px;color:var(--glow-dim);padding:14px 4px;text-align:center}details.more>summary::after{content:" \203A"}details.more[open]>summary::after{content:" \2039"}details.more>summary::-webkit-details-marker{display:none}
+.gplus{width:40px;height:40px;border-radius:50%;border:1px dashed rgba(231,196,90,.6);display:grid;place-items:center;font-size:22px;color:var(--gold)}.gchip{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--glow);font-family:var(--f-ui);font-size:14px;min-width:68px;padding:4px;cursor:pointer}
 .addnums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.addnums div{text-align:center}.addnums b{display:block;font-family:var(--f-display);font-size:26px;color:var(--gold)}.addnums span{display:block;font-family:var(--f-ui);font-size:13px;line-height:1.3;color:var(--glow-dim);margin-top:2px}
 select{background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 10px;font:inherit;font-size:17px;color-scheme:dark;flex:1}
 input[type=date]{width:100%;background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 14px;font:inherit;font-size:17px;color-scheme:dark}
@@ -2294,6 +2295,27 @@ function yourGuardians(){
 const LOCAL_VOICE={sage:"Tonight isn't asking you to understand it again. It's asking you to discharge it.",onyx:"You already know what this is about. Let's stop protecting it.",fern:"You have been holding the whole tide up by yourself. Put it down for a few minutes.",lily:"Your mind is loud because it's trying to keep you safe. Give it one clear thing to do.",thistle:"This doesn't make you mean. It makes you someone with an edge.",marigold:"You have been giving everyone the good version of you. Your turn.",juniper:"The space is holding what happened in it. Let's reset the container.",rue:"Not everyone gets access. We're changing the locks.",sol:"Stuck is just a plan without a date. Let's give it one, and I'll hold you to it.",
   poppy:"Your spark isn't gone. It's bored. Let's play.",aurora:"Something is trying to become clear. Let's give it some light.",rowan:"Your body is holding what your head keeps replaying. Let's move it through.",ember:"This is the moment before the leap. Let's make you brave enough.",willow:"You can be soft here. Let's give the grief somewhere to go.",vesper:"What you want is information. Let's listen to it, slowly.",wren:"You've been noticing things. Let's find out what they mean.",lumen:"You can already see it. Now let's name it.",onora:"You come from people. Let's call them in."};
 
+const GSPEC={
+ aura:{sig:"unclear, mixed or first time feelings",avoid:"never when one guardian clearly fits",next:"the guardian who fits",mem:"everything, especially open threads"},
+ onyx:{sig:"guilt, shame, regret, lying, hiding, something she did wrong, the same pattern again",avoid:"fresh grief, panic, crisis, or when she is already punishing herself hard",next:"Willow to forgive herself once it's owned; Thistle if the repair needs a boundary",mem:"what she has avoided saying, repeating patterns, past amends"},
+ sage:{sig:"anger, resentment, betrayal, feeling disrespected",avoid:"when the anger has already been released and the issue is still there (then it's a boundary or a decision, not more fire)",next:"Thistle for the boundary, Sol for the next step",mem:"who keeps lighting it, what release has and hasn't worked"},
+ fern:{sig:"exhaustion, overwhelm, crying, burnout, low tank",avoid:"when she needs to act, not rest; when rest has become avoidance",next:"Sol when rest has been had and it's time to move",mem:"sleep and energy check ins, how often she runs empty"},
+ lily:{sig:"anxiety, racing thoughts, overthinking, panic, can't think",avoid:"when the worry is about a real decision that needs making",next:"Aurora or Sol to decide once she can think",mem:"what calms her fastest, what the worry keeps circling"},
+ thistle:{sig:"boundaries, people pleasing, family guilt, being taken advantage of, saying no",avoid:"when she is the one who did harm (that's Onyx)",next:"Sol to follow through on the boundary, Rue if someone keeps pushing",mem:"the people involved, boundaries she has set and whether they held"},
+ marigold:{sig:"worth, confidence, joy, money, love, dating, a partner or crush",avoid:"grief or shame (don't brighten over it)",next:"Vesper for desire and intimacy (21+ members only), Onyx if it's really shame",mem:"her person, what makes her feel good, money stories"},
+ juniper:{sig:"home, space, clutter, moving, stillness, can't slow down",avoid:"when the heaviness is in a relationship, not the room",next:"Fern for deeper rest",mem:"her spaces and what she said about each"},
+ rue:{sig:"toxic people, envy, gossip, feeling targeted, protection",avoid:"when she is the one stirring it (that's Onyx)",next:"Thistle for the boundary",mem:"who she needs protecting from"},
+ sol:{sig:"accountability, procrastination, stuck, goals, plans, follow through, nerves before a big day, momentum",avoid:"when she is depleted or grieving (rest first)",next:"Fern if she is running empty, Ember for a big leap",mem:"her open promises, what she said she'd do and didn't, her wins"},
+ aurora:{sig:"decisions, confusion, new beginnings, mornings, clarity",avoid:"when she already knows and is avoiding (that's Onyx or Sol)",next:"Sol to act on the decision",mem:"decisions she's circling, how she felt each morning"},
+ rowan:{sig:"movement, exercise, restless body, stiff, sitting all day, wanting to feel in her body",avoid:"injury, illness or a very low tank (then Fern)",next:"Sol to make movement a habit",mem:"midday movement check ins, what kinds of movement she likes"},
+ ember:{sig:"fear, courage, big leaps, quitting, confronting",avoid:"when she is exhausted or the leap isn't hers to take yet",next:"Sol to plan the leap",mem:"the leaps she's named and what stopped her"},
+ willow:{sig:"grief, loss, death, forgiveness, missing someone",avoid:"rushing to fix or reframe; never hype",next:"Onora to honor the person, Onyx only if guilt is underneath",mem:"who she lost, dates that matter, anniversaries"},
+ vesper:{sig:"desire, sex, intimacy, pleasure, libido, sex magic",avoid:"anyone not 21+ and a member; pain, pressure or harm (care first, then Willow or a real person)",next:"Marigold for love and dating",mem:"her person (partner or crush), what she wants more of"},
+ wren:{sig:"signs, dreams, coincidences, repeating numbers",avoid:"when the sign is a way to avoid deciding",next:"Aurora to decide what it means for her",mem:"signs and dreams she has logged"},
+ lumen:{sig:"vision, goals, the future, manifesting",avoid:"when she needs a next step today (Sol)",next:"Sol to put a date on it",mem:"the future she has described"},
+ onora:{sig:"ancestors, family history, heritage, a grandparent",avoid:"fresh grief (Willow first)",next:"Willow if grief opens",mem:"the people she comes from and what she carries from them"},
+ poppy:{sig:"creativity, art, writing, blocked, wanting to make something",avoid:"when the block is fear of judgment (Ember) or exhaustion (Fern)",next:"Sol to finish it",mem:"her projects and what she keeps not finishing"}
+};
 const SHORT={poppy:"your muse",thistle:"your boundary keeper",onyx:"your shadow mirror",sage:"your fire keeper",fern:"keeper of your rest and tides",lily:"the one who clears your head",marigold:"keeper of your glow",juniper:"keeper of your space",rue:"your protection",sol:"your accountability coach",aurora:"your first light",rowan:"your movement keeper",ember:"your courage",willow:"keeper of your grief",vesper:"keeper of your desire",wren:"your sign reader",lumen:"keeper of your vision",onora:"keeper of your ancestors"};
 /* Each guardian's job, in plain words, so the circle is useful and not just mythology. */
 const JOB={aura:"Your guide. Hears what happened and sends you to the right help.",onyx:"Shadow work. The things you did wrong, owning them and making it right.",sage:"Anger. Turning fury into something that protects you.",fern:"Rest and overwhelm. When you're running on empty.",lily:"Anxiety and overthinking. Getting your head clear.",thistle:"Boundaries. Saying no, people pleasing, protecting your peace.",marigold:"Love and worth. Romance, dating, self love, confidence and joy.",juniper:"Your home and your stillness. Resetting your space and slowing down when you can't stop.",rue:"Protection. Toxic people, envy and energy that isn't yours.",sol:"Accountability. Keeps you on track, hypes you up and holds you to what you said.",aurora:"New beginnings and clarity. Decisions and fresh starts.",rowan:"Movement. Exercise, getting back in your body, nerves and keeping momentum.",ember:"Courage. Big leaps and walking through fear.",willow:"Grief. Loss, forgiveness and letting yourself feel it.",vesper:"Desire and intimacy. Pleasure, sex and sex magic. Members 21 and older.",wren:"Signs. Dreams, coincidences and what they might mean.",lumen:"Vision. Goals and the future you're building.",onora:"Family and ancestry. Where you come from and what you carry.",poppy:"Creativity. Getting unblocked and making things again."};
@@ -2367,12 +2389,26 @@ function followHTML(){
   const did=a.did&&S.entries.find(e=>e.id===a.did), when=Date.now()-a.ts<36*3600e3?"Yesterday":"On "+new Date(a.ts).toLocaleDateString(undefined,{weekday:"long"}), g=G[a.guardian]||G.aura;
   const said=a.text?' you told me "'+esc(a.text.length>90?a.text.slice(0,90)+"...":a.text)+'".':" we talked.";
   const q=did?" You did "+esc(did.ritualTitle)+". Did it help?":a.ritualTitle&&a.action!=="talk"?" I suggested "+esc(a.ritualTitle)+" with "+esc(g.name)+". Did you get to it?":" Did anything shift?";
-  const btns=did||!a.ritualTitle||a.action==="talk"?[["helped","It helped"],["little","A little"],["notreally","Not really"]]:[["did","I did it"],["notyet","Not yet"],["letgo","Let it go"]];
+  const btns=did||!a.ritualTitle||a.action==="talk"?[["helped","I feel better"],["still","Still bothering me"],["happened","Something happened"]]:[["did","I did it"],["notyet","Not yet"],["letgo","Let it go"]];
   return '<div class="card checkin" id="fuCard" data-fuid="'+a.id+'"><div class="handoff" style="padding:0">'+glyph("aura")+'<p><span class="who2">Aura, following up</span>'+when+said+q+'</p></div><div class="row" style="margin-top:10px" id="fuBtns">'+btns.map(b=>'<button class="chip" data-fu="'+b[0]+'">'+b[1]+'</button>').join("")+'</div><div id="fuMore"></div></div>';
 }
 function followStep2(a,picked){
   const box=$("#fuMore");if(!box)return;$("#fuBtns").innerHTML='<span class="small muted">'+esc(picked)+'</span>';
   box.innerHTML='<div class="composer" style="margin-top:10px"><label class="sr" for="fuText">What changed?</label><textarea id="fuText" placeholder="What changed? One line is plenty."></textarea>'+micBtn("fuText")+'</div><p class="small" style="margin-top:10px">Want me to carry this forward?</p><div class="row" style="margin-top:6px"><button class="btn btn-main" data-fusave="carry">Yes, keep it with me</button><button class="btn btn-ghost" data-fusave="rest">Let it rest</button></div>';
+}
+/* When it's still bothering her, Aura uses judgment instead of handing out another ritual. */
+function stillBothering(a){
+  a.follow={did:true,helped:"Not really",changed:"",carry:true,ts:Date.now(),still:true};
+  const g=a.guardian||"aura",r=a.ritualId&&byId[a.ritualId];
+  const released=r&&/release|burn|let go|cut|banish|cleanse|rest|nap|calm|breath/i.test((r.purpose||"")+" "+(r.title||"")+" "+(r.tags||[]).join(" "));
+  const theme=a.theme||THEME[g]||"";
+  const nextG=okG(/fire|protection|boundar/.test(theme)||["sage","rue","thistle"].includes(g)?"thistle":/grief/.test(theme)||g==="willow"?"willow":/shadow/.test(theme)||g==="onyx"?"onyx":"sol")||"sol";
+  const line=released?"Then I don't think you need another release ritual. I think you need to decide what you're going to do about it.":
+    nextG==="willow"?"Then let's not push it. Some things need more time and more company.":"Then let's stop circling it. One clear decision will do more than another ritual tonight.";
+  if(memOn())updateLedger("Follow up: after "+(a.ritualTitle||"talking")+" about "+(a.thread||a.theme||"this")+", she said it's still bothering her. "+(released?"Release did not resolve it; she needs a decision or boundary, not more release.":"It is unresolved."));
+  persistAll();
+  const card=$("#fuCard");if(!card)return;
+  card.innerHTML='<div class="handoff" style="padding:0">'+glyph("aura")+'<p><span class="who2">Aura</span>'+esc(line)+'</p></div><div class="row" style="margin-top:10px"><button class="btn btn-main" data-talk="'+nextG+'">Work it out with '+esc(G[nextG].name)+'</button><button class="btn btn-ghost" id="fuTell">Tell Aura what\'s still there</button></div>';
 }
 function saveFollow(a,carry){
   const f=a._fu||{};const changed=(($("#fuText")||{}).value||"").trim().slice(0,600);
@@ -2430,12 +2466,14 @@ async function askAura(text,mins){
   const p=S.profile, mem=memOn()?memoryBrief(text):{text:"(memory is off; do not refer to her past)"};
   const recent=S.entries.filter(usable).slice(0,8).map(e=>"- "+fmtDate(e.ts)+" | "+e.guardian+" | "+(e.ritualTitle||"")+" | theme: "+(e.theme||"")+" | carrying: "+(e.carrying||"").slice(0,120)+" | wrote: "+(e.text||"").slice(0,160)).join("\n")||"(no entries yet)";
   const catalog=R.filter(canUse).map(r=>r.id+" | "+G[r.g].name+" | "+r.title+" | "+r.min+" min | needs: "+(r.needs.map(n=>n[0]).join(", ")||"nothing")+" | for: "+r.purpose).join("\n");
-  const circle=circleKeys().map(k=>k+": "+G[k].name+", "+G[k].title+". Job: "+JOB[k]+" Domain: "+G[k].domain+" Voice: "+G[k].voice+" Signature phrases: "+G[k].phrases.join(" / ")).join("\n");
+  const circle=circleKeys().map(k=>k+": "+G[k].name+", "+G[k].title+". Job: "+JOB[k]+" Domain: "+G[k].domain+(GSPEC[k]?" Call when: "+GSPEC[k].sig+". Do NOT use when: "+GSPEC[k].avoid+". Goes next to: "+GSPEC[k].next+". Memory that matters: "+GSPEC[k].mem+".":"")+" Voice: "+G[k].voice+" Signature phrases: "+G[k].phrases.join(" / ")).join("\n");
   const prompt =
 "You are Aura, lead guardian of The Daily Alchemist, a ritual app from The Alchemist Archives. Philosophy: the person should never have to browse or work harder because the app exists. Read her moment and bring her ONE practice that fits right now.\n\n"+
 "THE CIRCLE (each guardian has a distinct voice; write the reading in the chosen guardian's voice):\n"+circle+"\n\n"+
 "BRAND VOICE: warm, wise, grounded, a little bougie. Real talk, not love-and-light. Nature, moon and elements, tangible and real, never woo-woo fluff. NEVER use em dashes or en dashes. No emojis.\n\n"+
-"TODAY: "+today.toDateString()+". Moon: "+M.name+", "+Math.round(M.ill*100)+"% lit. Season: "+SEA.cur.name+" ("+SEA.cur.sense+"), "+SEA.next.name+" in "+SEA.days+" days.\n\n"+
+"TODAY: "+today.toDateString()+". Moon: "+M.name+", "+Math.round(M.ill*100)+"% lit. Season: "+SEA.cur.name+" ("+SEA.cur.sense+"), "+SEA.next.name+" in "+SEA.days+" days.\n"+
+"THE MOON IS A SIGNAL, NOT DECORATION: waxing is for beginning and building, full is for peaks, celebration and big releases, waning is for releasing, ending and rest, new and dark moon are for rest and quiet intentions. Weigh it with how much she is carrying. When it shapes your choice, say why in one short clause, for example: You're carrying a lot tonight and the moon is waning, so we're not beginning anything. We're releasing. Never force it.\n"+
+"HOW SHE IS TODAY: "+(()=>{const d=(S.days||{})[dayKey(new Date())]||{};return [d.sleep?"slept "+["","rough","okay","good","great"][d.sleep]:"",d.energy?"energy "+["","low","some","good"][d.energy]:"",d.moved!=null?["hasn't moved yet","moved a little","moved"][d.moved]:""].filter(Boolean).join(", ")||"no check in yet";})()+".\n\n"+
 "WHAT AURA KNOWS ABOUT HER: name: "+(p.name||"unknown")+". Time right now: "+mins+" minutes. Has at home (water, paper, pen assumed): "+ownedNames().join(", ")+". "+personalText().replace(/\n/g,". ")+". "+"Prefers language that is "+p.tone+" (grounded = practical, mystical = more spell language).\n\n"+
 "HER RECENT ARCHIVE (newest first):\n"+recent+"\n\n"+
 "WHAT AURA REMEMBERS:\n"+mem.text+"\n\n"+
@@ -3479,20 +3517,21 @@ function renderToday(){
   h+='<div class="aura" id="auraBox"><div class="speaker">'+glyph("aura")+'<span class="who">Aura is listening</span><button class="howbtn" id="howOpen" aria-label="How it works">?</button></div>'+
      '<p class="q">What happened?</p>'+
      '<label class="sr" for="carry">What happened</label><div class="composer"><textarea id="carry" placeholder="Say it or type it. Messy is fine."></textarea>'+micBtn("carry")+'</div><p class="small muted" id="carryHint" hidden style="margin-top:6px"></p>'+
-     '<details class="feelset"'+(feelSel.length?' open':'')+'><summary class="small">Or tap how you feel</summary><div class="chips" style="margin-top:8px" id="quick">'+QUICK.map(q=>'<button class="chip" data-q="'+esc(q[0])+'" aria-pressed="'+feelSel.includes(q[0])+'">'+esc(q[0])+'</button>').join("")+'<button class="chip calm" id="cantThink">Can\'t think</button></div></details>'+
+     '<details class="feelset"'+(feelSel.length?' open':'')+'><summary class="small">Not ready to talk? Tap how you feel.</summary><div class="chips" style="margin-top:8px" id="quick">'+QUICK.map(q=>'<button class="chip" data-q="'+esc(q[0])+'" aria-pressed="'+feelSel.includes(q[0])+'">'+esc(q[0])+'</button>').join("")+'<button class="chip calm" id="cantThink">Can\'t think</button></div></details>'+
      '<button class="btn btn-main full" id="askBtn" style="margin-top:14px">Tell Aura</button></div>';
   h+='<div id="readingSlot">'+(lastRead?readingHTML(lastRead):"")+'</div>';
   if(!lastRead){
-    h+=yourCircleHTML()+bdayHTML()+rhythmHTML();
-    const fu=followHTML()||checkinHTML();if(fu)h+=fu;
+    const fu=followHTML()||checkinHTML(),rh=rhythmHTML();
+    h+=bdayHTML()+(fu||rh);
     h+='<div id="nudgeSlot">'+nudgeHTML()+'</div>'+letterCardHTML();
+    h+=yourCircleHTML();
     const dp=deeperHTML();
-    h+='<div class="trio">'+
+    h+='<details class="more"><summary>More for today</summary>'+(fu?rh:'')+'<div class="trio">'+
       '<div class="card hcard"><div class="label">One thing to do</div><h3 style="margin-top:6px">'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min'+(b.why?". "+esc(b.why):known?"":". A good place to start.")+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
       (memOn()&&b.remembered?'<div class="card hcard"><div class="label">One thing I remember</div><p style="margin-top:6px">'+esc(b.remembered)+'</p><div class="row" style="margin-top:8px"><button class="linkish" id="memOpen">See everything I remember</button></div></div>':
         !memOn()?'<div class="card hcard"><div class="label">Memory is off</div><p class="small muted" style="margin-top:6px">I\'m not keeping anything, so every visit starts fresh.</p><button class="linkish" id="memOpen">Change</button></div>':'')+
       '<div class="card hcard"><div class="label">'+esc(dp.label)+'</div><p class="small" style="margin-top:6px">'+esc(dp.text)+'</p><div class="row" style="margin-top:10px">'+dp.btn+'</div></div>'+
-      '</div>'+dateCardHTML();
+      '</div>'+dateCardHTML()+'</details>';
   }
   h+='<p class="disclaim"><button class="linkish" data-how="1">How it works</button> · For reflection and ritual. Not medical or mental health advice.</p>';
   $("#v-today").innerHTML=h;
@@ -3896,6 +3935,7 @@ function talkPrompt(k){
   return "You are "+g.name+", "+g.title+", one of the guardians of The Daily Alchemist from The Alchemist Archives. Stay fully in character.\n"+
   "Element: "+g.element+". Domain: "+g.domain+"\nVoice: "+g.voice+"\nSignature phrases (use sparingly): "+g.phrases.join(" / ")+"\n"+
   "The rest of the circle: "+circleKeys().filter(x=>x!==k).map(x=>G[x].name+" ("+G[x].domain+")").join("; ")+". Point her to one of them by name if they fit better.\n"+
+  (GSPEC[k]?"YOUR LANE: you are called for "+GSPEC[k].sig+". You are the wrong guardian when: "+GSPEC[k].avoid+". When it's time, send her to: "+GSPEC[k].next+". From her history, pay most attention to: "+GSPEC[k].mem+".\n":"")+
   "Brand voice: warm, wise, grounded, a little bougie. Real talk, not love and light. Rooted in nature, the moon and the elements. Never use em dashes or en dashes. No emojis. No lists.\n"+
   "Talk like a text conversation: 1 to 4 sentences. At most one question at a time. Remember what she said earlier in this chat.\n"+
   "Today: "+today.toDateString()+", "+M.name+" ("+Math.round(M.ill*100)+"% lit), "+SEA.cur.name+" season.\n"+
@@ -4289,8 +4329,11 @@ document.addEventListener("click",async ev=>{
     if(d.fu==="notyet"){a.fuSnooze=Date.now()+864e5;persistAll();toast("No pressure. I'll ask again tomorrow.");renderToday();return;}
     if(d.fu==="letgo"){a.follow={did:false,helped:"",changed:"",carry:false,ts:Date.now(),letgo:true};persistAll();toast("Let go. That's allowed.");renderToday();return;}
     a._fu={did:d.fu!=="notyet",helped:{helped:"It helped",little:"A little",notreally:"Not really",did:""}[d.fu]};
-    if(d.fu==="did"){$("#fuBtns").innerHTML=[["helped","It helped"],["little","A little"],["notreally","Not really"]].map(b=>'<button class="chip" data-fu="'+b[0]+'">'+b[1]+'</button>').join("");return;}
+    if(d.fu==="did"){$("#fuBtns").innerHTML=[["helped","I feel better"],["still","Still bothering me"],["happened","Something happened"]].map(b=>'<button class="chip" data-fu="'+b[0]+'">'+b[1]+'</button>').join("");return;}
+    if(d.fu==="still"){stillBothering(a);return;}
+    if(d.fu==="happened"){a._fu={did:true,helped:"Something happened"};followStep2(a,"Something happened");const ta=$("#fuText");if(ta){ta.placeholder="What happened?";ta.focus();}return;}
     followStep2(a,a._fu.helped);return;}
+  if(t.id==="fuTell"){const c=$("#carry");if(c){c.focus();c.scrollIntoView({block:"center"});}return;}
   if(d.fusave){const card=t.closest("#fuCard"),a=card&&S.asks.find(z=>z.id===card.dataset.fuid);if(a)saveFollow(a,d.fusave==="carry");return;}
   if(d.tabgo){tab(d.tabgo);return;}
   if(d.peek){const r=byId[d.peek];if(r)openSheet('<div class="stack">'+ritualCard(r,{why:true})+'</div>');return;}

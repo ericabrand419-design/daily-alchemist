@@ -1,7 +1,7 @@
 {
   "name": "The Daily Alchemist",
   "short_name": "Daily Alchemist",
-  "description": "Small rituals, kept daily, become who you are. Tell Aura what happened, and the right guardian brings one ritual that fits your day.",
+  "description": "The Daily Alchemist remembers what you're living through, recognizes your patterns and brings you the right ritual, reflection or guide when you need it. Small rituals, kept daily, become who you are.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
