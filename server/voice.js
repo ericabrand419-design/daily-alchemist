@@ -107,6 +107,8 @@ export async function POST(request) {
   if (!key()) return json({ error: "voice_off" }, 503);
   const user = await getUser(request);
   if (!user) return json({ error: "signin" }, 401);
+  // Spoken voice is off for customers until it's good enough. Set GUARDIAN_VOICE_ENABLED=true in Vercel to reopen it.
+  if (env("GUARDIAN_VOICE_ENABLED") !== "true" && !isAdminEmail(user.email)) return json({ error: "voice_off" }, 503);
   let body = {}; try { body = await request.json(); } catch {}
   const text = String(body.text || "").replace(/\s+/g, " ").trim().slice(0, 2500);
   if (!text) return json({ error: "bad_request" }, 400);

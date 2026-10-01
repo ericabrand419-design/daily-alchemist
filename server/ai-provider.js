@@ -12,7 +12,7 @@ import { env } from "../api/_lib.js";
 
 const DEFAULTS = {
   anthropic: { fast: "claude-haiku-4-5-20251001", deep: "claude-sonnet-5-5" },
-  openai: { fast: "gpt-4o-mini", deep: "gpt-4o" },
+  openai: { fast: "gpt-5.6-luna", deep: "gpt-5.6-sol" },
 };
 
 export function providerName(override) {
@@ -34,25 +34,36 @@ async function anthropic({ system, messages, maxTokens, model }) {
     headers: { "x-api-key": env("ANTHROPIC_API_KEY"), "anthropic-version": "2023-06-01", "content-type": "application/json" },
     body: JSON.stringify({ model, max_tokens: maxTokens, system, messages }),
   });
-  if (!res.ok) throw Object.assign(new Error("ai_unavailable"), { status: res.status });
+  if (!res.ok) { let msg = ""; try { msg = (await res.json()).error?.message || ""; } catch {} throw Object.assign(new Error("ai_unavailable" + (msg ? ": " + msg.slice(0, 160) : "")), { status: res.status }); }
   const d = await res.json();
   return {
     text: (d.content || []).filter((c) => c.type === "text").map((c) => c.text).join(""),
     usage: { input: d.usage?.input_tokens || 0, output: d.usage?.output_tokens || 0 },
   };
 }
+// OpenAI through the Responses API (their recommended interface for new work).
+// GPT-5.6 models reason before answering; effort stays low so replies stay quick, and the
+// output budget leaves room for that reasoning.
 async function openai({ system, messages, maxTokens, model }) {
-  if (!env("OPENAI_API_KEY")) throw Object.assign(new Error("ai_unavailable"), { status: 503 });
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  if (!env("OPENAI_API_KEY")) throw Object.assign(new Error("no_openai_key"), { status: 503 });
+  const res = await fetch("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: { authorization: "Bearer " + env("OPENAI_API_KEY"), "content-type": "application/json" },
-    body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: "system", content: system }, ...messages] }),
+    body: JSON.stringify({
+      model,
+      instructions: system,
+      input: messages.map((m) => ({ role: m.role, content: m.content })),
+      max_output_tokens: maxTokens + 4000,
+      reasoning: { effort: env("OPENAI_REASONING_EFFORT") || "low" },
+      store: false,
+    }),
   });
-  if (!res.ok) throw Object.assign(new Error("ai_unavailable"), { status: res.status });
+  if (!res.ok) { let msg = ""; try { msg = (await res.json()).error?.message || ""; } catch {} throw Object.assign(new Error("ai_unavailable" + (msg ? ": " + msg.slice(0, 160) : "")), { status: res.status }); }
   const d = await res.json();
+  const text = d.output_text || (d.output || []).filter((o) => o.type === "message").flatMap((o) => o.content || []).filter((c) => c.type === "output_text").map((c) => c.text).join("");
   return {
-    text: d.choices?.[0]?.message?.content || "",
-    usage: { input: d.usage?.prompt_tokens || 0, output: d.usage?.completion_tokens || 0 },
+    text,
+    usage: { input: d.usage?.input_tokens || 0, output: d.usage?.output_tokens || 0, reasoning: d.usage?.output_tokens_details?.reasoning_tokens || 0 },
   };
 }
 

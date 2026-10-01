@@ -116,3 +116,11 @@ Guardian voices now use ElevenLabs `eleven_multilingual_v2` (more natural than f
 Works with no setup inside the US (National Weather Service). Location comes from the visitor's connection, or the phone if she turns on precise location in Settings; nothing is stored.
 Outside the US, add Apple WeatherKit once the Apple developer account exists: in the Apple developer site make a WeatherKit key and a Services ID, then add to Vercel
 `WEATHERKIT_TEAM_ID`, `WEATHERKIT_KEY_ID`, `WEATHERKIT_SERVICE_ID`, `WEATHERKIT_PRIVATE_KEY` (the .p8 file's contents).
+
+## Spoken voice is off
+Guardians no longer speak aloud (no hear buttons, no Guide me aloud, no eyes closed mode, no spoken ritual commands, no music ducking, no /api/voice for customers). Typing by voice with the mic still works.
+The code stays behind `GUARDIAN_VOICE_ENABLED` in src/js/13-audio.js and the `GUARDIAN_VOICE_ENABLED=true` env var for /api/voice. The owner can try it on her own phone by setting localStorage `da.voiceDev` to `1`.
+
+## Claude vs OpenAI comparison
+/admin has a "Claude vs OpenAI" section. It needs `OPENAI_API_KEY` in Vercel. Defaults: Claude Haiku 4.5 vs GPT-5.6 Luna (fast), and the deep models for the hard moments. OpenAI uses the Responses API with low reasoning effort (`OPENAI_REASONING_EFFORT` to change).
+The moments live in server/compare-scenarios.json and are rebuilt with tools/capture-scenarios.mjs whenever the app's prompts change.

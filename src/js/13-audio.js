@@ -1,6 +1,11 @@
 /* Music: every guardian has an instrumental theme, made once and stored with the app.
    Aura's plays on Today and the main pages; a guardian's plays on their page, in their
    rituals and in their chats. It dips whenever someone speaks, and it can be turned off. */
+/* Spoken guardian voice (hear buttons, Guide me aloud, eyes closed, spoken ritual commands) is
+   switched off for now. The code stays here behind this flag. Only the owner can try it, by
+   setting localStorage "da.voiceDev" to "1". Speaking into the mic to type is separate and stays on. */
+const GUARDIAN_VOICE_ENABLED=false;
+function voiceEnabled(){if(GUARDIAN_VOICE_ENABLED)return true;try{return typeof ACCT!=="undefined"&&!!ACCT.admin&&localStorage.getItem("da.voiceDev")==="1";}catch(e){return false;}}
 const MUSIC={a:null,b:null,cur:null,want:"aura",base:"aura",duck:false,started:false};
 function musicOn(){return S.prefMusic!=="off";}
 function musicVol(){const h=new Date().getHours();return (S.prefMusicVol==="normal"?0.26:0.12)*(MUSIC.duck?0.25:1)*(h>=21||h<5?0.7:1);}
@@ -20,7 +25,7 @@ function musicPlay(g){
 function musicStop(){const el=MUSIC.cur;MUSIC.cur=null;if(el)fadeTo(el,0,800,()=>{try{el.pause();}catch(e){}});}
 function musicFor(g){musicPlay(g||MUSIC.base);}
 function musicBack(){musicPlay(MUSIC.base);}
-function musicDuck(on){MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
+function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
 /* Browsers only allow sound after a tap, so the music starts with the first one. */
 function musicStart(ev){return;if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-snd="music"]')){MUSIC.started=true;return;}MUSIC.started=true;musicPlay(MUSIC.want);}
 document.addEventListener("pointerdown",musicStart,{capture:true});
@@ -37,11 +42,11 @@ const SND_MUTE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 
 function soundSheet(){
   const m=musicOn()&&(musicAudible()||!MUSIC.started),v=!voiceMuted(),soft=S.prefMusicVol!=="normal";
   const row=(lab,on,a,b,da,db)=>'<div class="sndrow"><span>'+lab+'</span><div class="chips"><button class="chip" data-sndset="'+da+'" aria-pressed="'+on+'">'+a+'</button><button class="chip" data-sndset="'+db+'" aria-pressed="'+!on+'">'+b+'</button></div></div>';
-  return '<div class="stack" id="sndSheet"><div class="label">Sound</div>'+row("Music",m,"On","Off","music-on","music-off")+row("Volume",soft,"Softer","Fuller","vol-soft","vol-full")+row("Guardian voices",v,"On","Off","voice-on","voice-off")+'<p class="small muted">Stays this way until you change it. Guided rituals read each step aloud when you choose Guide me aloud.</p></div>';
+  return '<div class="stack" id="sndSheet"><div class="label">Sound</div>'+row("Music",m,"On","Off","music-on","music-off")+row("Volume",soft,"Softer","Fuller","vol-soft","vol-full")+(voiceEnabled()?row("Guardian voices",v,"On","Off","voice-on","voice-off"):'')+'<p class="small muted">Stays this way until you change it.</p></div>';
 }
 function openSound(){openSheet(soundSheet());}
 function renderSnd(){
-  document.body.classList.toggle("novoice",voiceMuted());
+  document.body.classList.toggle("novoice",voiceMuted()||!voiceEnabled());
   const anyOn=(musicOn()&&(musicAudible()||!MUSIC.started))||!voiceMuted();
   document.querySelectorAll(".sndbar").forEach(b=>{b.innerHTML='<button class="snd one'+(anyOn?"":" off")+'" data-snd="menu" aria-label="Sound settings">'+(anyOn?SND_VOICE:SND_MUTE)+'</button>';});
   const sh=$("#sndSheet");if(sh)sh.outerHTML=soundSheet();
@@ -92,7 +97,7 @@ async function voiceURL(g,text,cache){
   return null;
 }
 async function speak(text,onend,g,cache){
-  if(voiceMuted())return;
+  if(voiceMuted()||!voiceEnabled())return;
   g=g||(run&&run.r.g)||"aura";stopAudio();musicDuck(true);
   const done0=onend;onend=()=>{musicDuck(false);done0&&done0();};
   if(naturalVoices()){
@@ -110,6 +115,7 @@ function speakStep(){
   speak((i===0?r.title+". ":"")+s.t+". "+s.d+(s.say?" Say: "+s.say:""),()=>{if(s.hold&&voiceOn){const b=$("#holdBtn");if(b&&!b.disabled)b.click();}},r.g,true);
 }
 function startVoiceCommands(){
+  if(!voiceEnabled())return;
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR||vrec)return;
   try{vrec=new SR();vrec.continuous=true;vrec.interimResults=false;vrec.lang=navigator.language||"en-US";
     vrec.onresult=e=>{const t=e.results[e.results.length-1][0].transcript.toLowerCase();

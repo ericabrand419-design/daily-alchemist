@@ -102,6 +102,25 @@ a.btn{text-decoration:none;display:inline-block}
       <div class="tablewrap" style="margin-top:14px"><table id="music" style="min-width:560px"></table></div>
     </div>
 
+    <h2>Claude vs OpenAI</h2>
+    <div class="card">
+      <p style="margin:0">The same Daily Alchemist moments, sent word for word to both. Each prompt is exactly what the app builds for a made-up person on a made-up day: the boss at lunch, the evening reopen, the period on the same day, grief, safety and more. Nothing here touches real users or your limits. OpenAI needs <b>OPENAI_API_KEY</b> in Vercel first.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;align-items:center">
+        <button class="btn" id="cmpFast">Run everyday moments (fast models)</button>
+        <button class="btn" id="cmpDeep">Run the hard ones (deep models)</button>
+        <span class="note" id="cmpMsg" style="margin:0"></span>
+      </div>
+      <details style="margin-top:10px"><summary class="note" style="cursor:pointer">Prices used for the cost estimate (dollars per million tokens, check against each company's pricing page)</summary>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;font-size:14px">
+          <label>Claude fast in <input id="pAfi" value="1" size="5"></label><label>out <input id="pAfo" value="5" size="5"></label>
+          <label>OpenAI fast in <input id="pOfi" value="0.20" size="5"></label><label>out <input id="pOfo" value="1.20" size="5"></label>
+          <label>Claude deep in <input id="pAdi" value="3" size="5"></label><label>out <input id="pAdo" value="15" size="5"></label>
+          <label>OpenAI deep in <input id="pOdi" value="4" size="5"></label><label>out <input id="pOdo" value="20" size="5"></label>
+        </div></details>
+      <div id="cmpSum" style="margin-top:14px"></div>
+      <div class="tablewrap" style="margin-top:10px"><table id="cmp" style="min-width:760px"></table></div>
+    </div>
+
     <h2>Who used it, day by day</h2>
     <div class="card chart" id="chart"></div>
     <p class="note">People who said yes to sharing and opened the app that day.</p>
@@ -283,6 +302,50 @@ document.addEventListener("click",e=>{const r=e.target.closest("tr.row");if(r)sh
 $("#refresh").onclick=load;$("#csv").onclick=()=>DATA&&csv();
 $("#send").onclick=async()=>{const em=$("#email").value.trim();if(!em)return;msg("Sending...");const {error}=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});if(error){msg("Couldn't send a code ("+(error.message||"unknown error")+"). Try again in a minute.");return;}msg("Check your email for a 6-digit code.");$("#code").hidden=false;$("#verify").hidden=false;$("#code").focus();};
 $("#verify").onclick=async()=>{const {error}=await sb.auth.verifyOtp({email:$("#email").value.trim(),token:$("#code").value.trim(),type:"email"});if(error){msg("That code didn't work. Try again.");return;}start();};
+
+/* ---------- Claude vs OpenAI comparison ---------- */
+let CMP=null,cmpBusy=false,cmpRows=[];
+const DISPLAY_G={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",sol:"Sol",aurora:"Aurora",rowan:"Rowan",iris:"Iris",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+function cmpJSON(t){const m=String(t||"").match(/\{[\s\S]*\}/);if(!m)return null;try{return JSON.parse(m[0]);}catch(e){return null;}}
+function cmpCheck(sc,r){
+  if(!r||r.error)return {ok:false,notes:[r&&r.error?r.error:"no reply"],json:null};
+  const notes=[];let ok=true,j=null,txt=r.text||"";
+  if(sc.kind==="read"){j=cmpJSON(txt);if(!j){ok=false;notes.push("JSON did not parse");}else{txt=[j.aura,j.reading,j.why,j.writePrompt,j.tomorrow].filter(Boolean).join(" ");}}
+  const e=sc.expect||{};
+  if(j&&e.guardians&&!e.guardians.includes(String(j.guardian||"").toLowerCase())){ok=false;notes.push("chose "+(DISPLAY_G[j.guardian]||j.guardian)+", expected "+e.guardians.map(g=>DISPLAY_G[g]||g).join(" or "));}
+  if(j&&e.actions&&!e.actions.includes(j.action)){ok=false;notes.push("action "+j.action+", expected "+e.actions.join(" or "));}
+  if(j&&e.care&&!j.care){ok=false;notes.push("did not flag care");}
+  if(e.must&&!new RegExp(e.must,"i").test(txt)){ok=false;notes.push("never mentioned: "+e.must.split("|").slice(0,3).join(", "));}
+  if(e.mustNot&&new RegExp(e.mustNot,"i").test(txt)){ok=false;notes.push("said something it shouldn't ("+(txt.match(new RegExp(e.mustNot,"i"))||[""])[0]+")");}
+  if(/[\u2013\u2014]/.test(txt))notes.push("used a dash");
+  return {ok,notes,json:j,shown:txt};
+}
+function price(prov,tier,io){const k="#p"+(prov==="openai"?"O":"A")+(tier==="deep"?"d":"f")+io;return Number(($(k)||{}).value)||0;}
+function costOf(r,tier){if(!r||!r.usage)return 0;return (r.usage.input*price(r.provider,tier,"i")+r.usage.output*price(r.provider,tier,"o"))/1e6;}
+function cmpRender(){
+  const rows=cmpRows.map(x=>{const cell=(r,c)=>r?(r.error?'<td colspan="3" style="color:#f2b8a0">'+esc(r.error)+'</td>':'<td>'+(c.ok?'✅':'⚠️')+'<div class="note" style="margin:2px 0 0">'+esc(c.notes.join("; ")||"all checks passed")+'</div></td><td>'+(r.ms/1000).toFixed(1)+'s<br><span class="note">'+r.usage.input+' in / '+r.usage.output+' out</span></td><td>$'+costOf(r,x.tier).toFixed(4)+'</td>'):'<td colspan="3" class="note">running...</td>';
+    return '<tr><td><b>'+esc(x.sc.title)+'</b><div class="note">'+esc(x.sc.when)+(x.sc.g?' · talking to '+esc(DISPLAY_G[x.sc.g]):'')+' · '+x.tier+'</div><div class="note">She says: “'+esc(x.sc.text)+'”</div><details><summary class="note" style="cursor:pointer">Read both replies</summary><p style="font-size:14px"><b>Claude ('+esc(x.a&&x.a.model||"")+'):</b> '+esc(x.ca?x.ca.shown||x.a.text:"")+'</p><p style="font-size:14px"><b>OpenAI ('+esc(x.o&&x.o.model||"")+'):</b> '+esc(x.co?x.co.shown||x.o.text:"")+'</p></details></td>'+cell(x.a,x.ca||{})+cell(x.o,x.co||{})+'</tr>';}).join("");
+  $("#cmp").innerHTML='<thead><tr><th>Moment</th><th>Claude</th><th>Speed</th><th>Cost</th><th>OpenAI</th><th>Speed</th><th>Cost</th></tr></thead><tbody>'+rows+'</tbody>';
+  const done=cmpRows.filter(x=>x.a&&x.o);if(!done.length){$("#cmpSum").innerHTML="";return;}
+  const sum=(side)=>{const rs=done.map(x=>[x[side],x["c"+side[0]],x.tier]).filter(([r])=>r&&!r.error);if(!rs.length)return '<b>No replies</b> ('+esc((done[0][side]||{}).error||"")+')';const pass=rs.filter(([,c])=>c.ok).length,ms=rs.reduce((a,[r])=>a+r.ms,0)/rs.length,cost=rs.reduce((a,[r,,t])=>a+costOf(r,t),0);return '<b>'+pass+' of '+rs.length+'</b> passed · average '+(ms/1000).toFixed(1)+'s · $'+cost.toFixed(4)+' for this run · about $'+(cost/rs.length*1000).toFixed(2)+' per 1,000 like these';};
+  $("#cmpSum").innerHTML='<div style="display:grid;gap:6px"><div>Claude: '+sum("a")+'</div><div>OpenAI: '+sum("o")+'</div></div><p class="note">Checks are automatic and simple: right guardian, right action, remembered what matters, never blamed her cycle, no plant talk when life comes first, JSON that parses. Read the replies for tone; that part is yours to judge.</p>';
+}
+async function cmpRun(tier){
+  if(cmpBusy)return;cmpBusy=true;$("#cmpMsg").textContent="Loading the moments...";
+  try{if(!CMP){const r=await fetch(API+"/api/ai",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({scenarios:true})});CMP=await r.json();if(!CMP.scenarios)throw 0;}}catch(e){$("#cmpMsg").textContent="Couldn't load the moments.";cmpBusy=false;return;}
+  const list=CMP.scenarios.filter(s=>tier==="deep"?s.deep:true);
+  cmpRows=list.map(sc=>({sc,tier}));cmpRender();
+  let n=0;
+  for(const x of cmpRows){
+    $("#cmpMsg").textContent="Running "+(++n)+" of "+cmpRows.length+"...";
+    try{const r=await fetch(API+"/api/ai",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({compare:true,kind:x.sc.kind,tier,g:x.sc.g||"",messages:x.sc.messages})});
+      const d=await r.json();if(d.error){x.a={error:d.error};x.o={error:d.error};}else{x.a=d.anthropic;x.o=d.openai;}
+    }catch(e){x.a={error:"network"};x.o={error:"network"};}
+    x.ca=cmpCheck(x.sc,x.a);x.co=cmpCheck(x.sc,x.o);cmpRender();
+  }
+  $("#cmpMsg").textContent="Done. "+cmpRows.length+" moments.";cmpBusy=false;
+}
+$("#cmpFast").onclick=()=>cmpRun("fast");$("#cmpDeep").onclick=()=>cmpRun("deep");
 async function start(){$("#signin").hidden=true;$("#dash").hidden=false;await load();await invites("list");await music("list");}
 (async()=>{
   if(!C.supabaseUrl||!window.supabase){msg("Fill in config.js first (see SETUP.md).");return;}

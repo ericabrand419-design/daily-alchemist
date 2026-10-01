@@ -11,7 +11,7 @@ function startRitual(r,ctx){
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
 }
-function endRitual(){stopEyes();stopVoice();clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;if(talkG)musicFor(talkG);else musicBack();}
+function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;if(talkG)musicFor(talkG);else musicBack();}
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
@@ -21,7 +21,7 @@ function drawStep(){
     const s=r.steps[i];
     el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal">'+ROMAN[i+1]+'</span><span>of '+ROMAN[total]+'</span></div><h2>'+esc(s.t)+'</h2>'+ORN+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
       (s.say?'<div class="say"><span class="sayl">Say it aloud</span>"'+esc(s.say)+'"</div>':"")+
-      '<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>'+
+      (!voiceEnabled()?'':'<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>')+
       (s.hold?'<div class="timer"><span class="clock" id="clock">'+mmss(s.hold)+'</span><button class="btn btn-ghost" id="holdBtn">Start timer</button></div>':"")+
       (i===total-1&&r.secret?'<p class="secret">'+esc(r.secret)+'</p>':"")+
       '</div><div class="foot">'+(i>0?'<button class="btn btn-ghost" id="prevBtn">Back</button>':"")+'<button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';

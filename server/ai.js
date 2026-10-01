@@ -1,5 +1,6 @@
 // Guardian and Aura replies, with daily limits. The model provider is chosen in server/ai-provider.js.
 import { complete, compare } from "./ai-provider.js";
+import { readFileSync } from "node:fs";
 import { json, env, getUser, getProfile, isMember, isPaid, isAdult, adultRequired, ensureTrial, getUsage, bumpUsage, LIMITS, isAdminEmail } from "../api/_lib.js";
 
 // The hard rule governs every reply, whichever guardian is speaking.
@@ -15,6 +16,11 @@ export async function POST(request) {
   const user = await getUser(request);
   if (!user) return json({ error: "signin" }, 401);
   let body; try { body = await request.json(); } catch { return json({ error: "bad_request" }, 400); }
+  // Owner only: the comparison moments (real app prompts for made-up people), kept off the public site.
+  if (body.scenarios) {
+    if (!isAdminEmail(user.email)) return json({ error: "forbidden" }, 403);
+    return new Response(readFileSync(new URL("./compare-scenarios.json", import.meta.url), "utf8"), { headers: { "content-type": "application/json", "cache-control": "no-store", "access-control-allow-origin": "*" } });
+  }
   const kind = ["read", "talk", "memory"].includes(body.kind) ? body.kind : "talk";
   const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
   if (!messages.length || messages[messages.length - 1].role !== "user") return json({ error: "bad_request" }, 400);
