@@ -112,7 +112,7 @@ function focusCardHTML(f){
   if(f.level===3)return followHTML()||checkinHTML();
   return stewardHTML(f);
 }
-function speaker(g,t){return '<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';}
+function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';}
 function safetyCardHTML(f){
   return '<div class="card rhythm focus">'+speaker("aura","checking on you")+'<p style="margin-top:8px">Earlier you told me something that worried me. Before anything else today: are you safe right now?</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-safe="ok">I\'m safe</button><button class="btn btn-ghost" data-safe="'+esc(f.safety.kind)+'">Not really</button></div></div>';
 }
