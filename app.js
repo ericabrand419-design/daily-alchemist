@@ -115,7 +115,7 @@ function glyph(k, size){
   };
   return '<svg viewBox="0 0 64 64" aria-hidden="true"'+(size?' width="'+size+'" height="'+size+'"':'')+'>'+ring+(m[k]||m.aura)+'</svg>';
 }
-function guardianMark(k,size,label){return '<button class="gmark" data-guardian="'+esc(k)+'" aria-label="Open '+esc((G[k]||G.aura).name)+'">'+glyph(k,size)+'</button>'+(label?'<span class="gmarkname">'+esc((G[k]||G.aura).name)+'</span>':'');}
+function guardianMark(k,size,label){const g=G[k]||G.aura;return '<button class="gmark'+(label?' labeled':'')+'" data-guardian="'+esc(k)+'" aria-label="Open '+esc(g.name)+'">'+glyph(k,size)+(label?'<span class="gmarkname">'+esc(g.name)+'</span>':'')+'</button>';}
 
 
 /* ------------------------------------------------------------------
@@ -3451,7 +3451,7 @@ function focusCardHTML(f){
   if(f.level===3)return followHTML()||checkinHTML();
   return stewardHTML(f);
 }
-function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';}
+function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30,true)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">· '+esc(t)+'</span></div>';}
 function safetyCardHTML(f){
   return '<div class="card rhythm focus">'+speaker("aura","checking on you")+'<p style="margin-top:8px">Earlier you told me something that worried me. Before anything else today: are you safe right now?</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-safe="ok">I\'m safe</button><button class="btn btn-ghost" data-safe="'+esc(f.safety.kind)+'">Not really</button></div></div>';
 }
@@ -3718,7 +3718,6 @@ function openAlchemy(){
   let h='<div class="stack alchsheet"><div class="label">Daily Alchemy</div><h2>'+esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2>'+
    '<p class="voice">'+esc(alchemySentence(now))+'</p>'+
    (f.level<=3?'<p class="small" style="color:var(--gold)">'+esc(f.level===1?"Right now, you matter more than any of this.":"What's happening in your life comes before any of this today. The sky can wait.")+'</p>':'')+
-   (wxNow()?'<details class="group"><summary>The weather</summary><p>'+esc(wxNow().label)+', '+esc(wxTemp(wxNow()))+(wxNow().city?' in '+esc(wxNow().city):'')+'.'+(wxNow().soon?' '+esc(WX_OPEN[wxNow().soon])+' coming in the next few hours.':'')+'</p><p class="small muted">'+(["rain","storm","snow"].includes(wxNow().kind)?'Rituals that send you outside wait for a better sky today. ':'')+(wxMode()==="precise"?'Using your phone\'s location, rounded to about a kilometer.':'Using your rough location from your connection.')+' Change it in Settings, under Weather.</p></details>':'')+
    '<details class="group" open><summary>The moon</summary><p>'+esc(M.name)+', '+Math.round(M.ill*100)+'% lit. '+(M.waxing?"Full moon in "+fullIn+(fullIn===1?" day":" days")+", new moon in "+newIn+".":"New moon in "+newIn+(newIn===1?" day":" days")+", full moon in "+fullIn+".")+'</p><p class="small muted">'+esc(MOON_TALK[M.name])+'</p></details>'+
    '<details class="group"><summary>The season</summary><p>'+esc(se.name)+'. '+esc(se.next)+' begins in '+se.days+' days.</p><p class="small muted">On the wheel of the year it\'s '+esc(SEA.cur.name)+', the time of '+esc(SEA.cur.sense)+'. '+esc(SEA.next.name)+' is '+SEA.days+' days out.</p></details>'+
    '<details class="group"><summary>The day</summary><p>'+esc(day[0])+' belongs to '+esc(day[1])+': '+esc(day[2])+'.</p><p class="small muted">At home in the Circle today: '+esc(day[3].filter(k=>G[k]&&allowedG(k)).map(k=>G[k].name).join(", "))+'.</p></details>'+
@@ -4510,7 +4509,7 @@ function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.canc
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32,true)+'<span class="t">· '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){
     const needs=ritualNeeds(r);
     el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+

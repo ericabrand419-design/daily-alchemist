@@ -12,8 +12,8 @@
   --night-3:#2C2650;
   --line:rgba(231,196,90,.28);
   --glow:#F4F1E6;         /* Lunar Glow */
-  --glow-dim:#EEE9F6;
-  --glow-faint:#D0C8DF;
+  --glow-dim:#F5F1FA;
+  --glow-faint:#E7E0F0;
   --fuchsia:#BF1E73;      /* Cosmic Fuchsia */
   --fuchsia-hi:#E0438F;
   --flame:#E4572E;        /* Solar Flame */
@@ -70,12 +70,12 @@ button{cursor:pointer}
 
 section.view{padding-top:18px;display:grid;grid-template-columns:minmax(0,1fr);gap:22px}
 section.view>*{min-width:0}
-.label{font-family:var(--f-ui);font-size:15.5px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.label{font-family:var(--f-ui);font-size:16px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 h2{font-family:var(--f-display);font-weight:400;font-size:32px;line-height:1.1;margin:4px 0 0;text-wrap:balance}
 h3{font-family:var(--f-display);font-weight:400;font-size:25.5px;line-height:1.15;margin:0;text-wrap:balance}
 p{margin:0}
 .muted{color:var(--glow-dim)}
-.small{font-family:var(--f-ui);font-size:16.5px;line-height:1.5}
+.small{font-family:var(--f-ui);font-size:17.5px;line-height:1.55}
 
 /* Aura intake */
 .aura{position:relative;padding:20px 18px 18px;border-radius:18px;background:linear-gradient(180deg,rgba(44,38,80,.92),rgba(33,28,59,.92));border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(255,241,184,.12),0 18px 40px -20px rgba(0,0,0,.7)}
@@ -129,7 +129,7 @@ textarea::placeholder{color:var(--glow-faint);font-style:italic}
 .page .actions{display:flex;gap:10px;margin-top:14px;position:relative}
 
 /* cards generic */
-.card{border-radius:16px;border:1px solid rgba(244,241,230,.22);background:rgba(30,25,54,.88);padding:16px;box-shadow:0 12px 28px -22px rgba(0,0,0,.8)}
+.card{border-radius:16px;border:1px solid rgba(244,241,230,.30);background:rgba(25,21,48,.95);padding:16px;box-shadow:0 12px 28px -22px rgba(0,0,0,.8)}
 .card.link{display:block;width:100%;text-align:left;color:inherit}
 .card.link:hover{border-color:var(--line)}
 
@@ -151,7 +151,7 @@ textarea::placeholder{color:var(--glow-faint);font-style:italic}
 
 /* journey */
 .days{display:grid;gap:8px}
-.day{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid rgba(244,241,230,.1);background:rgba(33,28,59,.6);border-radius:14px;padding:10px 12px;color:inherit}
+.day{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;width:100%;text-align:left;border:1px solid rgba(244,241,230,.18);background:rgba(27,23,52,.88);border-radius:14px;padding:10px 12px;color:inherit}
 .day .num{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-sc);font-size:22.5px;box-shadow:inset 0 0 0 1px var(--line)}
 .day.done .num{background:rgba(231,196,90,.16);color:var(--gold)}
 .day.next{border-color:var(--gold);background:rgba(44,38,80,.9)}
@@ -167,7 +167,7 @@ textarea::placeholder{color:var(--glow-faint);font-style:italic}
 
 /* circle */
 .circle{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.g{border:1px solid rgba(244,241,230,.1);background:rgba(33,28,59,.6);border-radius:14px;padding:14px 6px 12px;display:grid;justify-items:center;gap:6px;color:inherit;text-align:center}
+.g{border:1px solid rgba(244,241,230,.18);background:rgba(27,23,52,.90);border-radius:14px;padding:14px 6px 12px;display:grid;justify-items:center;gap:6px;color:inherit;text-align:center}
 .g:hover{border-color:var(--line)}
 .g svg{width:46px;height:46px}
 .g .n{font-family:var(--f-display);font-size:23.5px;line-height:1}
@@ -661,6 +661,14 @@ html[data-weather=clear-night] #wxLayer{background:radial-gradient(900px 500px a
 .rite .count .seal{box-shadow:0 0 0 1px color-mix(in srgb,var(--gcol,var(--gold)) 55%,transparent),0 0 22px color-mix(in srgb,var(--gcol,var(--gold)) 18%,transparent)}
 .rite .say{border-color:color-mix(in srgb,var(--gcol,var(--gold)) 50%,#9A7414)}
 .page.ritualcard::after{content:"✦";position:absolute;right:16px;bottom:10px;font-family:var(--f-display);font-size:34px;color:rgba(154,116,20,.14);pointer-events:none}
+
+/* Readability override: secondary text should still be easy to read on a phone. */
+.muted,.why,.intro .kv,.talk .hint,.entry .m,.g .e,.stat .k,.field label,.field .lbl{opacity:1;text-shadow:0 1px 1px rgba(0,0,0,.16)}
+
+.gmark.labeled{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:2px 5px 2px 2px}
+.gmarkname{font-family:var(--f-ui);font-size:15.5px;font-weight:700;letter-spacing:.035em;color:inherit;white-space:nowrap}
+.rite .gmark.labeled{color:var(--ink-soft);background:rgba(42,33,48,.045);padding-right:8px}
+.rite .gmarkname{color:var(--ink-soft)}
 </style>
 
 <div class="app" id="app">
@@ -813,7 +821,7 @@ function glyph(k, size){
   };
   return '<svg viewBox="0 0 64 64" aria-hidden="true"'+(size?' width="'+size+'" height="'+size+'"':'')+'>'+ring+(m[k]||m.aura)+'</svg>';
 }
-function guardianMark(k,size,label){return '<button class="gmark" data-guardian="'+esc(k)+'" aria-label="Open '+esc((G[k]||G.aura).name)+'">'+glyph(k,size)+'</button>'+(label?'<span class="gmarkname">'+esc((G[k]||G.aura).name)+'</span>':'');}
+function guardianMark(k,size,label){const g=G[k]||G.aura;return '<button class="gmark'+(label?' labeled':'')+'" data-guardian="'+esc(k)+'" aria-label="Open '+esc(g.name)+'">'+glyph(k,size)+(label?'<span class="gmarkname">'+esc(g.name)+'</span>':'')+'</button>';}
 
 
 /* ------------------------------------------------------------------
@@ -4149,7 +4157,7 @@ function focusCardHTML(f){
   if(f.level===3)return followHTML()||checkinHTML();
   return stewardHTML(f);
 }
-function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';}
+function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30,true)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">· '+esc(t)+'</span></div>';}
 function safetyCardHTML(f){
   return '<div class="card rhythm focus">'+speaker("aura","checking on you")+'<p style="margin-top:8px">Earlier you told me something that worried me. Before anything else today: are you safe right now?</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-safe="ok">I\'m safe</button><button class="btn btn-ghost" data-safe="'+esc(f.safety.kind)+'">Not really</button></div></div>';
 }
@@ -4416,7 +4424,6 @@ function openAlchemy(){
   let h='<div class="stack alchsheet"><div class="label">Daily Alchemy</div><h2>'+esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2>'+
    '<p class="voice">'+esc(alchemySentence(now))+'</p>'+
    (f.level<=3?'<p class="small" style="color:var(--gold)">'+esc(f.level===1?"Right now, you matter more than any of this.":"What's happening in your life comes before any of this today. The sky can wait.")+'</p>':'')+
-   (wxNow()?'<details class="group"><summary>The weather</summary><p>'+esc(wxNow().label)+', '+esc(wxTemp(wxNow()))+(wxNow().city?' in '+esc(wxNow().city):'')+'.'+(wxNow().soon?' '+esc(WX_OPEN[wxNow().soon])+' coming in the next few hours.':'')+'</p><p class="small muted">'+(["rain","storm","snow"].includes(wxNow().kind)?'Rituals that send you outside wait for a better sky today. ':'')+(wxMode()==="precise"?'Using your phone\'s location, rounded to about a kilometer.':'Using your rough location from your connection.')+' Change it in Settings, under Weather.</p></details>':'')+
    '<details class="group" open><summary>The moon</summary><p>'+esc(M.name)+', '+Math.round(M.ill*100)+'% lit. '+(M.waxing?"Full moon in "+fullIn+(fullIn===1?" day":" days")+", new moon in "+newIn+".":"New moon in "+newIn+(newIn===1?" day":" days")+", full moon in "+fullIn+".")+'</p><p class="small muted">'+esc(MOON_TALK[M.name])+'</p></details>'+
    '<details class="group"><summary>The season</summary><p>'+esc(se.name)+'. '+esc(se.next)+' begins in '+se.days+' days.</p><p class="small muted">On the wheel of the year it\'s '+esc(SEA.cur.name)+', the time of '+esc(SEA.cur.sense)+'. '+esc(SEA.next.name)+' is '+SEA.days+' days out.</p></details>'+
    '<details class="group"><summary>The day</summary><p>'+esc(day[0])+' belongs to '+esc(day[1])+': '+esc(day[2])+'.</p><p class="small muted">At home in the Circle today: '+esc(day[3].filter(k=>G[k]&&allowedG(k)).map(k=>G[k].name).join(", "))+'.</p></details>'+
@@ -5208,7 +5215,7 @@ function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.canc
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32,true)+'<span class="t">· '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){
     const needs=ritualNeeds(r);
     el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+
