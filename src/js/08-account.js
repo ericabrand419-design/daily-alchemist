@@ -37,19 +37,20 @@ async function initWeb(){
   const qs=new URLSearchParams(location.search);
   if(qs.get("checkout")==="success"){history.replaceState(null,"",location.pathname);toast("Welcome to "+PLAN.name+".");setTimeout(refreshMe,2500);}
 }
-/* Sign in with a code by text (when texting is set up) or by email. New and returning people
-   do the same thing. */
-function phoneOn(){return !!(window.DA_CONFIG&&window.DA_CONFIG.phoneSignIn);}
+/* Authentication is email-only. Invitations can be shared by text, but Daily Alchemist
+   never sends an SMS sign-in code, so opening a texted invitation cannot create SMS cost. */
+function phoneOn(){return false;}
 function normPhone(v){let d=String(v||"").replace(/[^\d+]/g,"");if(d.startsWith("+"))return /^\+\d{8,15}$/.test(d)?d:null;d=d.replace(/\D/g,"");if(d.length===10)return "+1"+d;if(d.length===11&&d[0]==="1")return "+"+d;return null;}
 function signInForm(gate,byEmail){
-  const phone=phoneOn()&&!byEmail;
+  const invite=!!S.friendCode;
+  const phone=false;
   return '<div id="siForm" data-by="'+(phone?"phone":"email")+'">'+(phone
     ?'<div class="field" id="siEmailRow"><label for="siPhone">Your mobile number</label><input type="tel" inputmode="tel" autocomplete="tel" id="siPhone" placeholder="(555) 123 4567"></div>'
     :'<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>')+
-    '<button class="btn btn-main full" id="siSend" style="margin-top:12px">'+(phone?"Text me a code":"Send my code")+'</button>'+
+    '<button class="btn btn-main full" id="siSend" style="margin-top:12px">'+(invite?"Email my code":"Send my code")+'</button>'+
     '<div class="field" id="siCodeRow" hidden style="margin-top:12px"><label for="siCode">'+(phone?"Code from your texts":"Code from your email")+'</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
     '<button class="btn btn-main full" id="siVerify" hidden style="margin-top:12px">'+(gate?"Come in":"Sign in")+'</button>'+
-    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(phone?"New here or coming back, it\'s the same: we text you a 6-digit code. No password.":"New here or coming back, it\'s the same: we email you a 6-digit code. No password.")+'</p>'+
+    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(invite?"Your invitation arrived by link. We only use your email to sign you in. We\'ll email you a 6-digit code. No password and no text messages from us.":"New here or coming back, it\'s the same: we email you a 6-digit code. No password.")+'</p>'+
     (phoneOn()?'<p class="small" style="text-align:center"><button class="linkish" id="siSwitch" data-gate="'+(gate?1:0)+'">'+(phone?"Use email instead":"Use my phone number instead")+'</button></p>':'')+'</div>';
 }
 /* On the live app everyone signs in or makes a free account first, so Aura can give her
@@ -59,7 +60,7 @@ function showGate(){
   if(!S.seenIntro&&!S.profile.onboarded){showIntro();return;}
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays(S.friendCode?"I\'m Aura, your guide here. You came in on an invitation, so make your account and everything opens for you, for life.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
+    auraSays(S.friendCode?"I\'m Aura, your guide here. Erica invited you in. Enter your email to claim your invitation and I\'ll email your sign-in code. No password and no text messages from us.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
     signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }
