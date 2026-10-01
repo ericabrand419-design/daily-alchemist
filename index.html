@@ -141,7 +141,7 @@
 
 <div class="modal" id="statusModal"><div class="sheet"><button class="close" data-close="statusModal">×</button><div class="eyebrow">Something changed</div><h2 style="font:500 31px Georgia,serif;margin:8px 0">What happened next?</h2><div class="row" id="statusButtons">
 <button class="secondary" data-status="Answered">Answered</button><button class="secondary" data-status="Changed">Changed</button><button class="secondary" data-status="Released">Released</button><button class="secondary" data-status="Still carrying">Still carrying</button>
-</div><textarea id="statusNote" placeholder="What happened?" style="width:100%;min-height:95px;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:12px;background:#fffefa"></textarea></div></div>
+</div><textarea id="statusNote" placeholder="What happened?" style="width:100%;min-height:95px;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:12px;background:#fffefa"></textarea><button class="primary" id="saveStatusBtn">Save update</button></div></div>
 
 <div class="modal" id="authModal"><div class="sheet"><button class="close" data-close="authModal">×</button><div class="eyebrow">Private sync</div><h2 style="font:500 31px Georgia,serif;margin:8px 0">Take your walk with you.</h2><p>Once Supabase is connected, sign in by email to sync your private faith memory across devices.</p><input id="emailInput" type="email" placeholder="you@example.com" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:14px;background:#fffefa"><button class="primary" id="sendLinkBtn">Send sign-in link</button></div></div>
 <div class="toast" id="toast"></div>
@@ -181,6 +181,19 @@ let state=load();
 let current=null;
 let selectedStatus=null;
 let sb=null;
+const $=id=>document.getElementById(id);
+const heartInput=$('heartInput'), micBtn=$('micBtn'), guideBtn=$('guideBtn'), responseCard=$('responseCard');
+const actionPill=$('actionPill'), decisionTitle=$('decisionTitle'), heardText=$('heardText'), threadCount=$('threadCount');
+const verseRef=$('verseRef'), verseText=$('verseText'), verseNote=$('verseNote'), whyBtn=$('whyBtn'), openPassageBtn=$('openPassageBtn');
+const prayerText=$('prayerText'), stepText=$('stepText'), tomorrowWrap=$('tomorrowWrap'), tomorrowText=$('tomorrowText');
+const rememberBtn=$('rememberBtn'), followBtn=$('followBtn'), prayedBtn=$('prayedBtn'), resolvedBtn=$('resolvedBtn');
+const whyModal=$('whyModal'), whyNow=$('whyNow'), whyYou=$('whyYou'), whyThis=$('whyThis');
+const statusModal=$('statusModal'), statusNote=$('statusNote'), saveStatusBtn=$('saveStatusBtn');
+const continuityCard=$('continuityCard'), greeting=$('greeting'), openingLine=$('openingLine'), openingSub=$('openingSub');
+const prayerTimeline=$('prayerTimeline'), insightCards=$('insightCards'), circleList=$('circleList'), addPersonBtn=$('addPersonBtn'), pathsList=$('pathsList'), memoryList=$('memoryList');
+const translation=$('translation'), prayerStyle=$('prayerStyle'), depth=$('depth'), followToggle=$('followToggle');
+const authBtn=$('authBtn'), authModal=$('authModal'), emailInput=$('emailInput'), sendLinkBtn=$('sendLinkBtn'), cloudStatus=$('cloudStatus');
+const onboarding=$('onboarding'), onTitle=$('onTitle'), onBody=$('onBody'), onNext=$('onNext');
 
 const passages={
  anxiety:{pattern:/anx|worried|worry|afraid|fear|panic|peace|overwhelm/i,key:'night anxiety',title:'Anxiety at night',ref:'Psalm 46:1',web:'“God is our refuge and strength, a very present help in trouble.”',heard:"This sounds like a need for steadiness before it becomes another problem to solve.",prayer:'God, meet me in what I cannot settle by myself. Be my refuge here. Give me enough peace for the next faithful thing.',step:'Put the problem down for ten minutes. Read Psalm 46 slowly once, then do only what belongs to tonight.'},
@@ -280,7 +293,8 @@ rememberBtn.onclick=()=>{if(!current)return;state.memories.unshift({id:'m'+Date.
 followBtn.onclick=()=>{const t=ensureThread();if(!t)return;t.follow=true;save();renderAll();toast('I’ll keep the thread.')};
 prayedBtn.onclick=()=>{const t=ensureThread();if(!t)return;state.events.unshift({date:'Today',title:'You prayed about it',body:current.p.prayer,thread:t.title});save();renderAll();toast('Added to your Prayer Story.')};
 resolvedBtn.onclick=()=>{if(!current)return;selectedStatus=null;statusNote.value='';statusModal.classList.add('show')};
-document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{selectedStatus=b.dataset.status;document.querySelectorAll('[data-status]').forEach(x=>x.style.borderColor=x===b?'#ad8446':'') ;setTimeout(applyStatus,100)});
+document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{selectedStatus=b.dataset.status;document.querySelectorAll('[data-status]').forEach(x=>x.style.borderColor=x===b?'#ad8446':'')});
+saveStatusBtn.onclick=applyStatus;
 function applyStatus(){if(!selectedStatus||!current)return;const t=ensureThread();t.status=selectedStatus;t.follow=selectedStatus==='Still carrying';const note=statusNote.value.trim()||('Marked '+selectedStatus);t.last=note;t.updated=Date.now();state.events.unshift({date:'Today',title:'Prayer status: '+selectedStatus,body:note,thread:t.title});save();statusModal.classList.remove('show');renderAll();toast(selectedStatus)}
 
 function followContent(){
@@ -312,10 +326,14 @@ function renderInsights(){const xs=insights();insightCards.innerHTML=xs.map(x=>'
 function renderCircle(){circleList.innerHTML=state.circle.map(p=>'<div class="card person"><div class="avatar">'+esc(p.name[0])+'</div><div class="grow"><strong>'+esc(p.name)+'</strong><small>'+esc(p.note)+'</small></div><button class="textbtn" data-pray="'+esc(p.id)+'">Pray</button></div>').join('');circleList.querySelectorAll('[data-pray]').forEach(b=>b.onclick=()=>{const p=state.circle.find(x=>x.id===b.dataset.pray);heartInput.value='I want to pray for '+p.name+'. '+p.note;showView('today');heartInput.focus()})}
 addPersonBtn.onclick=()=>{const name=prompt('Who do you want to remember in prayer?');if(!name)return;const note=prompt('What should I remember?')||'Prayer request';state.circle.push({id:'p'+Date.now(),name,note});save();renderAll()}
 function renderPaths(){pathsList.innerHTML=state.paths.map((p,i)=>'<div class="card path"><span class="pill">'+(p.progress?'Continue':'Suggested for you')+'</span><h3 style="font:500 23px Georgia,serif;margin:10px 0 5px">'+esc(p.title)+'</h3><p class="subtle">'+esc(p.why)+'</p><div class="progress"><i style="width:'+Math.round(p.progress/p.days*100)+'%"></i></div><div class="row between" style="margin-top:8px"><span class="subtle">'+p.progress+' of '+p.days+' days</span><button class="textbtn" data-path="'+i+'">'+(p.progress?'Continue':'Begin')+'</button></div></div>').join('');pathsList.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{const i=+b.dataset.path;state.paths[i].progress=Math.min(state.paths[i].days,state.paths[i].progress+1);save();renderAll();toast('Today’s step complete.')})}
-function renderMemory(){memoryList.innerHTML=state.memories.map(m=>'<div class="memoryrow"><div class="grow"><strong>'+esc(m.text)+'</strong><small>'+esc(m.kind||'memory')+'</small></div><div class="memoryActions"><button class="mini '+(m.kept?'on':'')+'" data-keep="'+m.id+'">'+(m.kept?'Kept':'Keep')+'</button><button class="mini" data-correct="'+m.id+'">Correct</button><button class="danger" data-forget="'+m.id+'">Forget</button></div></div>').join('')||'<div class="empty">Nothing saved.</div>';
+function renderMemory(){
+  const mem=state.memories.map(m=>'<div class="memoryrow"><div class="grow"><strong>'+esc(m.text)+'</strong><small>'+esc(m.kind||'memory')+'</small></div><div class="memoryActions"><button class="mini '+(m.kept?'on':'')+'" data-keep="'+m.id+'">'+(m.kept?'Kept':'Keep')+'</button><button class="mini" data-correct="'+m.id+'">Correct</button><button class="danger" data-forget="'+m.id+'">Forget</button></div></div>').join('');
+  const threads=state.threads.filter(t=>!state.forgotten.includes(t.key)).map(t=>'<div class="memoryrow"><div class="grow"><strong>'+esc(t.title)+'</strong><small>thread I follow · '+t.count+' conversation'+(t.count===1?'':'s')+'</small></div><div class="memoryActions"><button class="danger" data-forgetthread="'+esc(t.key)+'">Forget thread</button></div></div>').join('');
+  memoryList.innerHTML=(mem||'<div class="empty">No individual memories saved.</div>')+(threads?'<div class="eyebrow" style="margin-top:18px">Threads I follow</div>'+threads:'');
   memoryList.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{const m=state.memories.find(x=>x.id===b.dataset.keep);m.kept=!m.kept;save();renderAll();toast(m.kept?'I’ll keep this.':'No longer pinned.')});
   memoryList.querySelectorAll('[data-correct]').forEach(b=>b.onclick=()=>{const m=state.memories.find(x=>x.id===b.dataset.correct);const v=prompt('Correct this memory:',m.text);if(v&&v.trim()){m.text=v.trim();save();renderAll();toast('Corrected.')}});
   memoryList.querySelectorAll('[data-forget]').forEach(b=>b.onclick=()=>{const id=b.dataset.forget;state.memories=state.memories.filter(x=>x.id!==id);save();renderAll();toast('Forgotten.')});
+  memoryList.querySelectorAll('[data-forgetthread]').forEach(b=>b.onclick=()=>{const key=b.dataset.forgetthread;if(!state.forgotten.includes(key))state.forgotten.push(key);state.memories=state.memories.filter(m=>!m.text.toLowerCase().includes(key.toLowerCase()));save();renderAll();toast('Thread forgotten. I won’t bring it back.')});
 }
 function renderSettings(){translation.value=state.settings.translation;prayerStyle.value=state.settings.prayerStyle;depth.value=state.settings.depth;followToggle.classList.toggle('on',state.settings.followups)}
 function renderAll(){renderOpening();followContent();renderThreads('todayThreads',3);renderThreads('walkThreads');renderTimeline();renderInsights();renderCircle();renderPaths();renderMemory();renderSettings()}
