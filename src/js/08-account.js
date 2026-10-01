@@ -76,7 +76,7 @@ async function refreshMe(){
   const r=await api("/api/me",S.pendingDob?{dob:S.pendingDob}:{});
   if(!r.error&&S.pendingDob&&(r.adult21_at||r.under21_at||r.under18_at)){delete S.pendingDob;saveLocal();}
   if(!r.error&&r.under18_at){S.profile.minor=true;saveLocal();showMinor();return;}
-  if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt&&!S.profile.adult){S.profile.adult=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.monitorScope=Array.isArray(r.monitor_scope)?r.monitor_scope:null;ACCT.admin=!!r.admin;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
+  if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt){S.profile.adult=true;S.profile.ageVerified=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.monitorScope=Array.isArray(r.monitor_scope)?r.monitor_scope:null;ACCT.admin=!!r.admin;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
   renderAll();
   if(!r.error&&S.profile.onboarded&&needBirthday()&&!$("#scrim")){setTimeout(()=>openBirthday(),600);return;}
   if(!r.error&&S.friendCode&&!ACCT.lifetime){await redeemFriend();return;}
