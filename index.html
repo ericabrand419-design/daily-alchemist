@@ -3244,15 +3244,21 @@ function isShared(){return accountsOn()&&ACCT.lifetime&&ACCT.cohort==="shared";}
 let SHARE=null;
 function shareURL(){return ((window.DA_CONFIG&&window.DA_CONFIG.siteUrl)||location.origin).replace(/\/$/,"")+"/?friend="+SHARE.code;}
 function shareHTML(){
-  if(accountsOn()&&ACCT.admin){return '<details class="group" open id="shareGroup"><summary>Your open link</summary><p class="small muted">One link, no limit. Everyone who joins with it gets lifetime access and their own link for 3 more.</p>'+(SHARE?'<p class="small" style="margin:8px 0">'+SHARE.uses+' joined so far</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div>':'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';}
+  if(accountsOn()&&ACCT.admin){return '<details class="group" open id="shareGroup"><summary>Your open link</summary><p class="small muted">One link, no limit. Everyone who joins with it gets lifetime access and their own link for 3 more.</p>'+(SHARE?'<p class="small" style="margin:8px 0">'+SHARE.uses+' joined so far</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div><div class="row" style="margin-top:8px"><button class="btn btn-ghost" id="shareText">Text it</button><button class="btn btn-ghost" id="shareEmail">Email it</button></div>':'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';}
   if(!isFriend())return "";
   if(!accountsOn())return '<details class="group" open><summary>Bring three people in</summary><p class="small muted">Share your own link with up to 3 people. They get everything, free for life, just like you. (This works on the live app.)</p></details>';
   const left=SHARE?Math.max(0,SHARE.max-SHARE.uses):null;
   return '<details class="group" open id="shareGroup"><summary>Bring three people in</summary><p class="small muted">Your own link, for up to 3 people you choose. They get everything, free for life, just like you.</p>'+
-    (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div>':'<p class="small" style="margin-top:8px">All 3 have come in. Thank you for bringing them.</p>')
+    (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div><div class="row" style="margin-top:8px"><button class="btn btn-ghost" id="shareText">Text it</button><button class="btn btn-ghost" id="shareEmail">Email it</button></div>':'<p class="small" style="margin-top:8px">All 3 have come in. Thank you for bringing them.</p>')
       :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';
 }
 async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
+async function shareVia(kind){
+  if(!SHARE)await loadShare();if(!SHARE)return;
+  const url=shareURL(),text=(SHARE.open?"I made an app, The Daily Alchemist, and I\'d love for you to try it. Open this on your phone and everything is free for you, for life: ":"I\'ve been using The Daily Alchemist. Here\'s a free invitation, everything open for life. It works for 3 people, so use it soon: ")+url;
+  track("share",{reason:kind});
+  location.href=kind==="text"?"sms:?&body="+encodeURIComponent(text):"mailto:?subject="+encodeURIComponent("An invitation to The Daily Alchemist")+"&body="+encodeURIComponent(text);
+}
 async function doShare(copyOnly){
   if(!SHARE)await loadShare();if(!SHARE)return;
   const url=shareURL(),text=SHARE.open?"I made an app, The Daily Alchemist, and I'd love for you to try it. Open this on your phone and everything is free for you, for life.":"I've been using The Daily Alchemist. Here's a free invitation, everything open for life. It works for 3 people, so use it soon.";
@@ -4541,6 +4547,8 @@ document.addEventListener("click",async ev=>{
   if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";await loadShare();return;}
   if(t.id==="shareGo"){doShare(false);return;}
   if(t.id==="shareCopy"){doShare(true);return;}
+  if(t.id==="shareText"){shareVia("text");return;}
+  if(t.id==="shareEmail"){shareVia("email");return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").value){toast("Add your birthday to begin.");$("#age18").focus();return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){const v=$("#age18").value,a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return;}if(a<18){setBirthday(v);return;}setBirthday(v);}
   if(t.id==="pSave"||t.id==="pSkip"){

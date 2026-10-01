@@ -221,7 +221,8 @@ const invLink=c=>siteURL()+"/?friend="+c;
 /* A ready-made text message. On a phone, "Text it" opens Messages with this filled in. */
 const invText=(c,name)=>name?"Hi "+name.split(/\s+/)[0]+"! I made an app, The Daily Alchemist, and I'd love for you to try it before anyone else. This link is just for you and gives you everything free, for life: "+invLink(c):"I made an app, The Daily Alchemist, and I'd love for you to try it. Open this on your phone and everything is free for you, for life: "+invLink(c);
 const smsHref=(c,name)=>"sms:?&body="+encodeURIComponent(invText(c,name));
-function textBtns(c,name,small){const n=esc(name||"");return '<a class="btn'+(small?' ghost small':'')+'" href="'+esc(smsHref(c,name))+'">Text it</a> <button class="btn ghost'+(small?' small':'')+'" data-share="'+esc(c)+'" data-name="'+n+'">Share</button>';}
+const mailHref=(c,name)=>"mailto:?subject="+encodeURIComponent((name?name.split(/\s+/)[0]+", ":"")+"your invitation to The Daily Alchemist")+"&body="+encodeURIComponent(invText(c,name));
+function textBtns(c,name,small){const n=esc(name||"");return '<a class="btn'+(small?' ghost small':'')+'" href="'+esc(smsHref(c,name))+'">Text it</a> <a class="btn ghost'+(small?' small':'')+'" href="'+esc(mailHref(c,name))+'">Email it</a> <button class="btn ghost'+(small?' small':'')+'" data-share="'+esc(c)+'" data-name="'+n+'">Share</button>';}
 async function shareInv(c,name){const text=invText(c,name);if(navigator.share){try{await navigator.share({title:"The Daily Alchemist",text});return;}catch(e){if(e&&e.name==="AbortError")return;}}copyLink(c);}
 async function invites(action,extra){
   const res=await fetch(API+"/api/invites",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,...(extra||{})})});
