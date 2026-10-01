@@ -114,7 +114,7 @@ a.btn{text-decoration:none;display:inline-block}
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:8px;font-size:14px">
           <label>Claude fast in <input id="pAfi" value="1" size="5"></label><label>out <input id="pAfo" value="5" size="5"></label>
           <label>OpenAI fast in <input id="pOfi" value="0.20" size="5"></label><label>out <input id="pOfo" value="1.20" size="5"></label>
-          <label>Claude deep in <input id="pAdi" value="3" size="5"></label><label>out <input id="pAdo" value="15" size="5"></label>
+          <label>Claude deep in <input id="pAdi" value="2" size="5"></label><label>out <input id="pAdo" value="10" size="5"></label>
           <label>OpenAI deep in <input id="pOdi" value="4" size="5"></label><label>out <input id="pOdo" value="20" size="5"></label>
         </div></details>
       <div id="cmpSum" style="margin-top:14px"></div>
@@ -333,7 +333,7 @@ function cmpRender(){
 async function cmpRun(tier){
   if(cmpBusy)return;cmpBusy=true;$("#cmpMsg").textContent="Loading the moments...";
   try{if(!CMP){const r=await fetch(API+"/api/ai",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({scenarios:true})});CMP=await r.json();if(!CMP.scenarios)throw 0;}}catch(e){$("#cmpMsg").textContent="Couldn't load the moments.";cmpBusy=false;return;}
-  const list=CMP.scenarios.filter(s=>tier==="deep"?s.deep:true);
+  const list=CMP.scenarios.filter(s=>tier==="deep"?s.deep:!s.deep);
   cmpRows=list.map(sc=>({sc,tier}));cmpRender();
   let n=0;
   for(const x of cmpRows){
