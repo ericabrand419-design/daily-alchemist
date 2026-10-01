@@ -5,7 +5,7 @@
 /* Spoken guardian voice (hear buttons, Guide me aloud, eyes closed, spoken ritual commands) is
    switched off for now. The code stays here behind this flag. Only the owner can try it, by
    setting localStorage "da.voiceDev" to "1". Speaking into the mic to type is separate and stays on. */
-const GUARDIAN_VOICE_ENABLED=false;
+const GUARDIAN_VOICE_ENABLED=!!(window.DA_CONFIG&&window.DA_CONFIG.guardianVoiceEnabled);
 function voiceEnabled(){if(GUARDIAN_VOICE_ENABLED)return true;try{return typeof ACCT!=="undefined"&&!!ACCT.admin&&localStorage.getItem("da.voiceDev")==="1";}catch(e){return false;}}
 const MUSIC={a:null,b:null,cur:null,want:"aura",base:"aura",duck:false,started:false};
 function musicOn(){return S.prefMusic!=="off";}
