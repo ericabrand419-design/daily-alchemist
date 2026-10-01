@@ -84,7 +84,7 @@ function trackerClick(t,d){
   if(d.goalact){const [id,act]=d.goalact.split(":"),g=S.goals.find(x=>x.id===id);if(!g)return true;g.updated=Date.now();g.updates=g.updates||[];
     if(act==="done"){g.status="done";g.doneAt=Date.now();g.updates.push({ts:Date.now(),state:"done"});if(memOn())updateLedger("She finished a goal she tracked with Sol: "+g.title);toast("Done. Sol kept the receipt.");closeSheet();openGuardian("sol");}
     else if(act==="pause"){g.status="paused";g.updates.push({ts:Date.now(),state:"paused"});toast("Paused. No guilt.");closeSheet();openGuardian("sol");}
-    else if(act==="stuck"){g.updates.push({ts:Date.now(),state:"stuck"});persistAll();closeSheet();openTalk("sol");const list=S.chats.sol=S.chats.sol||[];guardianOpens(list,{text:"You're stuck on "+g.title+". The next move was: "+(g.next||"not clear yet")+". Tell me what's actually in the way."});saveLocal();}
+    else if(act==="stuck"){g.updates.push({ts:Date.now(),state:"stuck"});persistAll();const list=S.chats.sol=S.chats.sol||[];guardianOpens(list,{text:"You're stuck on "+g.title+". The next move was: "+(g.next||"not clear yet")+". Tell me what's actually in the way."});saveLocal();closeSheet();openTalk("sol");}
     persistAll();return true;
   }
   return false;
