@@ -6,7 +6,7 @@ const LIMITS = {free:{read:3,talk:10},member:{read:40,talk:150}};
 const CHAMBERS = {
   aura:{name:"The Weaving Room",d:"Weekly reviews that pull your rituals, chats and patterns into one thread."},
   onyx:{name:"The Shadow Chamber",d:"Mirror work, truth rites and amends for the parts you keep looking away from."},
-  sage:{name:"The Revolution Pages",d:"Cord cutting and fire rites for rage, resistance and taking your power back."},
+  sage:{name:"The Revolution Pages",d:"Cord cutting, fire rites and the forge: rage, courage, endings you mean and rebirths you can feel."},
   fern:{name:"The Lunar Alchemist",d:"Moon work for rest, tides and release, timed to the phase you're in."},
   lily:{name:"The Clear Channel",d:"Breath rites that clear a racing mind in every direction."},
   thistle:{name:"The Rootkeeper's Almanac",d:"Boundary scripts you rehearse before you need them."},
@@ -16,7 +16,7 @@ const CHAMBERS = {
   sol:{name:"The Solar Chamber",d:"Hype, plans and follow through. Where the promises you make to yourself get kept."},
   aurora:{name:"The Dawn Chamber",d:"Morning rites for clarity and answers that arrive at first light."},
   rowan:{name:"The Moving Grove",d:"Movement rites that get you out of your head and back into your body."},
-  ember:{name:"The Forge",d:"Endings you mean and rebirths you can feel on your skin."},
+  iris:{name:"The Pulse Room",d:"Rites for each part of your own rhythm, built from what you actually log, never a template."},
   willow:{name:"The Weeping Garden",d:"Forgiveness and unfinished words, handled gently."},
   vesper:{name:"The Night Garden",d:"Desire, pleasure and sex magic, for members 21 and older."},
   wren:{name:"The Omen Book",d:"Dream bowls and sky questions for reading the signs."},

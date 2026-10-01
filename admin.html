@@ -127,7 +127,7 @@ a.btn{text-decoration:none;display:inline-block}
 const C=window.DA_CONFIG||{};const API=(C.apiBase||"");
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const GN={aura:"Aura",sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",aurora:"Aurora",rowan:"Rowan",sol:"Sol",cypress:"Sol",moss:"Juniper",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const GN={aura:"Aura",sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",aurora:"Aurora",rowan:"Rowan",sol:"Sol",cypress:"Sol",moss:"Juniper",ember:"Sage",iris:"Iris",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 const TABN={today:"Today",journeys:"Journeys",circle:"Circle",archive:"Archive"};
 const nice=id=>String(id||"").replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 function say(e){const m=e.meta||{},g=GN[m.g]||"a guardian";
@@ -251,7 +251,8 @@ $("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const befo
 $("#openLink").onclick=async()=>{const res=await fetch(API+"/api/share",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:"{}"});const d=await res.json().catch(()=>({}));if(!d.code){$("#openBox").hidden=false;$("#openBox").textContent="Couldn't get your link. Try again in a minute.";return;}
   $("#openBox").hidden=false;$("#openBox").innerHTML='<div class="linkbox"><code>'+esc(invLink(d.code))+'</code><button class="btn small" data-copy="'+esc(d.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(d.code,"",false)+'</div><p class="note">'+(d.uses||0)+' people have joined with it so far. You can turn it off below any time.</p>';await invites("list");};
 document.addEventListener("click",e=>{const sh=e.target.closest("[data-share]");if(sh){shareInv(sh.dataset.share,sh.dataset.name);return;}const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
-const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",aurora:"Aurora",rowan:"Rowan",sol:"Sol",cypress:"Sol",moss:"Juniper",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const ALIASES=["cypress","moss","ember"];
+const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",aurora:"Aurora",rowan:"Rowan",sol:"Sol",cypress:"Sol",moss:"Juniper",ember:"Sage",iris:"Iris",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 let MUS={tracks:{},url:""},musBusy=false;
 async function music(action,g){
   const res=await fetch(API+"/api/music",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,g})});
@@ -259,7 +260,7 @@ async function music(action,g){
 }
 function renderMusic(){
   const bust="?v="+Date.now();
-  $("#music").innerHTML='<thead><tr><th>Guardian</th><th>Track</th><th></th></tr></thead><tbody>'+Object.keys(GNAMES).map(g=>{const has=MUS.tracks[g];return '<tr><td>'+GNAMES[g]+'</td><td>'+(has?'<audio controls preload="none" src="'+esc(MUS.url+g+".mp3"+bust)+'" style="height:36px;max-width:260px"></audio>':'<span class="pill wait">Not made yet</span>')+'</td><td><button class="btn ghost small" data-mus="'+g+'">'+(has?"Remake":"Make")+'</button></td></tr>';}).join("")+'</tbody>';
+  $("#music").innerHTML='<thead><tr><th>Guardian</th><th>Track</th><th></th></tr></thead><tbody>'+Object.keys(GNAMES).filter(g=>!ALIASES.includes(g)).map(g=>{const has=MUS.tracks[g];return '<tr><td>'+GNAMES[g]+'</td><td>'+(has?'<audio controls preload="none" src="'+esc(MUS.url+g+".mp3"+bust)+'" style="height:36px;max-width:260px"></audio>':'<span class="pill wait">Not made yet</span>')+'</td><td><button class="btn ghost small" data-mus="'+g+'">'+(has?"Remake":"Make")+'</button></td></tr>';}).join("")+'</tbody>';
 }
 async function makeOne(g){
   $("#musMsg").textContent="Making "+GNAMES[g]+"'s music, about 20 seconds...";
@@ -268,7 +269,7 @@ async function makeOne(g){
   return true;
 }
 $("#musMakeAll").onclick=async()=>{if(musBusy)return;musBusy=true;const b=$("#musMakeAll");b.disabled=true;
-  const todo=Object.keys(GNAMES).filter(g=>!MUS.tracks[g]);let n=0;
+  const todo=Object.keys(GNAMES).filter(g=>!ALIASES.includes(g)).filter(g=>!MUS.tracks[g]);let n=0;
   for(const g of todo){if(!(await makeOne(g)))break;n++;}
   $("#musMsg").textContent=todo.length?(n===todo.length?"All done. Press play to listen.":n+" of "+todo.length+" made."):"Every guardian already has music.";
   b.disabled=false;musBusy=false;};

@@ -13,9 +13,9 @@ const G = {
     voice:"Short sentences. Uses silence. Will not coddle you, and will not let you drown in it either. No bypassing.",
     phrases:["No more lies.","Tell the truth or sit in it.","Cut it loose.","You knew."]},
   sage:{name:"Sage",title:"The Flame Keeper",element:"Fire",color:"#F0703F",
-    domain:"Truth-telling, cord-cutting, anger, courage and sacred rage.",
-    voice:"Fierce and protective. Will light the match for you.",
-    phrases:["Burn it clean.","This is sacred rage.","From the ashes."]},
+    domain:"Anger, truth, courage, endings, decisive action, cord-cutting, burning the old map and rebirth.",
+    voice:"Fierce and protective. Will light the match for you, then dare you to walk through it.",
+    phrases:["Burn it clean.","This is sacred rage.","From the ashes.","Burn the old map.","Brave looks like this."]},
   fern:{name:"Fern",title:"The Flow Priestess",element:"Water",color:"#5CC0B5",
     domain:"Rest, intuition, lunar tides, tears and renewal.",
     voice:"Soft, lyrical, slow. Sounds like water.",
@@ -52,9 +52,9 @@ Object.assign(G,{
   rowan:{name:"Rowan",title:"The Mover",element:"Earth",color:"#B9CF5E",
     domain:"Movement, exercise, getting back into your body, nerves before big days and keeping momentum.",
     voice:"Warm, steady coach energy. Grounded, never pushy. Gets you moving before you can talk yourself out of it.",phrases:["Move it through.","Your body knows the way back.","Feet first, then feelings."]},
-  ember:{name:"Ember",title:"The Firebrand",element:"Fire",color:"#FF8A5B",
-    domain:"Courage, drive, big leaps and destruction as rebirth.",
-    voice:"Unapologetically fierce. She dares you.",phrases:["Walk through it.","Burn the old map.","Brave looks like this."]},
+  iris:{name:"Iris",title:"The Cycle Keeper",element:"Rhythm",color:"#E0708E",
+    domain:"Menstrual cycles, periods, recurring body rhythms, energy and symptom patterns, perimenopause and menopause.",
+    voice:"Observant, body-literate, matter-of-fact and warm. Never dismissive. Never assumes hormones explain a real problem. Context, not dismissal.",phrases:["Your body gets a vote.","Pattern, not prophecy.","Your body keeps a rhythm."]},
   willow:{name:"Willow",title:"The Quiet Healer",element:"Water",color:"#9CC9B8",
     domain:"Grief, forgiveness, emotional release and soft restoration.",
     voice:"Gentle and nurturing. Never rushes you.",phrases:["Bend, don't break.","Let it fall.","You can be soft here."]},
@@ -74,11 +74,13 @@ Object.assign(G,{
     domain:"Creativity, art, play, making things and getting unstuck on the page.",
     voice:"Playful, messy, delighted. Talks fast when she's excited and makes you want to make something.",phrases:["Make it badly first.","Play is a spell.","Follow the spark."]}
 });
+/* Ember was folded into Sage. Old Ember entries and chats still render as Sage. */
+Object.defineProperty(G,"ember",{value:G.sage,enumerable:false});
 const ORDER = ["onyx","sage","fern","lily","thistle","marigold","juniper","rue","sol"];
-const EXP = ["aurora","rowan","ember","willow","vesper","wren","lumen","onora","poppy"];
+const EXP = ["aurora","rowan","iris","willow","vesper","wren","lumen","onora","poppy"];
 const ALL = ["aura",...ORDER,...EXP];
 /* wider-circle guardians borrow practices from their closest kin */
-const KIN = {aurora:"aura",rowan:"lily",ember:"sage",willow:"fern",vesper:"marigold",wren:"lily",lumen:"sol",onora:"thistle",poppy:"marigold"};
+const KIN = {aurora:"aura",rowan:"lily",iris:"fern",willow:"fern",vesper:"marigold",wren:"lily",lumen:"sol",onora:"thistle",poppy:"marigold"};
 
 /* Glyphs: alchemical marks, one per guardian */
 function glyph(k, size){
@@ -97,7 +99,7 @@ function glyph(k, size){
     rue:'<path '+s+' d="M14 32c6-9 30-9 36 0c-6 9-30 9-36 0z"/><circle '+s+' cx="32" cy="32" r="5"/><path '+s+' d="M20 20l24 24"/>',
     aurora:'<path '+s+' d="M15 42h34M21 42a11 11 0 0 1 22 0M32 20v7M22 25l3 5M42 25l-3 5M16 48h32"/>',
     rowan:'<path '+s+' d="M32 50V26M32 34l-9-8M32 30l9-8M32 42l-7-5M32 40l7-5M14 46c4-3 8-3 12 0M38 46c4-3 8-3 12 0"/><circle cx="23" cy="24" r="2.4" fill="'+c+'"/><circle cx="41" cy="20" r="2.4" fill="'+c+'"/><circle cx="32" cy="18" r="2.4" fill="'+c+'"/>',
-    ember:'<path '+s+' d="M32 14c6 8 12 12 12 20a12 12 0 0 1-24 0c0-5 3-8 5-11c1 4 3 6 5 6c-2-6 0-11 2-15z"/>',
+    iris:'<circle '+s+' cx="32" cy="32" r="15" stroke-dasharray="3 4" stroke-opacity=".7"/><path '+s+' d="M13 33h8l3-7l5 14l4-11l3 6h15"/>',
     willow:'<path '+s+' d="M32 14v34M32 18c-8 4-12 12-12 22M32 18c8 4 12 12 12 22M32 24c-4 4-6 10-6 16M32 24c4 4 6 10 6 16"/>',
     vesper:'<path '+s+' d="M30 16a16 16 0 1 1 0 32a12.5 12.5 0 1 0 0-32z"/><path '+s+' d="M21 26l1.8 4.2L27 32l-4.2 1.8L21 38l-1.8-4.2L15 32l4.2-1.8z"/>',
     wren:'<path '+s+' d="M15 38c8-1 12-13 23-13c6 0 9 3 10 7l-6 2c0 8-8 12-16 12c-5 0-9-3-11-8z"/><circle cx="42" cy="30" r="1.6" fill="'+c+'"/>',

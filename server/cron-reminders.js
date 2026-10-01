@@ -6,7 +6,7 @@
 import webpush from "web-push";
 import { json, env, sb, isMember, isPaid, GRACE_DAYS } from "../api/_lib.js";
 
-const GNAME = {sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",sol:"Sol",cypress:"Sol",aurora:"Aurora",rowan:"Rowan",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const GNAME = {sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",sol:"Sol",cypress:"Sol",aurora:"Aurora",rowan:"Rowan",ember:"Sage",iris:"Iris",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 function easternWeekday(d) {
   return new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(d);
 }
@@ -90,6 +90,14 @@ export async function GET(request) {
     if (p && !isPaid(p) && trialEnd && trialEnd - now > 0 && trialEnd - now <= 36 * 36e5) {
       const key = "trialend:" + p.trial_until;
       if (!already.has(key)) due.unshift({ key, title: "Aura", body: hi + "your free week ends tomorrow. I'll keep writing to you, but my letters will stay sealed until you join." });
+    }
+    // Real life outranks the rhythm here too: an unresolved thing she told Aura leads the message.
+    // Her words never go on the lock screen.
+    const HEAVY = /humiliat|embarrass|boss|fight|argu|cried|scared|anxious|panic|angry|furious|hurt|betray|lied|ashamed|disrespect|overwhelm|broke up|divorce|died|funeral|hospital|grief/i;
+    const sit = (x.asks || []).filter((a) => !a.noMem && a.text && !a.settled && !a.fuDismiss && (!a.follow || a.follow.still) && now - a.ts < 36 * 36e5 && !(a.sitSnooze && a.sitSnooze > now) && (HEAVY.test(a.text) || (a.follow && a.follow.still))).sort((p, q) => q.ts - p.ts)[0];
+    if (sit && !(x.later || []).some((l) => l.ref === sit.id && !l.done)) {
+      const key = "sit:" + sit.id;
+      if (!already.has(key)) due.unshift({ key, title: "Aura", body: hi + "I'm still holding what you told me yesterday. Where are you with it?" });
     }
     if (!due.length) continue;
 

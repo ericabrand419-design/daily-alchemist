@@ -13,8 +13,8 @@ const PHASE_WORK = {
 };
 const DAY_RULE = [
   ["Sunday","the Sun","vitality, confidence and being seen",["rowan","aurora","marigold","aura"]],
-  ["Monday","the Moon","intuition, emotion, rest and dreams",["fern","juniper","wren","willow"]],
-  ["Tuesday","Mars","courage, anger, cutting ties and protection",["sage","ember","rue"]],
+  ["Monday","the Moon","intuition, emotion, rest, dreams and body rhythms",["fern","juniper","wren","willow","iris"]],
+  ["Tuesday","Mars","courage, anger, cutting ties and protection",["sage","rue"]],
   ["Wednesday","Mercury","clarity, communication, signs and messages",["lily","wren","aurora"]],
   ["Thursday","Jupiter","growth, abundance, vision and big plans",["lumen","sol","rowan"]],
   ["Friday","Venus","love, beauty, worth, pleasure and home",["marigold","vesper","juniper","willow"]],

@@ -46,7 +46,7 @@ function ledgerHTML(){
   return '<div class="card"><div class="label">What Aura carries for you</div><p class="small muted" style="margin-top:4px">Aura\'s long-term memory, so you never explain it twice. Tap × to make her forget something.</p>'+rows.map(([k,l])=>'<div class="ledg"><div class="lk">'+esc(l)+'</div>'+L[k].map((it,i)=>ledgerItemHTML(k,i,it)).join("")+'</div>').join("")+'</div>';
 }
 function ownHTML(empty){
-  return '<div class="card own"><div class="label">Your data is yours</div><p class="small muted" style="margin-top:4px">Download everything you\'ve written, or delete it all for good.</p><div class="row" style="margin-top:10px">'+(empty?'':'<button class="btn btn-ghost" id="exportBtn">Export my Archive</button>')+'<button class="btn btn-ghost danger" id="deleteBtn">Delete my account and data</button></div></div>';
+  return '<div class="card own"><div class="label">Your data is yours</div><p class="small muted" style="margin-top:4px">Download everything you\'ve written. Clear it and start fresh while keeping your account, or delete your account entirely.</p><div class="row" style="margin-top:10px;flex-wrap:wrap">'+(empty?'':'<button class="btn btn-ghost" id="exportBtn">Export my Archive</button>')+'<button class="btn btn-ghost" id="clearBtn">Clear my data</button><button class="btn btn-ghost danger" id="deleteBtn">Delete my account</button></div></div>';
 }
 function entryList(){
   const t=q.trim().toLowerCase();

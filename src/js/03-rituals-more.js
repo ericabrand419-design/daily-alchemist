@@ -68,7 +68,7 @@ R.push(
  tags:["unworthy","failure","doubt","confidence","celebrate","proud"]},
 
 /* EMBER · Courage */
-{id:"courage-coal",g:"ember",title:"The Courage Coal",el:"Fire",moon:"First Quarter",min:7,
+{id:"courage-coal",g:"sage",title:"The Courage Coal",el:"Fire",moon:"First Quarter",min:7,
  purpose:"For the moment before the hard conversation or the big leap.",needs:[["candle","A candle, or any warm light"]],
  steps:[
   {t:"Light it",d:"Light a candle, or turn on the warmest lamp you have. Sit close."},
@@ -79,7 +79,7 @@ R.push(
  secret:"Courage is not the absence of fear. It's fear with a deadline.",
  prompts:["What were you afraid of?","What did you do within the hour?"],
  tags:["scared","afraid","fear","courage","leap","quit","confront","hard conversation"]},
-{id:"last-straw",g:"ember",member:true,title:"The Last Straw Ceremony",el:"Fire",moon:"Waning",min:12,
+{id:"last-straw",g:"sage",member:true,title:"The Last Straw Ceremony",el:"Fire",moon:"Waning",min:12,
  purpose:"Officially end something you have tolerated too long.",needs:[["thread","A piece of string or thread"]],
  steps:[
   {t:"Tie the knot",d:"Tie a knot in a piece of string for each time you said 'this is the last time' and it wasn't."},
@@ -90,7 +90,7 @@ R.push(
  secret:"Knots hold repeated promises. Cutting them makes the ending physical.",
  prompts:["What are you done tolerating?","What will you do next time?"],
  tags:["done","enough","fed up","quit","end","toxic","leave"]},
-{id:"phoenix-shower",g:"ember",member:true,title:"The Phoenix Shower",el:"Fire and Water",moon:"New",min:12,bath:true,
+{id:"phoenix-shower",g:"sage",member:true,title:"The Phoenix Shower",el:"Fire and Water",moon:"New",min:12,bath:true,
  purpose:"Burn off the old version of you and step out new.",needs:[["salt","A handful of salt"]],
  steps:[
   {t:"Hot first",d:"Start the shower as hot as is comfortable. Scrub your arms and legs with a little salt.",hold:120},

@@ -14,7 +14,7 @@ const GREET={
   sol:"Okay. What did you say you'd do, and where are we with it? Real version, not the tidy one.",
   aurora:"It's early light here. What's just starting to become clear to you?",
   rowan:"Okay, up. Not literally yet. What's your body been telling you today?",
-  ember:"You didn't come to me to play small. What needs to change?",
+  iris:"Hi. I'm Iris. I keep track of your body's rhythm with you, only if you want me to. What's your body been telling you lately?",
   willow:"You can be soft here. What are you grieving?",
   vesper:"Come in. Take your time. What do you want more of?",
   wren:"Something caught your eye lately, didn't it? Tell me the sign.",
@@ -92,7 +92,8 @@ function talkPrompt(k){
   (GSPEC[k]?"YOUR LANE: you are called for "+GSPEC[k].sig+". You are the wrong guardian when: "+GSPEC[k].avoid+". When it's time, send her to: "+GSPEC[k].next+". From her history, pay most attention to: "+GSPEC[k].mem+".\n":"")+
   "Brand voice: warm, wise, grounded, a little bougie. Real talk, not love and light. Rooted in nature, the moon and the elements. Never use em dashes or en dashes. No emojis. No lists.\n"+
   "Talk like a text conversation: 1 to 4 sentences. At most one question at a time. Remember what she said earlier in this chat.\n"+
-  "Today: "+today.toDateString()+", "+M.name+" ("+Math.round(M.ill*100)+"% lit), "+SEA.cur.name+" season.\n"+
+  "Today: "+today.toDateString()+", "+M.name+" ("+Math.round(M.ill*100)+"% lit), "+SEA.cur.name+" season.\n"+focusText()+
+  (k==="iris"?"YOU ARE IRIS. Context, not dismissal. You never tell her she feels something because of her cycle; you can say a pattern may be turning the volume up while the real problem stays real. Never diagnose (no PMS, PMDD, PCOS, perimenopause or any condition), never predict ovulation or fertility, never give contraception advice, and never tell her to eat, drink or take herbs or supplements. Use only the cycle summary above, never guess her history. If something sounds medically worrying, gently suggest a clinician.\n":"")+
   "About her: name "+(p.name||"unknown")+"; usually has "+p.minutes+" minutes; has at home: "+ownedNames().join(", ")+".\n"+personalText()+"\nHer recent archive:\n"+recent+"\n"+
   "LEDGER (long-term memory of her life):\n"+ledgerText()+"\nWHAT HAS WORKED:\n"+workedText()+"\n"+"WHAT THE CIRCLE REMEMBERS ABOUT HER:\n"+memoryBrief(((S.chats[k]||[]).filter(m=>m.role==="me").slice(-1)[0]||{}).text||"").text+"\nUse this memory out loud when it helps, so she never has to explain herself twice: name patterns, quote her own past words with dates. Only use what is listed. Never invent memories.\n"+
   "YOUR OWN HISTORY WITH HER (speak from this continuity):\n"+(S.entries.filter(e=>usable(e)&&e.guardian===k).slice(0,6).map(e=>"- "+fmtDate(e.ts)+": "+e.ritualTitle+", carrying: "+(e.carrying||"").slice(0,90)+", wrote: "+(e.text||"").slice(0,120)+(e.after?", felt "+e.after:"")).join("\n")||"(this is new between you)")+"\n"+

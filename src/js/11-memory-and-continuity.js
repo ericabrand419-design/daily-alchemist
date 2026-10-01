@@ -137,7 +137,8 @@ function resetProgress(){
 
 /* Export and delete */
 async function exportArchive(){
-  const data=JSON.stringify({app:"The Daily Alchemist",exported:new Date().toISOString(),profile:S.profile,entries:S.entries,chats:S.chats,ledger:S.ledger||{}},null,2);
+  if(typeof cycleSync==="function")await cycleSync();
+  const data=JSON.stringify({app:"The Daily Alchemist",exported:new Date().toISOString(),profile:S.profile,entries:S.entries,chats:S.chats,ledger:S.ledger||{},days:S.days||{},asks:S.asks||[],promises:S.promises||[],cycle:{mode:C.mode,irregular:C.irregular,consent:C.consent,events:C.events}},null,2);
   const filename="daily-alchemist-archive-"+new Date().toISOString().slice(0,10)+".json";
   if(MODE==="artifact"){
     try{const dl=await window.claude.use("downloads");if(!dl){toast("Export isn't available in this view.");return;}await dl.save({filename,data});}catch(e){if(!e||e.code!=="declined")toast("Export didn't finish. Try again.");}
@@ -145,10 +146,20 @@ async function exportArchive(){
   }
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"application/json"}));a.download=filename;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
 }
+async function clearMyData(){
+  if(MODE==="artifact"&&cloud.on){try{const snap=await col().get();for(const d of snap.docs)await col().doc(d.id).delete();}catch(e){}}
+  if(MODE==="web"&&ACCT.user){const r=await api("/api/delete",{scope:"data"});if(!r||r.error){toast("Couldn't clear your data. Try again.");return false;}}
+  const keep=S.profile||{},snd={prefMusic:S.prefMusic,prefMusicVol:S.prefMusicVol,prefVoiceOff:S.prefVoiceOff,prefVoice:S.prefVoice};
+  try{localStorage.removeItem(KEY);localStorage.removeItem(CYC_KEY);}catch(e){}
+  if(typeof cycleReset==="function")cycleReset();
+  S={profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false,adult:keep.adult,adult21:keep.adult21,under21:keep.under21},entries:[],draws:{},chats:{},usage:S.usage||{},...snd,seenIntro:true};
+  saveLocal();return true;
+}
 async function deleteEverything(){
   if(MODE==="artifact"&&cloud.on){try{const snap=await col().get();for(const d of snap.docs)await col().doc(d.id).delete();}catch(e){}}
   if(MODE==="web"&&ACCT.user){const r=await api("/api/delete",{});if(r.error){toast("Couldn't delete your account. Try again, or email support.");return false;}try{await ACCT.sb.auth.signOut();}catch(e){}}
-  try{localStorage.removeItem(KEY);}catch(e){}
+  try{localStorage.removeItem(KEY);localStorage.removeItem(CYC_KEY);}catch(e){}
+  if(typeof cycleReset==="function")cycleReset();
   return true;
 }
 
@@ -194,27 +205,27 @@ const LOCAL_VOICE={sage:"Tonight isn't asking you to understand it again. It's a
 const GSPEC={
  aura:{sig:"unclear, mixed or first time feelings",avoid:"never when one guardian clearly fits",next:"the guardian who fits",mem:"everything, especially open threads"},
  onyx:{sig:"guilt, shame, regret, lying, hiding, something she did wrong, the same pattern again",avoid:"fresh grief, panic, crisis, or when she is already punishing herself hard",next:"Willow to forgive herself once it's owned; Thistle if the repair needs a boundary",mem:"what she has avoided saying, repeating patterns, past amends"},
- sage:{sig:"anger, resentment, betrayal, feeling disrespected",avoid:"when the anger has already been released and the issue is still there (then it's a boundary or a decision, not more fire)",next:"Thistle for the boundary, Sol for the next step",mem:"who keeps lighting it, what release has and hasn't worked"},
+ sage:{sig:"anger, resentment, betrayal, feeling disrespected, fear, courage, big leaps, quitting, confronting, endings, starting over",avoid:"when the anger has already been released and the issue is still there (then it's a boundary or a decision, not more fire); when she is exhausted or the leap isn't hers to take yet",next:"Thistle for the boundary, Sol to plan the leap or the next step",mem:"who keeps lighting it, what release has and hasn't worked, the leaps she's named and what stopped her"},
  fern:{sig:"exhaustion, overwhelm, crying, burnout, low tank",avoid:"when she needs to act, not rest; when rest has become avoidance",next:"Sol when rest has been had and it's time to move",mem:"sleep and energy check ins, how often she runs empty"},
  lily:{sig:"anxiety, racing thoughts, overthinking, panic, can't think",avoid:"when the worry is about a real decision that needs making",next:"Aurora or Sol to decide once she can think",mem:"what calms her fastest, what the worry keeps circling"},
  thistle:{sig:"boundaries, people pleasing, family guilt, being taken advantage of, saying no",avoid:"when she is the one who did harm (that's Onyx)",next:"Sol to follow through on the boundary, Rue if someone keeps pushing",mem:"the people involved, boundaries she has set and whether they held"},
  marigold:{sig:"worth, confidence, joy, money, love, dating, a partner or crush",avoid:"grief or shame (don't brighten over it)",next:"Vesper for desire and intimacy (21+ members only), Onyx if it's really shame",mem:"her person, what makes her feel good, money stories"},
  juniper:{sig:"home, space, clutter, moving, stillness, can't slow down",avoid:"when the heaviness is in a relationship, not the room",next:"Fern for deeper rest",mem:"her spaces and what she said about each"},
  rue:{sig:"toxic people, envy, gossip, feeling targeted, protection",avoid:"when she is the one stirring it (that's Onyx)",next:"Thistle for the boundary",mem:"who she needs protecting from"},
- sol:{sig:"accountability, procrastination, stuck, goals, plans, follow through, nerves before a big day, momentum",avoid:"when she is depleted or grieving (rest first)",next:"Fern if she is running empty, Ember for a big leap",mem:"her open promises, what she said she'd do and didn't, her wins"},
+ sol:{sig:"accountability, procrastination, stuck, goals, plans, follow through, nerves before a big day, momentum",avoid:"when she is depleted or grieving (rest first)",next:"Fern if she is running empty, Sage for a big leap",mem:"her open promises, what she said she'd do and didn't, her wins"},
  aurora:{sig:"decisions, confusion, new beginnings, mornings, clarity",avoid:"when she already knows and is avoiding (that's Onyx or Sol)",next:"Sol to act on the decision",mem:"decisions she's circling, how she felt each morning"},
  rowan:{sig:"movement, exercise, restless body, stiff, sitting all day, wanting to feel in her body",avoid:"injury, illness or a very low tank (then Fern)",next:"Sol to make movement a habit",mem:"midday movement check ins, what kinds of movement she likes"},
- ember:{sig:"fear, courage, big leaps, quitting, confronting",avoid:"when she is exhausted or the leap isn't hers to take yet",next:"Sol to plan the leap",mem:"the leaps she's named and what stopped her"},
+ iris:{sig:"periods, cycle, cramps, PMS feelings, perimenopause, menopause, body rhythm, energy that rises and falls with her cycle",avoid:"never as the explanation for a real problem; if a work, relationship or grief situation is active, that stays the issue and Iris only adds body context",next:"Fern for rest, the guardian who owns the real situation",mem:"her own logged patterns only, never a 28 day template"},
  willow:{sig:"grief, loss, death, forgiveness, missing someone",avoid:"rushing to fix or reframe; never hype",next:"Onora to honor the person, Onyx only if guilt is underneath",mem:"who she lost, dates that matter, anniversaries"},
  vesper:{sig:"desire, sex, intimacy, pleasure, libido, sex magic",avoid:"anyone not 21+ and a member; pain, pressure or harm (care first, then Willow or a real person)",next:"Marigold for love and dating",mem:"her person (partner or crush), what she wants more of"},
  wren:{sig:"signs, dreams, coincidences, repeating numbers",avoid:"when the sign is a way to avoid deciding",next:"Aurora to decide what it means for her",mem:"signs and dreams she has logged"},
  lumen:{sig:"vision, goals, the future, manifesting",avoid:"when she needs a next step today (Sol)",next:"Sol to put a date on it",mem:"the future she has described"},
  onora:{sig:"ancestors, family history, heritage, a grandparent",avoid:"fresh grief (Willow first)",next:"Willow if grief opens",mem:"the people she comes from and what she carries from them"},
- poppy:{sig:"creativity, art, writing, blocked, wanting to make something",avoid:"when the block is fear of judgment (Ember) or exhaustion (Fern)",next:"Sol to finish it",mem:"her projects and what she keeps not finishing"}
+ poppy:{sig:"creativity, art, writing, blocked, wanting to make something",avoid:"when the block is fear of judgment (Sage) or exhaustion (Fern)",next:"Sol to finish it",mem:"her projects and what she keeps not finishing"}
 };
-const SHORT={poppy:"your muse",thistle:"your boundary keeper",onyx:"your shadow mirror",sage:"your fire keeper",fern:"keeper of your rest and tides",lily:"the one who clears your head",marigold:"keeper of your glow",juniper:"keeper of your space",rue:"your protection",sol:"your accountability coach",aurora:"your first light",rowan:"your movement keeper",ember:"your courage",willow:"keeper of your grief",vesper:"keeper of your desire",wren:"your sign reader",lumen:"keeper of your vision",onora:"keeper of your ancestors"};
+const SHORT={poppy:"your muse",thistle:"your boundary keeper",onyx:"your shadow mirror",sage:"your fire keeper",fern:"keeper of your rest and tides",lily:"the one who clears your head",marigold:"keeper of your glow",juniper:"keeper of your space",rue:"your protection",sol:"your accountability coach",aurora:"your first light",rowan:"your movement keeper",iris:"keeper of your body's rhythm",willow:"keeper of your grief",vesper:"keeper of your desire",wren:"your sign reader",lumen:"keeper of your vision",onora:"keeper of your ancestors"};
 /* Each guardian's job, in plain words, so the circle is useful and not just mythology. */
-const JOB={aura:"Your guide. Hears what happened and sends you to the right help.",onyx:"Shadow work. The things you did wrong, owning them and making it right.",sage:"Anger. Turning fury into something that protects you.",fern:"Rest and overwhelm. When you're running on empty.",lily:"Anxiety and overthinking. Getting your head clear.",thistle:"Boundaries. Saying no, people pleasing, protecting your peace.",marigold:"Love and worth. Romance, dating, self love, confidence and joy.",juniper:"Your home and your stillness. Resetting your space and slowing down when you can't stop.",rue:"Protection. Toxic people, envy and energy that isn't yours.",sol:"Accountability. Keeps you on track, hypes you up and holds you to what you said.",aurora:"New beginnings and clarity. Decisions and fresh starts.",rowan:"Movement. Exercise, getting back in your body, nerves and keeping momentum.",ember:"Courage. Big leaps and walking through fear.",willow:"Grief. Loss, forgiveness and letting yourself feel it.",vesper:"Desire and intimacy. Pleasure, sex and sex magic. Members 21 and older.",wren:"Signs. Dreams, coincidences and what they might mean.",lumen:"Vision. Goals and the future you're building.",onora:"Family and ancestry. Where you come from and what you carry.",poppy:"Creativity. Getting unblocked and making things again."};
+const JOB={aura:"Your guide. Hears what happened and sends you to the right help.",onyx:"Shadow work. The things you did wrong, owning them and making it right.",sage:"Anger and courage. Turning fury into protection, and fear into the leap.",fern:"Rest and overwhelm. When you're running on empty.",lily:"Anxiety and overthinking. Getting your head clear.",thistle:"Boundaries. Saying no, people pleasing, protecting your peace.",marigold:"Love and worth. Romance, dating, self love, confidence and joy.",juniper:"Your home and your stillness. Resetting your space and slowing down when you can't stop.",rue:"Protection. Toxic people, envy and energy that isn't yours.",sol:"Accountability. Keeps you on track, hypes you up and holds you to what you said.",aurora:"New beginnings and clarity. Decisions and fresh starts.",rowan:"Movement. Exercise, getting back in your body, nerves and keeping momentum.",iris:"Your cycle. Periods, body rhythms, perimenopause and menopause, tracked privately.",willow:"Grief. Loss, forgiveness and letting yourself feel it.",vesper:"Desire and intimacy. Pleasure, sex and sex magic. Members 21 and older.",wren:"Signs. Dreams, coincidences and what they might mean.",lumen:"Vision. Goals and the future you're building.",onora:"Family and ancestry. Where you come from and what you carry.",poppy:"Creativity. Getting unblocked and making things again."};
 /* Which guardians keep showing up, and when: the seasons of her life, read from her history. */
 function guardianSeasons(){
   const items=[...S.entries.filter(usable).map(e=>({g:e.guardian,ts:e.ts})),...S.asks.filter(a=>!a.noMem).map(a=>({g:a.guardian,ts:a.ts}))].filter(x=>x.g&&x.g!=="aura");
@@ -278,7 +289,7 @@ function logAsk(text,x){
 function asksText(){return S.asks.filter(a=>!a.noMem&&a.text).slice(0,12).map(a=>"- "+fmtDate(a.ts)+" | "+(a.thread||a.theme)+" | "+G[a.guardian].name+" | said: "+a.text.slice(0,140)+(a.follow?" | afterwards: "+(a.follow.did===false?"didn't do it":a.follow.helped||"did it")+(a.follow.changed?", "+a.follow.changed.slice(0,100):""):"")).join("\n")||"(nothing yet)";}
 function pendingFollow(){
   const now=Date.now();
-  return S.asks.find(a=>!a.follow&&!a.fuDismiss&&["ritual","write","talk","event","build","decide"].includes(a.action)&&now-a.ts>6*3600e3&&now-a.ts<5*864e5&&(!a.fuSnooze||a.fuSnooze<now))||null;
+  return S.asks.find(a=>!a.follow&&!a.fuDismiss&&["ritual","write","talk","event","build","decide"].includes(a.action)&&now-a.ts>6*3600e3&&now-a.ts<5*864e5&&(!a.fuSnooze||a.fuSnooze<now)&&!(a.sitSnooze&&a.sitSnooze>now)&&!a.settled)||null;
 }
 function followHTML(){
   const a=pendingFollow();if(!a)return "";
@@ -354,6 +365,19 @@ function openSafety(kind){
     '<button class="btn btn-ghost full" id="popClose">I\'m safe right now</button>'+
     '<p class="small muted" style="text-align:center">Outside the US, call your local emergency number. I won\'t contact anyone or send this to another person.</p></div>');
 }
+/* Deterministic shortlist before any AI call: keyword fit, the guardian who owns today's open
+   situation, the day's steward, who she has been with lately, and Aura. Smaller prompt, better picks. */
+function shortlist(text,mins){
+  const t=" "+String(text||"").toLowerCase()+" ",sc={},f=resolveCurrentFocus();
+  for(const k of circleKeys()){if(k==="aura")continue;let s=0;for(const w of (KW[k]||[]))if(hasWord(t,w))s+=2;for(const r of R)if(r.g===k)for(const tg of r.tags||[])if(hasWord(t,tg))s+=.5;sc[k]=s;}
+  if(f.owner&&sc[f.owner]!=null)sc[f.owner]+=1.5;if(sc[f.steward]!=null)sc[f.steward]+=.5;
+  for(const k of (memOn()?yourGuardians():[]).slice(0,3))if(sc[k]!=null)sc[k]+=.75;
+  const gs=["aura",...Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0])];
+  const pool=R.filter(r=>canUse(r)&&!r.reset&&(gs.includes(r.g)||gs.includes(KIN[r.g])));
+  const scored=pool.map(r=>[score(r,mins)+outcomeBonus(r.id)+(gs.indexOf(r.g)>=0?(6-gs.indexOf(r.g))*.3:0)+(r.tags||[]).filter(tg=>hasWord(t,tg)).length,r]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
+  const extra=R.filter(r=>canUse(r)&&!r.reset&&r.min<=5&&!scored.includes(r)).slice(0,4);
+  return {guardians:gs,rituals:[...scored.slice(0,32),...extra]};
+}
 async function askAura(text,mins){
   const pre=localRoute(text);
   if(pre&&pre.action==="simplify")return {...pre,theme:"centering",ritual:byId["two-minute-settle"],why:""};
@@ -361,11 +385,14 @@ async function askAura(text,mins){
   if(overLimit("read")){const res=localRead(text,mins);res.limit=true;res.note="That's today's "+LIMITS.free.read+" free readings from me, so this one comes from the Archive's own index. In the Inner Circle, we get much more time together. Aura";return res;}
   const p=S.profile, mem=memOn()?memoryBrief(text):{text:"(memory is off; do not refer to her past)"};
   const recent=S.entries.filter(usable).slice(0,8).map(e=>"- "+fmtDate(e.ts)+" | "+e.guardian+" | "+(e.ritualTitle||"")+" | theme: "+(e.theme||"")+" | carrying: "+(e.carrying||"").slice(0,120)+" | wrote: "+(e.text||"").slice(0,160)).join("\n")||"(no entries yet)";
-  const catalog=R.filter(canUse).map(r=>r.id+" | "+G[r.g].name+" | "+r.title+" | "+r.min+" min | needs: "+(r.needs.map(n=>n[0]).join(", ")||"nothing")+" | for: "+r.purpose).join("\n");
-  const circle=circleKeys().map(k=>k+": "+G[k].name+", "+G[k].title+". Job: "+JOB[k]+" Domain: "+G[k].domain+(GSPEC[k]?" Call when: "+GSPEC[k].sig+". Do NOT use when: "+GSPEC[k].avoid+". Goes next to: "+GSPEC[k].next+". Memory that matters: "+GSPEC[k].mem+".":"")+" Voice: "+G[k].voice+" Signature phrases: "+G[k].phrases.join(" / ")).join("\n");
+  // Shortlist first, in code: the likely guardians and their rituals, not the whole library every time.
+  const sl=shortlist(text,mins);
+  const catalog=sl.rituals.map(r=>r.id+" | "+G[r.g].name+" | "+r.title+" | "+r.min+" min | needs: "+(r.needs.map(n=>n[0]).join(", ")||"nothing")+" | for: "+r.purpose).join("\n");
+  const others=circleKeys().filter(k=>!sl.guardians.includes(k)).map(k=>k+": "+G[k].name+", "+JOB[k]).join("\n");
+  const circle=sl.guardians.map(k=>k+": "+G[k].name+", "+G[k].title+". Job: "+JOB[k]+" Domain: "+G[k].domain+(GSPEC[k]?" Call when: "+GSPEC[k].sig+". Do NOT use when: "+GSPEC[k].avoid+". Goes next to: "+GSPEC[k].next+". Memory that matters: "+GSPEC[k].mem+".":"")+" Voice: "+G[k].voice+" Signature phrases: "+G[k].phrases.join(" / ")).join("\n");
   const prompt =
 "You are Aura, lead guardian of The Daily Alchemist, a ritual app from The Alchemist Archives. Philosophy: the person should never have to browse or work harder because the app exists. Read her moment and bring her ONE practice that fits right now.\n\n"+
-"THE CIRCLE (each guardian has a distinct voice; write the reading in the chosen guardian's voice):\n"+circle+"\n\n"+
+"THE LIKELIEST GUARDIANS FOR THIS MOMENT (each has a distinct voice; write the reading in the chosen guardian's voice):\n"+circle+"\n"+"THE REST OF THE CIRCLE (choose one only if clearly better; their voice is in their job line):\n"+others+"\n\n"+focusText()+"\n"+
 "BRAND VOICE: warm, wise, grounded, a little bougie. Real talk, not love-and-light. Nature, moon and elements, tangible and real, never woo-woo fluff. NEVER use em dashes or en dashes. No emojis.\n\n"+
 "TODAY: "+today.toDateString()+". Moon: "+M.name+", "+Math.round(M.ill*100)+"% lit. Season: "+SEA.cur.name+" ("+SEA.cur.sense+"), "+SEA.next.name+" in "+SEA.days+" days.\n"+
 "THE MOON IS A SIGNAL, NOT DECORATION: waxing is for beginning and building, full is for peaks, celebration and big releases, waning is for releasing, ending and rest, new and dark moon are for rest and quiet intentions. Weigh it with how much she is carrying. When it shapes your choice, say why in one short clause, for example: You're carrying a lot tonight and the moon is waning, so we're not beginning anything. We're releasing. Never force it.\n"+
@@ -382,7 +409,7 @@ async function askAura(text,mins){
 "MAKE IT PERSONAL: whenever she has any history, your aura line must include one sentence that could only be said to her, drawn from what she told you or did (for example: You said yesterday you were trying to stop carrying work into bed. Let's keep that promise tonight). If she has been with the same guardian twice or more this week, say what that tells you. If she has already done release work twice and the thread is still unresolved, do not prescribe more release: recommend a decision or an action and say why.\n\n"+
 "BE A CONTINUITY ENGINE, NOT A RECOMMENDER. Connect tonight to where she has been, what she tried and what helped. Example of the voice: This sounds like the same work situation you brought me twice last week. The first time Lily helped you calm down. The second time you wrote that calming down wasn't the real issue because you still hadn't said no. So I don't think we're doing Lily tonight. I'm taking you to Thistle. Prefer what has actually helped her. Avoid what didn't move it unless you say why this time is different.\n\n"+
 "Do not explain who the guardian is in your aura line. The app adds that introduction itself.\n"+"MEMORY IS THE POINT. She should never have to explain herself twice. Use what you remember out loud when it's relevant: count how often a theme has come up, quote her own past words, name the ritual and date. If a theme keeps repeating, give her something different from what she has already done and say so. If her usual pattern (for example reaching for release) is not what this moment needs, say it plainly, like: You usually reach for release when this happens. I don't think you need another release ritual tonight. I think this is a boundary. Only reference memories listed above. Never invent past entries, dates or quotes.\n\n"+
-"RITUAL LIBRARY (id | guardian | title | minutes | needs):\n"+catalog+"\n\n"+
+"RITUAL SHORTLIST (id | guardian | title | minutes | needs). Choose from these; compose only if none fits:\n"+catalog+"\n\n"+
 "SHE SAYS: \""+text.replace(/"/g,"'")+"\"\n\n"+
 "YOU ARE THE FRONT DOOR. She never has to know how the app is organized. Choose the right NEXT ACTION, not always a ritual. action is one of: ritual (a practice fits), talk (she needs to think it through with the guardian first), write (one honest sentence would do more than a ritual; give the exact prompt), rest (she has already done enough today or is depleted; tell her plainly, like: You've done enough today. I'm not giving you another ritual. Go sleep. I'll hold this until tomorrow. Recommending nothing is allowed and often the most caring choice), revisit (something she already wrote holds the answer; give revisitId), simplify (she can't think or is flooded; one tiny grounding action, nothing else), circle (there are genuinely two or three ways to see this; give 2 or 3 guardians and one sentence each on how they see it), decide (she is weighing a decision; never decide for her), event (a life transition like a move, breakup, new job, loss or birthday that needs a short path of 3 to 5 steps; use library ritual ids where possible), build (she asked you to create a ritual; compose it). Then choose the guardian and, for ritual, the best ritual id from the library.\n"+
 "OPEN PROMISES SHE MADE TO HERSELF: "+(openPromises().map(p=>fmtDate(p.ts)+": "+p.text).join(" | ")||"none")+"\n"+

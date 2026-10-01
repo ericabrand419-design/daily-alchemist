@@ -513,3 +513,48 @@ body:has(#rite) .scrim{z-index:45}
 body.novoice .hear{display:none}
 .hear{float:right;margin:-4px -4px 4px 8px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.4);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;font-style:normal}
 .hear.on{background:var(--fuchsia);border-color:var(--fuchsia);color:#fff;box-shadow:0 0 0 5px rgba(191,30,115,.2)}
+.bdayErr{color:#f2b8a0;margin-top:6px}
+.chc.wide{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px}.chc.wide .cl{margin-left:auto}
+.circle .g.ghost{opacity:.45;border-style:dashed}.circle .g.ghost .gq{display:grid;place-items:center;width:44px;height:44px;margin:0 auto;border-radius:50%;border:1px dashed var(--line);font-family:var(--f-display);font-size:22px;color:var(--gold)}
+/* ---------- The same world under different light (data-daypart on <html>) ---------- */
+:root{--dp-a:rgba(191,30,115,.22);--dp-b:rgba(58,132,132,.16);--dp-c:rgba(231,196,90,0);--dp-wash:rgba(22,19,42,0);--moonglow:.6}
+html[data-daypart=dawn]{--dp-a:rgba(232,140,175,.26);--dp-b:rgba(70,60,140,.22);--dp-c:rgba(231,196,90,.16);--dp-wash:rgba(40,32,82,.18)}
+html[data-daypart=morning]{--dp-a:rgba(214,140,200,.22);--dp-b:rgba(70,160,160,.22);--dp-c:rgba(231,196,90,.08);--dp-wash:rgba(52,42,98,.30)}
+html[data-daypart=afternoon]{--dp-a:rgba(150,60,130,.24);--dp-b:rgba(60,150,150,.26);--dp-c:rgba(240,210,140,.08);--dp-wash:rgba(44,30,70,.26)}
+html[data-daypart=transition]{--dp-a:rgba(224,67,143,.32);--dp-b:rgba(240,150,60,.18);--dp-c:rgba(231,180,80,.22);--dp-wash:rgba(40,20,50,.12)}
+html[data-daypart=evening]{--dp-a:rgba(191,30,115,.20);--dp-b:rgba(58,132,132,.14);--dp-c:rgba(231,196,90,0);--dp-wash:rgba(22,19,42,0)}
+html[data-daypart=deepnight]{--dp-a:rgba(120,30,90,.12);--dp-b:rgba(40,80,90,.08);--dp-c:rgba(0,0,0,0);--dp-wash:rgba(8,6,18,.22)}
+body::before{opacity:1;transition:background 2s ease;background:
+  radial-gradient(1200px 500px at 110% -10%,var(--dp-a),transparent 60%),
+  radial-gradient(900px 520px at -20% 30%,var(--dp-b),transparent 60%),
+  radial-gradient(1100px 420px at 50% 112%,var(--dp-c),transparent 65%),
+  linear-gradient(var(--dp-wash),var(--dp-wash))}
+html[data-daypart=deepnight] .foil.shine{animation:none}
+.sky svg{filter:drop-shadow(0 0 calc(var(--moonglow) * 14px) rgba(255,240,200,calc(var(--moonglow) * .45)))}
+/* Daily Alchemy strip */
+.sky{display:block}
+.alch{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center;width:100%;text-align:left;background:none;border:0;padding:0;color:inherit;cursor:pointer}
+.alch .alt{display:grid;gap:2px;min-width:0}
+.alch .aline{font-family:var(--f-ui);font-size:14.5px;letter-spacing:.04em;color:var(--glow-dim)}
+.alch .aplant{font-size:16px}.alch .aplant b{font-weight:600;color:var(--gold)}
+.alch .aread{font-family:var(--f-display);font-style:italic;font-size:18px;line-height:1.25}
+.alch .aread.muted{font-style:normal;font-family:var(--f-ui);font-size:14px}
+.alchsheet .pday{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:8px 0}
+.alchsheet .pday div{font-size:13px;line-height:1.25;padding:6px;border:1px solid rgba(244,241,230,.1);border-radius:10px}
+.alchsheet .pday div span{display:block;font-family:var(--f-ui);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--glow-faint)}
+.alchsheet .pday div.on{border-color:var(--gold)}
+.relayrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px}.relay{font-family:var(--f-ui);font-size:13px;padding:4px 10px;border-radius:999px;border:1px solid rgba(244,241,230,.15)}.relay.on{border-color:var(--gold);color:var(--gold)}.rarr{color:var(--glow-faint)}
+/* Focus, since, arc, day ritual */
+.card.focus{border-color:rgba(231,196,90,.55)}
+.since{border-left:2px solid var(--gold);padding:6px 12px;margin:4px 0 12px;background:rgba(231,196,90,.05);border-radius:0 12px 12px 0}.since p{font-size:16.5px;margin:2px 0}
+.arcq{margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,241,230,.08)}.arcq input{border-radius:12px;border:1px solid rgba(231,196,90,.35);background:rgba(22,19,42,.7);padding:9px 12px;font-size:17px}
+.arcq.done p{font-family:var(--f-display);font-style:italic;margin-top:2px}
+.dayrit{margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,241,230,.08)}
+.btn.sm{padding:8px 13px;font-size:15px}
+.subrow{display:grid;grid-template-columns:24px 1fr;gap:10px;align-items:start;margin-top:12px;padding-top:10px;border-top:1px solid rgba(244,241,230,.08)}
+.cardnow{margin-top:10px;font-family:var(--f-display);font-style:italic}
+/* Iris */
+.cycstat{display:flex;gap:14px;align-items:center;margin-bottom:12px}.cday{display:grid;place-items:center;min-width:84px;padding:8px;border-radius:16px;border:1px solid rgba(224,112,142,.5)}.cday span{font-family:var(--f-ui);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--glow-faint)}.cday b{font-family:var(--f-display);font-size:34px;line-height:1;color:#E0708E}
+.cinfo p{margin:2px 0}
+details.cyclog{margin-top:12px;border-top:1px solid rgba(244,241,230,.08);padding-top:10px}details.cyclog summary{cursor:pointer;font-family:var(--f-ui);font-size:15px;letter-spacing:.04em}
+details.cyclog input[type=date],details.cyclog input[type=text]{border-radius:12px;border:1px solid rgba(231,196,90,.35);background:rgba(22,19,42,.7);padding:9px 12px}

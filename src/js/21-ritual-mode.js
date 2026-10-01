@@ -37,7 +37,7 @@ function drawStep(){
   el.scrollTop=0; const w=el.querySelector(".wrap"); if(w)w.scrollTop=0;
   speakStep();
 }
-const OUTSIDE_HINT={thistle:"Mute the thread tonight",rue:"Block the number",sage:"Say it to their face, or let it go",marigold:"Send the invoice",sol:"Put the first step on your calendar today",juniper:"Clear the entry table",fern:"In bed by 10",lily:"Close the laptop at 7",onyx:"Tell one person the truth",willow:"Call the person who remembers them too",vesper:"Say one want out loud to your person",ember:"Make the call",rowan:"Walk around the block after dinner",lumen:"Book the first appointment",aurora:"Phone stays off until after coffee",wren:"Write down the next sign",onora:"Ask about the family story"};
+const OUTSIDE_HINT={thistle:"Mute the thread tonight",rue:"Block the number",sage:"Say it to their face, or let it go",marigold:"Send the invoice",sol:"Put the first step on your calendar today",juniper:"Clear the entry table",fern:"In bed by 10",lily:"Close the laptop at 7",onyx:"Tell one person the truth",willow:"Call the person who remembers them too",vesper:"Say one want out loud to your person",iris:"Log how today actually felt",rowan:"Walk around the block after dinner",lumen:"Book the first appointment",aurora:"Phone stays off until after coffee",wren:"Write down the next sign",onora:"Ask about the family story"};
 function mmss(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
 function saveEntry(text,after,extra){
   const {r,ctx}=run; extra=extra||{};

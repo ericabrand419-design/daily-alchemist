@@ -106,10 +106,10 @@ function extractJSON(t){
   const a=t.indexOf("{"),b=t.lastIndexOf("}");if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1));}catch(e){}}
   throw {code:"invalid_json"};
 }
-async function aiJSON(prompt,signal){
+async function aiJSON(prompt,signal,opts){
   if(MODE==="artifact"){const s=await getSample();if(!s)throw {code:"unavailable"};return s.json(prompt,{signal,modelTier:"quick"});}
   if(!ACCT.user)throw {code:"signin"};
-  const r=await api("/api/ai",{kind:"read",messages:[{role:"user",content:prompt}]});
+  const r=await api("/api/ai",{kind:"read",messages:[{role:"user",content:prompt}],tier:opts&&opts.tier==="deep"?"deep":"fast"});
   if(r.error)throw {code:r.error};
   return extractJSON(r.text);
 }

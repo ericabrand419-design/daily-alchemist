@@ -19,7 +19,7 @@ const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capa
 function vesperOK(){if(accountsOn())return !!(ACCT.adult21&&(ACCT.paid||ACCT.lifetime||ACCT.admin));return !!(S.profile.adult21&&isMember());}
 function allowedG(k){return k!=="vesper"||vesperOK();}
 function circleKeys(){return ALL.filter(allowedG);}
-function okG(k){return G[k]?(allowedG(k)?k:"marigold"):null;}
+function okG(k){k=RENAMED[k]||k;return G[k]?(allowedG(k)?k:"marigold"):null;}
 function canUse(r){return !!r&&(!r.member||isMember())&&(!r.adult21||vesperOK())&&(!r.explicit||!NATIVE)&&(!r.love||!S.profile.person||r.love===S.profile.person.mode);}
 const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SIGNS=[["Capricorn",120,"earth"],["Aquarius",219,"air"],["Pisces",321,"water"],["Aries",420,"fire"],["Taurus",521,"earth"],["Gemini",621,"air"],["Cancer",723,"water"],["Leo",823,"fire"],["Virgo",923,"earth"],["Libra",1023,"air"],["Scorpio",1122,"water"],["Sagittarius",1222,"fire"],["Capricorn",1300,"earth"]];
@@ -45,12 +45,24 @@ function showMinor(){
 }
 async function setBirthday(v,after){
   const a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return false;}
-  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;
-  if(a<18){S.profile.minor=true;S.profile.adult=false;saveLocal();if(accountsOn()&&ACCT.user)await api("/api/me",{dob:v});showMinor();return false;}
-  S.profile.adult=true;saveLocal();remotePut("prefs");
-  if(accountsOn()&&ACCT.user){S.pendingDob=v;saveLocal();const r=await api("/api/me",{dob:v});
-    if(r&&!r.error){delete S.pendingDob;saveLocal();ACCT.adultAt=r.adult_confirmed_at||ACCT.adultAt;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;if(S.friendCode&&!ACCT.lifetime)redeemFriend();}}
+  bdayErr("");
+  if(a<18){S.profile.bday=v.slice(5,10);S.profile.minor=true;S.profile.adult=false;saveLocal();if(accountsOn()&&ACCT.user)await api("/api/me",{dob:v});showMinor();return false;}
+  // Signed in: the server has to confirm the age before anything moves on. Nothing is saved locally until it does.
+  if(accountsOn()&&ACCT.user){
+    const btns=[...document.querySelectorAll("#bdayGo,#pSave,#pSkip")];btns.forEach(b=>b.disabled=true);
+    let r=null;try{r=await api("/api/me",{dob:v});}catch(e){r=null;}
+    btns.forEach(b=>b.disabled=false);
+    if(!r||r.error||!r.adult_confirmed_at){track("bday_save_failed",{why:r&&r.error?String(r.error).slice(0,40):"network"});bdayErr("That didn't save. Check your connection and tap Continue again.");return false;}
+    ACCT.adultAt=r.adult_confirmed_at;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;delete S.pendingDob;
+  }
+  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;saveLocal();remotePut("prefs");
+  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime)redeemFriend();
   return true;
+}
+function bdayErr(msg){
+  document.querySelectorAll(".bdayErr").forEach(e=>e.remove());if(!msg)return;
+  const inp=$("#bdayIn")||$("#age18");if(!inp)return toast(msg);
+  const p=document.createElement("p");p.className="bdayErr small";p.setAttribute("role","alert");p.textContent=msg;(inp.closest(".field")||inp).after(p);
 }
 async function submitBirthday(){
   const v=($("#bdayIn")||{}).value;if(!v){toast("Choose your birthday.");return;}

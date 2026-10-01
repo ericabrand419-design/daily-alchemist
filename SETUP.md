@@ -101,3 +101,13 @@ The app's code lives in `src/`, one file per area:
 - `src/shell/` holds the page skeleton.
 
 After editing, run `node build.mjs`. It writes `index.html`, `app.js` and `styles.css` for the live site, and `preview/daily-alchemist.html` for the Claude preview. Commit the built files with the source. `src/`, `preview/` and `build.mjs` aren't deployed (see `.vercelignore`).
+
+## AI provider (optional)
+The app works with no new settings (Anthropic, Haiku). To compare or switch later, add in Vercel:
+- `AI_PROVIDER` = `anthropic` or `openai`
+- `AI_FAST_MODEL`, `AI_DEEP_MODEL` (optional model names for the active provider)
+- `OPENAI_API_KEY` (only if you want to try OpenAI)
+The owner account can send `{compare:true}` to `/api/ai` to run one scenario through both and see text, tokens, speed and whether the JSON parsed.
+
+## Voices
+Guardian voices now use ElevenLabs `eleven_multilingual_v2` (more natural than flash). Override with `ELEVENLABS_MODEL` in Vercel.

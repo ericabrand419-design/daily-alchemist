@@ -3,11 +3,11 @@
 ------------------------------------------------------------------ */
 function innerCircleHTML(compact){
   const n=R.filter(r=>r.member).length, mem=isMember();
-  const ch=ALL.filter(k=>CHAMBERS[k]);
+  const ch=ALL.filter(k=>k!=="aura"&&CHAMBERS[k]);
   let h='<div class="card icircle'+(mem?' open':'')+'"><div class="row between"><span class="label">'+esc(PLAN.name)+'</span>'+(mem?'<span class="badge gold">'+(isLifetime()?'Lifetime':inTrial()?'Your free week':'You\'re a member')+'</span>':'<span class="price">From '+PLAN.monthly+'/mo</span>')+'</div>'+
     '<div style="margin-top:10px">'+auraSays(mem?(inTrial()?"This week everything is open. I\'ll write to you, and the guardians will come find you.":"You\'re in. I write to you every week, and the guardians check in on you by name."):"I\'d like to keep you in mind between visits. In the Inner Circle, I write to you every week, and the guardians check in on you by name.")+'</div><p class="small muted" style="margin-top:8px">Plus every guardian\'s deeper chamber, the guided journeys, and more time with me.</p>';
   if(!compact){
-    h+='<div class="chgrid">'+ch.map(k=>'<button class="chc" data-chamber="'+k+'">'+glyph(k,30)+'<span class="cn">'+esc(CHAMBERS[k].name)+'</span><span class="cl">'+(mem?'Open':'🔒')+'</span></button>').join("")+'</div>';
+    h+='<button class="chc wide" data-chamber="aura">'+glyph("aura",30)+'<span class="cn">'+esc(CHAMBERS.aura.name)+'</span><span class="cl">'+(mem?'Open':'🔒')+'</span></button><div class="chgrid">'+ch.map(k=>'<button class="chc" data-chamber="'+k+'">'+glyph(k,30)+'<span class="cn">'+esc(CHAMBERS[k].name)+'</span><span class="cl">'+(mem?'Open':'🔒')+'</span></button>').join("")+'</div>';
     h+='<div class="label" style="margin-top:14px">Journeys</div>'+JOURNEYS.map(j=>'<button class="li jl" data-journey="'+j.id+'"><span>'+esc(j.name)+'<br><span class="small muted">7 days with '+esc(G[j.g].name)+'</span></span><span class="cl">'+(mem?'Start':'🔒')+'</span></button>').join("");
   }
   h+=(mem?'':'<button class="btn btn-main full" style="margin-top:14px" data-paywall="Go deeper">'+(compact?'See what\'s inside':'Join '+esc(PLAN.name))+'</button>')+'</div>';
@@ -30,8 +30,8 @@ function renderCircle(){
   }
   const met=metList(), full=S.showAll||met.length>=3;
   if(!full){
-    h+='<button class="card link lead" data-guardian="aura">'+glyph("aura")+'<span><div class="label">Lead guardian</div><h3 style="margin-top:2px">Aura</h3><p class="small muted" style="margin-top:4px">'+esc(G.aura.domain)+'</p></span></button>';
-    if(met.length)h+='<div><div class="label">Your circle so far</div></div><div class="circle">'+met.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+'</div>';
+    h+='<button class="card link lead" data-guardian="aura">'+glyph("aura")+'<span><div class="label">Keeper of the Archive</div><h3 style="margin-top:2px">Aura</h3><p class="small muted" style="margin-top:4px">'+esc(G.aura.domain)+'</p></span></button>';
+    if(met.length)h+='<div><div class="label">Your circle so far</div></div><div class="circle">'+met.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+Array.from({length:(3-met.length%3)%3},()=>'<button class="g ghost" id="showAll2" aria-label="Show everyone"><span class="gq">?</span><span class="n">Waiting</span></button>').join("")+'</div>';
     {const gs=guardianSeasons();if(gs)h+='<div class="card">'+auraSays(esc(gs.join(" ")),"Aura · the seasons of your circle")+'</div>';}
     const left=ALL.length-1-met.length;
     h+='<div class="card waiting">'+auraSays((met.length?left+" more guardians":"Eighteen guardians")+" are waiting to meet you. You don\'t have to pick. When you tell me what you\'re carrying, I\'ll send you to the one who can hold it, and introduce you.")+
@@ -40,8 +40,8 @@ function renderCircle(){
     $("#v-circle").innerHTML=h;return;
   }
   h+=innerCircleHTML(false);
-  h+='<div><div class="label">The circle</div><h2>Nineteen voices. One archive.</h2><p class="muted" style="margin-top:6px">You never have to pick. Aura reads what you bring and sends it to the guardian who can hold it. Tap anyone to meet them, then talk to them. Type or speak.</p></div>';
-  h+='<button class="card link lead" data-guardian="aura">'+glyph("aura")+'<span><div class="label">Lead guardian</div><h3 style="margin-top:2px">Aura</h3><p class="small muted" style="margin-top:4px">'+esc(G.aura.domain)+'</p></span></button>';
+  h+='<div><div class="label">The circle</div><h2>Eighteen guardians. One Archive.</h2><p class="muted" style="margin-top:6px">You never have to pick. Aura reads what you bring and sends it to the guardian who can hold it. Tap anyone to meet them, then talk to them. Type or speak.</p></div>';
+  h+='<button class="card link lead" data-guardian="aura">'+glyph("aura")+'<span><div class="label">Keeper of the Archive</div><h3 style="margin-top:2px">Aura</h3><p class="small muted" style="margin-top:4px">'+esc(G.aura.domain)+'</p></span></button>';
   {const gs=guardianSeasons();if(gs)h+='<div class="card">'+auraSays(esc(gs.join(" ")),"Aura · the seasons of your circle")+'</div>';}
   h+='<div class="circle">'+ORDER.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+'</div>';
   h+='<div><div class="label">The wider circle</div><p class="muted" style="margin-top:6px">Nine more voices from the Archives. Talk to any of them any time.</p></div>';
@@ -56,7 +56,8 @@ function openGuardian(k){
   let h='<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+' · '+esc(g.element)+'</div><h2 style="margin:2px 0 0">'+esc(g.name)+'</h2></div></div>'+
    '<p><b>'+esc(g.name)+'\'s job:</b> '+esc(JOB[k]||g.domain)+'</p><p class="small muted">'+esc(g.domain)+' '+esc(g.voice)+(usedN?" You have walked with "+esc(g.name)+" "+usedN+" time"+(usedN>1?"s":"")+".":"")+'</p>'+
    '<div class="chips">'+g.phrases.map(p=>'<span class="tag" style="font-family:var(--f-display);font-style:italic;font-size:15px">'+esc(p)+'</span>').join("")+'</div>'+
-   '<button class="btn btn-main full" data-talk="'+k+'">Talk to '+esc(g.name)+'</button>';
+   '<button class="btn btn-main full" data-talk="'+k+'">Talk to '+esc(g.name)+'</button>'+(k==="iris"?irisPanelHTML():'');
+  if(k==="iris")setTimeout(()=>cycleSync().then(rerenderIris),0);
   if(rs.length)h+='<div class="label">'+esc(g.name)+'\'s rituals</div>'+rs.map(r=>ritualCard(r)).join("");
   if(c)h+='<div class="card"><div class="row between"><h3>'+esc(c.name)+'</h3>'+(isMember()?'':'<span class="badge">Members</span>')+'</div><p class="small muted" style="margin-top:6px">'+esc(c.d)+'</p><button class="btn btn-ghost full" style="margin-top:12px" data-chamber="'+k+'">Open the chamber</button></div>';
   openSheet(h+'</div>');

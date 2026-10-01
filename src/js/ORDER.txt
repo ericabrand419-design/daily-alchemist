@@ -15,6 +15,9 @@
 15-letters-and-checkins.js
 16-friends-week.js
 17-testing-and-feedback.js
+17a-daily-context.js
+17b-plants-and-alchemy.js
+17c-iris.js
 18-journeys-view.js
 19-circle-view.js
 20-archive-view.js

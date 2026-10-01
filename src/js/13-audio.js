@@ -64,8 +64,20 @@ let voiceOn=false,vrec=null;
 let audioEl=null,voiceNoted=false;
 const HEAR_ICON='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 function naturalVoices(){return accountsOn()&&ACCT.user&&S.prefVoice!=="device";}
+/* Phones ship joke voices (Cellos, Good News, Bells, Zarvox...) that sing or sound robotic.
+   Never pick one of those. Use one natural voice, the best the phone has, for everyone. */
+const NOVELTY=/^(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|junior|kathy|organ|pipe organ|princess|ralph|superstar|trinoids|whisper|wobble|zarvox|fred|grandma|grandpa|rocko|shelley|flo|eddy|reed|sandy)\b/i;
+const GOOD_VOICE=/samantha|ava|allison|susan|zoe|nicky|serena|karen|moira|tessa|kate|google us english|google uk english female|microsoft (aria|jenny|sonia|libby)|siri/i;
+let _bestVoice=null;
+function bestDeviceVoice(){
+  if(_bestVoice)return _bestVoice;
+  const all=speechSynthesis.getVoices().filter(v=>/^en[-_]/i.test(v.lang)&&!NOVELTY.test(v.name));if(!all.length)return null;
+  const score=v=>(GOOD_VOICE.test(v.name)?10:0)+(/enhanced|premium|natural|neural/i.test(v.name)?6:0)+(/en[-_]US/i.test(v.lang)?2:/en[-_]GB/i.test(v.lang)?1:0)+(v.default?1:0);
+  _bestVoice=all.sort((a,b)=>score(b)-score(a))[0];return _bestVoice;
+}
+try{speechSynthesis.onvoiceschanged=()=>{_bestVoice=null;};}catch(e){}
 function deviceSpeak(text,onend,g){
-  try{if(!("speechSynthesis" in window)){onend&&onend();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.9;u.pitch=1;const vs=speechSynthesis.getVoices().filter(v=>/en/i.test(v.lang));if(vs.length)u.voice=vs[hash(g||"aura")%vs.length];u.onend=()=>onend&&onend();speechSynthesis.speak(u);}catch(e){onend&&onend();}
+  try{if(!("speechSynthesis" in window)){onend&&onend();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.95;u.pitch=1;const v=bestDeviceVoice();if(v){u.voice=v;u.lang=v.lang;}u.onend=()=>onend&&onend();speechSynthesis.speak(u);}catch(e){onend&&onend();}
 }
 function stopAudio(){try{if(audioEl){audioEl.onended=null;audioEl.pause();}}catch(e){}audioEl=null;musicDuck(false);try{speechSynthesis.cancel();}catch(e){}document.querySelectorAll(".hear.on").forEach(b=>b.classList.remove("on"));}
 async function voiceURL(g,text,cache){

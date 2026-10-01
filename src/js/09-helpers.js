@@ -37,9 +37,5 @@ function drawSeal(){
   x.fillStyle=fg;const sx=cx+18,sy=cy+14,s=8;x.beginPath();x.moveTo(sx,sy-s);x.lineTo(sx+2.2,sy-2.2);x.lineTo(sx+s,sy);x.lineTo(sx+2.2,sy+2.2);x.lineTo(sx,sy+s);x.lineTo(sx-2.2,sy+2.2);x.lineTo(sx-s,sy);x.lineTo(sx-2.2,sy-2.2);x.fill();
 }
 
-/* Sky strip */
-function renderSky(){
-  const nm=S.profile.name?(", "+esc(S.profile.name)):"";
-  $("#sky").innerHTML=moonSVG(M)+'<div><div class="small muted">'+today.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+nm+'</div><div class="phase">'+M.name+'</div><div class="meta"><b>'+Math.round(M.ill*100)+'% lit</b> · '+(M.waxing?"full in "+Math.round(M.toFull)+" days":"new in "+Math.round(M.toNew)+" days")+' · '+SEA.cur.name+' season, '+SEA.next.name+' in '+SEA.days+' days</div>'+(S.pseason?'<div class="meta" style="color:var(--gold)">Your season: '+esc(S.pseason.name)+'</div>':'')+'</div>';
-}
+/* The sky strip lives in 17b-plants-and-alchemy.js as the Daily Alchemy strip. */
 

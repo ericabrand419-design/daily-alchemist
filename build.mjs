@@ -34,7 +34,7 @@ writeFileSync(new URL("./index.html", import.meta.url),
   '<script src="/app.js?v=' + v(bundle) + '"></script>\n' + webTail);
 
 // Preview: everything inline in one file.
-const inline = head + "<style>\n" + css + "</style>\n" + body + "<script>\n" + bundle + "</script>\n";
+const inline = '<meta charset="utf-8">\n' + head + "<style>\n" + css + "</style>\n" + body + "<script>\n" + bundle + "</script>\n";
 mkdirSync(new URL("./preview/", import.meta.url), { recursive: true });
 writeFileSync(new URL("./preview/daily-alchemist.html", import.meta.url), inline);
 

@@ -18,7 +18,7 @@ export async function POST(request) {
         const at = new Date().toISOString();
         const patch = age < 18 ? { under18_at: at, under21_at: at } : age < 21 ? { under21_at: at } : { adult21_at: at };
         if (age >= 18 && !profile.adult_confirmed_at) patch.adult_confirmed_at = at;
-        try { await sb("profiles?id=eq." + user.id, { method: "PATCH", body: patch }); profile = { ...profile, ...patch }; } catch {}
+        try { await sb("profiles?id=eq." + user.id, { method: "PATCH", body: patch }); profile = { ...profile, ...patch }; } catch { return json({ error: "save_failed" }, 500); }
       }
     }
   }

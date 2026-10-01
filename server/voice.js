@@ -16,7 +16,7 @@ const VOICES = {
   marigold: ["Jessica - Playful, Bright, Warm", "r1KmysJdVYZjJCm4mL3b", "d5a057fa67bd4518fbf13eb08503860c528f1b11bb306922220aa0c561744e90"],
   rue:      ["Mariana - Intimacy with Authority", "OB0Jj6v9DGLLgz8dD57i", "375c86e675d6d8b2b50d4c33cc6b7ef407a68953e41de9fc9f98a70b88bb21d9"],
   aurora:   ["Tiffany - Natural and Welcoming", "6aDn1KB0hjpdcocrUkmq", "64cbc624eb5aab4e95a968e1f41d75402277cca6e549036ed17e56ea33bbbc9e"],
-  ember:    ["Ivy - Spirited, Lively, Daring", "i4CzbCVWoqvD0P1QJCUL", "db90e9d28d86510262ed2a7235586923c68c9c8ae2e533739754741e8965a616"],
+  iris:     ["Ivy - Spirited, Lively, Daring", "i4CzbCVWoqvD0P1QJCUL", "db90e9d28d86510262ed2a7235586923c68c9c8ae2e533739754741e8965a616"],
   willow:   ["Lauren - Friendly, Comforting and Soft", "DODLEQrClDo8wCz460ld", "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6"],
   wren:     ["Priyanka - Calm, Neutral and Relaxed", "BpjGufoPiobT79j2vtj4", "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6"],
   onora:    ["Kelli LaShae - Warm Southern Narrator", "Z5JpFCNFIz8Nhe4KEikq", "f671d623811fd0dc84fc9eb65f91c3e9a96728bbe850dc243d0728f6b18d3f25"],
@@ -110,10 +110,12 @@ export async function POST(request) {
   let body = {}; try { body = await request.json(); } catch {}
   const text = String(body.text || "").replace(/\s+/g, " ").trim().slice(0, 2500);
   if (!text) return json({ error: "bad_request" }, 400);
-  const g = String(body.g || "aura").toLowerCase();
+  let g = String(body.g || "aura").toLowerCase(); if (g === "ember") g = "sage";
   const voice = await voiceFor(g);
   if (!voice) return json({ error: "voice_off" }, 503);
-  const model = env("ELEVENLABS_MODEL") || "eleven_flash_v2_5";
+  // Flash is fast but garbles cadence on many library voices (the robotic, sing-song sound).
+  // Multilingual v2 is ElevenLabs' most natural, stable model, and rituals are cached, so speed matters less.
+  const model = env("ELEVENLABS_MODEL") || "eleven_multilingual_v2";
   const cacheable = !!body.cache && text.length <= 1500;
   const name = crypto.createHash("sha256").update(voice + "|" + model + "|" + text).digest("hex") + ".mp3";
   const publicUrl = storeBase() + "/object/public/voice/" + name;
@@ -130,7 +132,7 @@ export async function POST(request) {
   const r = await fetch(XI + "/v1/text-to-speech/" + voice + "?output_format=mp3_44100_64", {
     method: "POST",
     headers: { "xi-api-key": key(), "content-type": "application/json", accept: "audio/mpeg" },
-    body: JSON.stringify({ text, model_id: model, voice_settings: { stability: 0.55, similarity_boost: 0.75, style: 0.15 } }),
+    body: JSON.stringify({ text, model_id: model, voice_settings: { stability: 0.6, similarity_boost: 0.8, style: 0, use_speaker_boost: true, speed: 0.95 } }),
   });
   if (!r.ok) return json({ error: "voice_unavailable" }, 502);
   const bytes = new Uint8Array(await r.arrayBuffer());

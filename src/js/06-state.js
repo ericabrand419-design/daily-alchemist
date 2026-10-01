@@ -5,7 +5,7 @@
 const KEY="dailyAlchemist.v1";
 let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false},entries:[],draws:{}};
 try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S={...S,...p,profile:{...S.profile,...(p.profile||{})}};}}catch(e){}
-const RENAMED={moss:"juniper",cypress:"sol"};
+const RENAMED={moss:"juniper",cypress:"sol",ember:"sage"};
 function migrateCircle(){
   const fix=o=>{if(o&&RENAMED[o.guardian])o.guardian=RENAMED[o.guardian];if(o&&RENAMED[o.g])o.g=RENAMED[o.g];};
   (S.entries||[]).forEach(fix);(S.asks||[]).forEach(fix);

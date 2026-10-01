@@ -17,8 +17,11 @@ function tab(name){
 }
 document.addEventListener("click",ev=>{if(ev.target.closest&&ev.target.closest("#eyes")){stopEyes();}},true);
 document.addEventListener("click",async ev=>{
-  const t=ev.target.closest("button"); if(!t)return;
+  const t=ev.target.closest("button,input[type=checkbox]"); if(!t)return;
   const d=t.dataset;
+  if(t.tagName==="INPUT"){irisClick(t,d);return;}
+  if(focusClick(t,d))return;
+  if(irisClick(t,d))return;
   if(d.mic){toggleMic(t);return;}
   if(t.id==="customAdd"){const v=($("#customIn").value||"").trim().slice(0,40);if(!v)return;if(!S.profile.custom.includes(v))S.profile.custom.push(v);persist("profile");$("#pCustom").insertAdjacentHTML("beforeend",'<span class="chip" aria-pressed="true">'+esc(v)+' <button class="x2 in" data-delcustom="'+(S.profile.custom.length-1)+'" aria-label="Remove">×</button></span>');$("#customIn").value="";toast("Aura knows you have "+v+".");return;}
   if(d.delcustom!==undefined){S.profile.custom.splice(+d.delcustom,1);persist("profile");t.closest(".chip").remove();return;}
@@ -99,6 +102,8 @@ document.addEventListener("click",async ev=>{
     try{EXCLUDE=e.guardian;lastRead=await askAura(txt,S.profile.minutes);EXCLUDE=null;if(lastRead.guardian===e.guardian){EXCLUDE=e.guardian;lastRead=localRead(txt,S.profile.minutes);EXCLUDE=null;}lastRead.carrying=e.carrying||"";if(lastRead.ritual&&lastRead.ritual.id===e.ritualId){const alt=R.filter(z=>canUse(z)&&z.g!==e.guardian&&!z.reset);lastRead.ritual=alt[hash(e.id)%alt.length];lastRead.guardian=lastRead.ritual.g;}lastRead.intro=introFor(lastRead.guardian);markMet(lastRead.guardian);}catch(err){}
     renderToday();return;}
   if(t.id==="exportBtn"){exportArchive();return;}
+  if(t.id==="clearBtn"){closeSheet();openSheet('<div class="stack"><div class="label">Clear my data</div><h2>Start fresh, keep your account.</h2><p>Your Archive, chats, Aura\'s memory, your cycle history and your settings will be permanently deleted. '+(MODE==="web"&&ACCT.user?'You stay signed in, and your account'+(ACCT.member?' and membership':'')+' stay exactly as they are.':'You can start again right away.')+'</p><p class="small muted">Want a copy first? Export your Archive before you clear it.</p><div class="field"><label for="clrConfirm">Type CLEAR to confirm</label><input type="text" id="clrConfirm" autocomplete="off"></div><button class="btn btn-main full danger" id="clrGo">Clear my data</button><button class="btn btn-ghost full" id="sheetDone">Keep my data</button></div>');return;}
+  if(t.id==="clrGo"){if(($("#clrConfirm").value||"").trim().toUpperCase()!=="CLEAR"){$("#clrConfirm").focus();return;}t.disabled=true;t.textContent="Clearing...";const ok=await clearMyData();if(ok){closeSheet();toast("Your data is cleared. Your account is still here.");setTimeout(()=>location.reload(),1200);}else{t.disabled=false;t.textContent="Clear my data";}return;}
   if(t.id==="deleteBtn"){closeSheet();openSheet('<div class="stack"><div class="label">Delete everything</div><h2>This can\'t be undone.</h2><p>Your Archive, chats, Aura\'s memory, your settings'+(MODE==="web"&&ACCT.user?', your account'+(ACCT.member?', and your membership (it will be canceled)':''):'')+' will be permanently deleted.</p><div class="field"><label for="delConfirm">Type DELETE to confirm</label><input type="text" id="delConfirm" autocomplete="off"></div><button class="btn btn-main full danger" id="delGo">Delete everything</button><button class="btn btn-ghost full" id="sheetDone">Keep my data</button></div>');return;}
   if(t.id==="delGo"){if(($("#delConfirm").value||"").trim().toUpperCase()!=="DELETE"){$("#delConfirm").focus();return;}t.disabled=true;t.textContent="Deleting...";const ok=await deleteEverything();if(ok){closeSheet();S={profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false},entries:[],draws:{},chats:{},usage:{}};lastRead=null;renderAll();toast("Everything is deleted.");}else{t.disabled=false;t.textContent="Delete everything";}return;}
   if(d.paywall!==undefined){closeTalk();openPaywall(d.paywall);return;}
@@ -143,7 +148,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="fbOpen"||d.fb){openFeedback(d.fb||"settings");return;}
   if(d.fbmood){t.parentElement.querySelectorAll("[data-fbmood]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="fbSend"){sendFeedback(t.dataset.where);return;}
-  if(t.id==="showAll"){S.showAll=true;saveLocal();renderCircle();return;}
+  if(t.id==="showAll"||t.id==="showAll2"){S.showAll=true;saveLocal();renderCircle();return;}
   if(t.id==="howOpen"||d.how){openHow();return;}
   if(t.id==="letterOpen"){openLetterFlow(t);return;}
   if(t.id==="trialSeen"){S.trialSeen=true;saveLocal();renderToday();return;}
@@ -275,7 +280,7 @@ function refreshCards(){
 }
 function renderBadge(){const b=$("#memBadge");if(!b)return;b.hidden=!isMember();b.textContent=isLifetime()?"Inner Circle · Lifetime":inTrial()?"Inner Circle · "+trialDaysLeft()+(trialDaysLeft()===1?" day":" days")+" free":"Inner Circle";}
 function renderAll(){renderBadge();renderSky();renderToday();renderJourneys();renderCircle();renderArchive();}
-drawSeal();renderAll();setTimeout(()=>{auraPopup();setTimeout(maybeAskFeedback,400);trackOpen();},1200);
+noteVisit();drawSeal();renderAll();setTimeout(cycleSync,2500);setTimeout(()=>{auraPopup();setTimeout(maybeAskFeedback,400);trackOpen();},1200);
 if(!S.profile.onboarded)setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate")&&!$("#phoneOnly"))openAltar(true);},700);
 restoreUI();
 initCloud();initWeb();

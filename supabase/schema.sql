@@ -158,3 +158,18 @@ grant execute on function public.claim_invite(text, uuid) to service_role;
 
 -- Friends Week: what each person ticked to share (only taps and times, never words).
 alter table public.profiles add column if not exists monitor_scope text[];
+
+-- Iris: cycle history lives in its own table, never in prefs. Only she can read or write her rows.
+-- Nothing in the admin dashboard reads this table. Deleting the account deletes every row.
+create table if not exists public.cycle_events (
+  id text primary key,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  kind text not null check (kind in ('start','end','log','settings')),
+  day date,
+  data jsonb not null default '{}'::jsonb,
+  created_at timestamptz default now()
+);
+create index if not exists cycle_events_user on public.cycle_events(user_id, day);
+alter table public.cycle_events enable row level security;
+drop policy if exists "own cycle events" on public.cycle_events;
+create policy "own cycle events" on public.cycle_events for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

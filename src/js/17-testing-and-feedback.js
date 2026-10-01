@@ -95,12 +95,12 @@ function localBrief(){
 let briefBusy=false;
 async function refreshBrief(){
   if(briefBusy||!memOn())return;const H=hist();if(H.length<2)return;
-  const key=dayKey(new Date())+":"+H.length;if(S.brief&&S.brief.key===key)return;
+  const key=dayKey(new Date())+":"+H.length+":"+arcPart(daypart());if(S.brief&&S.brief.key===key)return;
   if(MODE==="artifact"){const s=await getSample();if(!s)return;}else if(!ACCT.user)return;
   briefBusy=true;
   try{
     const catalog=R.filter(r=>canUse(r)&&!r.reset).map(r=>r.id+" | "+G[r.g].name+" | "+r.title+" | "+r.min+" min | for: "+r.purpose).join("\n");
-    const out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist. You open the app for her before she says a word, like a friend who has been paying attention.\nToday: "+today.toDateString()+". Moon: "+M.name+". Season: "+SEA.cur.name+". Use these only as quiet context, never as the headline.\n\nWHAT SHE HAS TOLD YOU LATELY:\n"+asksText()+"\n\nHER RECENT ARCHIVE:\n"+historyText().slice(0,3000)+"\n\nLONG-TERM MEMORY:\n"+ledgerText()+"\n\nWHAT HAS HELPED HER:\n"+workedText()+"\n\nRITUAL LIBRARY:\n"+catalog+"\n\nWrite: observation = one or two short sentences, in your voice, about what today seems to be about for her, grounded in the patterns above (count repeats, quote her briefly, name what she wanted). Then say what kind of day you think it is, for example: I think today is a grounding and inventory day. remembered = one specific thing from her history worth bringing back today, in plain words. ritualId = the one practice from the library that fits today best. why = one sentence on why that one. No em dashes. No emojis. Never mention health diagnoses.\nReply with ONLY JSON: {\"observation\":\"\",\"remembered\":\"\",\"ritualId\":\"\",\"why\":\"\"}",null);
+    const out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist. You open the app for her before she says a word, like a friend who has been paying attention.\n"+focusText()+"Today: "+today.toDateString()+". Moon: "+M.name+". Season: "+SEA.cur.name+". Use these only as quiet context, never as the headline.\n\nWHAT SHE HAS TOLD YOU LATELY:\n"+asksText()+"\n\nHER RECENT ARCHIVE:\n"+historyText().slice(0,3000)+"\n\nLONG-TERM MEMORY:\n"+ledgerText()+"\n\nWHAT HAS HELPED HER:\n"+workedText()+"\n\nRITUAL LIBRARY:\n"+catalog+"\n\nWrite: observation = one or two short sentences, in your voice, about what today seems to be about for her, grounded in the patterns above (count repeats, quote her briefly, name what she wanted). Then say what kind of day you think it is, for example: I think today is a grounding and inventory day. remembered = one specific thing from her history worth bringing back today, in plain words. ritualId = the one practice from the library that fits today best. why = one sentence on why that one. No em dashes. No emojis. Never mention health diagnoses.\nReply with ONLY JSON: {\"observation\":\"\",\"remembered\":\"\",\"ritualId\":\"\",\"why\":\"\"}",null);
     if(out&&out.observation){S.brief={key,observation:clean(out.observation).slice(0,320),remembered:clean(out.remembered||"").slice(0,220),ritualId:byId[out.ritualId]&&canUse(byId[out.ritualId])?out.ritualId:null,why:clean(out.why||"").slice(0,200)};saveLocal();if(!lastRead&&!$("#v-today").hidden)renderToday();}
   }catch(e){}finally{briefBusy=false;}
 }
@@ -188,7 +188,7 @@ function whyThis(t){return t?'<details class="whythis"><summary>Why this?</summa
 function eveningPick0(ins){
   const day=Date.now()-18*3600e3,today=S.asks.filter(a=>a.ts>day),txt=today.map(a=>a.text||"").join(" ").toLowerCase(),d=S.days[dayKey(new Date())]||{};
   const pool=g=>R.filter(r=>canUse(r)&&!r.reset&&r.g===g&&r.min<=15&&!r.bath);
-  let g="juniper",why=[];const h=new Date().getHours();
+  let g=daypart()==="transition"?"juniper":"fern",why=[];const h=new Date().getHours();
   if(/anxious|anxiety|overthink|racing|can'?t (stop|shut|sleep)|spiral|worried|panic/.test(txt)||today.some(a=>a.guardian==="lily")){g="lily";why.push("Earlier today your mind was running hot, and you can't sleep on a racing head");}
   else if(/grie|miss (him|her)|died|loss|funeral/.test(txt)||today.some(a=>a.guardian==="willow")){g="willow";why.push("You've been carrying grief today, and it deserves somewhere soft to land before sleep");}
   else if(lowTank()||/tired|exhausted|drained|burn/.test(txt)){g="fern";why.push(lowTank()?"You started today with a low tank":"You told me you're running on empty");}
@@ -196,7 +196,7 @@ function eveningPick0(ins){
   if(M.name.includes("Waning")||M.name.includes("Crescent")&&!M.waxing)why.push("the moon is waning, so tonight is for letting go, not starting something");
   if(ritualsToday()>=1)why.push("you've already done "+ritualsToday()+(ritualsToday()===1?" ritual":" rituals")+" today, so I kept this one short");
   if(h>=22)why.push("it's late");
-  const p=pool(g).length?pool(g):pool("juniper");
+  const p=pool(g).length?pool(g):pool("fern").length?pool("fern"):pool("juniper");
   const r=pickForNow(p,new Date(),"wind")||byId["two-minute-settle"];
   return {r,why:esc(why.join(", ").replace(/^./,c=>c.toUpperCase()))+". "+esc(G[r.g].name)+" is better for tonight than anything that asks more of you."+(ins?" "+esc(ins):"")};
 }
@@ -244,35 +244,12 @@ function personalPick(pk){
   pk.mine=mine[0]||"";if(mine.length>1)pk.why=esc(mine[1])+" "+pk.why;
   return pk;
 }
-function rhythmHTML(){
-  const part=partOfDay(),d=dayRec(),ins=rhythmInsight();
-  const head=(g,t)=>'<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+G[g].color+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';
-  if(part==="morning"){
-    if(d.sleep&&d.energy){
-      const low=lowTank();
-      return '<div class="card rhythm">'+head("aurora","this morning")+'<p style="margin-top:8px">'+(low?"Low tank today. I'll keep everything short and gentle, and nothing you skip counts against you.":"Good. You've got something to work with today. Let's use it well.")+'</p>'+(ins?'<p class="why" style="margin-top:10px">'+esc(ins)+'</p>':'')+(low?'<div class="row" style="margin-top:10px"><button class="btn btn-ghost" data-begin="two-minute-settle">Two minutes, that\'s all</button></div>':'')+'</div>';
-    }
-    return '<div class="card rhythm">'+head("aurora","morning check in")+'<p class="q2" style="margin-top:8px">How did you sleep?</p>'+chipsQ("sleep",SLEEPQ,d.sleep)+'<p class="q2" style="margin-top:12px">What\'s in the tank?</p>'+chipsQ("energy",ENERGYQ,d.energy)+WATCH_NOTE+'</div>';
-  }
-  if(part==="midday"){
-    if(d.moved==null)return '<div class="card rhythm">'+head("rowan","midday")+'<p class="q2" style="margin-top:8px">Did you move your body today?</p>'+chipsQ("moved",MOVEDQ,null)+WATCH_NOTE+'</div>';
-    if(d.moved===0){const r=byId[lowTank()?"one-song-dance":"walk-it-off"];return '<div class="card rhythm">'+head("rowan","midday")+'<p style="margin-top:8px">No judgment. Want the smallest version? '+esc(r.title)+', '+r.min+' minutes.</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+r.id+'">Move with Rowan</button><button class="btn btn-ghost" data-moved="1">Did a little</button></div></div>';}
-    return ins?'<div class="card rhythm">'+head("aura","what I'm noticing")+'<p class="why" style="margin-top:8px">'+esc(ins)+'</p></div>':"";
-  }
-  const nk=nightKey();
-  if(!woundDown(nk)){const pk=personalPick(eveningPick(ins));
-    if(pk.action&&!pk.nothing)return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura, tonight</span></div><p style="margin-top:8px">'+esc(pk.action.line)+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-talk="'+(okG("thistle")&&/bound|work|family|people/i.test(pk.action.thread)?"thistle":"sol")+'">Decide the next step</button><button class="btn btn-ghost" data-wind="1">Just rest tonight</button></div></div>';
-    if(pk.nothing)return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura, tonight</span></div><p style="margin-top:8px;font-family:var(--f-display);font-size:21px">Nothing tonight. Go to bed.</p><p style="margin-top:6px">You\'ve done enough today. I\'m not giving you another ritual. Go sleep. I\'ll hold this until tomorrow.</p>'+whyThis(pk.nothingWhy)+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-wind="1">Goodnight</button></div></div>';
-    return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura picked '+esc(G[pk.r.g].name)+' for tonight</span></div><p style="margin-top:8px">'+(pk.mine?esc(pk.mine)+' ':'')+'Let\'s close the day. <b>'+esc(pk.r.title)+'</b> · '+pk.r.min+' min</p>'+whyThis(pk.why)+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pk.r.id)+'">Wind down with '+esc(G[pk.r.g].name)+'</button><button class="btn btn-ghost" data-wind="1">Already did</button></div></div>';}
-  if(woundDown(nk))return '<div class="card rhythm">'+head("juniper","tonight")+'<p style="margin-top:8px">You wound down. The day is done asking things of you. Sleep well.</p></div>';
-  const pool=R.filter(r=>canUse(r)&&!r.reset&&["juniper","willow","fern","lily"].includes(r.g)&&r.min<=15&&!r.bath&&r.tags.some(t=>/rest|calm|slow|sleep|still|busy|overwhelm|stirred/.test(t)));
-  const r=pickForNow(pool,new Date(),"wind")||byId["two-minute-settle"];
-  return '<div class="card rhythm">'+head(r.g,"wind down")+'<p style="margin-top:8px">Let\'s close the day. '+esc(r.title)+', '+r.min+' minutes, then nothing else is needed from you tonight.</p>'+(ins?'<p class="why" style="margin-top:10px">'+esc(ins)+'</p>':'')+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(r.id)+'">Wind down</button><button class="btn btn-ghost" data-wind="1">Already did</button></div></div>';
-}
+/* Every rhythm surface goes through the priority engine first (17a-daily-context.js). */
+function rhythmHTML(){return focusCardHTML(resolveCurrentFocus());}
 function openingLine(known){
   if(!known)return "I'm Aura. Tell me what happened, and I'll take it from there.";
   if(!memOn())return "Tell me what happened, and I'll take it from there.";
-  const recent=S.asks.filter(a=>!a.noMem&&a.thread&&Date.now()-a.ts<48*3600e3).sort((a,b)=>b.ts-a.ts)[0];
+  const recent=S.asks.filter(a=>!a.noMem&&a.thread&&Date.now()-a.ts<48*3600e3&&!(a.sitSnooze&&a.sitSnooze>Date.now())&&!a.settled).sort((a,b)=>b.ts-a.ts)[0];
   if(recent){const ti=threadInfo(recent.thread),t=recent.thread.toLowerCase();
     if(recent.tomorrow&&Date.now()-recent.ts>6*3600e3)return "Before you tell me anything, how did it go with "+t+"?";
     if(ti&&ti.talks>=2)return "Is this about "+t+" again?";
@@ -281,25 +258,23 @@ function openingLine(known){
   return "I think I know what today has been about.";
 }
 function renderToday(){
-  const p=S.profile, mins=pickedMins||p.minutes, H=memOn()?hist():[], known=H.length>0, b=todayBrief();
-  const pick=(b.ritualId&&byId[b.ritualId])||pickForNow(R.filter(r=>canUse(r)&&!r.reset),new Date(),"today")||byId.anchor;
+  const p=S.profile, mins=pickedMins||p.minutes, H=memOn()?hist():[], known=H.length>0, b=todayBrief(), f=resolveCurrentFocus(), dr=dayRitual();
+  const pick=(dr&&dr.r)||(b.ritualId&&byId[b.ritualId])||byId.anchor;
+  // The engine decides what leads. When her life is louder than the clock, nothing else competes with it.
   let h='<div class="home"><p class="greet">'+esc(greeting())+'</p>'+
-    '<h2 class="hline">'+esc(openingLine(known))+'</h2>'+
-    (known&&b.observation?'<p class="obs">'+esc(b.observation)+'</p>':'')+'</div>';
+    (f.level>3?'<h2 class="hline">'+esc(openingLine(known))+'</h2>'+(known&&b.observation?'<p class="obs">'+esc(b.observation)+'</p>':''):'')+'</div>';
+  if(!lastRead)h+=sinceHTML(f)+bdayHTML()+focusCardHTML(f);
   h+='<div class="aura" id="auraBox"><div class="speaker">'+glyph("aura")+'<span class="who">Aura is listening</span><button class="howbtn" id="howOpen" aria-label="How it works">?</button></div>'+
-
      '<label class="sr" for="carry">What happened</label><div class="composer"><textarea id="carry" placeholder="Tell me what happened. Messy is fine."></textarea>'+micBtn("carry")+'</div><p class="small muted" id="carryHint" hidden style="margin-top:6px"></p>'+
      '<details class="feelset"'+(feelSel.length?' open':'')+'><summary class="small">Not ready to talk? Tap how you feel.</summary><div class="chips" style="margin-top:8px" id="quick">'+QUICK.map(q=>'<button class="chip" data-q="'+esc(q[0])+'" aria-pressed="'+feelSel.includes(q[0])+'">'+esc(q[0])+'</button>').join("")+'<button class="chip calm" id="cantThink">Can\'t think</button></div></details>'+
      '<button class="btn btn-main full" id="askBtn" style="margin-top:14px">Tell Aura</button></div>';
   h+='<div id="readingSlot">'+(lastRead?readingHTML(lastRead):"")+'</div>';
   if(!lastRead){
-    const fu=followHTML()||checkinHTML(),rh=rhythmHTML();
-    h+=bdayHTML()+(fu||rh);
     h+='<div id="nudgeSlot">'+nudgeHTML()+'</div>'+letterCardHTML();
     h+=yourCircleHTML();
-    const dp=deeperHTML();
-    h+='<details class="more"><summary>If you want more</summary>'+(fu?rh:'')+'<div class="trio">'+
-      '<div class="card hcard"><h3>'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min'+(b.why?". "+esc(b.why):known?"":". A good place to start.")+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
+    const dp=deeperHTML(),more=f.level<=3?stewardHTML({...f,level:6,steward:STEWARD[f.dp],insight:""}):"",fu=f.level===2?(followHTML()||checkinHTML()):"";
+    h+='<details class="more"><summary>If you want more</summary>'+fu+more+'<div class="trio">'+
+      '<div class="card hcard"><div class="label">Today\'s ritual</div><h3 style="margin-top:6px">'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min. '+esc(dr?dr.why:(b.why||""))+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
       (memOn()&&b.remembered?'<div class="card hcard"><div class="label">One thing I remember</div><p style="margin-top:6px">'+esc(b.remembered)+'</p><div class="row" style="margin-top:8px"><button class="linkish" id="memOpen">See everything I remember</button></div></div>':
         !memOn()?'<div class="card hcard"><div class="label">Memory is off</div><p class="small muted" style="margin-top:6px">I\'m not keeping anything, so every visit starts fresh.</p><button class="linkish" id="memOpen">Change</button></div>':'')+
       '<div class="card hcard"><div class="label">'+esc(dp.label)+'</div><p class="small" style="margin-top:6px">'+esc(dp.text)+'</p><div class="row" style="margin-top:10px">'+dp.btn+'</div></div>'+
@@ -374,7 +349,7 @@ const CARDS={
  sol:["IX","The Oath","A wish with a date is a plan. Keep one small promise to yourself today and let it count.","What did I say I'd do, and what's the first step?"],
  aurora:["X","The Dawn","Something is becoming clear. A fresh start is closer than it feels.","What's starting to make sense that didn't before?"],
  rowan:["XI","The Path","Your body knows the way back. Move first and the feelings follow.","Where is my body holding today, and how can I move it?"],
- ember:["XII","The Leap","This is the moment before the jump. Fear isn't a stop sign. It's a sign you care.","What would I do today if I were a little braver?"],
+ iris:["XII","The Pulse","Your body has a rhythm even when it is not perfectly regular. Track what happens, not what you think should happen.","What is my body asking me to notice today?"],
  willow:["XIII","The Rain","Let it fall. Grief and softness aren't weakness. Something wants to be felt, not fixed.","What am I still carrying that I haven't let myself feel?"],
  vesper:["XIV","The Evening Star","Desire is information. What you want more of is worth listening to, slowly and without shame.","What do I want more of, and have I said it out loud?"],
  wren:["XV","The Messenger","Pay attention. The signs you keep seeing are asking to be written down.","What keeps showing up, and what might it be telling me?"],
@@ -389,12 +364,12 @@ function drawSpread(){
   return out;
 }
 function drawPick(){const v=S.draws[dayKey(today)];return v==null?null:(typeof v==="object"?v.pick:0);}
-function todayDraw(){const sp=drawSpread(), pi=drawPick(), g=sp[pi==null?0:pi]||"aura";const lines=(DECK[g]&&DECK[g].length?DECK[g]:G[g].phrases);const line=lines[hash(dayKey(today)+"l"+g)%lines.length];return {g,line,...cardOf(g)};}
+function todayDraw(){const sp=drawSpread(), pi=drawPick(), g=sp[pi==null?0:pi]||"aura";const lines=(DECK[g]&&DECK[g].length?DECK[g]:G[g].phrases);const line=lines[hash(dayKey(today)+"l"+g)%lines.length];return {g,line,...cardOf(g),now:cardNow(g)};}
 function cardFace(g){const c=cardOf(g);return '<div class="cf"><div class="cnum">'+esc(c.num)+'</div>'+glyph(g)+'<div class="cname">'+esc(c.name)+'</div><div class="n">'+esc(G[g].name)+'</div></div>';}
 function drawHTML(d){
   const r=guardianDaily(d.g),hint=OUTSIDE_HINT[d.g];
   return '<div class="label" style="color:'+G[d.g].color+'">'+esc(d.num)+' · '+esc(d.name)+'</div><h3 style="margin-top:6px">"'+esc(d.line)+'"</h3>'+
-   '<p style="margin-top:10px">'+esc(d.meaning)+'</p>'+
+   '<p style="margin-top:10px">'+esc(d.meaning)+'</p>'+(d.now?'<p class="cardnow"><span class="label">Right now</span> '+esc(d.now)+'</p>':'')+
    '<div class="cardq"><div class="label">Ask yourself</div><p class="voice" style="margin-top:4px">'+esc(d.question)+'</p></div>'+
    (hint?'<p class="small" style="margin-top:10px"><b>Today\'s invitation:</b> '+esc(hint)+'.</p>':'')+
    '<div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-main" data-cardask="'+d.g+'">What does this mean for me?</button>'+(r?'<button class="btn btn-ghost" data-begin="'+esc(r.id)+'">'+esc(r.title)+' · '+r.min+' min</button>':'')+'</div>'+
