@@ -94,7 +94,8 @@ let returnLetterBusy=false;
 function maybeFirstReturnLetter(){
   if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded||!firstActivity()||!S.firstAwayAt)return false;
   if(Date.now()-S.firstAwayAt<3000)return false;
-  if($("#gate")||$("#intro")||$("#scrim")||$("#rite")||$("#talk"))return false;
+  if($("#gate")||$("#intro")||$("#rite"))return false;
+  if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
 }
 function noteAppAway(){
