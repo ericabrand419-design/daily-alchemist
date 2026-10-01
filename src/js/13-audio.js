@@ -1,6 +1,7 @@
 /* Music: every guardian has an instrumental theme, made once and stored with the app.
    Aura's plays on Today and the main pages; a guardian's plays on their page, in their
-   rituals and in their chats. It dips whenever someone speaks, and it can be turned off. */
+   rituals and in their chats. Music starts only after a meaningful app action, a ritual,
+   or an explicit choice in Sound. It never starts from an arbitrary tap. */
 /* Spoken guardian voice (hear buttons, Guide me aloud, eyes closed, spoken ritual commands) is
    switched off for now. The code stays here behind this flag. Only the owner can try it, by
    setting localStorage "da.voiceDev" to "1". Speaking into the mic to type is separate and stays on. */
@@ -26,8 +27,15 @@ function musicStop(){const el=MUSIC.cur;MUSIC.cur=null;if(el)fadeTo(el,0,800,()=
 function musicFor(g){musicPlay(g||MUSIC.base);}
 function musicBack(){musicPlay(MUSIC.base);}
 function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
-/* Browsers only allow sound after a tap, so the music starts with the first one. */
-function musicStart(ev){return;if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-snd="music"]')){MUSIC.started=true;return;}MUSIC.started=true;musicPlay(MUSIC.want);}
+/* Browsers require a user gesture for audio. Start only from a meaningful app action,
+   never because she happened to tap a field, open settings or move around the shell. */
+const MUSIC_START_SEL='#askBtn,[data-begin],[data-talk],[data-talkread],[data-guardian],[data-pickcard],[data-cardask]';
+function musicStart(ev){
+  if(MUSIC.started||!musicOn())return;
+  if(ev&&ev.type==="keydown"&&ev.key!=="Enter"&&ev.key!==" ")return;
+  const t=ev&&ev.target;if(!t||!t.closest||!t.closest(MUSIC_START_SEL))return;
+  MUSIC.started=true;musicPlay(MUSIC.want);
+}
 document.addEventListener("pointerdown",musicStart,{capture:true});
 document.addEventListener("keydown",musicStart,{capture:true});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(MUSIC.cur)try{MUSIC.cur.pause();}catch(e){}}else if(MUSIC.cur&&musicOn()){MUSIC.cur.play().catch(()=>{});}});
@@ -47,13 +55,10 @@ function soundSheet(){
 function openSound(){openSheet(soundSheet());}
 function renderSnd(){
   document.body.classList.toggle("novoice",voiceMuted()||!voiceEnabled());
-  const anyOn=(musicOn()&&(musicAudible()||!MUSIC.started))||!voiceMuted();
-  document.querySelectorAll(".sndbar").forEach(b=>{b.innerHTML='<button class="snd one'+(anyOn?"":" off")+'" data-snd="menu" aria-label="Sound settings">'+(anyOn?SND_VOICE:SND_MUTE)+'</button>';});
+  const m=musicOn()&&(musicAudible()||!MUSIC.started),v=voiceEnabled()&&!voiceMuted(),anyOn=m||v;
+  const icon=voiceEnabled()?(anyOn?SND_VOICE:SND_MUTE):(m?SND_MUSIC:SND_MUTE);
+  document.querySelectorAll(".sndbar").forEach(b=>{b.innerHTML='<button class="snd one'+(anyOn?"":" off")+'" data-snd="menu" aria-label="Sound settings">'+icon+'</button>';});
   const sh=$("#sndSheet");if(sh)sh.outerHTML=soundSheet();
-  return;
-  document.querySelectorAll(".sndbar").forEach(b=>{const m=musicOn()&&(musicAudible()||!MUSIC.started||document.visibilityState==="hidden"),v=!voiceMuted(),both=!!b.closest(".talk,.rite");
-    b.innerHTML='<button class="snd lab'+(m?"":" off")+'" data-snd="music" aria-pressed="'+m+'" aria-label="'+(m?"Music is on. Tap to turn it off":"Music is off. Tap to turn it on")+'">'+SND_MUSIC+'<span>'+(m?"Music on":"Music off")+'</span></button>'+
-      (both?'<button class="snd lab'+(v?"":" off")+'" data-snd="voice" aria-pressed="'+v+'" aria-label="'+(v?"Voices are on. Tap to turn them off":"Voices are off. Tap to turn them on")+'">'+SND_VOICE+'<span>'+(v?"Voice on":"Voice off")+'</span></button>':'');});
 }
 function syncSnd(){S.profile.snd={music:S.prefMusic||"on",vol:S.prefMusicVol||"normal",voiceOff:!!S.prefVoiceOff,voice:S.prefVoice||"natural"};saveLocal();try{remotePut("prefs");}catch(e){}}
 function applySnd(x){if(!x)return;S.prefMusic=x.music==="off"?"off":"on";S.prefMusicVol=x.vol==="quiet"?"quiet":"normal";S.prefVoiceOff=!!x.voiceOff;S.prefVoice=x.voice==="device"?"device":"natural";if(!musicOn())musicStop();if(voiceMuted())stopAudio();renderSnd();}
