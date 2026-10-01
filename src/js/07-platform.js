@@ -81,13 +81,6 @@ function vesperGate(){
   closeSheet();openPaywall("Vesper's room is for members");
 }
 function age21(v){const d=new Date(v+"T12:00:00");if(isNaN(d))return null;const n=new Date();let a=n.getFullYear()-d.getFullYear();if(n.getMonth()<d.getMonth()||(n.getMonth()===d.getMonth()&&n.getDate()<d.getDate()))a--;return a;}
-async function submitDob(){
-  const v=($("#dob21")||{}).value;const a=age21(v);if(a==null||a<0||a>120){toast("Choose your date of birth.");return;}
-  if(accountsOn()&&ACCT.user){const r=await api("/api/me",{dob:v});if(r&&!r.error){ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;}}
-  else{if(a>=21)S.profile.adult21=true;else S.profile.under21=true;saveLocal();}
-  closeSheet();renderAll();
-  if(vesperOK())openTalk("vesper");else vesperGate();
-}
 function usedToday(kind){const u=S.usage[dayKey(new Date())]||{};return u[kind]||0;}
 function bump(kind){const k=dayKey(new Date());const cur=S.usage[k]||{};S.usage={[k]:{...cur,[kind]:(cur[kind]||0)+1}};saveLocal();}
 function overLimit(kind){if(accountsOn()&&ACCT.admin)return false;return usedToday(kind)>=LIMITS[isMember()?"member":"free"][kind];}
