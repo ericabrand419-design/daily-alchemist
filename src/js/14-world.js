@@ -226,16 +226,15 @@ function ritualCard(r,opts){
   if(!canUse(r)){
     return '<article class="page locked"><div class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+'</div><h3>'+esc(r.title)+'</h3><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(CHAMBERS[r.g]?CHAMBERS[r.g].name:"Chamber")+'</span></div><p class="needs">'+esc(r.purpose)+'</p><div class="actions"><button class="btn btn-ink" data-paywall="'+esc(G[r.g].name)+'\'s chamber">Unlock with '+esc(PLAN.name)+'</button></div></article>';
   }
-  const a=adapt(r), unk=unknownFor(r)[0];
-  const needList=ritualNeeds(r),needs=needList.length?needList.map(esc).join(" · "):"Nothing but you.";
-  const ownable=r.needs.filter(n=>SUBS[n[0]]&&S.profile.have.includes(n[0]));
-  return '<article class="page ritualcard" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
+  const a=adapt(r), needItems=ritualNeedItems(r);
+  const supplyButtons=needItems.length?needItems.map(n=>{const miss=known().includes(n[0])&&!S.profile.have.includes(n[0]);return '<button class="needchip'+(miss?' missing':'')+'" data-own="'+n[0]+':'+(miss?'1':'0')+'" aria-pressed="'+(!miss)+'"><span class="needcheck">'+(miss?'＋':'✓')+'</span>'+esc(n[1])+'</button>';}).join(""):'<span class="needchip static">Nothing but you</span>';
+  return '<article class="page ritualcard" style="--gcol:'+esc(G[r.g].color)+'" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
    '<button class="ritualguardian" data-guardian="'+esc(r.g)+'">'+glyph(r.g,42)+'<span><span class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+(r.reset?" · Reset day "+r.reset:"")+(r.composed?" · Written for you":"")+'</span><span class="small">Open '+esc(G[r.g].name)+"'s chamber</span></span></button>"+
    '<h3>'+esc(r.title)+'</h3><p class="ritualpurpose">'+esc(r.purpose||"")+'</p><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(r.moon==="Any"?"Any moon":r.moon+" moon")+'</span><span>'+r.steps.length+' steps</span></div>'+
-   '<div class="needs"><b>Gather before you begin</b><div class="needchips">'+(needList.length?needList.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
+   '<div class="needs supplycheck"><b>Gather before you begin</b><p class="supplyhint">Tap anything you are missing. Tap it again to add it back.</p><div class="needchips">'+supplyButtons+'</div></div>'+
    (a.notes.length?'<p class="adj">'+a.notes.map(esc).join(" ")+' The steps already say so.</p>':"")+
-   cartOffer(r)+(unk?'<div class="ask"><span>Do you usually have '+esc(ASKN[unk[0]])+'?</span><button class="chip" data-own="'+unk[0]+':1">Yes</button><button class="chip" data-own="'+unk[0]+':0">No</button></div>':"")+
+   cartOffer(r)+
+   (a.notes.length?'<div class="supplyswap"><span class="label">Aura adapted it</span><p>'+a.notes.map(esc).join(" ")+'</p></div>':"")+
    whyNow(r,opts&&opts.why)+
-   '<div class="actions"><button class="btn btn-ink" data-begin="'+esc(r.id)+'"'+(opts&&opts.ctx?' data-ctx="'+opts.ctx+'"':"")+'>Begin the ritual</button>'+(ownable.length?'<button class="linkish dark" data-donthave="'+esc(r.id)+'">I don\'t have that</button>':'')+'</div>'+
-   (ownable.length?'<div class="dh" hidden data-dh="'+esc(r.id)+'"><span class="small">Tap what you don\'t have. Aura will rewrite the steps.</span><div class="chips">'+ownable.map(n=>'<button class="chip" data-own="'+n[0]+':0">'+esc(NOUN[n[0]])+'</button>').join("")+'</div></div>':'')+'</article>';
+   '<div class="actions"><button class="btn btn-ink" data-begin="'+esc(r.id)+'"'+(opts&&opts.ctx?' data-ctx="'+opts.ctx+'"':"")+'>Begin the ritual</button></div></article>';
 }

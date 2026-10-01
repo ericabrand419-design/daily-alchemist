@@ -42,10 +42,10 @@ export async function GET(request) {
     const rows = await sb("prefs?user_id=eq." + userId + "&select=data");
     const data = rows && rows[0] && rows[0].data; if (!data) continue;
     const x = data.extras || {}, name = firstName(data.profile), contact=(data.profile&&data.profile.contact)||null;
-    if(!contact||contact.enabled!==true)continue;
+    if(!contact||contact.notify!==true)continue;
     const sentRows=((await sb("push_sent?user_id=eq." + userId + "&select=key,sent_at&order=sent_at.desc")) || []);
     const already = new Set(sentRows.map((r) => r.key));
-    const cadenceDays=contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:7;
+    const cadenceDays=contact&&contact.cadence==="3xday"?1/3:contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
     const lastContact=sentRows[0]&&Date.parse(sentRows[0].sent_at);
     if(contact&&contact.enabled===true&&lastContact&&now-lastContact<(cadenceDays*864e5-6*36e5))continue;
     const due = [];
@@ -72,7 +72,7 @@ export async function GET(request) {
     const hi = name ? name + ", " : "";
     if (member || inGrace) {
       const recent = (await sb("entries?user_id=eq." + userId + "&created_at=gte." + new Date(now - 7 * 864e5).toISOString() + "&select=id,data&order=created_at.desc&limit=30")) || [];
-      if (member && (!contact || contact.scope==="circle")) {
+      if (member && contact && contact.scope==="circle") {
         const withG = recent.map((r) => ({ id: r.id, ...(r.data || {}) })).filter((e) => !e.private && GNAME[e.guardian] && e.ts);
         const latest = {};
         for (const e of withG) if (!latest[e.guardian] || e.ts > latest[e.guardian].ts) latest[e.guardian] = e;
@@ -86,7 +86,7 @@ export async function GET(request) {
       const lastL = (x.letters || []).reduce((m, l) => Math.max(m, l.ts || 0), 0);
       const firstEver = (await sb("entries?user_id=eq." + userId + "&select=created_at&order=created_at.asc&limit=1")) || [];
       const startedBeforeToday = firstEver[0] && Date.parse(firstEver[0].created_at) < now - 12 * 36e5;
-      const cadence=contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:7;
+      const cadence=contact&&contact.cadence==="3xday"?1/3:contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
       const letterDue = lastL ? now - lastL > (cadence-.25) * 864e5 && recent.length : false;
       if (letterDue) {
         const key = "letter:" + et.y + "-" + et.m + "-" + et.d;

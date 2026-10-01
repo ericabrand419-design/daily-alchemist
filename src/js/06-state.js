@@ -3,7 +3,7 @@
    mirrored on this device so the app works offline and instantly.
 ------------------------------------------------------------------ */
 const KEY="dailyAlchemist.v1";
-let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false},entries:[],draws:{}};
+let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",appearance:"auto",fontSize:"standard",onboarded:false},entries:[],draws:{}};
 try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S={...S,...p,profile:{...S.profile,...(p.profile||{})}};}}catch(e){}
 const RENAMED={moss:"juniper",cypress:"sol",ember:"sage"};
 function migrateCircle(){
@@ -19,6 +19,14 @@ if(!S.prefMusicVol)S.prefMusicVol="quiet";
 if(S.profile.minor)setTimeout(()=>showMinor(),300);
 const cloud={db:null,uid:null,on:false};
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function applyDisplayPrefs(){
+  const p=S.profile||{},root=document.documentElement;
+  const appearance=["auto","light","dark"].includes(p.appearance)?p.appearance:"auto";
+  const font=["standard","large","xlarge"].includes(p.fontSize)?p.fontSize:"standard";
+  root.dataset.appearance=appearance;root.dataset.font=font;
+  if(appearance==="auto")delete root.dataset.theme;else root.dataset.theme=appearance;
+}
+applyDisplayPrefs();
 function col(){return cloud.db.collection("data/users/"+cloud.uid);}
 async function cloudPut(id,data){if(!cloud.on)return;try{await col().doc(id).set(JSON.parse(JSON.stringify(data)));}catch(e){cloud.on=false;renderArchive();}}
 function mergeExtras(x){

@@ -94,7 +94,7 @@ async function onSignedIn(session){
     for(const row of (e.data||[])){remote.add(row.id);if(!have.has(row.id)&&row.data)S.entries.push(row.data);}
     for(const x of S.entries)if(!remote.has(x.id))remotePut("entry",x.id,x);
     for(const row of (c.data||[])){const loc=S.chats[row.guardian]||[];S.chats[row.guardian]=(row.msgs||[]).length>=loc.length?row.msgs:loc;}
-    if(p.data&&p.data.data){S.profile={...S.profile,...(p.data.data.profile||{})};if(S.profile.snd)applySnd(S.profile.snd);S.draws={...S.draws,...(p.data.data.draws||{})};if(p.data.data.ledger)S.ledger=p.data.data.ledger;if(p.data.data.extras)mergeExtras(p.data.data.extras);}
+    if(p.data&&p.data.data){S.profile={...S.profile,...(p.data.data.profile||{})};applyDisplayPrefs();if(S.profile.snd)applySnd(S.profile.snd);S.draws={...S.draws,...(p.data.data.draws||{})};if(p.data.data.ledger)S.ledger=p.data.data.ledger;if(p.data.data.extras)mergeExtras(p.data.data.extras);}
     else if(S.profile.onboarded)remotePut("prefs");
     migrateCircle();S.entries.sort((a,b)=>b.ts-a.ts);saveLocal();
   }catch(err){}

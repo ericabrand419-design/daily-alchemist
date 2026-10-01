@@ -74,7 +74,7 @@ function openChamber(k){
 function openJourney(id){
   const j=JOURNEYS.find(x=>x.id===id); if(!j)return;
   const done=journeyDays(id), next=[1,2,3,4,5,6,7].find(n=>!done.includes(n));
-  let h='<div class="stack"><div class="lead">'+glyph(j.g)+'<div><div class="label">7 days with '+esc(G[j.g].name)+'</div><h2 style="margin:2px 0 0">'+esc(j.name)+'</h2></div></div><p>'+esc(j.d)+'</p><div class="days">';
+  let h='<div class="stack"><div class="lead journeyhead">'+guardianMark(j.g,64)+'<div><button class="journeyguardianname" data-guardian="'+j.g+'"><span class="label">7 days with '+esc(G[j.g].name)+'</span></button><h2 style="margin:2px 0 0">'+esc(j.name)+'</h2><span class="small muted">Tap '+esc(G[j.g].name)+' to open the chamber</span></div></div><p>'+esc(j.d)+'</p><div class="days">';
   let note="";
   j.days.forEach((d,i)=>{const n=i+1,isDone=done.includes(n),isNext=next===n,locked=!isMember()||(!isDone&&!isNext);let r=byId[d[0]];if(isNext&&isMember()){const a=journeyStep(j,n);r=a.r;note=a.note;window.__jsettle=!!a.settle;}
     h+='<button class="day'+(isDone?" done":"")+(isNext&&isMember()?" next":"")+'" '+(isMember()&&!locked?'data-jday="'+id+':'+n+'"':'')+(locked?" disabled":"")+'><span class="num">'+(isDone?"✓":n)+'</span><span><div class="t">'+esc(r.title)+'</div><div class="s">'+esc(d[1])+'</div></span><span class="st">'+(isDone?"Done":isNext&&isMember()?"Tonight":r.min+" min")+'</span></button>';});

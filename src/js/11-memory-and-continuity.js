@@ -4,8 +4,8 @@
 /* ------------------------------------------------------------------
    CONTINUITY: what worked, what she owns, what Aura carries long-term.
 ------------------------------------------------------------------ */
-const NOUN={candle:"a candle",salt:"salt",broom:"a broom",bowl:"a bowl",thread:"thread",jar:"a jar",mirror:"a mirror",honey:"honey",rosemary:"rosemary",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil",stone:"a stone",tea:"tea"};
-const ASKN={candle:"candles",salt:"salt",broom:"a broom",bowl:"bowls",thread:"thread or string",jar:"a jar with a lid",mirror:"a mirror",honey:"honey",rosemary:"rosemary or any fresh herb",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil or lotion",stone:"a stone",tea:"tea"};
+const NOUN={candle:"a candle",salt:"salt",broom:"a broom",bowl:"a bowl",thread:"thread",jar:"a jar",mirror:"a mirror",honey:"honey",rosemary:"rosemary",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil",stone:"a stone",tea:"tea",paper:"paper",pen:"a pen or pencil",water:"water",lighter:"matches or a lighter",scissors:"scissors",towel:"a towel",chair:"a chair",envelope:"an envelope",plate:"a plate",shower:"a shower",bath:"a bath or basin"};
+const ASKN={candle:"candles",salt:"salt",broom:"a broom",bowl:"bowls",thread:"thread or string",jar:"a jar with a lid",mirror:"a mirror",honey:"honey",rosemary:"rosemary or any fresh herb",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil or lotion",stone:"a stone",tea:"tea",paper:"paper",pen:"a pen or pencil",water:"water",lighter:"matches or a lighter",scissors:"scissors",towel:"a towel",chair:"a chair",envelope:"an envelope",plate:"a plate",shower:"a shower",bath:"a bath or basin"};
 const SUBS={
   candle:{alt:[],text:"a lamp or your phone's flashlight"},
   salt:{alt:[],text:"a pinch of sugar or baking soda"},
@@ -23,13 +23,24 @@ const SUBS={
   soil:{alt:[],text:"a damp paper towel folded into a cup"},
   oil:{alt:[],text:"any lotion, or a little olive oil"},
   stone:{alt:[],text:"a coin or any small, heavy object"},
-  tea:{alt:[],text:"hot water with a slice of lemon"}
+  tea:{alt:[],text:"hot water with a slice of lemon"},
+  paper:{alt:[],text:"a note in your phone"},
+  pen:{alt:[],text:"your phone keyboard"},
+  water:{alt:[],text:"any drinkable water you have"},
+  lighter:{alt:[],text:"a lamp or your phone flashlight when the ritual does not require burning"},
+  scissors:{alt:[],text:"tear it carefully by hand"},
+  towel:{alt:[],text:"any clean cloth"},
+  chair:{alt:[],text:"the edge of a bed or a firm cushion"},
+  envelope:{alt:[],text:"fold the paper inward and keep it somewhere private"},
+  plate:{alt:["bowl"],text:"a bowl, saucer or clean flat surface"},
+  shower:{alt:[],text:"a sink wash or warm cloth"},
+  bath:{alt:[],text:"a basin or foot soak"}
 };
-const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"]};
-function ritualNeeds(r){
+const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"],paper:["paper","page","write","journal","letter","note"],pen:["pen","pencil","write"],water:["water"],lighter:["matches","lighter","light it","flame"],scissors:["scissors","cut"],towel:["towel","cloth"],chair:["chair","seat"],envelope:["envelope"],plate:["plate"],shower:["shower"],bath:["bath","basin"]};
+function ritualNeedItems(r){
   const out=[],keys=new Set();
-  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push(label);};
-  for(const n of (r.needs||[])){add(n[0],n[1]);}
+  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push([k,label]);};
+  for(const n of (r.needs||[]))add(n[0],n[1]);
   const txt=(r.steps||[]).map(x=>[x.t,x.d,x.say].filter(Boolean).join(" ")).join(" ").toLowerCase();
   const has=k=>(r.needs||[]).some(n=>n[0]===k);
   if(/\b(write|writing|wrote|journal|record|list|letter|note|label|draw)\b/.test(txt)){add("paper","Paper");add("pen","A pen or pencil");}
@@ -48,9 +59,10 @@ function ritualNeeds(r){
   if(/\bbath\b/.test(txt)&&r.bath)add("bath","Access to a bath or basin");
   return out;
 }
+function ritualNeeds(r){return ritualNeedItems(r).map(n=>n[1]);}
 function known(){return S.profile.known||(S.profile.known=[...S.profile.have]);}
-function missingFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
-function unknownFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
+function missingFor(r){return ritualNeedItems(r).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
+function unknownFor(r){return ritualNeedItems(r).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
 function adapt(r){
   const miss=missingFor(r).map(n=>n[0]); if(!miss.length)return {...r,notes:[]};
   const notes=miss.map(t=>{const n=NOUN[t].replace(/^an? /,""),sb=subFor(t);return sb?"No "+n+"? Use "+sb+".":"No "+n+"? Skip that part. The ritual still works without it.";});

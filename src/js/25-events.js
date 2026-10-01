@@ -123,6 +123,14 @@ document.addEventListener("click",async ev=>{
   if(t.id==="checkoutBtn"){track("checkout",{plan:payPlan});if(!ACCT.user){openSignIn();return;}t.disabled=true;t.textContent="Opening checkout...";const r=await api("/api/checkout",{plan:payPlan});if(r.url){openExternal(r.url);}else{t.disabled=false;t.textContent="Join "+PLAN.name;toast("Checkout isn't available right now. Try again soon.");}return;}
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
   if(t.id==="signOut"||t.id==="signOutTop"){if(ACCT.sb)await ACCT.sb.auth.signOut();try{localStorage.removeItem(KEY);}catch(e){}location.reload();return;}
+  if(d.appearance){S.profile.appearance=d.appearance;applyDisplayPrefs();persist("profile");t.parentElement.querySelectorAll("[data-appearance]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.font){S.profile.fontSize=d.font;applyDisplayPrefs();persist("profile");t.parentElement.querySelectorAll("[data-font]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactcad){S.profile.contact={...contactPref(),cadence:d.contactcad,enabled:d.contactcad!=="never"};t.parentElement.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactscope){S.profile.contact={...contactPref(),scope:d.contactscope};t.parentElement.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactnotify!=null){S.profile.contact={...contactPref(),notify:d.contactnotify==="1"};t.parentElement.querySelectorAll("[data-contactnotify]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(t.id==="contactSave"){const c=contactPref();persist("profile");if(c.notify===true&&!S.profile.push)await enablePush();toast(c.cadence==="never"?"Letters are off. You can turn them back on anytime.":"Your letter rhythm is saved.");return;}
+  if(d.ritualneed&&run){const [tg,yn]=d.ritualneed.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);run.r=adapt(run.base||run.r);drawStep();toast(yn==="1"?"Added back.":"Aura adapted the ritual around it.");return;}
+  if(t.id==="missingBtn"){const g=document.querySelector("#rite .gatherbox");if(g){g.classList.add("attention");g.scrollIntoView({behavior:"smooth",block:"center"});}toast("Tap the item you are missing. Tap it again if you need to undo it.");return;}
   if(d.talk){openTalk(d.talk);return;}
   if(d.gocircle){const b=document.querySelector('[data-tab="circle"]');if(b)b.click();window.scrollTo(0,0);return;}
   if(d.sleep||d.energy||d.moved!=null&&t.closest(".rhythm")||d.wind){

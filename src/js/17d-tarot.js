@@ -122,7 +122,7 @@ function cardNow(id,rev,d){
 }
 
 /* Card faces: original art. Majors carry a sigil, minors carry their pips like a real deck. */
-const INK="#3A2A1A",GOLD="#9A7414";
+const INK="#F6E9C8",GOLD="#E7C45A";
 function suitMark(s,x,y,sz){
   const k=sz/10,st='stroke="'+INK+'" stroke-width="'+(1.1)+'" fill="none" stroke-linecap="round" stroke-linejoin="round"';
   const T=(p)=>'<g transform="translate('+x+' '+y+') scale('+k+')">'+p+'</g>';
@@ -165,14 +165,13 @@ function cardSVG(id,rev){
   if(c.major)art=SIGIL[c.i]||"";
   else if(c.rank<10)art=(PIPS[c.rank+1]||[]).map(([x,y])=>suitMark(c.suit,x,y,c.rank===0?22:10)).join("");
   else art=COURT[c.rank]+suitMark(c.suit,50,110,11);
-  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#B55A36",cups:"#4D7F91",swords:"#6B668C",pentacles:"#7C7040"}[c.suit]||GOLD);
-  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true">'+
-    '<rect x="0" y="0" width="100" height="160" rx="8" fill="#F7EDCF"/><circle cx="50" cy="73" r="31" fill="'+accent+'" fill-opacity=".055"/>'+
-    '<path d="M12 14h12M76 14h12M12 146h12M76 146h12" stroke="'+accent+'" stroke-opacity=".65" stroke-width="1.2"/>'+
-    '<circle cx="16" cy="18" r="1.4" fill="'+accent+'"/><circle cx="84" cy="18" r="1.4" fill="'+accent+'"/><circle cx="16" cy="142" r="1.4" fill="'+accent+'"/><circle cx="84" cy="142" r="1.4" fill="'+accent+'"/>'+
-    '<rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+accent+'" stroke-opacity=".5" stroke-width=".8"/>'+
-    '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" letter-spacing="1.5" fill="'+GOLD+'">'+esc(c.num)+'</text>'+art+
-    '<path d="M14 128h72" stroke="'+GOLD+'" stroke-opacity=".5" stroke-width=".6"/><text x="50" y="142" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6.4:nm.length>12?7.4:8.4)+'" font-weight="600" fill="'+INK+'">'+esc(nm.toUpperCase())+'</text></svg>';
+  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#E77C4A",cups:"#66B6C8",swords:"#AAA0F2",pentacles:"#C9B55D"}[c.suit]||GOLD),gid="cg_"+String(id).replace(/[^a-z0-9]/gi,"_");
+  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#241937"/><stop offset=".5" stop-color="#16132A"/><stop offset="1" stop-color="#0C0918"/></linearGradient><radialGradient id="'+gid+'_a" cx="50%" cy="42%" r="48%"><stop offset="0" stop-color="'+accent+'" stop-opacity=".28"/><stop offset="1" stop-color="'+accent+'" stop-opacity="0"/></radialGradient></defs>'+
+    '<rect x=".8" y=".8" width="98.4" height="158.4" rx="9.5" fill="url(#'+gid+')" stroke="'+GOLD+'" stroke-width="1.3"/><rect x="5" y="5" width="90" height="150" rx="7" fill="none" stroke="'+accent+'" stroke-opacity=".62" stroke-width=".8"/><rect x="8" y="8" width="84" height="144" rx="5" fill="none" stroke="'+GOLD+'" stroke-opacity=".26" stroke-width=".55"/>'+
+    '<ellipse cx="50" cy="75" rx="35" ry="45" fill="url(#'+gid+'_a)"/><path d="M20 30Q50 18 80 30M20 118Q50 130 80 118" fill="none" stroke="'+GOLD+'" stroke-opacity=".32" stroke-width=".65"/>'+
+    '<g fill="'+GOLD+'" opacity=".65"><circle cx="17" cy="19" r="1"/><circle cx="83" cy="19" r="1"/><circle cx="14" cy="73" r=".7"/><circle cx="86" cy="73" r=".7"/><circle cx="21" cy="121" r=".8"/><circle cx="79" cy="121" r=".8"/></g>'+
+    '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="8.5" letter-spacing="1.6" fill="'+GOLD+'">'+esc(c.num)+'</text><g transform="translate(0 1)">'+art+'</g>'+
+    '<path d="M16 128h68" stroke="'+accent+'" stroke-opacity=".55" stroke-width=".7"/><text x="50" y="143" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6:nm.length>12?6.9:7.8)+'" font-weight="600" letter-spacing=".45" fill="#F8EDCF">'+esc(nm.toUpperCase())+'</text><text x="50" y="151" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="3.7" letter-spacing=".9" fill="'+accent+'">'+esc(c.major?"MAJOR ARCANA":SUITS[c.suit].el.toUpperCase())+'</text></svg>';
 }
 function cardFace(id){return cardSVG(id,cardRev(id));}
 function drawHTML(d){
