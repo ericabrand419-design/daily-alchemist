@@ -4,7 +4,7 @@
 function openSheet(html){
   closeSheet();
   const s=document.createElement("div");s.className="scrim";s.id="scrim";
-  s.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><button class="x" id="sheetX" aria-label="Close">×</button><div class="grab"></div>'+html+'</div>';
+  s.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><div class="sheetnav"><button class="navback" id="sheetX" aria-label="Back">← <span>Back</span></button></div><div class="grab"></div>'+html+'</div>';
   $("#layer").appendChild(s);
   s.addEventListener("click",ev=>{if(ev.target===s)closeSheet();});
   const x=s.querySelector("#sheetX");x.focus({preventScroll:true});
