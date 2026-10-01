@@ -1,369 +1,346 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#18231f" />
-  <meta name="description" content="Direct My Steps is a Bible app that remembers your walk." />
-  <link rel="manifest" href="/manifest.json" />
-  <title>Direct My Steps</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    :root{
-      --ink:#18231f;--muted:#66716b;--paper:#f7f2e7;--paper2:#fffdf7;--line:#ded5c5;
-      --gold:#ad8446;--sage:#5f786a;--sage2:#dfe8e0;--wine:#78524f;--shadow:0 18px 50px rgba(24,35,31,.10);
-    }
-    *{box-sizing:border-box} html{background:var(--paper)} body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(180deg,#f4eee2 0,#fbf8f0 44%,#f7f2e7 100%);min-height:100vh}
-    button,input,textarea,select{font:inherit} button{cursor:pointer}
-    .app{max-width:760px;margin:0 auto;min-height:100vh;padding:0 18px 110px}
-    .top{position:sticky;top:0;z-index:20;background:rgba(247,242,231,.88);backdrop-filter:blur(16px);padding:16px 2px 12px;border-bottom:1px solid rgba(222,213,197,.6)}
-    .brand{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand h1{font-family:Georgia,serif;font-weight:500;letter-spacing:-.02em;font-size:24px;margin:0}.brand small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
-    .mark{width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;font-family:Georgia,serif;color:var(--gold);font-size:20px;background:rgba(255,255,255,.5)}
-    .view{display:none;padding:22px 0}.view.active{display:block}.eyebrow{font-size:12px;letter-spacing:.15em;text-transform:uppercase;color:var(--sage);font-weight:700}
-    h2{font-family:Georgia,serif;font-weight:500;letter-spacing:-.025em;font-size:36px;line-height:1.05;margin:8px 0 10px} h3{font-family:Georgia,serif;font-weight:500;font-size:24px;margin:0 0 8px} p{line-height:1.55}
-    .lead{font-size:16px;color:var(--muted);margin:0 0 22px}.card{background:rgba(255,253,247,.92);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
-    .follow{border-color:#c9b88f;background:linear-gradient(145deg,#fffaf0,#f5eddd)}.follow .mini{display:flex;justify-content:space-between;gap:12px}.pill{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border-radius:999px;background:var(--sage2);color:#3e594b;font-size:12px;font-weight:700}
-    .ghostpill{background:transparent;border:1px solid var(--line);color:var(--muted)}.composer{padding:20px}.composer label{font-family:Georgia,serif;font-size:26px;display:block;margin-bottom:14px}.inputwrap{position:relative}.composer textarea{width:100%;min-height:128px;resize:vertical;border:1px solid #cfc5b4;background:#fffefa;border-radius:18px;padding:16px 54px 16px 16px;color:var(--ink);outline:none;line-height:1.5}.composer textarea:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(95,120,106,.12)}
-    .mic{position:absolute;right:10px;bottom:10px;border:0;width:38px;height:38px;border-radius:50%;background:var(--sage2);color:var(--ink);font-size:18px}.primary{width:100%;margin-top:12px;border:0;border-radius:16px;background:var(--ink);color:white;padding:14px 18px;font-weight:750}.primary:hover{opacity:.92}.secondary{border:1px solid var(--line);background:#fffefa;border-radius:14px;padding:11px 14px;color:var(--ink);font-weight:650}.textbtn{border:0;background:none;color:var(--sage);font-weight:750;padding:6px 0}
-    .chips{display:flex;gap:8px;overflow:auto;padding:2px 0 4px;scrollbar-width:none}.chip{white-space:nowrap;border:1px solid var(--line);background:#fffefa;border-radius:999px;padding:9px 12px;color:#49534e}.chip:hover{border-color:var(--sage)}
-    .answer{display:none}.answer.show{display:block}.heard{font-size:14px;color:var(--muted);border-left:3px solid var(--gold);padding-left:12px;margin-bottom:18px}.scripture{font-family:Georgia,serif;font-size:22px;line-height:1.45;margin:8px 0}.reference{color:var(--gold);font-size:13px;font-weight:700;letter-spacing:.04em}.prayer{background:#f0ece1;border-radius:18px;padding:16px;margin-top:16px}.nextstep{display:flex;gap:12px;align-items:flex-start;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}.stepnum{min-width:30px;height:30px;border-radius:50%;background:var(--ink);color:white;display:grid;place-items:center;font-size:12px}
-    .actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.sectionhead{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:26px 0 12px}.sectionhead h3{margin:0}.subtle{color:var(--muted);font-size:13px}
-    .thread{display:flex;gap:14px;align-items:flex-start}.dot{width:12px;height:12px;border-radius:50%;background:var(--gold);margin-top:7px;box-shadow:0 0 0 5px rgba(173,132,70,.12)}.threadmain{flex:1}.thread h4{margin:0 0 4px;font-size:16px}.meta{font-size:12px;color:var(--muted);display:flex;gap:8px;flex-wrap:wrap}.status{font-size:11px;border-radius:999px;padding:4px 8px;background:var(--sage2);color:#3d594a}
-    .timeline{position:relative;padding-left:24px}.timeline:before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:1px;background:#cdbf9d}.event{position:relative;margin:0 0 22px}.event:before{content:"";position:absolute;left:-22px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--paper2);border:2px solid var(--gold)}.event time{font-size:11px;color:var(--muted)}.event strong{display:block;margin:4px 0}.event p{margin:3px 0;color:#4f5953;font-size:14px}
-    .person{display:flex;align-items:center;gap:12px}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--sage2);font-family:Georgia,serif;font-size:18px}.person .grow{flex:1}.person strong{display:block}.person small{color:var(--muted)}
-    .path{padding:18px;background:linear-gradient(135deg,#fffdf7,#eee6d6)}.path .progress{height:7px;background:#e6dece;border-radius:99px;overflow:hidden;margin-top:12px}.path .progress i{display:block;height:100%;background:var(--sage);border-radius:99px}
-    .setting{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0;border-bottom:1px solid var(--line)}.setting:last-child{border:0}.setting label{font-weight:650}.setting small{display:block;color:var(--muted);font-weight:400;margin-top:2px}.setting select{max-width:46%;border:1px solid var(--line);border-radius:12px;background:#fffefa;padding:9px}
-    .toggle{width:44px;height:26px;background:#d5cec0;border-radius:99px;position:relative;border:0}.toggle:after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:white;top:3px;left:3px;transition:.2s}.toggle.on{background:var(--sage)}.toggle.on:after{left:21px}
-    .memoryrow{display:flex;gap:10px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line)}.memoryrow:last-child{border:0}.memoryrow .grow{flex:1}.memoryrow strong{display:block;font-size:14px}.memoryrow small{color:var(--muted)}.danger{color:#9b4944;border:0;background:none;padding:4px}
-    .nav{position:fixed;bottom:0;left:0;right:0;z-index:40;padding:9px max(12px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:rgba(250,247,239,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line)}.navin{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav button{border:0;background:none;border-radius:14px;padding:8px 4px;color:#6c756f;font-size:11px}.nav button span{font-size:20px;display:block;line-height:1.1;margin-bottom:3px}.nav button.active{color:var(--ink);background:#ece5d7;font-weight:750}
-    .modal{position:fixed;inset:0;z-index:100;background:rgba(20,28,25,.62);display:none;align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:min(760px,100%);max-height:86vh;overflow:auto;background:var(--paper2);border-radius:26px 26px 0 0;padding:24px 20px calc(28px + env(safe-area-inset-bottom));box-shadow:0 -20px 50px rgba(0,0,0,.18)}.sheet h3{font-size:28px}.close{float:right;border:0;background:#eee7da;width:36px;height:36px;border-radius:50%}
-    .onboarding{position:fixed;inset:0;z-index:120;background:var(--ink);color:#fff;display:none;place-items:center;padding:24px}.onboarding.show{display:grid}.oncard{max-width:540px;width:100%}.oncard .eyebrow{color:#d3ba80}.oncard h2{font-size:44px}.oncard p{color:#dbe0dc;font-size:17px}.dots{display:flex;gap:7px;margin:24px 0}.dots i{width:7px;height:7px;border-radius:50%;background:#66716b}.dots i.on{width:24px;border-radius:99px;background:#d3ba80}.oncard button{background:#f5efe3;color:var(--ink)}
-    .authnote{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}.empty{text-align:center;padding:30px;color:var(--muted)}.toast{position:fixed;z-index:160;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:white;padding:11px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.2s;font-size:13px;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-    @media(min-width:680px){.app{padding-left:28px;padding-right:28px}.composer{padding:24px}.actions{grid-template-columns:repeat(4,1fr)}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18231f">
+<meta name="description" content="Direct My Steps remembers your walk and brings Scripture, prayer or the next faithful step when you need it.">
+<link rel="manifest" href="/manifest.json">
+<title>Direct My Steps</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#18231f;--ink2:#26362f;--muted:#68736d;--paper:#f7f2e7;--paper2:#fffdf7;--line:#ddd3c2;--gold:#ad8446;--gold2:#d1b379;--sage:#5f786a;--sage2:#e0e8e1;--rose:#8c615a;--shadow:0 20px 54px rgba(26,35,31,.09)}
+*{box-sizing:border-box}html{background:var(--paper)}body{margin:0;background:linear-gradient(#f2ebdf,#fbf8f1 44%,#f6f1e7);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}button,input,textarea,select{font:inherit}button{cursor:pointer}.app{max-width:780px;margin:auto;min-height:100vh;padding:0 18px 116px}.top{position:sticky;top:0;z-index:20;background:rgba(247,242,231,.9);backdrop-filter:blur(18px);border-bottom:1px solid rgba(221,211,194,.7);padding:14px 2px 11px}.brand{display:flex;justify-content:space-between;align-items:center;gap:12px}.brand h1{font:500 23px/1.05 Georgia,serif;margin:0}.brand small{display:block;color:var(--muted);font-size:12px;margin-top:3px}.seal{width:38px;height:38px;border:1px solid var(--gold);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.55);color:var(--gold);font:20px Georgia,serif;border-color:var(--gold)}.view{display:none;padding:22px 0}.view.active{display:block}.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--sage);font-weight:800}.hero h2,.view>h2{font:500 38px/1.02 Georgia,serif;letter-spacing:-.025em;margin:8px 0 10px}.lead{font-size:16px;line-height:1.58;color:var(--muted);margin:0 0 20px}.card{background:rgba(255,253,247,.94);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}.continuity{background:linear-gradient(145deg,#fffaf0,#f0eadc);border-color:#cfbf9e}.continuity h3{font:500 21px Georgia,serif;margin:8px 0 5px}.pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:6px 10px;background:var(--sage2);color:#3d574a;font-size:12px;font-weight:800}.pill.gold{background:#efe3c9;color:#765a29}.subtle{font-size:12.5px;color:var(--muted)}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.between{justify-content:space-between}.composer{padding:20px}.composer label{display:block;font:500 27px Georgia,serif;margin-bottom:12px}.inputwrap{position:relative}.composer textarea{width:100%;min-height:120px;border:1px solid #cec3b0;border-radius:18px;background:#fffefa;color:var(--ink);padding:15px 52px 15px 15px;resize:vertical;outline:none;line-height:1.5}.composer textarea:focus{border-color:var(--sage);box-shadow:0 0 0 3px rgba(95,120,106,.12)}.mic{position:absolute;right:10px;bottom:10px;width:38px;height:38px;border:0;border-radius:50%;background:var(--sage2);color:var(--ink);font-size:18px}.primary{border:0;border-radius:16px;padding:14px 17px;background:var(--ink);color:white;font-weight:800;width:100%;margin-top:11px}.secondary{border:1px solid var(--line);border-radius:14px;padding:10px 13px;background:#fffefa;color:var(--ink);font-weight:700}.textbtn{border:0;background:none;color:var(--sage);font-weight:800;padding:5px 0}.chips{display:flex;gap:7px;overflow:auto;scrollbar-width:none}.chip{white-space:nowrap;border:1px solid var(--line);background:#fffefa;color:#4d5752;padding:8px 11px;border-radius:999px}.response{display:none;margin-top:15px}.response.show{display:block}.decision{font:500 27px/1.12 Georgia,serif;margin:12px 0 6px}.heard{border-left:3px solid var(--gold);padding-left:12px;color:var(--muted);font-size:14px;margin:10px 0 18px}.scripturebox{background:#f3ede1;border-radius:18px;padding:16px}.ref{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold)}.verse{font:500 22px/1.45 Georgia,serif;margin:8px 0 4px}.scriptureNote{font-size:12px;color:var(--muted)}.prayerbox,.stepbox,.tomorrowbox{margin-top:14px;padding:15px;border-radius:18px}.prayerbox{background:#eef2ec}.stepbox{border:1px solid var(--line)}.tomorrowbox{background:#f2ece7}.prayerbox strong,.stepbox strong,.tomorrowbox strong{display:block;margin-bottom:5px}.stephead{display:flex;gap:10px;align-items:flex-start}.stepnum{width:29px;height:29px;border-radius:50%;background:var(--ink);color:white;display:grid;place-items:center;font-size:12px;flex:0 0 auto}.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}.sectionhead{display:flex;justify-content:space-between;align-items:end;gap:12px;margin:26px 0 12px}.sectionhead h3{font:500 25px Georgia,serif;margin:2px 0 0}.thread{display:flex;gap:13px;align-items:flex-start}.dot{width:11px;height:11px;border-radius:50%;background:var(--gold);margin-top:7px;box-shadow:0 0 0 5px rgba(173,132,70,.12)}.threadmain{flex:1;min-width:0}.thread h4{margin:0 0 4px;font-size:16px}.meta{display:flex;gap:7px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.status{background:var(--sage2);color:#3e594b;border-radius:999px;padding:3px 7px}.insight{border-left:2px solid var(--gold);padding:10px 0 10px 13px;margin-top:10px;color:#48534e;font-size:14px}.timeline{position:relative;padding-left:24px}.timeline:before{content:"";position:absolute;left:7px;top:8px;bottom:8px;width:1px;background:#cdbd9b}.event{position:relative;margin:0 0 20px}.event:before{content:"";position:absolute;left:-22px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--paper2);border:2px solid var(--gold)}.event time{font-size:11px;color:var(--muted)}.event strong{display:block;margin:4px 0}.event p{font-size:14px;color:#4f5953;margin:3px 0}.memoryrow{display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.memoryrow:last-child{border:0}.grow{flex:1}.memoryrow strong{display:block;font-size:14px}.memoryrow small{color:var(--muted)}.memoryActions{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.mini{border:1px solid var(--line);background:#fffefa;border-radius:999px;padding:5px 8px;font-size:11px}.mini.on{border-color:#b89659;color:#77571f;background:#f4ead6}.danger{border:0;background:none;color:#984e49;padding:5px;font-size:12px}.person{display:flex;gap:12px;align-items:center}.avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:var(--sage2);font:18px Georgia,serif}.person strong{display:block}.person small{color:var(--muted)}.path{background:linear-gradient(135deg,#fffdf7,#eee6d6)}.progress{height:7px;background:#e4ddce;border-radius:99px;overflow:hidden;margin-top:12px}.progress i{display:block;height:100%;background:var(--sage)}.setting{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line)}.setting:last-child{border:0}.setting label{font-weight:750}.setting small{display:block;color:var(--muted);font-weight:400;margin-top:2px}.setting select{max-width:48%;border:1px solid var(--line);border-radius:12px;background:#fffefa;padding:9px}.toggle{border:0;width:44px;height:26px;border-radius:999px;background:#d4ccc0;position:relative}.toggle:after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:.2s}.toggle.on{background:var(--sage)}.toggle.on:after{left:21px}.nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:rgba(250,247,239,.95);backdrop-filter:blur(18px);border-top:1px solid var(--line);padding:8px max(12px,env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}.navin{max-width:780px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.nav button{border:0;background:none;border-radius:14px;padding:8px 4px;color:#6d756f;font-size:11px}.nav button span{display:block;font-size:19px;margin-bottom:3px}.nav button.active{background:#ece5d7;color:var(--ink);font-weight:800}.modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(21,29,26,.64);align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:min(780px,100%);max-height:88vh;overflow:auto;background:var(--paper2);border-radius:27px 27px 0 0;padding:24px 20px calc(28px + env(safe-area-inset-bottom));box-shadow:0 -20px 50px rgba(0,0,0,.2)}.close{float:right;width:36px;height:36px;border:0;border-radius:50%;background:#eee6d8}.whygrid{display:grid;gap:10px;margin:15px 0}.whyrow{padding:14px;border-radius:16px;background:#f4efe5}.whyrow b{display:block;color:var(--gold);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:5px}.onboarding{display:none;position:fixed;inset:0;z-index:130;background:var(--ink);color:#fff;place-items:center;padding:24px}.onboarding.show{display:grid}.oncard{max-width:550px;width:100%}.oncard h2{font:500 45px/1.02 Georgia,serif;margin:10px 0}.oncard p{color:#dce1dd;font-size:17px;line-height:1.55}.dots{display:flex;gap:7px;margin:24px 0}.dots i{width:7px;height:7px;border-radius:50%;background:#65716b}.dots i.on{width:24px;border-radius:99px;background:#d2b57c}.oncard .primary{background:#f6efe3;color:var(--ink)}.toast{position:fixed;z-index:160;left:50%;bottom:96px;transform:translateX(-50%) translateY(18px);opacity:0;background:var(--ink);color:#fff;padding:10px 15px;border-radius:999px;font-size:13px;white-space:nowrap;transition:.2s;pointer-events:none}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.empty{text-align:center;color:var(--muted);padding:26px}.note{font-size:12px;color:var(--muted);line-height:1.45}.notice{padding:13px 14px;border-radius:16px;background:#f0eadf;color:#4d5751;font-size:13px}.hidden{display:none!important}
+@media(min-width:680px){.app{padding-left:28px;padding-right:28px}.actions{grid-template-columns:repeat(4,1fr)}.whygrid{grid-template-columns:repeat(3,1fr)}}
+</style>
 </head>
 <body>
-<div class="onboarding" id="onboarding">
-  <div class="oncard">
-    <div class="eyebrow">Direct My Steps</div>
-    <h2 id="onTitle">Tell me what's happening.</h2>
-    <p id="onBody">Start with your life, not a menu. Say what is on your heart and I’ll help you return to Scripture, prayer and the next faithful step.</p>
-    <div class="dots"><i class="on"></i><i></i><i></i></div>
-    <button class="primary" id="onNext">Continue</button>
-  </div>
-</div>
+<div class="onboarding" id="onboarding"><div class="oncard">
+  <div class="eyebrow" style="color:#d2b57c">Direct My Steps</div>
+  <h2 id="onTitle"></h2><p id="onBody"></p>
+  <div class="dots"><i></i><i></i><i></i></div>
+  <button class="primary" id="onNext">Continue</button>
+</div></div>
 
 <div class="app">
-  <header class="top">
-    <div class="brand">
-      <div><h1>Direct My Steps</h1><small>A Bible app that remembers your walk.</small></div>
-      <button class="mark" id="profileBtn" aria-label="Profile">D</button>
+<header class="top"><div class="brand">
+  <div><h1>Direct My Steps</h1><small>A Bible app that remembers your walk.</small></div>
+  <button class="seal" id="profileBtn" aria-label="Your settings">D</button>
+</div></header>
+
+<main>
+<section class="view active" data-view="today">
+  <div class="hero">
+    <div class="eyebrow" id="greeting">Today</div>
+    <h2 id="openingLine">What’s on your heart?</h2>
+    <p class="lead" id="openingSub">Tell me what’s happening. You do not need to know which feature, verse or prayer to look for.</p>
+  </div>
+
+  <div class="card continuity" id="continuityCard"></div>
+
+  <div class="card composer">
+    <label for="heartInput">Tell me what happened.</label>
+    <div class="inputwrap"><textarea id="heartInput" placeholder="I’m worried about someone I love...&#10;I keep coming back to the same problem...&#10;I got good news today..."></textarea><button class="mic" id="micBtn" aria-label="Speak">◉</button></div>
+    <button class="primary" id="guideBtn">Take it from here</button>
+    <p class="note" style="text-align:center;margin-bottom:0">Scripture and app reflection are always separated. Direct My Steps does not speak for God.</p>
+  </div>
+
+  <div class="chips">
+    <button class="chip" data-preset="I feel anxious and I need peace.">Anxious</button>
+    <button class="chip" data-preset="I need help deciding what to do.">Need direction</button>
+    <button class="chip" data-preset="I am still waiting and I am getting discouraged.">Still waiting</button>
+    <button class="chip" data-preset="I am angry and this keeps happening.">Angry</button>
+    <button class="chip" data-preset="Something good happened and I want to thank God.">Grateful</button>
+    <button class="chip" data-preset="I am grieving someone I love.">Grieving</button>
+  </div>
+
+  <div class="card response" id="responseCard">
+    <div class="row between"><span class="pill gold" id="actionPill">For this moment</span><span class="subtle" id="threadCount"></span></div>
+    <div class="decision" id="decisionTitle"></div>
+    <div class="heard" id="heardText"></div>
+
+    <div id="scriptureWrap" class="scripturebox">
+      <div class="ref" id="verseRef"></div>
+      <div class="verse" id="verseText"></div>
+      <div class="scriptureNote" id="verseNote"></div>
+      <div class="row" style="margin-top:8px"><button class="textbtn" id="whyBtn">Why this?</button><button class="textbtn" id="openPassageBtn">Open passage in context</button></div>
     </div>
-  </header>
 
-  <main>
-    <section class="view active" data-view="today">
-      <div class="eyebrow" id="dayGreeting">Today</div>
-      <h2>What’s on your heart?</h2>
-      <p class="lead">You don’t need to know what to look for. Tell me what’s happening and I’ll take it from there.</p>
+    <div id="prayerWrap" class="prayerbox"><strong>A prayer you can borrow</strong><div id="prayerText"></div></div>
+    <div class="stepbox"><div class="stephead"><span class="stepnum">1</span><div><strong>One faithful step</strong><div id="stepText"></div></div></div></div>
+    <div class="tomorrowbox hidden" id="tomorrowWrap"><strong>Not for tonight</strong><div id="tomorrowText"></div></div>
 
-      <div class="card follow" id="followCard">
-        <div class="mini"><span class="pill">Continue your walk</span><span class="subtle">from 3 days ago</span></div>
-        <h3 style="margin-top:14px;font-size:21px">You asked me to remember Aunt Denise’s surgery.</h3>
-        <p style="margin:6px 0 12px;color:var(--muted)">Have you heard how she’s doing?</p>
-        <div style="display:flex;gap:8px">
-          <button class="secondary" onclick="prefill('Aunt Denise is doing better after surgery.')">She’s doing better</button>
-          <button class="textbtn" onclick="prefill('I am still waiting to hear about Aunt Denise.')">Still waiting</button>
-        </div>
-      </div>
+    <div class="actions">
+      <button class="secondary" id="rememberBtn">Remember this</button>
+      <button class="secondary" id="followBtn">Follow up</button>
+      <button class="secondary" id="prayedBtn">I prayed</button>
+      <button class="secondary" id="resolvedBtn">Something changed</button>
+    </div>
+  </div>
 
-      <div class="card composer">
-        <label for="heartInput">Tell me what happened.</label>
-        <div class="inputwrap">
-          <textarea id="heartInput" placeholder="I’m worried about my son...&#10;I got good news today...&#10;I don’t know what to do next..."></textarea>
-          <button class="mic" id="micBtn" aria-label="Speak">◉</button>
-        </div>
-        <button class="primary" id="guideBtn">Help me with this</button>
-        <p class="authnote">Scripture is shown separately from app reflection. You can always ask why a passage was chosen.</p>
-      </div>
+  <div class="sectionhead"><div><div class="eyebrow">Right now</div><h3>What you’re carrying</h3></div><button class="textbtn" onclick="showView('walk')">See all</button></div>
+  <div id="todayThreads"></div>
+</section>
 
-      <div class="chips" aria-label="Quick starts">
-        <button class="chip" onclick="prefill('I feel anxious and I need peace.')">I’m anxious</button>
-        <button class="chip" onclick="prefill('I need help making a decision.')">I need direction</button>
-        <button class="chip" onclick="prefill('I am grieving someone I love.')">I’m grieving</button>
-        <button class="chip" onclick="prefill('I am angry and I do not know what to do with it.')">I’m angry</button>
-        <button class="chip" onclick="prefill('Something good happened and I want to thank God.')">I’m grateful</button>
-        <button class="chip" onclick="prefill('I am waiting and getting discouraged.')">I’m waiting</button>
-      </div>
+<section class="view" data-view="walk">
+  <div class="eyebrow">My Walk</div><h2>Your story stays connected.</h2>
+  <p class="lead">Direct My Steps keeps the thread across prayers, Scripture, decisions and what actually happened next.</p>
+  <div id="walkThreads"></div>
+  <div class="sectionhead"><div><div class="eyebrow">Prayer Story</div><h3>What has been unfolding</h3></div></div>
+  <div class="card"><div class="timeline" id="prayerTimeline"></div></div>
+  <div class="sectionhead"><div><div class="eyebrow">What Direct My Steps noticed</div><h3>Patterns worth seeing</h3></div></div>
+  <div id="insightCards"></div>
+</section>
 
-      <div class="card answer" id="answerCard" style="margin-top:16px">
-        <span class="pill">For this moment</span>
-        <div class="heard" id="heardText"></div>
-        <div class="reference" id="verseRef"></div>
-        <div class="scripture" id="verseText"></div>
-        <button class="textbtn" id="whyBtn">Why this Scripture?</button>
-        <div class="prayer"><strong>A prayer you can borrow</strong><p id="prayerText"></p></div>
-        <div class="nextstep"><span class="stepnum">1</span><div><strong>One faithful step</strong><p id="stepText" style="margin:4px 0 0"></p></div></div>
-        <div class="actions">
-          <button class="secondary" id="rememberBtn">Remember this</button>
-          <button class="secondary" id="followBtn">Follow up</button>
-          <button class="secondary" id="prayedBtn">I prayed</button>
-          <button class="secondary" id="openWalkBtn">Add update</button>
-        </div>
-      </div>
+<section class="view" data-view="circle">
+  <div class="eyebrow">Prayer Circle</div><h2>People you carry with you.</h2>
+  <p class="lead">Remember what matters to the people you love. Nothing is ever shared automatically.</p>
+  <div id="circleList"></div><button class="primary" id="addPersonBtn">Add someone</button>
+</section>
 
-      <div class="sectionhead"><div><div class="eyebrow">Right now</div><h3>What you’re carrying</h3></div><button class="textbtn" onclick="showView('walk')">See all</button></div>
-      <div id="todayThreads"></div>
-    </section>
+<section class="view" data-view="paths">
+  <div class="eyebrow">Paths</div><h2>Guidance that meets the season.</h2>
+  <p class="lead">Paths are not homework. They appear when your ongoing story suggests that a longer walk would help.</p>
+  <div id="pathsList"></div>
+</section>
 
-    <section class="view" data-view="walk">
-      <div class="eyebrow">My Walk</div>
-      <h2>Your life, remembered with care.</h2>
-      <p class="lead">Prayer requests are not isolated entries. They become continuing stories you can return to.</p>
-      <div id="walkThreads"></div>
+<section class="view" data-view="you">
+  <div class="eyebrow">You</div><h2>You stay in control of what the app carries.</h2>
+  <p class="lead">Preferences help Direct My Steps make better decisions. Memory can be kept, corrected or forgotten item by item.</p>
+  <div class="card">
+    <div class="setting"><div><label>Bible translation</label><small>Only public-domain text is quoted in this prototype.</small></div><select id="translation"><option>WEB</option><option>KJV</option><option>NIV</option><option>ESV</option><option>NLT</option></select></div>
+    <div class="setting"><div><label>Prayer style</label><small>How guided prayers should sound.</small></div><select id="prayerStyle"><option>Simple</option><option>Conversational</option><option>Traditional</option><option>Scripture-rich</option></select></div>
+    <div class="setting"><div><label>Depth</label><small>How much context you want by default.</small></div><select id="depth"><option>Devotional</option><option>Simple</option><option>Study-heavy</option></select></div>
+    <div class="setting"><div><label>Follow-ups</label><small>Bring unresolved threads back when useful.</small></div><button class="toggle on" id="followToggle"></button></div>
+  </div>
 
-      <div class="sectionhead"><div><div class="eyebrow">Signature view</div><h3>Prayer Story</h3></div></div>
-      <div class="card">
-        <div class="timeline" id="prayerTimeline"></div>
-      </div>
-    </section>
+  <div class="sectionhead"><div><div class="eyebrow">Memory</div><h3>What I remember</h3></div></div>
+  <div class="card"><p class="note" style="margin-top:0">Keep what matters, correct what I got wrong or forget it. Forgotten items are excluded from future continuity.</p><div id="memoryList"></div></div>
 
-    <section class="view" data-view="circle">
-      <div class="eyebrow">Prayer Circle</div>
-      <h2>People you carry with you.</h2>
-      <p class="lead">Remember what matters to the people you love. Nothing is shared unless you explicitly choose to share it.</p>
-      <div id="circleList"></div>
-      <button class="primary" onclick="addPerson()">Add someone</button>
-    </section>
+  <div class="sectionhead"><div><div class="eyebrow">Cloud</div><h3>Private sync</h3></div></div>
+  <div class="card"><p id="cloudStatus" style="margin-top:0">This build is saving privately on this device. Connect Supabase to enable account-based sync.</p><button class="secondary" id="authBtn">Sign in / sync</button></div>
 
-    <section class="view" data-view="paths">
-      <div class="eyebrow">Paths</div>
-      <h2>Guidance that meets the season.</h2>
-      <p class="lead">You do not have to browse a library. Paths appear when they fit what you are living through.</p>
-      <div id="pathsList"></div>
-    </section>
-
-    <section class="view" data-view="you">
-      <div class="eyebrow">You</div>
-      <h2>Let the app know how to serve you.</h2>
-      <p class="lead">These preferences help Direct My Steps choose what to surface without making you repeat yourself.</p>
-      <div class="card">
-        <div class="setting"><div><label>Bible translation</label><small>Used for references and future licensed text.</small></div><select id="translation"><option>WEB</option><option>KJV</option><option>NIV</option><option>ESV</option><option>NLT</option></select></div>
-        <div class="setting"><div><label>Prayer style</label><small>How you prefer guided prayers to sound.</small></div><select id="prayerStyle"><option>Simple</option><option>Conversational</option><option>Traditional</option><option>Scripture-rich</option></select></div>
-        <div class="setting"><div><label>Depth</label><small>How much context you want by default.</small></div><select id="depth"><option>Devotional</option><option>Simple</option><option>Study-heavy</option></select></div>
-        <div class="setting"><div><label>Follow-ups</label><small>Let unresolved prayer threads return at useful moments.</small></div><button class="toggle on" id="followToggle" aria-label="Toggle follow-ups"></button></div>
-      </div>
-
-      <div class="sectionhead"><div><div class="eyebrow">Memory controls</div><h3>What I remember</h3></div></div>
-      <div class="card" id="memoryList"></div>
-
-      <div class="sectionhead"><div><div class="eyebrow">Cloud</div><h3>Private sync</h3></div></div>
-      <div class="card">
-        <p id="cloudStatus" style="margin-top:0">This prototype is saving on this device. Connect Supabase to enable account-based private sync.</p>
-        <button class="secondary" id="authBtn">Sign in / sync</button>
-      </div>
-
-      <div class="card" style="background:#f1eadc">
-        <strong>A theological boundary</strong>
-        <p style="font-size:14px;color:var(--muted);margin-bottom:0">Direct My Steps can help you find Scripture, pray and reflect. It does not speak for God. App reflection is labeled separately from Scripture and every surfaced passage can be opened in context.</p>
-      </div>
-    </section>
-  </main>
+  <div class="notice"><strong>Boundary:</strong> Direct My Steps can help you find Scripture, pray, reflect and notice patterns. It does not claim divine authority and it should never say “God told me to tell you.”</div>
+</section>
+</main>
 </div>
 
-<nav class="nav">
-  <div class="navin">
-    <button class="active" data-go="today"><span>⌂</span>Today</button>
-    <button data-go="walk"><span>◌</span>My Walk</button>
-    <button data-go="circle"><span>◎</span>Circle</button>
-    <button data-go="paths"><span>↟</span>Paths</button>
-    <button data-go="you"><span>·</span>You</button>
-  </div>
-</nav>
+<nav class="nav"><div class="navin">
+<button class="active" data-go="today"><span>⌂</span>Today</button>
+<button data-go="walk"><span>◌</span>My Walk</button>
+<button data-go="circle"><span>◎</span>Circle</button>
+<button data-go="paths"><span>↟</span>Paths</button>
+<button data-go="you"><span>·</span>You</button>
+</div></nav>
 
-<div class="modal" id="whyModal"><div class="sheet"><button class="close" onclick="closeModal('whyModal')">×</button><div class="eyebrow">Why this Scripture?</div><h3 id="whyTitle"></h3><p id="whyBody"></p><div class="card" style="box-shadow:none"><strong>Scripture vs. reflection</strong><p style="font-size:14px;color:var(--muted);margin-bottom:0">The verse shown is Scripture. The explanation, prayer and suggested step are app-generated guidance. Direct My Steps should never blur those two.</p></div></div></div>
+<div class="modal" id="whyModal"><div class="sheet"><button class="close" data-close="whyModal">×</button><div class="eyebrow">Why this?</div><h2 style="font:500 32px Georgia,serif;margin:8px 0">The reasoning should be visible.</h2><div class="whygrid">
+<div class="whyrow"><b>Right now</b><div id="whyNow"></div></div>
+<div class="whyrow"><b>Your walk</b><div id="whyYou"></div></div>
+<div class="whyrow"><b>This response</b><div id="whyThis"></div></div>
+</div><div class="notice"><strong>Scripture vs. reflection:</strong> the Bible passage is Scripture. The explanation, prayer and suggested next step are app-generated guidance and can be wrong.</div></div></div>
 
-<div class="modal" id="authModal"><div class="sheet"><button class="close" onclick="closeModal('authModal')">×</button><div class="eyebrow">Private sync</div><h3>Take your walk with you.</h3><p>Sign in by email to sync prayer threads, memories and settings across devices once Supabase is connected.</p><input id="emailInput" type="email" placeholder="you@example.com" style="width:100%;padding:14px;border:1px solid var(--line);border-radius:14px;background:#fffefa"><button class="primary" id="sendLinkBtn">Send sign-in link</button><p class="authnote">Your private prayer content is not shared with your Prayer Circle automatically.</p></div></div>
+<div class="modal" id="statusModal"><div class="sheet"><button class="close" data-close="statusModal">×</button><div class="eyebrow">Something changed</div><h2 style="font:500 31px Georgia,serif;margin:8px 0">What happened next?</h2><div class="row" id="statusButtons">
+<button class="secondary" data-status="Answered">Answered</button><button class="secondary" data-status="Changed">Changed</button><button class="secondary" data-status="Released">Released</button><button class="secondary" data-status="Still carrying">Still carrying</button>
+</div><textarea id="statusNote" placeholder="What happened?" style="width:100%;min-height:95px;margin-top:12px;border:1px solid var(--line);border-radius:16px;padding:12px;background:#fffefa"></textarea></div></div>
+
+<div class="modal" id="authModal"><div class="sheet"><button class="close" data-close="authModal">×</button><div class="eyebrow">Private sync</div><h2 style="font:500 31px Georgia,serif;margin:8px 0">Take your walk with you.</h2><p>Once Supabase is connected, sign in by email to sync your private faith memory across devices.</p><input id="emailInput" type="email" placeholder="you@example.com" style="width:100%;padding:13px;border:1px solid var(--line);border-radius:14px;background:#fffefa"><button class="primary" id="sendLinkBtn">Send sign-in link</button></div></div>
 <div class="toast" id="toast"></div>
 
 <script src="/config.js"></script>
 <script>
-const STORAGE_KEY='direct-my-steps-v1';
+const K='direct-my-steps-v2';
 const seed={
   settings:{translation:'WEB',prayerStyle:'Simple',depth:'Devotional',followups:true},
+  todayActions:0,
+  forgotten:[],
   memories:[
-    {id:'m1',text:'Aunt Denise had surgery and you wanted to keep praying through recovery.',private:true},
-    {id:'m2',text:'Psalm 46 helped when anxiety was strongest at night.',private:true},
-    {id:'m3',text:'Marcus had a job interview you were praying about.',private:true}
+    {id:'m1',text:"Aunt Denise had surgery and you asked me to keep carrying her recovery with you.",kind:'person',kept:true},
+    {id:'m2',text:"Psalm 46 helped more than writing when anxiety was strongest at night.",kind:'helped',kept:false},
+    {id:'m3',text:"You wanted to remember Marcus's interview and what happened afterward.",kind:'prayer',kept:false}
   ],
   threads:[
-    {id:'t1',title:"Aunt Denise's surgery",status:'Still carrying',last:'Waiting for a recovery update',verse:'Psalm 121:1–2',date:'Sep 27'},
-    {id:'t2',title:"Marcus's job interview",status:'Answered',last:'He got the offer',verse:'Psalm 90:17',date:'Sep 24'},
-    {id:'t3',title:'Anxiety at night',status:'Still carrying',last:'Psalm 46 helped',verse:'Psalm 46:1',date:'Sep 22'}
+    {id:'t1',key:'denise health',title:"Aunt Denise's surgery",status:'Still carrying',count:2,last:'Waiting for a recovery update',verse:'Psalm 121:1–2',updated:Date.now()-3*864e5,created:Date.now()-7*864e5,follow:true,insight:"This prayer has shifted from fear before surgery to patience during recovery."},
+    {id:'t2',key:'marcus job',title:"Marcus's job interview",status:'Answered',count:2,last:'He got the offer',verse:'Psalm 90:17',updated:Date.now()-6*864e5,created:Date.now()-11*864e5,follow:false,insight:"You prayed first for the result, then for peace while he waited."},
+    {id:'t3',key:'night anxiety',title:'Anxiety at night',status:'Still carrying',count:3,last:'Psalm 46 helped; writing did not',verse:'Psalm 46:1',updated:Date.now()-2*864e5,created:Date.now()-14*864e5,follow:true,insight:"This has come up three times. Scripture and rest helped more than journaling."}
   ],
   events:[
-    {date:'Sep 22',title:'You named the anxiety',body:'You said nights felt heavy and hard to quiet.',thread:'Anxiety at night'},
-    {date:'Sep 22',title:'Psalm 46 became an anchor',body:'You saved Psalm 46:1 because it helped you settle.',thread:'Anxiety at night'},
-    {date:'Sep 24',title:'You prayed for Marcus',body:'You asked for clarity and favor around his interview.',thread:"Marcus's job interview"},
+    {date:'Sep 17',title:'The anxiety became a thread',body:'You said nighttime worry kept returning.',thread:'Anxiety at night'},
+    {date:'Sep 22',title:'You found an anchor',body:'Psalm 46 helped. Writing made you feel more activated.',thread:'Anxiety at night'},
+    {date:'Sep 24',title:'You prayed for Marcus',body:'You asked for favor and steadiness around his interview.',thread:"Marcus's job interview"},
     {date:'Sep 26',title:'An answer came',body:'Marcus got the offer. You marked the prayer Answered.',thread:"Marcus's job interview"},
-    {date:'Sep 27',title:'You carried Aunt Denise',body:'You prayed before surgery and asked for a follow-up.',thread:"Aunt Denise's surgery"}
+    {date:'Sep 27',title:'You carried Aunt Denise',body:'You prayed before surgery and asked me to follow up.',thread:"Aunt Denise's surgery"}
   ],
-  circle:[
-    {id:'p1',name:'Aunt Denise',note:'Recovery after surgery'},
-    {id:'p2',name:'Marcus',note:'New job and transition'},
-    {id:'p3',name:'Jordan',note:'Peace, growth and protection'}
-  ],
+  circle:[{id:'p1',name:'Aunt Denise',note:'Recovery after surgery'},{id:'p2',name:'Marcus',note:'New job and transition'},{id:'p3',name:'Jordan',note:'Peace, growth and protection'}],
   paths:[
-    {title:'Waiting without losing heart',why:'Suggested because you have an unresolved prayer you are still carrying.',days:7,progress:2},
-    {title:'When someone you love is sick',why:'A short Scripture and prayer path for showing up without carrying everything alone.',days:5,progress:0},
-    {title:'Seven Psalms for anxious nights',why:'Built around a pattern you asked the app to remember.',days:7,progress:3}
+    {id:'pa1',title:'Waiting without losing heart',why:'Suggested because you have an unresolved prayer you are still carrying.',days:7,progress:2},
+    {id:'pa2',title:'When someone you love is sick',why:'Suggested because care for someone else has stayed active across several days.',days:5,progress:0},
+    {id:'pa3',title:'Seven Psalms for anxious nights',why:'Suggested because nighttime anxiety has become a repeated pattern and Psalms have helped before.',days:7,progress:3}
   ]
 };
-let state=loadState();
-let currentResponse=null;
-let supabaseClient=null;
-const translation=document.getElementById('translation');
-const prayerStyle=document.getElementById('prayerStyle');
-const depth=document.getElementById('depth');
-const followToggle=document.getElementById('followToggle');
-const onTitle=document.getElementById('onTitle');
-const onBody=document.getElementById('onBody');
-const onNext=document.getElementById('onNext');
-const onboarding=document.getElementById('onboarding');
-const dayGreeting=document.getElementById('dayGreeting');
-const heartInput=document.getElementById('heartInput');
+let state=load();
+let current=null;
+let selectedStatus=null;
+let sb=null;
 
-const responses={
-  anxiety:{match:/anx|worried|worry|afraid|fear|panic|peace|overwhelm/i, heard:"You’re carrying something that feels bigger in your mind than you want it to.",ref:'Psalm 46:1',verse:'“God is our refuge and strength, a very present help in trouble.”',why:'Psalm 46 does not pretend trouble is absent. It places God inside the trouble as refuge and strength, which fits a moment when you need steadiness more than an explanation.',prayer:'God, meet me in what I cannot settle by myself. Be my refuge right here, not later. Give me enough peace for the next thing in front of me.',step:'Name the one part of this situation that actually belongs to today. Pray over that part and let the rest stay outside this moment.'},
-  direction:{match:/decision|direction|choose|choice|what should|next|confus|unsure/i, heard:'You are trying to make a faithful decision without pretending you can see the whole road.',ref:'Proverbs 3:5–6',verse:'“Trust in Yahweh with all your heart, and don’t lean on your own understanding. In all your ways acknowledge him, and he will make your paths straight.”',why:'This passage is about direction without requiring complete certainty first. It pairs trust with movement and acknowledgement, which fits a decision you cannot solve by knowing every outcome.',prayer:'God, order my thinking and my steps. Show me what is mine to do, close what needs to close and keep fear from pretending to be wisdom.',step:'Write the next reversible step, not the entire life decision. Take that step before demanding certainty about step ten.'},
-  grief:{match:/grief|grieving|died|death|lost|loss|miss them|funeral/i, heard:'You are carrying love that has nowhere ordinary to go right now.',ref:'Psalm 34:18',verse:'“Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit.”',why:'Psalm 34 does not rush grief toward a lesson. It emphasizes nearness in brokenness, which is often more faithful than trying to make pain sound tidy.',prayer:'God, stay near in the part of this that hurts. Hold what I cannot fix. Give me room to grieve without feeling like I have to perform strength.',step:'Do one concrete act of remembrance today: say their name, write one memory or tell one story to someone safe.'},
-  anger:{match:/angry|anger|mad|furious|pissed|resent/i, heard:'Something feels wrong enough that your body and mind are still arguing with it.',ref:'Ephesians 4:26',verse:'“Be angry, and don’t sin. Don’t let the sun go down on your wrath.”',why:'The verse makes room for anger without giving anger control of the next action. That distinction matters when the feeling itself is understandable but the response still needs wisdom.',prayer:'God, help me tell the truth about what made me angry without letting anger choose my character for me. Show me the boundary, conversation or release that is actually mine.',step:'Before responding to the person, write one sentence naming what boundary or value was crossed. Act from that sentence, not from the heat.'},
-  gratitude:{match:/grateful|thank|good news|bless|happy|worked out|got the job|better/i, heard:'Something good happened and you do not want to rush past it.',ref:'Psalm 107:1',verse:'“Give thanks to Yahweh, for he is good, for his loving kindness endures forever.”',why:'Gratitude becomes part of spiritual memory when it is named. This passage gives you language to mark goodness instead of only returning to prayer when something is wrong.',prayer:'God, thank you for this. Help me receive the good without immediately moving to the next worry. Let me remember that this happened.',step:'Mark this as part of your Prayer Story. Write what happened and what you want your future self to remember about today.'},
-  waiting:{match:/waiting|still waiting|haven't heard|not heard|delay|discourag/i, heard:'You have been faithful in the waiting and the lack of an answer is starting to become its own weight.',ref:'Psalm 27:14',verse:'“Wait for Yahweh. Be strong, and let your heart take courage. Yes, wait for Yahweh.”',why:'This is not passive waiting. The language connects waiting with courage, which fits when uncertainty has lasted long enough to drain you.',prayer:'God, strengthen me in the space between asking and knowing. Keep waiting from becoming hopelessness. Give me something faithful to do while the answer is still unfinished.',step:'Choose one thing that can move while the answer cannot: prepare, rest, ask one useful question or care for someone in front of you.'},
-  illness:{match:/surgery|hospital|sick|ill|doctor|diagnos|health|recovery/i, heard:'You are carrying concern for someone you love and you want somewhere faithful to put that concern.',ref:'Psalm 121:1–2',verse:'“I will lift up my eyes to the hills. Where does my help come from? My help comes from Yahweh, who made heaven and earth.”',why:'Psalm 121 is a song of help and keeping. It fits a moment when you cannot control the medical outcome but still need language for trust, care and endurance.',prayer:'God, watch over the person I love and the people caring for them. Give wisdom, strength and mercy. Help me be present without believing everything depends on me.',step:'Send one caring message or do one practical thing. Then let that action be enough for this moment.'},
-  default:{match:/.*/,heard:'This matters enough that you stopped and named it.',ref:'Psalm 119:105',verse:'“Your word is a lamp to my feet, and a light for my path.”',why:'A lamp usually gives enough light for the next steps, not the entire road. This passage fits the core purpose here: Scripture for the life you are actually walking through.',prayer:'God, meet me in what I just named. Bring your word close enough to shape my next step. Give me courage to do what is mine and trust you with what is not.',step:'Ask: “What is the next faithful thing, not the perfect final answer?” Write the first honest answer that comes.'}
+const passages={
+ anxiety:{pattern:/anx|worried|worry|afraid|fear|panic|peace|overwhelm/i,key:'night anxiety',title:'Anxiety at night',ref:'Psalm 46:1',web:'“God is our refuge and strength, a very present help in trouble.”',heard:"This sounds like a need for steadiness before it becomes another problem to solve.",prayer:'God, meet me in what I cannot settle by myself. Be my refuge here. Give me enough peace for the next faithful thing.',step:'Put the problem down for ten minutes. Read Psalm 46 slowly once, then do only what belongs to tonight.'},
+ direction:{pattern:/decision|direction|choose|choice|what should|next|confus|unsure|decide/i,key:'seeking direction',title:'Seeking direction',ref:'Proverbs 3:5–6',web:'“Trust in Yahweh with all your heart, and don’t lean on your own understanding. In all your ways acknowledge him, and he will make your paths straight.”',heard:'You are trying to make a faithful decision without pretending you can see the whole road.',prayer:'God, order my thinking and my steps. Show me what is mine to do and keep fear from pretending to be wisdom.',step:'Name the next reversible step. Take that step before demanding certainty about the whole outcome.'},
+ waiting:{pattern:/waiting|still waiting|haven't heard|not heard|delay|discourag/i,key:'waiting',title:'Waiting',ref:'Psalm 27:14',web:'“Wait for Yahweh. Be strong, and let your heart take courage. Yes, wait for Yahweh.”',heard:'The lack of an answer is becoming its own weight.',prayer:'God, strengthen me in the space between asking and knowing. Keep waiting from becoming hopelessness.',step:'Choose one thing that can move while the answer cannot: prepare, rest, ask one useful question or care for someone in front of you.'},
+ anger:{pattern:/angry|anger|mad|furious|pissed|resent|boundary/i,key:'anger boundary',title:'Anger and boundaries',ref:'James 1:19–20',web:'“Let every man be swift to hear, slow to speak, and slow to anger; for the anger of man doesn’t produce the righteousness of God.”',heard:'Your anger may be telling the truth about what happened, but it should not get to choose the response.',prayer:'God, help me tell the truth about what is wrong without letting anger choose my character for me.',step:'Write one sentence naming the boundary or value that was crossed. Decide from that sentence, not from the heat.'},
+ gratitude:{pattern:/grateful|thank|good news|bless|happy|worked out|got the job|better|answered/i,key:'gratitude',title:'Gratitude',ref:'Psalm 107:1',web:'“Give thanks to Yahweh, for he is good, for his loving kindness endures forever.”',heard:'Something good happened and you do not want to rush past it.',prayer:'God, thank you for this. Help me receive the good without immediately moving to the next worry.',step:'Mark what happened in your Prayer Story so this answer does not disappear into the next problem.'},
+ grief:{pattern:/grief|grieving|died|death|lost|loss|miss them|funeral/i,key:'grief',title:'Grief and remembrance',ref:'Psalm 34:18',web:'“Yahweh is near to those who have a broken heart, and saves those who have a crushed spirit.”',heard:'You are carrying love that has nowhere ordinary to go right now.',prayer:'God, stay near in the part of this that hurts. Hold what I cannot fix and give me room to grieve without performing strength.',step:'Do one act of remembrance today: say their name, write one memory or tell one story to someone safe.'},
+ illness:{pattern:/surgery|hospital|sick|ill|doctor|diagnos|health|recovery/i,key:'health',title:'Someone I love is sick',ref:'Psalm 121:1–2',web:'“I will lift up my eyes to the hills. Where does my help come from? My help comes from Yahweh, who made heaven and earth.”',heard:'You are carrying concern for someone you love and you need somewhere faithful to put what you cannot control.',prayer:'God, watch over the person I love and the people caring for them. Give wisdom, strength and mercy.',step:'Do one practical act of care, then let that be enough for this moment.'},
+ default:{pattern:/.*/,key:'life',title:'What I am carrying',ref:'Psalm 119:105',web:'“Your word is a lamp to my feet, and a light for my path.”',heard:'This matters enough that you stopped and named it.',prayer:'God, meet me in what I just named. Bring your word close enough to shape my next step.',step:'Ask: What is the next faithful thing, not the perfect final answer? Write the first honest answer that comes.'}
 };
 
 function clone(x){return JSON.parse(JSON.stringify(x))}
-function loadState(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||clone(seed)}catch(e){return clone(seed)}}
-function saveState(){localStorage.setItem(STORAGE_KEY,JSON.stringify(state));syncCloud()}
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
-function prefill(text){const el=document.getElementById('heartInput');el.value=text;el.focus();window.scrollTo({top:0,behavior:'smooth'})}
-function closeModal(id){document.getElementById(id).classList.remove('show')}
-function showView(v){
-  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
-  document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.go===v));
-  window.scrollTo({top:0,behavior:'smooth'}); renderAll();
+function load(){try{return JSON.parse(localStorage.getItem(K))||clone(seed)}catch(e){return clone(seed)}}
+function save(){localStorage.setItem(K,JSON.stringify(state));syncCloud()}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900)}
+function fmt(ts){return new Date(ts).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+function days(ts){return Math.max(1,Math.floor((Date.now()-ts)/864e5)+1)}
+function activeThreads(){return state.threads.filter(t=>t.status==='Still carrying'&&!state.forgotten.includes(t.key))}
+function findThread(key){return state.threads.find(t=>t.key===key&&!state.forgotten.includes(key))}
+function choose(text){return Object.values(passages).find(p=>p.pattern.test(text))||passages.default}
+function titleFor(text,p){const names=(text.match(/\b[A-Z][a-z]+\b/g)||[]).filter(n=>!['I','God','Yahweh'].includes(n));if(p===passages.illness&&names[0])return names[0]+"'s health";return p.title}
+function translationText(p){return ['WEB','KJV'].includes(state.settings.translation)?p.web:'Open '+p.ref+' in '+state.settings.translation+' to read the passage.'}
+function actionLabel(action){return ({rest:'Rest is the response',decide:'Time to discern',act:'One faithful action',pray:'Scripture + prayer',revisit:'Return to what helped'})[action]||'For this moment'}
+
+function decide(text,p,thread){
+  const hour=new Date().getHours();
+  const repeated=thread?thread.count:0;
+  const late=hour>=23||hour<5;
+  let action='pray',decision='Start with Scripture, not the whole problem.',tomorrow='';
+  if(late&&state.todayActions>=2){action='rest';decision="Nothing else tonight. You've done enough.";tomorrow='I’ll keep this thread and bring it back when you have more capacity.'}
+  else if(repeated>=3&&(p===passages.anger||p===passages.direction||p===passages.waiting)){action='decide';decision='This has become a discernment question, not another request for more content.';tomorrow='Come back to the decision itself: what are you being asked to choose, say or stop?'}
+  else if(repeated>=3&&p===passages.anxiety){action='revisit';decision='Do what helped before. Do not make yourself start over.';tomorrow='If this is still active tomorrow, we’ll look at the pattern instead of repeating the same calming step.'}
+  else if(p===passages.gratitude){action='act';decision='Mark the answer before life moves on.'}
+  else if(late&&(p===passages.anger||p===passages.direction)){action='rest';decision='Do not solve this tonight.';tomorrow='Tomorrow we’ll return to the decision after your nervous system has had a chance to settle.'}
+  return {action,decision,tomorrow,repeated,late}
 }
+
+function reason(text,p,thread,d){
+  const hour=new Date().getHours();const when=hour<5?'It is very late':hour<12?'It is morning':hour<18?'It is daytime':'It is evening';
+  const now=d.action==='rest'?when+', and the immediate need is to reduce load rather than add another spiritual task.':when+', and the app is choosing the smallest useful response for this moment.';
+  let you='This is the first time this specific thread has been named, so I am not pretending to know a pattern yet.';
+  if(thread){
+    you='You have brought this thread here '+thread.count+' time'+(thread.count===1?'':'s')+' across '+days(thread.created)+' day'+(days(thread.created)===1?'':'s')+'. '+(thread.insight||'I am carrying the continuity rather than asking you to start over.');
+    if(thread.key==='night anxiety')you+=' You previously said Psalm 46 helped and writing did not.';
+  }
+  let why='I chose '+p.ref+' because it speaks directly to '+p.title.toLowerCase()+' without claiming to explain why the situation happened.';
+  if(d.action==='decide')why='I am not giving you another prayer exercise as the main answer because repetition suggests the unresolved issue may now need discernment or action.';
+  if(d.action==='rest')why='I am intentionally recommending less. More content would add friction when rest and distance are more useful.';
+  if(d.action==='revisit')why='I am returning you to something that already helped instead of making novelty look like wisdom.';
+  return {now,you,why}
+}
+
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.dataset.view===v));document.querySelectorAll('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});renderAll()}
 document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>showView(b.dataset.go));
 document.getElementById('profileBtn').onclick=()=>showView('you');
+document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{heartInput.value=b.dataset.preset;heartInput.focus()});
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>document.getElementById(b.dataset.close).classList.remove('show'));
 
-function getResponse(text){return Object.values(responses).find(r=>r.match.test(text))||responses.default}
-function titleFrom(text,r){
-  const names=(text.match(/\b[A-Z][a-z]+\b/g)||[]).filter(x=>!['I','God','Yahweh'].includes(x));
-  if(r===responses.illness && names[0]) return names[0]+"'s health";
-  if(r===responses.anxiety) return 'Anxiety and peace';
-  if(r===responses.direction) return 'Seeking direction';
-  if(r===responses.grief) return 'Grief and remembrance';
-  if(r===responses.anger) return 'Anger and wisdom';
-  if(r===responses.gratitude) return 'Gratitude';
-  if(r===responses.waiting) return 'Waiting';
-  return text.split(/[.!?]/)[0].slice(0,44)||'Prayer thread';
-}
 function guide(){
-  const input=document.getElementById('heartInput'); const text=input.value.trim(); if(!text){toast('Tell me what is happening first.');return}
-  const r=getResponse(text); currentResponse={...r,input:text,title:titleFrom(text,r)};
-  document.getElementById('heardText').textContent=r.heard;
-  document.getElementById('verseRef').textContent=r.ref+' · '+state.settings.translation;
-  document.getElementById('verseText').textContent=r.verse;
-  document.getElementById('prayerText').textContent=r.prayer;
-  document.getElementById('stepText').textContent=r.step;
-  document.getElementById('answerCard').classList.add('show');
-  document.getElementById('answerCard').scrollIntoView({behavior:'smooth',block:'start'});
+  const text=heartInput.value.trim();if(!text){toast('Tell me what is happening first.');return}
+  const p=choose(text), key=p.key==='health'?('health '+titleFor(text,p).toLowerCase()):p.key;
+  const thread=findThread(key)||state.threads.find(t=>p===passages.illness&&t.title.toLowerCase()===titleFor(text,p).toLowerCase());
+  const d=decide(text,p,thread), why=reason(text,p,thread,d);
+  current={text,p,key,title:titleFor(text,p),thread,d,why};
+  state.todayActions=(state.todayActions||0)+1;save();
+
+  actionPill.textContent=actionLabel(d.action);
+  decisionTitle.textContent=d.decision;
+  heardText.textContent=p.heard;
+  threadCount.textContent=thread?thread.count+' prior conversation'+(thread.count===1?'':'s'):'New thread';
+  verseRef.textContent=p.ref+' · '+state.settings.translation;
+  verseText.textContent=translationText(p);
+  verseNote.textContent=['WEB','KJV'].includes(state.settings.translation)?'Scripture excerpt shown.':'Reference only. Licensed translation text is not reproduced here.';
+  prayerText.textContent=d.action==='rest'?'God, help me release the need to solve this tonight. Give me rest and enough trust to leave tomorrow for tomorrow.':p.prayer;
+  stepText.textContent=d.action==='rest'?'Close the app after this. No journaling, no searching for another answer. Rest.':d.action==='decide'?'Name the decision in one sentence. Then write the two faithful options you can actually choose between.':d.action==='revisit'?'Return to '+p.ref+' because it helped before. Do not add another exercise tonight.':p.step;
+  tomorrowWrap.classList.toggle('hidden',!d.tomorrow);tomorrowText.textContent=d.tomorrow||'';
+  responseCard.classList.add('show');
+  responseCard.scrollIntoView({behavior:'smooth',block:'start'});
 }
-document.getElementById('guideBtn').onclick=guide;
-document.getElementById('whyBtn').onclick=()=>{
-  if(!currentResponse)return; document.getElementById('whyTitle').textContent=currentResponse.ref;
-  document.getElementById('whyBody').textContent=currentResponse.why; document.getElementById('whyModal').classList.add('show')
-};
-document.getElementById('rememberBtn').onclick=()=>{
-  if(!currentResponse)return; state.memories.unshift({id:'m'+Date.now(),text:currentResponse.input,private:true});saveState();renderAll();toast('Remembered privately.')
-};
-document.getElementById('followBtn').onclick=()=>{
-  if(!currentResponse)return; addThread('Still carrying');toast('I’ll keep this thread open.')
-};
-document.getElementById('prayedBtn').onclick=()=>{
-  if(!currentResponse)return; state.events.unshift({date:'Today',title:'You prayed about it',body:currentResponse.prayer,thread:currentResponse.title});saveState();renderAll();toast('Added to your Prayer Story.')
-};
-document.getElementById('openWalkBtn').onclick=()=>{if(currentResponse)addThread('Still carrying');showView('walk')};
-function addThread(status){
-  const ex=state.threads.find(t=>t.title===currentResponse.title);
-  if(ex){ex.last=currentResponse.input;ex.date='Today'}
-  else state.threads.unshift({id:'t'+Date.now(),title:currentResponse.title,status,last:currentResponse.input,verse:currentResponse.ref,date:'Today'});
-  state.events.unshift({date:'Today',title:'You named what is happening',body:currentResponse.input,thread:currentResponse.title});
-  saveState();renderAll();
+
+guideBtn.onclick=guide;
+whyBtn.onclick=()=>{if(!current)return;whyNow.textContent=current.why.now;whyYou.textContent=current.why.you;whyThis.textContent=current.why.why;whyModal.classList.add('show')};
+openPassageBtn.onclick=()=>{if(!current)return;const q=encodeURIComponent(current.p.ref+' '+state.settings.translation);window.open('https://www.biblegateway.com/quicksearch/?quicksearch='+q,'_blank','noopener')};
+
+function ensureThread(){
+  if(!current)return null;
+  let t=findThread(current.key);
+  if(!t){t={id:'t'+Date.now(),key:current.key,title:current.title,status:'Still carrying',count:0,last:'',verse:current.p.ref,updated:Date.now(),created:Date.now(),follow:false,insight:''};state.threads.unshift(t)}
+  t.count++;t.last=current.text;t.verse=current.p.ref;t.updated=Date.now();
+  if(t.count>=3&&!t.insight)t.insight='This has become a repeated thread. The app should change the kind of help instead of giving you the same response again.';
+  state.events.unshift({date:'Today',title:'You named what is happening',body:current.text,thread:t.title});
+  return t;
+}
+rememberBtn.onclick=()=>{if(!current)return;state.memories.unshift({id:'m'+Date.now(),text:current.text,kind:'prayer',kept:false});save();renderAll();toast('Remembered privately.')};
+followBtn.onclick=()=>{const t=ensureThread();if(!t)return;t.follow=true;save();renderAll();toast('I’ll keep the thread.')};
+prayedBtn.onclick=()=>{const t=ensureThread();if(!t)return;state.events.unshift({date:'Today',title:'You prayed about it',body:current.p.prayer,thread:t.title});save();renderAll();toast('Added to your Prayer Story.')};
+resolvedBtn.onclick=()=>{if(!current)return;selectedStatus=null;statusNote.value='';statusModal.classList.add('show')};
+document.querySelectorAll('[data-status]').forEach(b=>b.onclick=()=>{selectedStatus=b.dataset.status;document.querySelectorAll('[data-status]').forEach(x=>x.style.borderColor=x===b?'#ad8446':'') ;setTimeout(applyStatus,100)});
+function applyStatus(){if(!selectedStatus||!current)return;const t=ensureThread();t.status=selectedStatus;t.follow=selectedStatus==='Still carrying';const note=statusNote.value.trim()||('Marked '+selectedStatus);t.last=note;t.updated=Date.now();state.events.unshift({date:'Today',title:'Prayer status: '+selectedStatus,body:note,thread:t.title});save();statusModal.classList.remove('show');renderAll();toast(selectedStatus)}
+
+function followContent(){
+  const open=activeThreads().filter(t=>t.follow).sort((a,b)=>a.updated-b.updated)[0];
+  const el=continuityCard;
+  if(!state.settings.followups||!open){el.innerHTML='<span class="pill">Continuity</span><h3>Nothing needs your attention from before.</h3><p class="subtle">You can start with what is happening today.</p>';return}
+  el.innerHTML='<div class="row between"><span class="pill">I kept the thread</span><span class="subtle">'+days(open.updated)+' day'+(days(open.updated)===1?'':'s')+' since last update</span></div><h3>'+esc(open.title)+'</h3><p style="margin:6px 0;color:var(--muted)">'+esc(open.last)+'</p><div class="row"><button class="secondary" data-followup="'+esc(open.id)+'">Something changed</button><button class="textbtn" data-still="'+esc(open.id)+'">Still carrying it</button></div>';
+  el.querySelector('[data-followup]').onclick=()=>{heartInput.value='Something changed with '+open.title+'. ';heartInput.focus();window.scrollTo({top:0,behavior:'smooth'})};
+  el.querySelector('[data-still]').onclick=()=>{heartInput.value='I am still carrying '+open.title+'.';heartInput.focus();window.scrollTo({top:0,behavior:'smooth'})};
+}
+
+function renderOpening(){
+  const open=activeThreads().sort((a,b)=>b.updated-a.updated)[0],h=new Date().getHours();
+  greeting.textContent=h<12?'Good morning':h<18?'Good afternoon':h<23?'Good evening':'Still up.';
+  if(open&&open.count>=2){openingLine.textContent='Is this about '+open.title.toLowerCase()+' again?';openingSub.textContent='If it is, you do not have to explain the whole history. Tell me what changed.'}
+  else{openingLine.textContent='What’s on your heart?';openingSub.textContent='Tell me what’s happening. You do not need to know which feature, verse or prayer to look for.'}
 }
 
 function renderThreads(target,limit){
-  const el=document.getElementById(target); const arr=limit?state.threads.slice(0,limit):state.threads;
-  el.innerHTML=arr.map(t=>`<div class="card thread"><span class="dot"></span><div class="threadmain"><h4>${esc(t.title)}</h4><div class="meta"><span class="status">${esc(t.status)}</span><span>${esc(t.date)}</span><span>${esc(t.verse)}</span></div><p style="margin:8px 0 0;color:var(--muted);font-size:14px">${esc(t.last)}</p></div><button class="textbtn" onclick="cycleStatus('${t.id}')">Update</button></div>`).join('')||'<div class="empty">Nothing here yet. Start by telling me what is happening.</div>';
+  const arr=state.threads.filter(t=>!state.forgotten.includes(t.key)).slice().sort((a,b)=>b.updated-a.updated);const use=limit?arr.slice(0,limit):arr;
+  document.getElementById(target).innerHTML=use.map(t=>'<div class="card thread"><span class="dot"></span><div class="threadmain"><h4>'+esc(t.title)+'</h4><div class="meta"><span class="status">'+esc(t.status)+'</span><span>'+t.count+' conversation'+(t.count===1?'':'s')+'</span><span>'+days(t.created)+' day'+(days(t.created)===1?'':'s')+'</span><span>'+esc(t.verse)+'</span></div><p style="margin:8px 0 0;color:var(--muted);font-size:14px">'+esc(t.last)+'</p>'+(t.insight?'<div class="insight"><b>What I noticed</b><br>'+esc(t.insight)+'</div>':'')+'</div><button class="textbtn" data-thread="'+esc(t.id)+'">Update</button></div>').join('')||'<div class="empty">Nothing here yet.</div>';
+  document.getElementById(target).querySelectorAll('[data-thread]').forEach(b=>b.onclick=()=>{const t=state.threads.find(x=>x.id===b.dataset.thread);heartInput.value='Update on '+t.title+': ';showView('today');heartInput.focus()});
 }
-function cycleStatus(id){const t=state.threads.find(x=>x.id===id);if(!t)return;const s=['Still carrying','Answered','Changed','Released'];t.status=s[(s.indexOf(t.status)+1)%s.length];state.events.unshift({date:'Today',title:'Prayer status changed',body:t.title+' → '+t.status,thread:t.title});saveState();renderAll();toast(t.status)}
-function renderTimeline(){document.getElementById('prayerTimeline').innerHTML=state.events.map(e=>`<div class="event"><time>${esc(e.date)}</time><strong>${esc(e.title)}</strong><p>${esc(e.body)}</p><span class="subtle">${esc(e.thread)}</span></div>`).join('')}
-function renderCircle(){document.getElementById('circleList').innerHTML=state.circle.map(p=>`<div class="card person"><div class="avatar">${esc(p.name.charAt(0))}</div><div class="grow"><strong>${esc(p.name)}</strong><small>${esc(p.note)}</small></div><button class="textbtn" onclick="prefill('I want to pray for ${escAttr(p.name)}. ${escAttr(p.note)}');showView('today')">Pray</button></div>`).join('')}
-function addPerson(){const name=prompt('Who do you want to remember in prayer?');if(!name)return;const note=prompt('What should I remember about what they are carrying?')||'Prayer request';state.circle.push({id:'p'+Date.now(),name,note});saveState();renderAll()}
-function renderPaths(){document.getElementById('pathsList').innerHTML=state.paths.map((p,i)=>`<div class="card path"><span class="pill">${p.progress?'Continue':'Suggested for you'}</span><h3 style="margin-top:12px">${esc(p.title)}</h3><p class="subtle">${esc(p.why)}</p><div class="progress"><i style="width:${Math.round(p.progress/p.days*100)}%"></i></div><div style="display:flex;justify-content:space-between;margin-top:8px"><span class="subtle">${p.progress} of ${p.days} days</span><button class="textbtn" onclick="advancePath(${i})">${p.progress?'Continue':'Begin'}</button></div></div>`).join('')}
-function advancePath(i){state.paths[i].progress=Math.min(state.paths[i].days,state.paths[i].progress+1);saveState();renderAll();toast('Today’s step marked complete.')}
-function renderMemory(){document.getElementById('memoryList').innerHTML=state.memories.map(m=>`<div class="memoryrow"><div class="grow"><strong>${esc(m.text)}</strong><small>${m.private?'Private · only you':'Shareable'}</small></div><button class="danger" onclick="deleteMemory('${m.id}')">Forget</button></div>`).join('')||'<div class="empty">Nothing saved yet.</div>'}
-function deleteMemory(id){state.memories=state.memories.filter(x=>x.id!==id);saveState();renderAll();toast('Removed from memory.')}
+function renderTimeline(){prayerTimeline.innerHTML=state.events.slice(0,30).map(e=>'<div class="event"><time>'+esc(e.date)+'</time><strong>'+esc(e.title)+'</strong><p>'+esc(e.body)+'</p><span class="subtle">'+esc(e.thread)+'</span></div>').join('')}
+function insights(){
+  const out=[];for(const t of state.threads){if(state.forgotten.includes(t.key))continue;if(t.count>=3)out.push({title:t.title,text:t.insight||'This has repeated enough that the app should change strategy rather than repeat itself.'});if(t.status==='Answered')out.push({title:'An answer worth remembering',text:t.title+' moved from prayer into an outcome. That belongs in your story, not just your history.'})}return out.slice(0,5)
+}
+function renderInsights(){const xs=insights();insightCards.innerHTML=xs.map(x=>'<div class="card"><span class="pill gold">Pattern</span><h3 style="font:500 22px Georgia,serif;margin:10px 0 6px">'+esc(x.title)+'</h3><p style="margin:0;color:var(--muted)">'+esc(x.text)+'</p></div>').join('')||'<div class="empty">Patterns will appear as your walk develops.</div>'}
+function renderCircle(){circleList.innerHTML=state.circle.map(p=>'<div class="card person"><div class="avatar">'+esc(p.name[0])+'</div><div class="grow"><strong>'+esc(p.name)+'</strong><small>'+esc(p.note)+'</small></div><button class="textbtn" data-pray="'+esc(p.id)+'">Pray</button></div>').join('');circleList.querySelectorAll('[data-pray]').forEach(b=>b.onclick=()=>{const p=state.circle.find(x=>x.id===b.dataset.pray);heartInput.value='I want to pray for '+p.name+'. '+p.note;showView('today');heartInput.focus()})}
+addPersonBtn.onclick=()=>{const name=prompt('Who do you want to remember in prayer?');if(!name)return;const note=prompt('What should I remember?')||'Prayer request';state.circle.push({id:'p'+Date.now(),name,note});save();renderAll()}
+function renderPaths(){pathsList.innerHTML=state.paths.map((p,i)=>'<div class="card path"><span class="pill">'+(p.progress?'Continue':'Suggested for you')+'</span><h3 style="font:500 23px Georgia,serif;margin:10px 0 5px">'+esc(p.title)+'</h3><p class="subtle">'+esc(p.why)+'</p><div class="progress"><i style="width:'+Math.round(p.progress/p.days*100)+'%"></i></div><div class="row between" style="margin-top:8px"><span class="subtle">'+p.progress+' of '+p.days+' days</span><button class="textbtn" data-path="'+i+'">'+(p.progress?'Continue':'Begin')+'</button></div></div>').join('');pathsList.querySelectorAll('[data-path]').forEach(b=>b.onclick=()=>{const i=+b.dataset.path;state.paths[i].progress=Math.min(state.paths[i].days,state.paths[i].progress+1);save();renderAll();toast('Today’s step complete.')})}
+function renderMemory(){memoryList.innerHTML=state.memories.map(m=>'<div class="memoryrow"><div class="grow"><strong>'+esc(m.text)+'</strong><small>'+esc(m.kind||'memory')+'</small></div><div class="memoryActions"><button class="mini '+(m.kept?'on':'')+'" data-keep="'+m.id+'">'+(m.kept?'Kept':'Keep')+'</button><button class="mini" data-correct="'+m.id+'">Correct</button><button class="danger" data-forget="'+m.id+'">Forget</button></div></div>').join('')||'<div class="empty">Nothing saved.</div>';
+  memoryList.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>{const m=state.memories.find(x=>x.id===b.dataset.keep);m.kept=!m.kept;save();renderAll();toast(m.kept?'I’ll keep this.':'No longer pinned.')});
+  memoryList.querySelectorAll('[data-correct]').forEach(b=>b.onclick=()=>{const m=state.memories.find(x=>x.id===b.dataset.correct);const v=prompt('Correct this memory:',m.text);if(v&&v.trim()){m.text=v.trim();save();renderAll();toast('Corrected.')}});
+  memoryList.querySelectorAll('[data-forget]').forEach(b=>b.onclick=()=>{const id=b.dataset.forget;state.memories=state.memories.filter(x=>x.id!==id);save();renderAll();toast('Forgotten.')});
+}
 function renderSettings(){translation.value=state.settings.translation;prayerStyle.value=state.settings.prayerStyle;depth.value=state.settings.depth;followToggle.classList.toggle('on',state.settings.followups)}
-function renderAll(){renderThreads('todayThreads',3);renderThreads('walkThreads');renderTimeline();renderCircle();renderPaths();renderMemory();renderSettings()}
-function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function escAttr(s){return String(s??'').replace(/['"\\]/g,'')}
+function renderAll(){renderOpening();followContent();renderThreads('todayThreads',3);renderThreads('walkThreads');renderTimeline();renderInsights();renderCircle();renderPaths();renderMemory();renderSettings()}
 
-['translation','prayerStyle','depth'].forEach(id=>document.getElementById(id).onchange=e=>{state.settings[id]=e.target.value;saveState();if(currentResponse)document.getElementById('verseRef').textContent=currentResponse.ref+' · '+state.settings.translation});
-document.getElementById('followToggle').onclick=e=>{state.settings.followups=!state.settings.followups;e.currentTarget.classList.toggle('on',state.settings.followups);saveState()};
-document.getElementById('authBtn').onclick=()=>document.getElementById('authModal').classList.add('show');
-document.getElementById('sendLinkBtn').onclick=async()=>{
-  if(!supabaseClient){toast('Supabase is not connected yet.');return}
-  const email=document.getElementById('emailInput').value.trim();if(!email){toast('Enter your email.');return}
-  const {error}=await supabaseClient.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin}});
-  toast(error?error.message:'Check your email for the sign-in link.');
-};
+translation.onchange=e=>{state.settings.translation=e.target.value;save();if(current){verseRef.textContent=current.p.ref+' · '+state.settings.translation;verseText.textContent=translationText(current.p)}};
+prayerStyle.onchange=e=>{state.settings.prayerStyle=e.target.value;save()};
+depth.onchange=e=>{state.settings.depth=e.target.value;save()};
+followToggle.onclick=()=>{state.settings.followups=!state.settings.followups;save();renderAll()};
 
-function initSupabase(){
-  const c=window.DMS_CONFIG||{};
-  if(c.supabaseUrl&&c.supabaseAnonKey&&window.supabase){
-    supabaseClient=window.supabase.createClient(c.supabaseUrl,c.supabaseAnonKey);
-    document.getElementById('cloudStatus').textContent='Supabase is connected. Sign in to enable private sync across devices.';
-    supabaseClient.auth.onAuthStateChange((_event,session)=>{if(session){document.getElementById('cloudStatus').textContent='Private cloud sync is active for '+(session.user.email||'your account')+'.';syncCloud(true)}});
-  }
-}
-async function syncCloud(force=false){
-  if(!supabaseClient)return;
-  const {data:{session}}=await supabaseClient.auth.getSession(); if(!session)return;
-  try{
-    await supabaseClient.from('user_state').upsert({user_id:session.user.id,state,updated_at:new Date().toISOString()},{onConflict:'user_id'});
-    if(force)toast('Your walk is synced privately.');
-  }catch(e){}
-}
+micBtn.onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Voice input is not available in this browser.');return}const r=new SR();r.lang='en-US';r.interimResults=false;micBtn.textContent='…';r.onresult=e=>heartInput.value=e.results[0][0].transcript;r.onend=()=>micBtn.textContent='◉';r.start()};
 
-document.getElementById('micBtn').onclick=()=>{
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){toast('Voice input is not available in this browser.');return}
-  const rec=new SR();rec.lang='en-US';rec.interimResults=false;
-  document.getElementById('micBtn').textContent='…';rec.onresult=e=>{heartInput.value=e.results[0][0].transcript};rec.onend=()=>document.getElementById('micBtn').textContent='◉';rec.start();
-};
+authBtn.onclick=()=>authModal.classList.add('show');
+sendLinkBtn.onclick=async()=>{if(!sb){toast('Supabase is not connected yet.');return}const email=emailInput.value.trim();if(!email){toast('Enter your email.');return}const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin}});toast(error?error.message:'Check your email for the sign-in link.')};
+function initSupabase(){const c=window.DMS_CONFIG||{};if(c.supabaseUrl&&c.supabaseAnonKey&&window.supabase){sb=window.supabase.createClient(c.supabaseUrl,c.supabaseAnonKey);cloudStatus.textContent='Supabase is connected. Sign in to enable private sync across devices.';sb.auth.onAuthStateChange((_e,s)=>{if(s){cloudStatus.textContent='Private cloud sync is active for '+(s.user.email||'your account')+'.';syncCloud(true)}})}}
+async function syncCloud(force=false){if(!sb)return;const {data:{session}}=await sb.auth.getSession();if(!session)return;try{await sb.from('user_state').upsert({user_id:session.user.id,state,updated_at:new Date().toISOString()},{onConflict:'user_id'});if(force)toast('Your walk is synced privately.')}catch(e){}}
 
-const onboardingSteps=[
-  ['Tell me what’s happening.','Start with your life, not a menu. Say what is on your heart and I’ll help you return to Scripture, prayer and the next faithful step.'],
-  ['I’ll remember what matters.','People, prayers, verses, unfinished situations and what helped before can stay connected, so you do not have to rebuild the context every time.'],
-  ['We’ll keep walking.','I can bring an unresolved prayer back at the right time, help you notice what changed and build a Prayer Story you can actually look back on.']
+const onSteps=[
+ ["Tell me what’s happening.","Start with your life, not a menu. Say it or type it. You do not have to know what Scripture, prayer or feature you need."],
+ ["I’ll remember your walk.","People, prayers, unfinished situations, what helped and what did not can stay connected. You control what I keep."],
+ ["I’ll bring the right next step.","Sometimes that is Scripture. Sometimes prayer. Sometimes a decision. Sometimes the most faithful recommendation is to close the app and rest."]
 ];
-let oi=0;function renderOn(){onTitle.textContent=onboardingSteps[oi][0];onBody.textContent=onboardingSteps[oi][1];document.querySelectorAll('.dots i').forEach((d,i)=>d.classList.toggle('on',i===oi));onNext.textContent=oi===2?'Begin':'Continue'}
-onNext.onclick=()=>{if(oi<2){oi++;renderOn()}else{localStorage.setItem('dms-onboarded','1');onboarding.classList.remove('show')}};
-if(!localStorage.getItem('dms-onboarded')){onboarding.classList.add('show');renderOn()}
-const hour=new Date().getHours();dayGreeting.textContent=hour<12?'Good morning':hour<17?'Good afternoon':'Good evening';
+let oi=0;function drawOn(){onTitle.textContent=onSteps[oi][0];onBody.textContent=onSteps[oi][1];document.querySelectorAll('.dots i').forEach((d,i)=>d.classList.toggle('on',i===oi));onNext.textContent=oi===2?'Begin':'Continue'}
+onNext.onclick=()=>{if(oi<2){oi++;drawOn()}else{localStorage.setItem('dms-intro-v2','1');onboarding.classList.remove('show')}};
+if(!localStorage.getItem('dms-intro-v2')){onboarding.classList.add('show');drawOn()}
 renderAll();initSupabase();if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
-</body></html>
+</body>
+</html>
