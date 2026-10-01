@@ -3699,9 +3699,20 @@ function alchemySentence(d){
 
 /* The strip: compact at a glance, the deeper layer on tap. When her life is louder than the sky,
    the sky gets quiet (only the date, moon and season). */
+function fallbackLight(dp){return ({dawn:"golden",morning:"day-bright",afternoon:"day-bright",transition:"day-low",evening:"blue",deepnight:"night"})[dp]||"night";}
+function atmosphereMood(f,now){
+  const recent=(S.asks||[]).filter(a=>a&&a.text&&now-a.ts>=0&&now-a.ts<6*36e5).sort((a,b)=>b.ts-a.ts)[0],t=(recent&&recent.text||"").toLowerCase();
+  if(f.level<=2||/grief|grieving|sad|lonely|hurt|anxious|panic|overthink|heavy|scared|afraid/.test(t))return "held";
+  if(f.level===4||/tired|exhaust|drained|depleted|period|sick|ache|pain/.test(t))return "gentle";
+  if(/hopeful|excited|happy|good|proud|relieved|joy|grateful/.test(t))return "lifted";
+  return "open";
+}
 function renderSky(){
-  const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
-  document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
+  const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),w=typeof wxNow==="function"?wxNow():null,root=document.documentElement;
+  root.dataset.daypart=dp;
+  root.dataset.light=w&&w.solarPhase?w.solarPhase:fallbackLight(dp);
+  root.dataset.atmosphere=atmosphereMood(f,now.getTime());
+  root.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
   const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
   const meta=esc(M.name)+' · '+esc(se.name);
@@ -4159,7 +4170,7 @@ function wxNow(){const w=S.wx;if(!w||!w.data||wxMode()==="off")return null;if(Da
 let wxBusy=false;
 async function wxRefresh(force){
   if(wxMode()==="off"||wxBusy)return;
-  if(!force&&S.wx&&Date.now()-S.wx.ts<60*60e3&&S.wx.mode===wxMode())return;
+  if(!force&&S.wx&&Date.now()-S.wx.ts<15*60e3&&S.wx.mode===wxMode())return;
   if(window.DA_WX_TEST){S.wx={ts:Date.now(),mode:wxMode(),data:window.DA_WX_TEST};wxApply();return;}
   if(MODE!=="web")return;
   wxBusy=true;
@@ -4183,9 +4194,12 @@ const WX_WORD={clear:"clear",clouds:"cloudy",rain:"rain",storm:"storms",snow:"sn
 const WX_OPEN={clear:"Clear skies",clouds:"Gray skies",rain:"Rain",storm:"A storm",snow:"Snow",fog:"Fog",wind:"Wind",hot:"Heat",cold:"Cold"};
 function wxApply(){
   const w=wxNow(),root=document.documentElement;
-  if(!w){delete root.dataset.weather;delete root.dataset.daylight;const l=$("#wxLayer");if(l)l.remove();return;}
+  if(!w){delete root.dataset.weather;delete root.dataset.daylight;delete root.dataset.sky;const l=$("#wxLayer");if(l)l.remove();if(typeof renderSky==="function"&&$("#sky"))renderSky();return;}
   root.dataset.weather=w.kind==="clear"?(w.isDay?"clear-day":"clear-night"):w.kind;
   root.dataset.daylight=w.isDay?"1":"0";
+  root.dataset.light=w.solarPhase||(w.isDay?"day-bright":"night");
+  const b=w.brightness==null?.8:w.brightness;
+  root.dataset.sky=b>=.88?"bright":b>=.64?"soft":"dim";
   if(!$("#wxLayer")){const l=document.createElement("div");l.id="wxLayer";l.setAttribute("aria-hidden","true");document.body.insertBefore(l,document.body.firstChild);}
   if(typeof renderSky==="function"&&$("#sky"))renderSky();
   if(typeof renderToday==="function"&&$("#v-today")&&!lastRead&&!$("#rite")&&!document.activeElement?.matches?.("textarea,input")&&root.dataset.wxShown!==root.dataset.weather){root.dataset.wxShown=root.dataset.weather;renderToday();}
@@ -4208,6 +4222,7 @@ function wxAIText(){
   return "WEATHER WHERE SHE IS: "+w.label+(w.isDay?" in daylight":" after dark")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but do not turn it into a forecast and never let it outrank her life.\n";
 }
 setTimeout(()=>wxRefresh(),1500);
+setInterval(()=>wxRefresh(),10*60e3);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")wxRefresh();});
 /* ------------------------------------------------------------------
    GUARDIAN TRACKERS. Not dashboards for their own sake:
@@ -4833,6 +4848,7 @@ function openAltar(first){
    '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>';
   }
   if(!first){
+    h+=ACCT.user?'<div class="card accountquick"><div class="row between"><span><span class="label">Signed in</span><br><span class="small">'+esc(ACCT.email||"Your account")+'</span></span><button class="btn btn-ghost" id="signOutTop">Log out</button></div><p class="small muted" style="margin-top:8px">Log out only when you want to switch accounts. Otherwise, this device keeps you signed in.</p></div>':'';
     h+='<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
      '<details class="group" open><summary>What you have</summary><p class="small muted">Tap what you own. Aura builds rituals around it and rewrites steps for what you don\'t.</p><div class="lbl" style="margin-top:10px">Everyday things</div>'+chipset("pHave",HAVE)+'<div class="lbl" style="margin-top:14px">More advanced tools</div>'+chipset("pAdv",HAVE_ADV)+'<div class="lbl" style="margin-top:14px">Your own</div>'+custom+'</details>'+
      ''+sharingHTML()+shareHTML()+(ACCT.admin?'<a class="btn btn-main full" href="/admin" style="margin:6px 0">Open your dashboard</a>':'')+'<details class="group"><summary>Share feedback</summary><p class="small muted">Tell me what confused you, what you loved, or what\'s missing. It goes straight to the person who made this app.</p><button class="btn btn-ghost full" id="fbOpen">Share a thought</button></details><details class="group"><summary>Dates that matter</summary><p class="small muted">Birthdays, move-in days, anniversaries, losses, fresh starts. Aura will remember and mark them with you.</p>'+S.dates.map(d=>'<div class="li"><span>'+esc(d.name)+'<br><span class="small muted">'+new Date(2000,d.month-1,d.day).toLocaleDateString(undefined,{month:"long",day:"numeric"})+(d.year?", "+d.year:"")+'</span></span><button class="x2" data-deldate="'+d.id+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="dateName">What happened</label><input type="text" id="dateName" placeholder="Moved into the house"><label class="sr" for="dateWhen">Date</label><input type="date" id="dateWhen"><button class="btn btn-ghost" id="dateAdd">Add</button></div></details>'+
@@ -4972,7 +4988,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");t.disabled=true;const {data,error}=await ACCT.sb.auth.verifyOtp(ACCT.pendingPhone?{phone:ACCT.pendingPhone,token:code,type:"sms"}:{email:ACCT.pendingEmail,token:code,type:"email"});t.disabled=false;if(error){$("#siMsg").textContent="That code didn't work. Check it, or send a new one.";return;}closeSheet();toast("Signed in. Your Archive is safe.");if(data&&data.session)await onSignedIn(data.session);return;}
   if(t.id==="checkoutBtn"){track("checkout",{plan:payPlan});if(!ACCT.user){openSignIn();return;}t.disabled=true;t.textContent="Opening checkout...";const r=await api("/api/checkout",{plan:payPlan});if(r.url){openExternal(r.url);}else{t.disabled=false;t.textContent="Join "+PLAN.name;toast("Checkout isn't available right now. Try again soon.");}return;}
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
-  if(t.id==="signOut"){await ACCT.sb.auth.signOut();ACCT.user=null;ACCT.member=false;closeSheet();renderAll();toast("Signed out.");return;}
+  if(t.id==="signOut"||t.id==="signOutTop"){if(ACCT.sb)await ACCT.sb.auth.signOut();try{localStorage.removeItem(KEY);}catch(e){}location.reload();return;}
   if(d.talk){openTalk(d.talk);return;}
   if(d.gocircle){const b=document.querySelector('[data-tab="circle"]');if(b)b.click();window.scrollTo(0,0);return;}
   if(d.sleep||d.energy||d.moved!=null&&t.closest(".rhythm")||d.wind){

@@ -663,3 +663,27 @@ html[data-weather=clear-night] #wxLayer{background:radial-gradient(900px 500px a
 .gmarkname{font-family:var(--f-ui);font-size:15.5px;font-weight:700;letter-spacing:.035em;color:inherit;white-space:nowrap}
 .rite .gmark.labeled{color:var(--ink-soft);background:rgba(42,33,48,.045);padding-right:8px}
 .rite .gmarkname{color:var(--ink-soft)}
+
+
+/* ---------- Light engine v2: real sky first, emotional tone second ---------- */
+:root{--mood-wash:rgba(0,0,0,0)}
+html[data-light=day-bright]{--world-bg:#777092;--dp-a:rgba(247,178,211,.34);--dp-b:rgba(113,202,197,.34);--dp-c:rgba(255,221,132,.30);--dp-wash:rgba(252,239,211,.035)}
+html[data-light=day-low]{--world-bg:#69617F;--dp-a:rgba(233,137,190,.34);--dp-b:rgba(95,181,181,.30);--dp-c:rgba(250,196,91,.34);--dp-wash:rgba(104,72,105,.035)}
+html[data-light=golden]{--world-bg:#5A405E;--dp-a:rgba(230,84,151,.44);--dp-b:rgba(242,139,70,.35);--dp-c:rgba(255,194,79,.40);--dp-wash:rgba(74,38,68,.04)}
+html[data-light=blue]{--world-bg:#303858;--dp-a:rgba(128,84,164,.28);--dp-b:rgba(62,139,160,.30);--dp-c:rgba(129,143,201,.18);--dp-wash:rgba(27,31,63,.08)}
+html[data-light=night]{--world-bg:#0C0918;--dp-a:rgba(120,30,90,.14);--dp-b:rgba(40,80,90,.08);--dp-c:rgba(0,0,0,0);--dp-wash:rgba(8,6,18,.30)}
+html[data-sky=bright][data-light=day-bright]{--world-bg:#817A9D;--dp-b:rgba(120,215,209,.38);--dp-c:rgba(255,229,146,.34)}
+html[data-sky=soft][data-light=day-bright]{--world-bg:#6C6886}
+html[data-sky=dim][data-light=day-bright]{--world-bg:#5E5D77;--dp-a:rgba(175,158,190,.22);--dp-b:rgba(145,165,180,.20);--dp-c:rgba(225,205,160,.12)}
+html[data-atmosphere=held]{--mood-wash:rgba(20,16,42,.085)}
+html[data-atmosphere=gentle]{--mood-wash:rgba(92,76,126,.055)}
+html[data-atmosphere=lifted]{--mood-wash:rgba(255,215,115,.035)}
+body::before{background:
+  radial-gradient(1200px 500px at 110% -10%,var(--dp-a),transparent 60%),
+  radial-gradient(900px 520px at -20% 30%,var(--dp-b),transparent 60%),
+  radial-gradient(1100px 420px at 50% 112%,var(--dp-c),transparent 65%),
+  linear-gradient(var(--mood-wash),var(--mood-wash)),
+  linear-gradient(var(--dp-wash),var(--dp-wash))}
+html[data-light=golden][data-weather=clear-day] #wxLayer{background:radial-gradient(900px 640px at 78% 4%,rgba(255,215,118,.32),transparent 58%),linear-gradient(180deg,rgba(255,174,122,.11),transparent 64%)}
+html[data-light=blue][data-weather=clear-night] #wxLayer{background:linear-gradient(180deg,rgba(74,108,158,.18),rgba(48,59,102,.12) 60%,transparent)}
+html[data-light=day-bright][data-sky=bright][data-weather=clear-day] #wxLayer{background:radial-gradient(900px 620px at 75% -8%,rgba(255,233,158,.30),transparent 58%),linear-gradient(180deg,rgba(134,212,218,.11),transparent 66%)}

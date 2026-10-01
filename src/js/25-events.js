@@ -122,7 +122,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");t.disabled=true;const {data,error}=await ACCT.sb.auth.verifyOtp(ACCT.pendingPhone?{phone:ACCT.pendingPhone,token:code,type:"sms"}:{email:ACCT.pendingEmail,token:code,type:"email"});t.disabled=false;if(error){$("#siMsg").textContent="That code didn't work. Check it, or send a new one.";return;}closeSheet();toast("Signed in. Your Archive is safe.");if(data&&data.session)await onSignedIn(data.session);return;}
   if(t.id==="checkoutBtn"){track("checkout",{plan:payPlan});if(!ACCT.user){openSignIn();return;}t.disabled=true;t.textContent="Opening checkout...";const r=await api("/api/checkout",{plan:payPlan});if(r.url){openExternal(r.url);}else{t.disabled=false;t.textContent="Join "+PLAN.name;toast("Checkout isn't available right now. Try again soon.");}return;}
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
-  if(t.id==="signOut"){await ACCT.sb.auth.signOut();ACCT.user=null;ACCT.member=false;closeSheet();renderAll();toast("Signed out.");return;}
+  if(t.id==="signOut"||t.id==="signOutTop"){if(ACCT.sb)await ACCT.sb.auth.signOut();try{localStorage.removeItem(KEY);}catch(e){}location.reload();return;}
   if(d.talk){openTalk(d.talk);return;}
   if(d.gocircle){const b=document.querySelector('[data-tab="circle"]');if(b)b.click();window.scrollTo(0,0);return;}
   if(d.sleep||d.energy||d.moved!=null&&t.closest(".rhythm")||d.wind){

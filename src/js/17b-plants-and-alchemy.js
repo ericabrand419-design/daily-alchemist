@@ -97,9 +97,20 @@ function alchemySentence(d){
 
 /* The strip: compact at a glance, the deeper layer on tap. When her life is louder than the sky,
    the sky gets quiet (only the date, moon and season). */
+function fallbackLight(dp){return ({dawn:"golden",morning:"day-bright",afternoon:"day-bright",transition:"day-low",evening:"blue",deepnight:"night"})[dp]||"night";}
+function atmosphereMood(f,now){
+  const recent=(S.asks||[]).filter(a=>a&&a.text&&now-a.ts>=0&&now-a.ts<6*36e5).sort((a,b)=>b.ts-a.ts)[0],t=(recent&&recent.text||"").toLowerCase();
+  if(f.level<=2||/grief|grieving|sad|lonely|hurt|anxious|panic|overthink|heavy|scared|afraid/.test(t))return "held";
+  if(f.level===4||/tired|exhaust|drained|depleted|period|sick|ache|pain/.test(t))return "gentle";
+  if(/hopeful|excited|happy|good|proud|relieved|joy|grateful/.test(t))return "lifted";
+  return "open";
+}
 function renderSky(){
-  const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
-  document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
+  const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),w=typeof wxNow==="function"?wxNow():null,root=document.documentElement;
+  root.dataset.daypart=dp;
+  root.dataset.light=w&&w.solarPhase?w.solarPhase:fallbackLight(dp);
+  root.dataset.atmosphere=atmosphereMood(f,now.getTime());
+  root.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
   const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
   const meta=esc(M.name)+' · '+esc(se.name);

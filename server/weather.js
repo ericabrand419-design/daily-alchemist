@@ -30,6 +30,30 @@ function kindFromText(t, tempF) {
 const WK_CODES = { Thunderstorms: "storm", IsolatedThunderstorms: "storm", ScatteredThunderstorms: "storm", StrongStorms: "storm", Rain: "rain", HeavyRain: "rain", Drizzle: "rain", SunShowers: "rain", Snow: "snow", HeavySnow: "snow", Flurries: "snow", Sleet: "snow", FreezingRain: "snow", FreezingDrizzle: "snow", Blizzard: "snow", WintryMix: "snow", Foggy: "fog", Haze: "fog", Smoky: "fog", Windy: "wind", Breezy: "wind", Cloudy: "clouds", MostlyCloudy: "clouds", Hot: "hot", Frigid: "cold" };
 const WK_LABEL = (c) => String(c || "").replace(/([a-z])([A-Z])/g, "$1 $2");
 
+/* Solar light uses the same temporary coordinates as weather and returns only light state.
+   The app can therefore show real daylight, golden hour, blue hour and night without storing location. */
+const D2R=Math.PI/180,R2D=180/Math.PI;
+const wrap360=(n)=>((n%360)+360)%360;
+function solarLight(lat,lon,at=Date.now()){
+  const jd=at/86400000+2440587.5,n=jd-2451545.0,L=wrap360(280.460+0.9856474*n),g=wrap360(357.528+0.9856003*n)*D2R;
+  const lambda=wrap360(L+1.915*Math.sin(g)+0.020*Math.sin(2*g))*D2R,eps=(23.439-0.0000004*n)*D2R;
+  let ra=Math.atan2(Math.cos(eps)*Math.sin(lambda),Math.cos(lambda))*R2D;ra=wrap360(ra);
+  const dec=Math.asin(Math.sin(eps)*Math.sin(lambda)),gmst=wrap360(280.46061837+360.98564736629*(jd-2451545.0));
+  let ha=wrap360(gmst+lon-ra);if(ha>180)ha-=360;
+  const phi=lat*D2R,H=ha*D2R,elevation=Math.asin(Math.sin(phi)*Math.sin(dec)+Math.cos(phi)*Math.cos(dec)*Math.cos(H))*R2D;
+  const phase=elevation>18?"day-bright":elevation>6?"day-low":elevation>-4?"golden":elevation>-8?"blue":"night";
+  return {solarPhase:phase,sunElevation:Math.round(elevation*10)/10};
+}
+function skyBrightness(kind,label,isDay){
+  if(!isDay)return .32;
+  const t=String(label||"").toLowerCase();
+  if(/sunny|clear/.test(t)&&!/partly|mostly/.test(t))return 1;
+  if(/mostly sunny|mostly clear/.test(t))return .92;
+  if(/partly/.test(t))return .84;
+  return ({storm:.42,rain:.55,fog:.58,clouds:.64,snow:.74,wind:.86,hot:.96,cold:.88}[kind]||.88);
+}
+function enrichLight(data,lat,lon){return {...data,...solarLight(lat,lon),brightness:skyBrightness(data.kind,data.label,data.isDay)};}
+
 async function nws(lat, lon) {
   const h = { "user-agent": UA, accept: "application/geo+json" };
   const p = await fetch("https://api.weather.gov/points/" + lat.toFixed(4) + "," + lon.toFixed(4), { headers: h });
@@ -85,14 +109,14 @@ export async function POST(request) {
   const inUS = country === "US" || (precise && ((lat > 24 && lat < 50 && lon > -125 && lon < -66) || (lat > 51 && lat < 72 && lon > -170 && lon < -129) || (lat > 18 && lat < 23 && lon > -161 && lon < -154)));
   const area = (Math.round(lat * 4) / 4) + "," + (Math.round(lon * 4) / 4);
   const hit = cache.get(area);
-  if (hit && Date.now() - hit.at < HOUR) return json({ ...hit.data, city: city || hit.data.city || "", precise, cached: true });
+  if (hit && Date.now() - hit.at < HOUR) return json({ ...enrichLight(hit.data, lat, lon), city: city || hit.data.city || "", precise, cached: true });
   let data = null;
   try { data = inUS ? (await nws(lat, lon)) || (await weatherkit(lat, lon)) : await weatherkit(lat, lon); } catch { data = null; }
   if (!data) return json({ error: "unavailable", us: inUS }, 200);
   data = { ...data, units: inUS ? "F" : "C", region };
   cache.set(area, { at: Date.now(), data });
   if (cache.size > 2000) cache.delete(cache.keys().next().value);
-  return json({ ...data, city, precise });
+  return json({ ...enrichLight(data, lat, lon), city, precise });
 }
 
 // GET uses the connection's rough location only (handy for checking it works).

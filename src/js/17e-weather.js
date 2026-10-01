@@ -10,7 +10,7 @@ function wxNow(){const w=S.wx;if(!w||!w.data||wxMode()==="off")return null;if(Da
 let wxBusy=false;
 async function wxRefresh(force){
   if(wxMode()==="off"||wxBusy)return;
-  if(!force&&S.wx&&Date.now()-S.wx.ts<60*60e3&&S.wx.mode===wxMode())return;
+  if(!force&&S.wx&&Date.now()-S.wx.ts<15*60e3&&S.wx.mode===wxMode())return;
   if(window.DA_WX_TEST){S.wx={ts:Date.now(),mode:wxMode(),data:window.DA_WX_TEST};wxApply();return;}
   if(MODE!=="web")return;
   wxBusy=true;
@@ -34,9 +34,12 @@ const WX_WORD={clear:"clear",clouds:"cloudy",rain:"rain",storm:"storms",snow:"sn
 const WX_OPEN={clear:"Clear skies",clouds:"Gray skies",rain:"Rain",storm:"A storm",snow:"Snow",fog:"Fog",wind:"Wind",hot:"Heat",cold:"Cold"};
 function wxApply(){
   const w=wxNow(),root=document.documentElement;
-  if(!w){delete root.dataset.weather;delete root.dataset.daylight;const l=$("#wxLayer");if(l)l.remove();return;}
+  if(!w){delete root.dataset.weather;delete root.dataset.daylight;delete root.dataset.sky;const l=$("#wxLayer");if(l)l.remove();if(typeof renderSky==="function"&&$("#sky"))renderSky();return;}
   root.dataset.weather=w.kind==="clear"?(w.isDay?"clear-day":"clear-night"):w.kind;
   root.dataset.daylight=w.isDay?"1":"0";
+  root.dataset.light=w.solarPhase||(w.isDay?"day-bright":"night");
+  const b=w.brightness==null?.8:w.brightness;
+  root.dataset.sky=b>=.88?"bright":b>=.64?"soft":"dim";
   if(!$("#wxLayer")){const l=document.createElement("div");l.id="wxLayer";l.setAttribute("aria-hidden","true");document.body.insertBefore(l,document.body.firstChild);}
   if(typeof renderSky==="function"&&$("#sky"))renderSky();
   if(typeof renderToday==="function"&&$("#v-today")&&!lastRead&&!$("#rite")&&!document.activeElement?.matches?.("textarea,input")&&root.dataset.wxShown!==root.dataset.weather){root.dataset.wxShown=root.dataset.weather;renderToday();}
@@ -59,4 +62,5 @@ function wxAIText(){
   return "WEATHER WHERE SHE IS: "+w.label+(w.isDay?" in daylight":" after dark")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but do not turn it into a forecast and never let it outrank her life.\n";
 }
 setTimeout(()=>wxRefresh(),1500);
+setInterval(()=>wxRefresh(),10*60e3);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")wxRefresh();});
