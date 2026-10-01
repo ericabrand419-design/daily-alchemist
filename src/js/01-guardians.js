@@ -110,6 +110,6 @@ function glyph(k, size){
   };
   return '<svg viewBox="0 0 64 64" aria-hidden="true"'+(size?' width="'+size+'" height="'+size+'"':'')+'>'+ring+(m[k]||m.aura)+'</svg>';
 }
-function guardianMark(k,size,label){return '<button class="gmark" data-guardian="'+esc(k)+'" aria-label="Open '+esc((G[k]||G.aura).name)+'">'+glyph(k,size)+'</button>'+(label?'<span class="gmarkname">'+esc((G[k]||G.aura).name)+'</span>':'');}
+function guardianMark(k,size,label){const g=G[k]||G.aura;return '<button class="gmark'+(label?' labeled':'')+'" data-guardian="'+esc(k)+'" aria-label="Open '+esc(g.name)+'">'+glyph(k,size)+(label?'<span class="gmarkname">'+esc(g.name)+'</span>':'')+'</button>';}
 
 
