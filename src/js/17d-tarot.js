@@ -165,8 +165,12 @@ function cardSVG(id,rev){
   if(c.major)art=SIGIL[c.i]||"";
   else if(c.rank<10)art=(PIPS[c.rank+1]||[]).map(([x,y])=>suitMark(c.suit,x,y,c.rank===0?22:10)).join("");
   else art=COURT[c.rank]+suitMark(c.suit,50,110,11);
-  const nm=c.major?c.name.replace(/^The /,"THE "):c.name;
-  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true"><rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+GOLD+'" stroke-opacity=".45" stroke-width=".6"/>'+
+  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#B55A36",cups:"#4D7F91",swords:"#6B668C",pentacles:"#7C7040"}[c.suit]||GOLD);
+  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true">'+
+    '<rect x="0" y="0" width="100" height="160" rx="8" fill="#F7EDCF"/><circle cx="50" cy="73" r="31" fill="'+accent+'" fill-opacity=".055"/>'+
+    '<path d="M12 14h12M76 14h12M12 146h12M76 146h12" stroke="'+accent+'" stroke-opacity=".65" stroke-width="1.2"/>'+
+    '<circle cx="16" cy="18" r="1.4" fill="'+accent+'"/><circle cx="84" cy="18" r="1.4" fill="'+accent+'"/><circle cx="16" cy="142" r="1.4" fill="'+accent+'"/><circle cx="84" cy="142" r="1.4" fill="'+accent+'"/>'+
+    '<rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+accent+'" stroke-opacity=".5" stroke-width=".8"/>'+
     '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" letter-spacing="1.5" fill="'+GOLD+'">'+esc(c.num)+'</text>'+art+
     '<path d="M14 128h72" stroke="'+GOLD+'" stroke-opacity=".5" stroke-width=".6"/><text x="50" y="142" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6.4:nm.length>12?7.4:8.4)+'" font-weight="600" fill="'+INK+'">'+esc(nm.toUpperCase())+'</text></svg>';
 }
