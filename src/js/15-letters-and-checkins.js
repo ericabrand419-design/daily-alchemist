@@ -1,6 +1,6 @@
 /* ------------------------------------------------------------------
    INNER CIRCLE HEADLINERS
-   1. Letters from Aura: the day after you start, then weekly.
+   1. Letters from Aura: first return, then at the cadence she chooses.
       For 30 days after the free week ends, she keeps writing, but the letters stay sealed until you join.
    2. Guardians who check in on you by name, a few days after you worked with them.
 ------------------------------------------------------------------ */
@@ -38,7 +38,7 @@ function letterDue(){
   return weekEntries(since).length>0||weekChats(since).length>0;
 }
 function letterMaterial(since,until){
-  if(!since)since=Math.max(letterSince(),Date.now()-WEEK);
+  if(!since)since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
   const es=weekEntries(since,until), ch=weekChats(since,until);
   return {es,ch,text:
     "HER NAME: "+(firstName()||"(not given)")+"\n"+
@@ -58,22 +58,22 @@ function localLetter(m){
   let t=(n?n+",\n\n":"")+"I've been keeping the thread since I last wrote. Here's what I noticed.\n\n";
   if(carried.length)t+="You came in carrying "+carried.slice(-2).map(c=>'"'+c.slice(0,80)+'"').join(" and ")+". You didn't pretend it was lighter than it was. That matters.\n\n";
   if(gs.length)t+="You spent time with "+namesList(gs)+". "+(good.length?good[good.length-1].ritualTitle+" left you "+good[good.length-1].after.toLowerCase()+", so remember that one.":"Not every ritual has to land to count. You showed up.")+"\n\n";
-  else if(m.ch.length)t+="You talked things through with the circle this week. That is its own kind of ritual.\n\n";
-  t+="This coming week, I'd like you to go back to "+G[next].name+". Not to fix anything. Just to keep the thread going.\n\nI'll be here.\nAura";
-  return {title:"Your week, looked at kindly",letter:t,next_guardian:next,intention:"Keep the thread going."};
+  else if(m.ch.length)t+="You talked things through with the circle since I last wrote. That is its own kind of ritual.\n\n";
+  t+="Before I write again, I'd like you to go back to "+G[next].name+". Not to fix anything. Just to keep the thread going.\n\nI'll be here.\nAura";
+  return {title:"What I noticed",letter:t,next_guardian:next,intention:"Keep the thread going."};
 }
 async function composeLetter(m){
   let out=null;
   try{
-    out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist, a ritual and reflection app. Warm, perceptive, grounded, a little mystical, never preachy. Once a week you write each member a personal letter looking back at her week.\n\n"+m.text+"\n\n"+
-      "Write a personal letter looking back since the last letter. 170 to 260 words. Address her by first name if you have it. Be specific: name what she actually carried, what she did, what helped and what didn't, using her own words where you can. Point out one pattern or shift you noticed. Suggest one guardian to spend time with next week and why, and close with one simple intention for the week. Sign it Aura. Plain words, short paragraphs, no em dashes, no bullet points, no diagnosing, no therapy language. Only use what is in the material.\n"+
+    out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist, a ritual and reflection app. Warm, perceptive, grounded, a little mystical, never preachy. You write each member personal letters at the cadence she chose: daily, every three days or weekly. Look back only over the time since the last letter.\n\n"+m.text+"\n\n"+
+      "Write a personal letter looking back since the last letter. 170 to 260 words. Address her by first name if you have it. Be specific: name what she actually carried, what she did, what helped and what didn't, using her own words where you can. Point out one pattern or shift you noticed. Suggest one guardian to spend time with before the next letter and why, and close with one simple intention until then. Sign it Aura. Plain words, short paragraphs, no em dashes, no bullet points, no diagnosing, no therapy language. Only use what is in the material.\n"+
       'Reply with ONLY JSON: {"title":"a short, warm title for the letter, under 7 words","letter":"the full letter with \\n\\n between paragraphs","next_guardian":"one key from: '+ALL.filter(k=>k!=="aura").join(", ")+'","intention":"one short line"}',null,{tier:"deep"});
   }catch(e){out=null;}
   if(!out||!out.letter)out=localLetter(m);
   return {title:clean(String(out.title||"From Aura")).slice(0,80),text:clean(String(out.letter)),next:G[out.next_guardian]&&out.next_guardian!=="aura"?out.next_guardian:null,intention:clean(String(out.intention||"")).slice(0,160)};
 }
 async function writeLetter(){
-  const since=Math.max(letterSince(),Date.now()-WEEK);
+  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
   const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),...(await composeLetter(letterMaterial(since)))};
   S.letters.unshift(L);S.letters=S.letters.slice(0,60);saveLocal();remotePut("prefs");
   return L;
@@ -106,13 +106,13 @@ setTimeout(maybeFirstReturnLetter,1800);
 /* During the 30 days after the free week: Aura still writes, but the letter stays sealed.
    Only the envelope is stored now. The words are written from that week's Archive when she joins and opens it. */
 function sealLetter(){
-  const since=Math.max(letterSince(),Date.now()-WEEK);
+  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
   const gs=[...new Set(weekEntries(since).map(e=>e.guardian).concat(weekChats(since).map(c=>c.g)).filter(g=>g&&g!=="aura"&&G[g]))];
   const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),sealed:true,gs,title:"A sealed letter"};
   S.letters.unshift(L);S.letters=S.letters.slice(0,60);saveLocal();remotePut("prefs");
   return L;
 }
-function sealedAbout(L){return L.gs&&L.gs.length?"I wrote about your week, and your time with "+namesList(L.gs.slice(0,3))+".":"I wrote about your week.";}
+function sealedAbout(L){return L.gs&&L.gs.length?"I wrote about what you've been carrying, and your time with "+namesList(L.gs.slice(0,3))+".":"I wrote about what you've been carrying.";}
 async function unsealLetter(L){
   toast("Opening your letter...");
   Object.assign(L,await composeLetter(letterMaterial(L.since,L.until)),{sealed:false});
@@ -129,11 +129,11 @@ function letterCardHTML(){
   const l=lastLetter();
   if(!mem){
     if(l&&l.sealed&&Date.now()-l.ts<3*864e5)return '<button class="card letterc link" data-letter="'+l.id+'">'+envelopeSVG(true)+'<span><span class="label">A sealed letter from Aura</span><span class="lt">'+(firstName()?esc(firstName())+", I":"I")+' wrote to you.</span><span class="small muted">'+esc(sealedAbout(l))+' It\'s waiting in your mailbox. It opens when you join the Inner Circle.</span></span></button>';
-    const since=Math.max(letterSince(),Date.now()-WEEK);
+    const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
     if(!(weekEntries(since).length+weekChats(since).length))return "";
     return '<button class="card letterc link" data-paywall="A letter from Aura">'+envelopeSVG(true)+'<span><span class="label">A letter from Aura</span><span class="lt">I\'ve been paying attention to your week.</span><span class="small muted">In the Inner Circle, I write to you about it. What you carried, what helped, and where to go next.</span></span></button>';
   }
-  if(letterDue())return '<button class="card letterc link" id="letterOpen">'+envelopeSVG()+'<span><span class="label">A letter from Aura</span><span class="lt">'+(firstName()?esc(firstName())+", I":"I")+' wrote you a letter.</span><span class="small muted">I looked back at your week. Tap to open it.</span></span></button>';
+  if(letterDue())return '<button class="card letterc link" id="letterOpen">'+envelopeSVG()+'<span><span class="label">A letter from Aura</span><span class="lt">'+(firstName()?esc(firstName())+", I":"I")+' wrote you a letter.</span><span class="small muted">I looked back at what you've carried since I last wrote. Tap to open it.</span></span></button>';
   const sc=sealedCount();
   if(sc)return '<button class="card letterc link" data-letter="'+S.letters.find(x=>x.sealed).id+'">'+envelopeSVG()+'<span><span class="label">Your mailbox</span><span class="lt">'+(sc===1?"One letter I wrote you is":sc+" letters I wrote you are")+' ready to open.</span><span class="small muted">I kept writing while you were away. Tap to open.</span></span></button>';
   if(l&&!l.sealed&&Date.now()-l.ts<2*864e5&&!l.read)return '<button class="card letterc link" data-letter="'+l.id+'">'+envelopeSVG()+'<span><span class="label">A letter from Aura</span><span class="lt">'+esc(l.title)+'</span><span class="small muted">Tap to read it.</span></span></button>';
@@ -165,8 +165,8 @@ function letterRow(l){return '<button class="li" data-letter="'+l.id+'"><span>'+
 function lettersArchiveHTML(){
   const mem=isMember(), sc=sealedCount(),unread=S.letters.filter(l=>!l.read).length;
   if(!S.letters.length){
-    if(!mem)return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("In the Inner Circle, I write to you every week about what you carried, what helped and where to go next. Every letter stays here.")+'<button class="btn btn-ghost" style="margin-top:10px" data-paywall="Letters from Aura">See the Inner Circle</button></div>';
-    return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("My first letter comes the day after you start. Every one I write you stays here.")+'</div>';
+    if(!mem)return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("In the Inner Circle, I write to you at the rhythm you choose about what you carried, what helped and where to go next. Every letter stays here.")+'<button class="btn btn-ghost" style="margin-top:10px" data-paywall="Letters from Aura">See the Inner Circle</button></div>';
+    return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("My first letter comes when you return after your first visit. After that, you choose the rhythm. Every one I write stays here.")+'</div>';
   }
   return '<div class="card mailbox"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>'+S.letters.length+' letter'+(S.letters.length===1?"":"s")+(unread?" · "+unread+" unread":"")+'</h3></div></div><p class="small muted" style="margin:6px 0 10px">Everything Aura writes you stays here. Tap any letter to open it.</p>'+S.letters.slice(0,30).map(letterRow).join("")+
     (!mem&&sc?'<div style="margin-top:10px">'+auraSays(sc===1?"One of these is sealed. It opens the moment you join.":sc+" of these are sealed. They all open the moment you join.")+'</div><button class="btn btn-main full" style="margin-top:10px" data-paywall="Open your letters">Open my letters</button>':"")+'</div>';
