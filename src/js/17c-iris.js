@@ -9,8 +9,20 @@
 ------------------------------------------------------------------ */
 const CYC_KEY="dailyAlchemist.cycle";
 let C=cycleLoad();
-function cycleBlank(){return {mode:null,irregular:false,consent:false,events:[],syncedAt:0};}
-function cycleLoad(){try{const raw=localStorage.getItem(CYC_KEY);if(raw)return {...cycleBlank(),...JSON.parse(raw)};}catch(e){}return cycleBlank();}
+function cycleBlank(){return {mode:null,irregular:false,consent:false,consentVersion:2,events:[],syncedAt:0};}
+function cycleLoad(){
+  try{
+    const raw=localStorage.getItem(CYC_KEY);
+    if(raw){
+      const parsed=JSON.parse(raw),out={...cycleBlank(),...parsed};
+      /* Earlier builds silently opted cycle tracking into Circle sharing. Revoke that
+         inferred permission once and ask for an explicit choice instead. */
+      if(parsed.consentVersion!==2){out.consent=false;out.consentVersion=2;localStorage.setItem(CYC_KEY,JSON.stringify(out));}
+      return out;
+    }
+  }catch(e){}
+  return cycleBlank();
+}
 function cycleSave(){try{localStorage.setItem(CYC_KEY,JSON.stringify(C));}catch(e){}}
 function cycleReset(){C=cycleBlank();try{localStorage.removeItem(CYC_KEY);}catch(e){}}
 function cycleOn(){return C.mode==="periods"||C.mode==="peri"||C.mode==="meno";}
@@ -23,14 +35,14 @@ const fmtMD=n=>cyFrom(n).toLocaleDateString(undefined,{month:"long",day:"numeric
 /* Cloud: one row per event, plus one settings row. Row level security keeps them hers. */
 function cycleCloud(){return MODE==="web"&&typeof ACCT!=="undefined"&&ACCT.user&&ACCT.sb?ACCT.sb:null;}
 async function cyclePutRow(ev){const sb=cycleCloud();if(!sb)return;try{await sb.from("cycle_events").upsert({id:ev.id,user_id:ACCT.user.id,kind:ev.kind,day:ev.day||null,data:ev.data||{}});}catch(e){}}
-async function cyclePutSettings(){const sb=cycleCloud();if(!sb)return;try{await sb.from("cycle_events").upsert({id:"settings-"+ACCT.user.id,user_id:ACCT.user.id,kind:"settings",day:null,data:{mode:C.mode,irregular:C.irregular,consent:C.consent}});}catch(e){}}
+async function cyclePutSettings(){const sb=cycleCloud();if(!sb)return;try{await sb.from("cycle_events").upsert({id:"settings-"+ACCT.user.id,user_id:ACCT.user.id,kind:"settings",day:null,data:{mode:C.mode,irregular:C.irregular,consent:C.consent,consentVersion:2}});}catch(e){}}
 async function cycleSync(){
   const sb=cycleCloud();if(!sb)return;
   try{
     const {data,error}=await sb.from("cycle_events").select("id,kind,day,data").limit(2000);if(error||!data)return;
     const have=new Map(C.events.map(e=>[e.id,e]));
     for(const r of data){
-      if(r.kind==="settings"){const d=r.data||{};if(!C.mode&&d.mode){C.mode=d.mode;C.irregular=!!d.irregular;C.consent=!!d.consent;}continue;}
+      if(r.kind==="settings"){const d=r.data||{},legacy=d.consentVersion!==2;if(!C.mode&&d.mode){C.mode=d.mode;C.irregular=!!d.irregular;C.consent=legacy?false:!!d.consent;C.consentVersion=2;}if(legacy&&C.mode)cyclePutSettings();continue;}
       if(!have.has(r.id))C.events.push({id:r.id,kind:r.kind,day:r.day,data:r.data||{}});
     }
     const local=C.events.filter(e=>!data.some(r=>r.id===e.id));for(const e of local)cyclePutRow(e);
@@ -144,9 +156,9 @@ function irisPanelHTML(){
 function rerenderIris(){const el=document.querySelector(".card.iris");if(el)el.outerHTML=irisPanelHTML();}
 function irisClick(t,d){
   if(d.cycmode!==undefined){
-    if(d.cycmode==="ask"){C.mode=null;}else{const first=!C.mode||C.mode==="none";C.mode=d.cycmode;if(first&&d.cycmode!=="none")C.consent=true;}
+    if(d.cycmode==="ask"){C.mode=null;}else{const first=!C.mode||C.mode==="none";C.mode=d.cycmode;if(first&&d.cycmode!=="none"){C.consent=false;C.consentVersion=2;}}
     cycleSave();cyclePutSettings();if(C.mode&&C.mode!=="none")track("cycle_feature_used");rerenderIris();
-    if(C.mode&&C.mode!=="none"&&!C.events.length)toast("I'll keep it private. Aura and the Circle get a summary only, and you can turn that off below.");
+    if(C.mode&&C.mode!=="none"&&!C.events.length)toast("I'll keep it private. If you want Aura and the Circle to use a short summary, you can turn that on below.");
     renderToday();return true;}
   if(d.cycstart){cycleAdd("start");rerenderIris();renderToday();toast("Logged. I'll keep today lighter.");return true;}
   if(d.cycend){cycleAdd("end");rerenderIris();toast("Logged.");return true;}
