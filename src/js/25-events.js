@@ -22,6 +22,7 @@ document.addEventListener("click",async ev=>{
   if(t.tagName==="INPUT"){irisClick(t,d);return;}
   if(focusClick(t,d))return;
   if(irisClick(t,d))return;
+  if(trackerClick(t,d))return;
   if(d.mic){toggleMic(t);return;}
   if(t.id==="customAdd"){const v=($("#customIn").value||"").trim().slice(0,40);if(!v)return;if(!S.profile.custom.includes(v))S.profile.custom.push(v);persist("profile");$("#pCustom").insertAdjacentHTML("beforeend",'<span class="chip" aria-pressed="true">'+esc(v)+' <button class="x2 in" data-delcustom="'+(S.profile.custom.length-1)+'" aria-label="Remove">×</button></span>');$("#customIn").value="";toast("Aura knows you have "+v+".");return;}
   if(d.delcustom!==undefined){S.profile.custom.splice(+d.delcustom,1);persist("profile");t.closest(".chip").remove();return;}
