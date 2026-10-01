@@ -658,3 +658,8 @@ html[data-weather=clear-night] #wxLayer{background:radial-gradient(900px 500px a
 
 /* Readability override: secondary text should still be easy to read on a phone. */
 .muted,.why,.intro .kv,.talk .hint,.entry .m,.g .e,.stat .k,.field label,.field .lbl{opacity:1;text-shadow:0 1px 1px rgba(0,0,0,.16)}
+
+.gmark.labeled{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:2px 5px 2px 2px}
+.gmarkname{font-family:var(--f-ui);font-size:15.5px;font-weight:700;letter-spacing:.035em;color:inherit;white-space:nowrap}
+.rite .gmark.labeled{color:var(--ink-soft);background:rgba(42,33,48,.045);padding-right:8px}
+.rite .gmarkname{color:var(--ink-soft)}
