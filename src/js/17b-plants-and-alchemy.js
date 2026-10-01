@@ -90,7 +90,9 @@ const DO_NOW={
  dark:{m:"go slowly and keep your plans quiet",d:"do less, on purpose",t:"come home to yourself early",n:"rest is the whole assignment"}};
 function alchemySentence(d){
   d=d||new Date();const mg=moonGroup(),dp=daypart(d),part=arcPart(dp),day=DAY_RULE[d.getDay()];
-  return MOON_SAY[mg]+" and "+day[0]+" carries "+DAY_THEME[d.getDay()]+" energy. This "+DP_WORD[dp]+" that means "+DO_NOW[mg][part]+".";
+  const w=typeof wxNow==="function"?wxNow():null;
+  const wet=w&&["rain","storm","snow"].includes(w.kind),act=wet&&part!=="m"?(w.kind==="snow"?{t:"stay in and let the snow quiet everything down",n:"stay warm and let the snow do the quieting"}:{t:"stay in and let something wash out",n:"stay in and let the weather do the washing"})[part==="d"?"t":part]||DO_NOW[mg][part]:DO_NOW[mg][part];
+  return (w?wxClause()+", "+MOON_SAY[mg].charAt(0).toLowerCase()+MOON_SAY[mg].slice(1)+", and ":MOON_SAY[mg]+" and ")+day[0]+" carries "+DAY_THEME[d.getDay()]+" energy. This "+DP_WORD[dp]+" that means "+act+".";
 }
 
 /* The strip: compact at a glance, the deeper layer on tap. When her life is louder than the sky,
@@ -99,7 +101,8 @@ function renderSky(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
   document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
-  const top=esc(now.toLocaleDateString(undefined,{weekday:"long"}))+' · '+esc(M.name)+' · '+esc(se.name);
+  const w=wxNow();
+  const top=esc(now.toLocaleDateString(undefined,{weekday:"long"}))+' · '+esc(M.name)+' · '+esc(se.name)+(w?' · '+esc(wxTemp(w))+' '+esc(WX_WORD[w.kind]):'');
   $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt"><span class="aline">'+top+'</span>'+
     (quiet?'<span class="aread muted">Your day comes first. Tap for today\'s sky.</span>':
      '<span class="aplant">Plant ally: <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+'</span></button>';
@@ -111,6 +114,7 @@ function openAlchemy(){
   let h='<div class="stack alchsheet"><div class="label">Daily Alchemy</div><h2>'+esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2>'+
    '<p class="voice">'+esc(alchemySentence(now))+'</p>'+
    (f.level<=3?'<p class="small" style="color:var(--gold)">'+esc(f.level===1?"Right now, you matter more than any of this.":"What's happening in your life comes before any of this today. The sky can wait.")+'</p>':'')+
+   (wxNow()?'<details class="group"><summary>The weather</summary><p>'+esc(wxNow().label)+', '+esc(wxTemp(wxNow()))+(wxNow().city?' in '+esc(wxNow().city):'')+'.'+(wxNow().soon?' '+esc(WX_OPEN[wxNow().soon])+' coming in the next few hours.':'')+'</p><p class="small muted">'+(["rain","storm","snow"].includes(wxNow().kind)?'Rituals that send you outside wait for a better sky today. ':'')+(wxMode()==="precise"?'Using your phone\'s location, rounded to about a kilometer.':'Using your rough location from your connection.')+' Change it in Settings, under Weather.</p></details>':'')+
    '<details class="group" open><summary>The moon</summary><p>'+esc(M.name)+', '+Math.round(M.ill*100)+'% lit. '+(M.waxing?"Full moon in "+fullIn+(fullIn===1?" day":" days")+", new moon in "+newIn+".":"New moon in "+newIn+(newIn===1?" day":" days")+", full moon in "+fullIn+".")+'</p><p class="small muted">'+esc(MOON_TALK[M.name])+'</p></details>'+
    '<details class="group"><summary>The season</summary><p>'+esc(se.name)+'. '+esc(se.next)+' begins in '+se.days+' days.</p><p class="small muted">On the wheel of the year it\'s '+esc(SEA.cur.name)+', the time of '+esc(SEA.cur.sense)+'. '+esc(SEA.next.name)+' is '+SEA.days+' days out.</p></details>'+
    '<details class="group"><summary>The day</summary><p>'+esc(day[0])+' belongs to '+esc(day[1])+': '+esc(day[2])+'.</p><p class="small muted">At home in the Circle today: '+esc(day[3].filter(k=>G[k]&&allowedG(k)).map(k=>G[k].name).join(", "))+'.</p></details>'+

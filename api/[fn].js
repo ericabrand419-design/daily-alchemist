@@ -22,6 +22,7 @@ const ROUTES = {
   "stripe-webhook": () => import("../server/stripe-webhook.js"),
   "track": () => import("../server/track.js"),
   "voice": () => import("../server/voice.js"),
+  "weather": () => import("../server/weather.js"),
 };
 
 async function handle(request, method) {

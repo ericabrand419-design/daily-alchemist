@@ -63,7 +63,7 @@ let voiceOn=false,vrec=null;
    available (preview, offline, daily limit), the phone's own voice takes over. */
 let audioEl=null,voiceNoted=false;
 const HEAR_ICON='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
-function naturalVoices(){return accountsOn()&&ACCT.user&&S.prefVoice!=="device";}
+function naturalVoices(){return accountsOn()&&ACCT.user;}
 /* Phones ship joke voices (Cellos, Good News, Bells, Zarvox...) that sing or sound robotic.
    Never pick one of those. Use one natural voice, the best the phone has, for everyone. */
 const NOVELTY=/^(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|junior|kathy|organ|pipe organ|princess|ralph|superstar|trinoids|whisper|wobble|zarvox|fred|grandma|grandpa|rocko|shelley|flo|eddy|reed|sandy)\b/i;
@@ -87,8 +87,8 @@ async function voiceURL(g,text,cache){
   if(ct.includes("audio"))return URL.createObjectURL(await res.blob());
   const j=await res.json().catch(()=>({}));
   if(j.url)return j.url;
-  if(j.error==="limit"&&!voiceNoted){voiceNoted=true;toast("That's today's time with the guardians' voices. I'll use your phone's voice for now.");}
-  else if(!voiceNoted){voiceNoted=true;toast("Guardian voice unavailable. Using your phone's voice for now.");track("voice_fail",{why:String(j.error||res.status).slice(0,40)});}
+  if(j.error==="limit"&&!voiceNoted){voiceNoted=true;toast("That's today's time with the guardians' voices. The words stay on screen.");}
+  else if(!voiceNoted){voiceNoted=true;toast("Voices aren't available right now, so the words stay on screen.");track("voice_fail",{why:String(j.error||res.status).slice(0,40)});}
   return null;
 }
 async function speak(text,onend,g,cache){
@@ -96,9 +96,11 @@ async function speak(text,onend,g,cache){
   g=g||(run&&run.r.g)||"aura";stopAudio();musicDuck(true);
   const done0=onend;onend=()=>{musicDuck(false);done0&&done0();};
   if(naturalVoices()){
-    try{const url=await voiceURL(g,text,cache);if(url){audioEl=new Audio(url);audioEl.onended=()=>{audioEl=null;onend&&onend();};await audioEl.play();return;}}catch(e){if(!voiceNoted){voiceNoted=true;toast("Guardian voice unavailable. Using your phone's voice for now.");}}
+    try{const url=await voiceURL(g,text,cache);if(url){audioEl=new Audio(url);audioEl.onended=()=>{audioEl=null;onend&&onend();};await audioEl.play();return;}}catch(e){if(!voiceNoted){voiceNoted=true;toast("Voices aren't available right now, so the words stay on screen.");track("voice_fail",{why:"play_error"});}}
   }
-  deviceSpeak(text,onend,g);
+  // No robot fallback. If a guardian's real voice isn't available, she reads instead.
+  if(!voiceNoted){voiceNoted=true;toast("Voices aren't available right now, so the words stay on screen.");track("voice_fail",{why:"no_natural_voice"});}
+  onend&&onend();
 }
 function speakStep(){
   if(!voiceOn||!run)return;

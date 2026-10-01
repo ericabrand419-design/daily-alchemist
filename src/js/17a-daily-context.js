@@ -102,7 +102,7 @@ function focusText(now){
   return "RIGHT NOW: "+DP_WORD[dp]+", "+now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+". Today's steward is "+G[STEWARD[dp]].name+". Plant ally: "+plantAlly(now).n+" (symbolic only; never suggest eating or taking herbs).\n"+
     "CURRENT FOCUS, decided by the app's priority engine (follow it): "+d+"\n"+
     (f.level!==4&&f.body.lines.length?"BODY: "+f.body.lines.join(" ")+"\n":"")+
-    (cycleAIText(now)?cycleAIText(now)+"\n":"")+
+    (cycleAIText(now)?cycleAIText(now)+"\n":"")+wxAIText()+
     (ans.length?"HER DAILY QUESTION TODAY: "+ans.join(". ")+".\n":"")+
     "THE HARD RULE: "+HARD_RULE+"\n"+PRIORITY_TEXT+"\n";
 }
@@ -157,7 +157,8 @@ function stewardHTML(f){
   }
   if(dp==="dawn"||dp==="morning"){
     if(!(d.sleep&&d.energy))return '<div class="card rhythm">'+speaker("aurora","first light")+'<p class="q2" style="margin-top:8px">How did you sleep?</p>'+chipsQ("sleep",SLEEPQ,d.sleep)+'<p class="q2" style="margin-top:12px">What\'s in the tank?</p>'+chipsQ("energy",ENERGYQ,d.energy)+WATCH_NOTE+'</div>';
-    return '<div class="card rhythm">'+speaker("aurora","this morning")+'<p style="margin-top:8px">You\'ve got something to work with today. Let\'s spend it on purpose.</p>'+why+arcHTML(dp)+dayRitualHTML()+'</div>';
+    const w=wxNow(),sun=w&&w.kind==="clear"&&w.isDay&&grayStreak()>=2?"First real sun in "+(grayStreak()>=4?"days":grayStreak()+" days")+". Get it on your face before your phone. ":w&&["rain","storm"].includes(w.kind)?"It's wet out there, so we start inside today. ":"";
+    return '<div class="card rhythm">'+speaker("aurora","this morning")+'<p style="margin-top:8px">'+esc(sun)+'You\'ve got something to work with today. Let\'s spend it on purpose.</p>'+why+arcHTML(dp)+dayRitualHTML()+'</div>';
   }
   if(dp==="afternoon"){
     const rowan=d.moved==null?'<div class="subrow">'+glyph("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> did you move your body today?</p>'+chipsQ("moved",MOVEDQ,null)+'</div></div>':
@@ -202,7 +203,7 @@ function dayRitual(d){
   if(S.dayRit&&S.dayRit.k===k&&ok(byId[S.dayRit.id]))return {r:byId[S.dayRit.id],why:S.dayRit.why};
     const themes=memOn()?recentThemes(21):{},stirred=new Set(S.entries.filter(e=>e.after==="Stirred up"&&Date.now()-e.ts<45*864e5).map(e=>e.ritualId));
   const mine=memOn()?yourGuardians():[];
-  const fit=r=>moonFit(r)*2+(DAY_RULE[d.getDay()][3].includes(r.g)?2:0)+outcomeBonus(r.id)*2+(r.min<=mins?1:-2)-(missingFor(r).length?1:0)-(stirred.has(r.id)?6:0)-(doneRecently(r.id,3)?4:0)+((themes[THEME[r.g]]||0)>=2?1.5:0)+(mine.includes(r.g)?1:0);
+  const fit=r=>-wxPenalty(r)+moonFit(r)*2+(DAY_RULE[d.getDay()][3].includes(r.g)?2:0)+outcomeBonus(r.id)*2+(r.min<=mins?1:-2)-(missingFor(r).length?1:0)-(stirred.has(r.id)?6:0)-(doneRecently(r.id,3)?4:0)+((themes[THEME[r.g]]||0)>=2?1.5:0)+(mine.includes(r.g)?1:0);
   const best=pool=>pool.filter(ok).map(r=>[fit(r)+(hash(dayKey(d)+r.id)%100)/1000,r]).sort((a,b)=>b[0]-a[0])[0];
   let pick=null;
   const named=(sig.ids||[]).map(id=>byId[id]).filter(ok);
@@ -245,6 +246,7 @@ function sinceHTML(f){const l=sinceLines(f);return l.length?'<div class="since">
 /* Clicks for everything above. */
 function focusClick(t,d){
   if(t.id==="alchOpen"){openAlchemy();return true;}
+  if(d.wxmode){S.profile.weather=d.wxmode;persist("profile");t.parentElement.querySelectorAll("[data-wxmode]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));if(d.wxmode==="off"){S.wx=null;saveLocal();wxApply();toast("Weather is off.");}else{wxRefresh(true);toast(d.wxmode==="precise"?"Your phone may ask to share your location once.":"Using your rough location.");}return true;}
   if(d.safe){if(d.safe==="ok"){S.safeAck=Date.now();persistAll();toast("I'm glad. I'm here if that changes.");renderAll();}else openSafety(d.safe);return true;}
   if(d.arc){const v=(($("#arcIn")||{}).value||"").trim();if(!v){$("#arcIn")&&$("#arcIn").focus();return true;}const rec=dayRec(nightKey());rec.arc={...(rec.arc||{}),[d.arc]:clean(v).slice(0,140)};persistAll();toast("Kept.");renderToday();return true;}
   if(d.sit){

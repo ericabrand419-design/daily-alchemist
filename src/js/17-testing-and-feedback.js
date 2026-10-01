@@ -187,7 +187,7 @@ function heavyEvenings(){let n=0;for(let i=0;i<7;i++){const d=new Date(Date.now(
 function whyThis(t){return t?'<details class="whythis"><summary>Why this?</summary><p class="why" style="margin-top:6px">'+t+'</p></details>':'';}
 function eveningPick0(ins){
   const day=Date.now()-18*3600e3,today=S.asks.filter(a=>a.ts>day),txt=today.map(a=>a.text||"").join(" ").toLowerCase(),d=S.days[dayKey(new Date())]||{};
-  const pool=g=>R.filter(r=>canUse(r)&&!r.reset&&r.g===g&&r.min<=15&&!r.bath);
+  const pool=g=>R.filter(r=>canUse(r)&&!r.reset&&r.g===g&&r.min<=15&&!r.bath&&wxOK(r));
   let g=daypart()==="transition"?"juniper":"fern",why=[];const h=new Date().getHours();
   if(/anxious|anxiety|overthink|racing|can'?t (stop|shut|sleep)|spiral|worried|panic/.test(txt)||today.some(a=>a.guardian==="lily")){g="lily";why.push("Earlier today your mind was running hot, and you can't sleep on a racing head");}
   else if(/grie|miss (him|her)|died|loss|funeral/.test(txt)||today.some(a=>a.guardian==="willow")){g="willow";why.push("You've been carrying grief today, and it deserves somewhere soft to land before sleep");}

@@ -111,3 +111,8 @@ The owner account can send `{compare:true}` to `/api/ai` to run one scenario thr
 
 ## Voices
 Guardian voices now use ElevenLabs `eleven_multilingual_v2` (more natural than flash). Override with `ELEVENLABS_MODEL` in Vercel.
+
+## Weather
+Works with no setup inside the US (National Weather Service). Location comes from the visitor's connection, or the phone if she turns on precise location in Settings; nothing is stored.
+Outside the US, add Apple WeatherKit once the Apple developer account exists: in the Apple developer site make a WeatherKit key and a Services ID, then add to Vercel
+`WEATHERKIT_TEAM_ID`, `WEATHERKIT_KEY_ID`, `WEATHERKIT_SERVICE_ID`, `WEATHERKIT_PRIVATE_KEY` (the .p8 file's contents).

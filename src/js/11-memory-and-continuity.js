@@ -374,7 +374,7 @@ function shortlist(text,mins){
   for(const k of (memOn()?yourGuardians():[]).slice(0,3))if(sc[k]!=null)sc[k]+=.75;
   const gs=["aura",...Object.entries(sc).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0])];
   const pool=R.filter(r=>canUse(r)&&!r.reset&&(gs.includes(r.g)||gs.includes(KIN[r.g])));
-  const scored=pool.map(r=>[score(r,mins)+outcomeBonus(r.id)+(gs.indexOf(r.g)>=0?(6-gs.indexOf(r.g))*.3:0)+(r.tags||[]).filter(tg=>hasWord(t,tg)).length,r]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
+  const scored=pool.map(r=>[-wxPenalty(r)+score(r,mins)+outcomeBonus(r.id)+(gs.indexOf(r.g)>=0?(6-gs.indexOf(r.g))*.3:0)+(r.tags||[]).filter(tg=>hasWord(t,tg)).length,r]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);
   const extra=R.filter(r=>canUse(r)&&!r.reset&&r.min<=5&&!scored.includes(r)).slice(0,4);
   return {guardians:gs,rituals:[...scored.slice(0,32),...extra]};
 }

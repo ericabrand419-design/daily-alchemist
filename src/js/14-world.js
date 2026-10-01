@@ -199,7 +199,7 @@ function eyesStep(){
   speak((i===0?r.title+". Close your eyes. ":"")+s.d+(s.say?" Say: "+s.say:""),()=>{eyesTimer=setTimeout(()=>{if(eyes&&run){run.i++;eyesStep();}},(s.hold||20)*1000);});
 }
 function startEyes(){
-  if(!("speechSynthesis" in window)){toast("Eyes-closed mode needs spoken guidance, which isn't available on this device.");return;}
+  if(!naturalVoices()||voiceMuted()){toast("Eyes-closed mode needs the guardian voices, which aren't available right now.");return;}
   eyes=true;const el=document.createElement("div");el.className="eyes";el.id="eyes";el.innerHTML='<p>Eyes closed.</p><p class="small">Aura is guiding you aloud. Tap anywhere to stop.</p>';document.body.appendChild(el);eyesStep();
 }
 function stopEyes(){eyes=false;clearTimeout(eyesTimer);try{speechSynthesis.cancel();}catch(e){}const el=$("#eyes");if(el)el.remove();}
