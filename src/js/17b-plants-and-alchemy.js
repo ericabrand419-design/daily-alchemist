@@ -101,11 +101,13 @@ function renderSky(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
   document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
-  const w=wxNow();
-  const top=esc(now.toLocaleDateString(undefined,{weekday:"long"}))+' · '+esc(M.name)+' · '+esc(se.name)+(w?' · '+esc(wxTemp(w))+' '+esc(WX_WORD[w.kind]):'');
-  $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt"><span class="aline">'+top+'</span>'+
-    (quiet?'<span class="aread muted">Your day comes first. Tap for today\'s sky.</span>':
-     '<span class="aplant">Plant ally: <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+'</span></button>';
+  const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
+  const meta=esc(M.name)+' · '+esc(se.name);
+  $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt">'+
+    '<span class="adate">'+date+'</span><span class="aline">'+meta+'</span>'+
+    (quiet?'<span class="aread">Your day comes first. The sky can wait.</span>':
+     '<span class="aplant">Today\'s plant ally · <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+
+    '<span class="aopen">Open today\'s alchemy <span aria-hidden="true">›</span></span></span></button>';
 }
 function openAlchemy(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),day=DAY_RULE[now.getDay()],dr=drawPick()!=null?todayDraw():null,cyc=cycleContext(now);
