@@ -563,3 +563,12 @@ details.cyclog input[type=date],details.cyclog input[type=text]{border-radius:12
 .tarot .front svg.tcard,.altar .tarot .front svg.tcard,.spread .tarot .front svg.tcard{width:100%!important;height:100%!important;display:block}
 .tarot svg.tcard.rev{transform:rotate(180deg)}
 .altar .tarot{width:160px;height:256px}.spread .tarot.sp{height:154px}
+.spread.seven .tarot.sp{width:84px;height:134px;margin-left:-42px;transform:translateX(calc(var(--i) * 40px)) rotate(calc(var(--i) * 6deg)) translateY(calc(var(--i) * var(--i) * 3px))}
+.spread.seven .tarot.sp:hover,.spread.seven .tarot.sp:focus-visible{transform:translateX(calc(var(--i) * 40px)) rotate(calc(var(--i) * 6deg)) translateY(-12px)}
+.spread.seven .tarot.sp.picked{transform:translateX(calc(var(--i) * 40px)) rotate(calc(var(--i) * 6deg)) translateY(-26px);z-index:2}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0}
+.three .tcol{display:flex;flex-direction:column;align-items:center;gap:6px}
+.three .tarot.mini{width:100%;max-width:104px;aspect-ratio:10/16;height:auto}
+.three .pos{font-family:var(--f-ui);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--glow-faint);text-align:center;line-height:1.25}
+details.tread{border-top:1px solid rgba(244,241,230,.08);padding:8px 0}details.tread summary{cursor:pointer}
+.card.together{margin-top:12px;border-color:rgba(231,196,90,.45)}

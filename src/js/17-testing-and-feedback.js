@@ -336,7 +336,7 @@ function chamberNudge(x){
   return '<div class="card"><div class="label">A deeper tool</div><p style="margin-top:6px">You keep returning to '+esc(x.theme)+'. '+esc(G[x.guardian].name)+'\'s chamber may help.</p><h3 style="margin-top:8px">'+esc(c.name)+'</h3><p class="small muted" style="margin-top:4px">'+esc(c.d)+'</p><button class="btn btn-ghost" style="margin-top:10px" data-chamber="'+x.guardian+'">Open the chamber</button></div>';
 }
 /* The altar draw lives in 17d-tarot.js. drawPick is shared. */
-function drawPick(){const v=S.draws[dayKey(today)];return v==null?null:(typeof v==="object"?v.pick:0);}
+function drawPick(){const v=S.draws[dayKey(today)];if(v==null)return null;if(typeof v!=="object")return 0;if(Array.isArray(v.picks))return v.picks.length>=3?v.picks[1]:null;return v.pick==null?null:v.pick;}
 function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><g fill="none" stroke="#E7C45A" stroke-opacity=".75" stroke-width="1"><circle cx="56" cy="84" r="26"/><circle cx="56" cy="84" r="34" stroke-dasharray="2 4"/><path d="M56 44v80M16 84h80M30 58l52 52M82 58l-52 52" stroke-opacity=".3"/><path d="M62 70a14 14 0 1 0 0 28a11 11 0 1 1 0-28z" fill="#E7C45A" fill-opacity=".85" stroke="none"/></g><text x="56" y="152" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="10" fill="#E7C45A" letter-spacing="2">ALTAR</text></svg>';}
 function resurface(){
   const old=S.entries.filter(e=>!e.private&&e.text&&(Date.now()-e.ts)>2*864e5);

@@ -105,7 +105,7 @@ const TAROT_BY=Object.fromEntries(TAROT.map(c=>[c.id,c]));
 /* The spread: five cards from the whole deck, a new five each day. About a third come up reversed. */
 function drawSpread(){
   const k=dayKey(today),out=[];let i=0;
-  while(out.length<5&&i<200){const c=TAROT[hash(k+"t"+i)%TAROT.length];if(!out.includes(c.id))out.push(c.id);i++;}
+  const n=spreadSize();while(out.length<n&&i<300){const c=TAROT[hash(k+"t"+i)%TAROT.length];if(!out.includes(c.id))out.push(c.id);i++;}
   return out;
 }
 function cardRev(id){return hash(dayKey(today)+"r"+id)%10<3;}
@@ -118,7 +118,7 @@ function cardNow(id,rev,d){
   const c=TAROT_BY[id];if(!c)return "";const p=arcPart(daypart(d)),th=rev?c.revTheme:c.theme,nm=c.name+(rev?", reversed,":"");
   if(p==="m")return rev?nm+" this morning: notice where "+th+" is getting in the way.":nm+" this morning: make room for "+th+".";
   if(p==="d")return c.name+" is still with you. Where has "+th+" shown up so far today?";
-  return c.name+"'s question tonight: "+(rev?"what would it take to set "+th+" down?":"what did "+th+" ask of you today?");
+  return c.name+(/s$/.test(c.name)?"'":"'s")+" question tonight: "+(rev?"what would it take to set "+th+" down?":"what did "+th+" ask of you today?");
 }
 
 /* Card faces: original art. Majors carry a sigil, minors carry their pips like a real deck. */
@@ -175,10 +175,66 @@ function drawHTML(d){
   const g=d.g,r=guardianDaily(g),c=d.card;
   return '<div class="label" style="color:'+G[g].color+'">'+esc(d.num)+' · '+esc(d.title)+'</div>'+
    (c.major?'<p class="small muted" style="margin-top:4px">'+esc(d.keywords)+'</p>':'<p class="small muted" style="margin-top:4px">'+esc(SUITS[c.suit].name)+' · '+esc(c.el)+'</p>')+
-   '<p style="margin-top:10px">'+esc(d.meaning)+'</p>'+
+   '<p style="margin-top:10px">'+esc(d.meaning)+'</p><p class="small" style="margin-top:8px">'+esc(personalCardLine(d.rev?d.card.revTheme:d.card.theme,g,d.rev))+'</p>'+
    (d.now?'<p class="cardnow"><span class="label">Right now</span> '+esc(d.now)+'</p>':'')+
    '<div class="cardq"><div class="label">Ask yourself</div><p class="voice" style="margin-top:4px">'+esc(d.question)+'</p></div>'+
    '<p class="small" style="margin-top:10px">'+esc(G[g].name)+', '+esc(G[g].title)+', holds this card.</p>'+
    '<div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-main" data-cardask="1">What does this mean for me?</button>'+(r?'<button class="btn btn-ghost" data-begin="'+esc(r.id)+'">'+esc(r.title)+' · '+r.min+' min</button>':'')+'</div>'+
    '<button class="linkish" style="margin-top:10px" data-talk="'+g+'">Talk it through with '+esc(G[g].name)+'</button>';
+}
+
+/* ---------- Free: one card. Inner Circle: three cards read together. ----------
+   Either way the reading leans on what Aura knows (open situations, body, the day's
+   question, who's been near her lately) without naming it bluntly. */
+const SPREAD_POS=[["What you're carrying","what you're carrying"],["What's asking for your attention","what's asking for your attention"],["What will help","what will help"]];
+function drawRec(){const v=S.draws[dayKey(today)];return v==null?null:(typeof v==="object"?v:{pick:v});}
+function threeMode(){return isMember();}
+function spreadSize(){return threeMode()?7:5;}
+function threePicks(){const r=drawRec();return r&&Array.isArray(r.picks)?r.picks:[];}
+function threeDone(){return threePicks().length>=3;}
+function drawnCards(){
+  const sp=drawSpread();
+  return threePicks().slice(0,3).map((i,k)=>{const id=sp[i],c=TAROT_BY[id],rev=cardRev(id);return {pos:k,id,c,rev,g:holderOf(c),title:c.name+(rev?", reversed":""),meaning:rev?c.revMeaning:c.meaning,theme:rev?c.revTheme:c.theme};});
+}
+/* A sentence that fits her day without spelling it out. */
+function personalCardLine(theme,g,rev){
+  const f=resolveCurrentFocus(),arc=(S.days[nightKey()]||{}).arc||{},out=[];
+  if(f.level===1)return "Before anything a card can say: you matter more than this reading. Take care of you first.";
+  if(f.level===2)out.push(rev?"If something from earlier is still sitting with you, read this card against it. It names "+theme+" as the thing to watch.":f.sit.still?"Where something is still unsettled, this card is less about fixing it and more about "+theme+".":"If something from earlier is still sitting with you, read this card against it. It points toward "+theme+".");
+  else if(f.level===4||f.body.significant)out.push(rev?"Read it gently today. Your body is asking for less, and "+theme+" will feel louder than it is.":"Read it gently today. Your body is asking for less, so "+theme+" can be small.");
+  else if(arc.m)out.push("Hold it next to what you said deserves your energy today.");
+  if(memOn()&&g&&g!=="aura"){const wk=S.entries.filter(e=>e.guardian===g&&Date.now()-e.ts<14*864e5).length;if(wk>=2)out.push(G[g].name+" keeps turning up near you lately. That's not an accident.");}
+  if(!out.length)out.push({m:"Carry it lightly into the day and notice where it shows up.",d:"Look back at the morning through it. Where has it already been true?",t:"Let it walk you home. What does it change about tonight?",n:"Sleep on it. Cards often make more sense in the morning."}[arcPart(daypart())]);
+  return out.slice(0,2).join(" ");
+}
+function localThreeReading(cs){
+  const [a,b,c]=cs;
+  return "What you're carrying: "+a.title+", "+a.theme+". What's asking for your attention, the heart of today's reading: "+b.title+", "+b.theme+". What will help: "+c.title+", "+c.theme+". "+personalCardLine(b.theme,b.g,b.rev);
+}
+async function fetchThreeReading(){
+  const rec=drawRec();if(!rec||rec.reading||rec.readingBusy)return;
+  if(MODE==="web"&&!(typeof ACCT!=="undefined"&&ACCT.user))return;
+  rec.readingBusy=true;
+  try{
+    const cs=drawnCards();
+    const out=await aiJSON("You are Aura, reading a three card tarot spread for her in The Daily Alchemist. Positions: 1 what she's carrying, 2 what's asking for her attention (the heart of the reading), 3 what will help.\n"+
+      cs.map((x,i)=>(i+1)+". "+x.title+": "+x.meaning+" (theme: "+x.theme+"; held by "+G[x.g].name+")").join("\n")+"\n\n"+focusText()+"\nWHAT AURA REMEMBERS:\n"+ledgerText()+"\n\n"+
+      "Read the three cards as ONE story about her life right now. Let what you know shape the reading, but subtly: never quote her private words, never name the person or the situation outright, and never sound like you are reading her diary. A friend who knows would understand; a stranger looking over her shoulder would not. Honor the hard rule: the cards never outrank what's actually happening in her life, and never explain her feelings away. 4 to 6 sentences, warm, grounded, no em dashes, no lists.\nReply with ONLY JSON: {\"reading\":\"...\",\"guardian\":\"the one guardian id best placed to help next\"}",null);
+    if(out&&out.reading){rec.reading=clean(out.reading).slice(0,1200);rec.next=okG(out.guardian)||null;persist("draws");}
+  }catch(e){}
+  rec.readingBusy=false;
+  const el=$("#spreadReading");if(el&&rec.reading)el.innerHTML=threeReadingInner();
+}
+function threeReadingInner(){
+  const rec=drawRec()||{},cs=drawnCards(),g=rec.next||cs[1].g;
+  return '<p class="voice">'+esc(rec.reading||localThreeReading(cs))+'</p><div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-main" data-cardask="1">Talk about it with Aura</button><button class="btn btn-ghost" data-talk="'+g+'">Go deeper with '+esc(G[g].name)+'</button></div>';
+}
+function threeSpreadHTML(){
+  const cs=drawnCards(),mid=cs[1];
+  let h='<div><div class="label">Your three card reading</div><div class="three">'+cs.map(x=>'<div class="tcol"><div class="tarot flipped mini"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardSVG(x.id,x.rev)+'</div></div></div><span class="pos">'+esc(SPREAD_POS[x.pos][0])+'</span></div>').join("")+'</div>';
+  h+=cs.map(x=>'<details class="tread"'+(x.pos===1?' open':'')+'><summary><span class="label" style="color:'+G[x.g].color+'">'+esc(SPREAD_POS[x.pos][0])+'</span> '+esc(x.title)+'</summary><p style="margin-top:6px">'+esc(x.meaning)+'</p><p class="small muted">Held by '+esc(G[x.g].name)+'.</p></details>').join("");
+  h+='<div class="card together"><div class="label">Together</div><div id="spreadReading">'+threeReadingInner()+'</div></div>';
+  h+='<p class="cardnow"><span class="label">Right now</span> '+esc(cardNow(mid.id,mid.rev))+'</p><div class="cardq"><div class="label">Ask yourself</div><p class="voice" style="margin-top:4px">'+esc(mid.c.question)+'</p></div><p class="small muted" style="margin-top:10px">A new spread waits tomorrow.</p></div>';
+  setTimeout(fetchThreeReading,50);
+  return h;
 }

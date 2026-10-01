@@ -189,10 +189,16 @@ document.addEventListener("click",async ev=>{
   if(d.reset){const rn=resetNext();startRitual(rn&&rn.base.id===d.reset?rn.r:byId[d.reset],{theme:"reset",reset:true});return;}
   if(d.jday){const [jid,n]=d.jday.split(":");const j=JOURNEYS.find(x=>x.id===jid);startRitual(journeyStep(j,+n).r,{journey:jid,jday:+n,theme:THEME[j.g]});return;}
   if(t.id==="tarot"){t.classList.toggle("flipped");return;}
+  if(d.pickcard!=null&&drawPick()==null&&threeMode()){
+    const i=+d.pickcard,k=dayKey(today),rec=S.draws[k]&&Array.isArray(S.draws[k].picks)?S.draws[k]:{picks:[]};if(rec.picks.includes(i))return;
+    rec.picks.push(i);S.draws[k]=rec;persist("draws");track("draw_pick",{n:rec.picks.length});t.classList.add("picked","flipped");
+    const hd=document.querySelector("#v-circle h3");if(hd&&rec.picks.length<3)hd.textContent="Pick "+(3-rec.picks.length)+" more.";
+    if(rec.picks.length>=3)setTimeout(renderCircle,1300);return;}
   if(d.pickcard!=null&&drawPick()==null){
     const i=+d.pickcard;S.draws[dayKey(today)]={pick:i};persist("draws");track("draw_pick",{g:drawSpread()[i]});
     const sp=$("#spread");if(sp)sp.classList.add("chosen");t.classList.add("picked","flipped");
     setTimeout(renderCircle,1100);return;}
+  if(d.cardask&&threeMode()&&threeDone()){const cs=drawnCards();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="My three cards today: "+cs.map(x=>SPREAD_POS[x.pos][1]+", "+x.title).join("; ")+". Help me understand what they mean for me right now.";sendTalk();}},350);return;}
   if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
   if(d.guardian){openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
