@@ -17,7 +17,7 @@ This folder is the whole app. It runs on Vercel. Accounts and data live in Supab
 4. Settings > Billing > Customer portal: turn it on so members can cancel on their own.
 5. Do all of this in Test mode first. Pay with card 4242 4242 4242 4242, any future date, any CVC. Switch to Live mode once that works.
 
-## 3. Anthropic (the guardians' voices)
+## 3. Anthropic (AI replies)
 1. console.anthropic.com > API Keys: create a key.
 2. Set a monthly spend limit under Billing. Free users get 3 readings and 10 messages a day; members get 40 and 150.
 
@@ -119,7 +119,7 @@ Outside the US, add Apple WeatherKit once the Apple developer account exists: in
 
 ## Spoken voice is off
 Guardians no longer speak aloud (no hear buttons, no Guide me aloud, no eyes closed mode, no spoken ritual commands, no music ducking, no /api/voice for customers). Typing by voice with the mic still works.
-The code stays behind `GUARDIAN_VOICE_ENABLED` in src/js/13-audio.js and the `GUARDIAN_VOICE_ENABLED=true` env var for /api/voice. The owner can try it on her own phone by setting localStorage `da.voiceDev` to `1`.
+Customer voice requires both `guardianVoiceEnabled: true` in `config.js` and `GUARDIAN_VOICE_ENABLED=true` in Vercel. Keep both off in production for now. The owner can still try the parked voice code on her own phone by setting localStorage `da.voiceDev` to `1`.
 
 ## Claude vs OpenAI comparison
 /admin has a "Claude vs OpenAI" section. It needs `OPENAI_API_KEY` in Vercel. Defaults: Claude Haiku 4.5 vs GPT-5.6 Luna (fast), and the deep models for the hard moments. OpenAI uses the Responses API with low reasoning effort (`OPENAI_REASONING_EFFORT` to change).
