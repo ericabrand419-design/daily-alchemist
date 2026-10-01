@@ -1749,7 +1749,7 @@ function showPhoneOnly(){
   const url=location.href;
   const d=document.createElement("div");d.className="gate";d.id="phoneOnly";
   d.innerHTML='<div class="in auraPop" style="text-align:center"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays("I live on your phone. Scan this with your phone\'s camera, or open dailyalchemist.com there, and I\'ll meet you.","Aura · open on your phone")+
+    auraSays("I\'m Aura, your guide in The Daily Alchemist. I live on your phone. Scan this with your phone\'s camera, or open dailyalchemist.com there, and I\'ll meet you.","Aura · open on your phone")+
     '<div id="qrBox" style="display:grid;place-items:center;margin:6px auto;background:#F4F1E6;border-radius:16px;padding:14px;width:max-content"></div>'+
     '<p class="small muted">'+esc(url.replace(/^https?:\/\//,"").replace(/\/$/,""))+'</p></div>';
   document.body.appendChild(d);document.body.style.overflow="hidden";
@@ -1794,7 +1794,7 @@ function showGate(){
   if(MODE!=="web"||!ACCT.sb||$("#gate"))return;
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays(S.friendCode?"You came in on an invitation. Make your account and everything opens for you, for life.":"Come in. Sign in, or make your free account, so I can read what you bring me and remember it for you.","Aura · welcome")+
+    auraSays(S.friendCode?"I\'m Aura, your guide here. You came in on an invitation, so make your account and everything opens for you, for life.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
     signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }
@@ -3284,7 +3284,7 @@ function renderToday(){
   const p=S.profile, mins=pickedMins||p.minutes, H=memOn()?hist():[], known=H.length>0, b=todayBrief();
   const pick=(b.ritualId&&byId[b.ritualId])||pickForNow(R.filter(r=>canUse(r)&&!r.reset),new Date(),"today")||byId.anchor;
   let h='<div class="home"><p class="greet">'+esc(greeting())+'</p>'+
-    '<h2 class="hline">'+(known?"I think I know what today has been about.":"Tell me what happened. I\'ll take it from there.")+'</h2>'+
+    '<h2 class="hline">'+(known?"I think I know what today has been about.":"I\'m Aura. Tell me what happened, and I\'ll take it from there.")+'</h2>'+
     (known&&b.observation?'<p class="obs">'+esc(b.observation)+'</p>':'')+'</div>';
   h+='<div class="aura" id="auraBox"><div class="speaker">'+glyph("aura")+'<span class="who">Aura is listening</span><button class="howbtn" id="howOpen" aria-label="How it works">?</button></div>'+
      '<p class="q">What happened?</p>'+
@@ -3619,7 +3619,7 @@ function afterLoop0(e,r){
    TALK: a real conversation with any guardian
 ------------------------------------------------------------------ */
 const GREET={
-  aura:"Welcome to the work. I see the whole circle from here. Tell me what's going on and I'll either sit with you or send you to the one who should.",
+  aura:"I\'m Aura, your guide. I see the whole circle from here. Tell me what's going on and I'll either sit with you or send you to the one who should.",
   onyx:"You came to me, so you already know it's something you've been avoiding. Say it plain.",
   sage:"Something's burning. Good. Tell me who or what lit it.",
   fern:"Slow down, love. You don't need the right words. Just let it drip out.",
