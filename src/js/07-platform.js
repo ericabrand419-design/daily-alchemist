@@ -85,13 +85,13 @@ function overLimit(kind){if(accountsOn()&&ACCT.admin)return false;return usedTod
 function synced(){return MODE==="artifact"?cloud.on:!!ACCT.user;}
 
 async function remotePut(kind,id,data){
-  if(MODE==="artifact"){return cloudPut(kind==="chat"?"chat-"+id:kind==="prefs"?"profile":id,kind==="prefs"?S.profile:data).then(()=>{if(kind==="prefs"){cloudPut("draws",{draws:S.draws});if(S.ledger)cloudPut("ledger",{ledger:S.ledger});cloudPut("extras",{extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges}});}});}
+  if(MODE==="artifact"){return cloudPut(kind==="chat"?"chat-"+id:kind==="prefs"?"profile":id,kind==="prefs"?S.profile:data).then(()=>{if(kind==="prefs"){cloudPut("draws",{draws:S.draws});if(S.ledger)cloudPut("ledger",{ledger:S.ledger});cloudPut("extras",{extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges,movements:S.movements||[],goals:S.goals||[]}});}});}
   if(!ACCT.user||!ACCT.sb)return;
   const sb=ACCT.sb,uid=ACCT.user.id;
   try{
     if(kind==="entry")await sb.from("entries").upsert({id,user_id:uid,data});
     else if(kind==="chat")await sb.from("chats").upsert({user_id:uid,guardian:id,msgs:data.msgs,updated_at:new Date().toISOString()});
-    else await sb.from("prefs").upsert({user_id:uid,data:{profile:S.profile,draws:S.draws,ledger:S.ledger||null,extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges}},updated_at:new Date().toISOString()});
+    else await sb.from("prefs").upsert({user_id:uid,data:{profile:S.profile,draws:S.draws,ledger:S.ledger||null,extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges,movements:S.movements||[],goals:S.goals||[]}},updated_at:new Date().toISOString()});
   }catch(e){}
 }
 async function api(path,body){
