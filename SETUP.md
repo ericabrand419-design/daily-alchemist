@@ -90,3 +90,14 @@ Each guardian has a 90 second instrumental theme made with ElevenLabs Music (abo
 3. From the Twilio console home, copy your **Account SID** (starts with AC) and **Auth Token**.
 4. In Supabase: **Authentication > Sign In / Providers > Phone**. Turn Phone on, choose **Twilio Verify**, paste the Account SID, Auth Token and Verify Service SID, and save. These stay in Supabase; never put them in config.js.
 5. Tell Claude (or set `phoneSignIn: true` in config.js). The app then asks for a mobile number first, with "Use email instead" underneath.
+
+
+## Editing the app (source files)
+
+The app's code lives in `src/`, one file per area:
+
+- `src/js/` holds the app logic, one file per area (guardians, rituals, state, account, audio, Today, Circle, Archive, ritual mode, talk, settings, events). `src/js/ORDER.txt` is the order they're joined in.
+- `src/styles.css` holds all the styles.
+- `src/shell/` holds the page skeleton.
+
+After editing, run `node build.mjs`. It writes `index.html`, `app.js` and `styles.css` for the live site, and `preview/daily-alchemist.html` for the Claude preview. Commit the built files with the source. `src/`, `preview/` and `build.mjs` aren't deployed (see `.vercelignore`).
