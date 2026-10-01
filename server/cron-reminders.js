@@ -42,7 +42,7 @@ export async function GET(request) {
     const rows = await sb("prefs?user_id=eq." + userId + "&select=data");
     const data = rows && rows[0] && rows[0].data; if (!data) continue;
     const x = data.extras || {}, name = firstName(data.profile), contact=(data.profile&&data.profile.contact)||null;
-    if(contact&&contact.enabled===false)continue;
+    if(!contact||contact.enabled!==true)continue;
     const sentRows=((await sb("push_sent?user_id=eq." + userId + "&select=key,sent_at&order=sent_at.desc")) || []);
     const already = new Set(sentRows.map((r) => r.key));
     const cadenceDays=contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:7;
@@ -87,7 +87,7 @@ export async function GET(request) {
       const firstEver = (await sb("entries?user_id=eq." + userId + "&select=created_at&order=created_at.asc&limit=1")) || [];
       const startedBeforeToday = firstEver[0] && Date.parse(firstEver[0].created_at) < now - 12 * 36e5;
       const cadence=contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:7;
-      const letterDue = lastL ? now - lastL > (cadence-.25) * 864e5 && recent.length : startedBeforeToday;
+      const letterDue = lastL ? now - lastL > (cadence-.25) * 864e5 && recent.length : false;
       if (letterDue) {
         const key = "letter:" + et.y + "-" + et.m + "-" + et.d;
         const body = member
