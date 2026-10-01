@@ -4117,7 +4117,7 @@ function openAltar(first){
      (accountsOn()?'<details class="group"><summary>Messages from Aura</summary><p class="small muted">Only when it means something: a promise you asked her to check, something you asked her to bring back, a date that matters. Never "don\'t forget to journal."</p><button class="btn btn-ghost full" id="pushOn" style="margin-top:8px">'+(p.push?"Messages are on":"Let Aura reach me")+'</button></details>':'')+
      cartHTML();
   }
-  h+='<button class="btn btn-main full" id="pSave">'+(first?"Begin":"Save")+'</button>'+(first?'<button class="btn btn-ghost full" id="pSkip">Skip for now</button>':accountHTML())+legalLine()+'</div>';
+  h+='<button class="btn btn-main full" id="pSave">'+(first?"Begin":"Save")+'</button>'+(first?'<button class="btn btn-ghost full" id="pSkip">Skip for now</button>':accountHTML())+legalLine()+(first?'':'<p class="small muted" style="text-align:center;margin-top:14px">This app was built by <a href="https://agent1stconsulting.com" target="_blank" rel="noopener" style="color:var(--gold)">Agent First</a>. Want one for your business? Let\'s talk.</p>')+'</div>';
   openSheet(h);
 }
 
