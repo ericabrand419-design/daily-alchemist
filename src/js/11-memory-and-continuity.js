@@ -160,7 +160,7 @@ function resetProgress(){
 /* Export and delete */
 async function exportArchive(){
   if(typeof cycleSync==="function")await cycleSync();
-  const data=JSON.stringify({app:"The Daily Alchemist",exported:new Date().toISOString(),profile:S.profile,entries:S.entries,chats:S.chats,ledger:S.ledger||{},days:S.days||{},asks:S.asks||[],promises:S.promises||[],cycle:{mode:C.mode,irregular:C.irregular,consent:C.consent,events:C.events}},null,2);
+  const data=JSON.stringify({app:"The Daily Alchemist",exported:new Date().toISOString(),profile:S.profile,entries:S.entries,chats:S.chats,ledger:S.ledger||{},days:S.days||{},asks:S.asks||[],promises:S.promises||[],movements:S.movements||[],goals:S.goals||[],cycle:{mode:C.mode,irregular:C.irregular,consent:C.consent,events:C.events}},null,2);
   const filename="daily-alchemist-archive-"+new Date().toISOString().slice(0,10)+".json";
   if(MODE==="artifact"){
     try{const dl=await window.claude.use("downloads");if(!dl){toast("Export isn't available in this view.");return;}await dl.save({filename,data});}catch(e){if(!e||e.code!=="declined")toast("Export didn't finish. Try again.");}
@@ -174,7 +174,7 @@ async function clearMyData(){
   const keep=S.profile||{},snd={prefMusic:S.prefMusic,prefMusicVol:S.prefMusicVol,prefVoiceOff:S.prefVoiceOff,prefVoice:S.prefVoice};
   try{localStorage.removeItem(KEY);localStorage.removeItem(CYC_KEY);}catch(e){}
   if(typeof cycleReset==="function")cycleReset();
-  S={profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false,adult:keep.adult,adult21:keep.adult21,under21:keep.under21},entries:[],draws:{},chats:{},usage:S.usage||{},...snd,seenIntro:true};
+  S={profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false,adult:keep.adult,adult21:keep.adult21,under21:keep.under21,ageVerified:keep.ageVerified},entries:[],draws:{},chats:{},movements:[],goals:[],usage:S.usage||{},...snd,seenIntro:true};
   saveLocal();return true;
 }
 async function deleteEverything(){
