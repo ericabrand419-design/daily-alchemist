@@ -503,7 +503,10 @@ body:has(#talk) .scrim{z-index:40}body:has(#gate) .scrim{z-index:60}
 .g .e.job{text-transform:none;letter-spacing:0;font-size:13.5px;line-height:1.25;color:var(--glow-dim)}
 .memline{margin-top:4px}
 .rhythm .speaker{display:flex;align-items:center;gap:10px}.rhythm .who{font-family:var(--f-ui);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.rhythm .q2{font-family:var(--f-display);font-size:20px}
-.gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}details.more{margin:6px 0 4px}details.more>summary{list-style:none;cursor:pointer;font-family:var(--f-ui);font-size:15.5px;color:var(--glow-dim);padding:14px 4px;text-align:center}details.more>summary::after{content:" \203A"}details.more[open]>summary::after{content:" \2039"}details.more>summary::-webkit-details-marker{display:none}
+.gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}details.whythis{margin-top:8px}details.whythis>summary{list-style:none;cursor:pointer;font-family:var(--f-ui);font-size:15px;color:var(--gold);display:inline-block}details.whythis>summary::-webkit-details-marker{display:none}
+.remember{margin-top:12px;padding:10px 12px;border-left:2px solid var(--gold);background:rgba(231,196,90,.06);border-radius:0 12px 12px 0}.remember p{font-family:var(--f-ui);font-size:15.5px;margin-top:4px;color:var(--glow)}
+.dotsrow{display:flex;gap:8px;justify-content:center;margin:20px 0 16px}.dotsrow i{width:8px;height:8px;border-radius:50%;background:rgba(244,241,230,.25)}.dotsrow i.on{background:var(--gold)}
+details.more{margin:6px 0 4px}details.more>summary{list-style:none;cursor:pointer;font-family:var(--f-ui);font-size:15.5px;color:var(--glow-dim);padding:14px 4px;text-align:center}details.more>summary::after{content:" \203A"}details.more[open]>summary::after{content:" \2039"}details.more>summary::-webkit-details-marker{display:none}
 .gplus{width:40px;height:40px;border-radius:50%;border:1px dashed rgba(231,196,90,.6);display:grid;place-items:center;font-size:22px;color:var(--gold)}.gchip{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--glow);font-family:var(--f-ui);font-size:14px;min-width:68px;padding:4px;cursor:pointer}
 .addnums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.addnums div{text-align:center}.addnums b{display:block;font-family:var(--f-display);font-size:26px;color:var(--gold)}.addnums span{display:block;font-family:var(--f-ui);font-size:13px;line-height:1.3;color:var(--glow-dim);margin-top:2px}
 select{background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 10px;font:inherit;font-size:17px;color-scheme:dark;flex:1}
@@ -1953,12 +1956,21 @@ function signInForm(gate,byEmail){
    full reading from the very first question. */
 function showGate(){
   if(MODE!=="web"||!ACCT.sb||$("#gate"))return;
+  if(!S.seenIntro&&!S.profile.onboarded){showIntro();return;}
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
     auraSays(S.friendCode?"I\'m Aura, your guide here. You came in on an invitation, so make your account and everything opens for you, for life.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
     signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }
+const INTRO=[["Tell Aura what's happening.","Say it or type it, messy is fine. No forms, no browsing."],["Aura remembers your story and notices your patterns.","The people, the threads, what helped and what didn't. You stay in control of what she keeps."],["She brings the right guardian, ritual or next step when you need it.","You live your life. Aura keeps the thread."]];
+let introAt=0;
+function showIntro(){
+  let g=$("#intro");if(!g){g=document.createElement("div");g.className="gate";g.id="intro";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Welcome");document.body.appendChild(g);document.body.style.overflow="hidden";}
+  const [h,p]=INTRO[introAt],last=introAt===INTRO.length-1;
+  g.innerHTML='<div class="in auraPop" style="text-align:center"><div class="popseal">'+glyph("aura",72)+'</div><div class="label">The Daily Alchemist</div><h2 style="margin-top:10px">'+esc(h)+'</h2><p class="muted" style="margin-top:10px">'+esc(p)+'</p><div class="dotsrow">'+INTRO.map((_,i)=>'<i'+(i===introAt?' class="on"':'')+'></i>').join("")+'</div><button class="btn btn-main full" id="introNext">'+(last?"Meet Aura":"Next")+'</button>'+(last?'':'<button class="linkish" id="introSkip" style="margin-top:10px">Skip</button>')+'</div>';
+}
+function introDone(){S.seenIntro=true;saveLocal();const g=$("#intro");if(g)g.remove();document.body.style.overflow="";showGate();}
 function hideGate(){const g=$("#gate");if(g){g.remove();document.body.style.overflow="";setTimeout(()=>{if(!S.profile.onboarded&&!$("#scrim")&&!$("#gate"))openAltar(true);},500);}}
 async function refreshMe(){
   const r=await api("/api/me",S.pendingDob?{dob:S.pendingDob}:{});
@@ -2376,7 +2388,7 @@ function localRead(text,mins){
 /* Every time she tells Aura something, it's logged (unless she says not to remember it), so Aura
    can see patterns, follow up, and answer from her history later. */
 function logAsk(text,x){
-  const a={id:uid(),ts:Date.now(),text:memOn()?String(text).slice(0,400):"",thread:x.thread||"",theme:x.theme||"",guardian:x.guardian||"aura",action:x.action||"ritual",ritualId:x.ritual&&!x.ritual.composed?x.ritual.id:null,ritualTitle:x.ritual?x.ritual.title:"",noMem:!memOn(),follow:null};
+  const a={id:uid(),ts:Date.now(),text:memOn()?String(text).slice(0,400):"",thread:x.thread||"",theme:x.theme||"",guardian:x.guardian||"aura",action:x.action||"ritual",ritualId:x.ritual&&!x.ritual.composed?x.ritual.id:null,ritualTitle:x.ritual?x.ritual.title:"",noMem:!memOn(),follow:null,tomorrow:x.tomorrow||""};
   S.asks.unshift(a);S.asks=S.asks.slice(0,200);persistAll();return a;
 }
 function asksText(){return S.asks.filter(a=>!a.noMem&&a.text).slice(0,12).map(a=>"- "+fmtDate(a.ts)+" | "+(a.thread||a.theme)+" | "+G[a.guardian].name+" | said: "+a.text.slice(0,140)+(a.follow?" | afterwards: "+(a.follow.did===false?"didn't do it":a.follow.helped||"did it")+(a.follow.changed?", "+a.follow.changed.slice(0,100):""):"")).join("\n")||"(nothing yet)";}
@@ -2387,9 +2399,9 @@ function pendingFollow(){
 function followHTML(){
   const a=pendingFollow();if(!a)return "";
   const did=a.did&&S.entries.find(e=>e.id===a.did), when=Date.now()-a.ts<36*3600e3?"Yesterday":"On "+new Date(a.ts).toLocaleDateString(undefined,{weekday:"long"}), g=G[a.guardian]||G.aura;
-  const said=a.text?' you told me "'+esc(a.text.length>90?a.text.slice(0,90)+"...":a.text)+'".':" we talked.";
-  const q=did?" You did "+esc(did.ritualTitle)+". Did it help?":a.ritualTitle&&a.action!=="talk"?" I suggested "+esc(a.ritualTitle)+" with "+esc(g.name)+". Did you get to it?":" Did anything shift?";
-  const btns=did||!a.ritualTitle||a.action==="talk"?[["helped","I feel better"],["still","Still bothering me"],["happened","Something happened"]]:[["did","I did it"],["notyet","Not yet"],["letgo","Let it go"]];
+  const said=a.tomorrow?" we left this unresolved. I said I'd ask "+esc(a.tomorrow.replace(/^(I'll ask|ask)( you)? ?/i,""))+".":a.text?' you told me "'+esc(a.text.length>90?a.text.slice(0,90)+"...":a.text)+'".':" we talked.";
+  const q=a.tomorrow?" Is it still bothering you?":did?" You did "+esc(did.ritualTitle)+". Did it help?":a.ritualTitle&&a.action!=="talk"?" I suggested "+esc(a.ritualTitle)+" with "+esc(g.name)+". Did you get to it?":" Did anything shift?";
+  const btns=a.tomorrow||did||!a.ritualTitle||a.action==="talk"?[["helped","I feel better"],["still","Still bothering me"],["happened","Something happened"]]:[["did","I did it"],["notyet","Not yet"],["letgo","Let it go"]];
   return '<div class="card checkin" id="fuCard" data-fuid="'+a.id+'"><div class="handoff" style="padding:0">'+glyph("aura")+'<p><span class="who2">Aura, following up</span>'+when+said+q+'</p></div><div class="row" style="margin-top:10px" id="fuBtns">'+btns.map(b=>'<button class="chip" data-fu="'+b[0]+'">'+b[1]+'</button>').join("")+'</div><div id="fuMore"></div></div>';
 }
 function followStep2(a,picked){
@@ -2489,10 +2501,11 @@ async function askAura(text,mins){
 "YOU ARE THE FRONT DOOR. She never has to know how the app is organized. Choose the right NEXT ACTION, not always a ritual. action is one of: ritual (a practice fits), talk (she needs to think it through with the guardian first), write (one honest sentence would do more than a ritual; give the exact prompt), rest (she has already done enough today or is depleted; tell her so), revisit (something she already wrote holds the answer; give revisitId), simplify (she can't think or is flooded; one tiny grounding action, nothing else), circle (there are genuinely two or three ways to see this; give 2 or 3 guardians and one sentence each on how they see it), decide (she is weighing a decision; never decide for her), event (a life transition like a move, breakup, new job, loss or birthday that needs a short path of 3 to 5 steps; use library ritual ids where possible), build (she asked you to create a ritual; compose it). Then choose the guardian and, for ritual, the best ritual id from the library.\n"+
 "OPEN PROMISES SHE MADE TO HERSELF: "+(openPromises().map(p=>fmtDate(p.ts)+": "+p.text).join(" | ")||"none")+"\n"+
 "If she states something she intends to do, offer to hold her to it in the promise field (her words, short).\n"+
+"TONIGHT VERSUS TOMORROW: when she is upset and still activated, decide what is for tonight (calming, releasing, resting) and what is a problem to solve later. Say it plainly in your aura line, for example: This doesn't sound like a problem you need to solve tonight. You're angry and still activated. Then fill tomorrow with what you'll check.\n"+
 "Name the ongoing thread this belongs to in 1 to 3 words, reusing an existing thread if it fits. Existing threads: "+(threadsOf().map(x=>x[0]).join(", ")||"none yet")+". Then choose the guardian and, for ritual, the best ritual id from the library. Only compose a new ritual if nothing in the library fits her time, materials or situation; composed rituals use only what she has, 4 to 6 steps, one spoken line.\n"+
 "If she mentions wanting to hurt herself, not wanting to be alive, wanting to hurt someone else, or someone hurting or threatening her, set care to true, choose aura, choose ritual anchor, and make the reading gentle, loving and plain: tell her she matters, that she is not alone, and to reach a real person now (call or text 988 in the US; 911 if anyone is in immediate danger; for someone hurting her, the National Domestic Violence Hotline). Never shame her for what she feels.\n"+
 "Reply with ONLY JSON in this shape:\n"+
-'{"action":"ritual","thread":"Work boundary","promise":"optional: something she said she will do, in her words, or null","circle":"only for circle: [{\"guardian\":\"fern\",\"view\":\"one sentence\"}]","plan":"only for event: {\"title\":\"A new home\",\"steps\":[{\"ritualId\":\"threshold-reset\",\"note\":\"one sentence\"}]}","writePrompt":"only for write: the one sentence she should finish, like: The thing I haven\'t said to her is...","revisitId":"only for revisit: the entry id","guardian":"thistle","aura":"1 or 2 sentences in AURA\'s own voice: show what you remember when it matters, then hand her off, ending with a line like That\'s Thistle\'s work.","ritualId":"salt-line","composed":null,"reading":"2 to 4 sentences spoken directly to her in the CHOSEN GUARDIAN\'s own voice, using their rhythm and phrases","memoryId":"the id of the most similar past moment if bringing it back would help, else null","memoryQuestion":"if memoryId is set, one short question in the guardian\'s voice, like Do you want to work from there or start fresh?","why":"one sentence on why this practice now, naming her words, her history or the moon","theme":"one word theme","care":false}\n'+
+'{"action":"ritual","thread":"Work boundary","promise":"optional: something she said she will do, in her words, or null","circle":"only for circle: [{\"guardian\":\"fern\",\"view\":\"one sentence\"}]","plan":"only for event: {\"title\":\"A new home\",\"steps\":[{\"ritualId\":\"threshold-reset\",\"note\":\"one sentence\"}]}","writePrompt":"only for write: the one sentence she should finish, like: The thing I haven\'t said to her is...","revisitId":"only for revisit: the entry id","guardian":"thistle","aura":"1 or 2 sentences in AURA\'s own voice: show what you remember when it matters, then hand her off, ending with a line like That\'s Thistle\'s work.","ritualId":"salt-line","composed":null,"reading":"2 to 4 sentences spoken directly to her in the CHOSEN GUARDIAN\'s own voice, using their rhythm and phrases","memoryId":"the id of the most similar past moment if bringing it back would help, else null","memoryQuestion":"if memoryId is set, one short question in the guardian\'s voice, like Do you want to work from there or start fresh?","why":"one or two sentences on why THIS and not something else, naming her words, her history, the time of day or the moon","tomorrow":"if something stays unresolved, what you will ask her tomorrow, in a few words, like: whether the boundary itself still needs attention. Otherwise null","theme":"one word theme","care":false}\n'+
 'If composing: "ritualId":null,"composed":{"title":"...","min":8,"el":"Fire","purpose":"...","needs":["salt"],"steps":[{"t":"short title","d":"one or two sentences","say":"optional spoken line"}],"secret":"one line on why it works","prompts":["reflection question","reflection question"]}';
   try{
     if(inflight)inflight.abort(); inflight=new AbortController();
@@ -2515,7 +2528,7 @@ async function askAura(text,mins){
     if(act==="event"&&!plan){const ev=lifeEventFor(text);if(ev)plan={title:ev.title,steps:ev.steps.map(([id,note])=>({ritualId:id,title:byId[id]?byId[id].title:"",note}))};else act="ritual";}
     if(act==="build"&&!(r&&r.composed))act="ritual";
     const rv=act==="revisit"&&out.revisitId&&S.entries.find(e=>e.id===out.revisitId);
-    return {circle,plan,thread:clean(out.thread||"").slice(0,40),promise:out.promise&&out.promise!=="null"?clean(out.promise).slice(0,200):"",action:act==="revisit"&&!rv?"ritual":act,writePrompt:clean(out.writePrompt||""),revisit:rv?rv.id:null,guardian:gk,ritual:r,aura:clean(out.aura||("That's "+G[gk].name+"'s work.")),memory,reading:clean(out.reading||G[gk].phrases[0]),why:esc(clean(out.why||"")),theme:String(out.theme||THEME[gk]).toLowerCase().slice(0,24),care:!!out.care,source:"aura"};
+    return {circle,plan,thread:clean(out.thread||"").slice(0,40),promise:out.promise&&out.promise!=="null"?clean(out.promise).slice(0,200):"",action:act==="revisit"&&!rv?"ritual":act,writePrompt:clean(out.writePrompt||""),revisit:rv?rv.id:null,guardian:gk,ritual:r,aura:clean(out.aura||("That's "+G[gk].name+"'s work.")),memory,reading:clean(out.reading||G[gk].phrases[0]),why:esc(clean(out.why||"")),tomorrow:out.tomorrow&&out.tomorrow!=="null"?clean(String(out.tomorrow)).slice(0,160):"",theme:String(out.theme||THEME[gk]).toLowerCase().slice(0,24),care:!!out.care,source:"aura"};
   }catch(e){
     if(e&&e.code==="cancelled")throw e;
     const res=localRead(text,mins);const c=e&&e.code;
@@ -3487,6 +3500,22 @@ function bdayHTML(){
   if(pn&&pd!=null&&pd<=7)h+='<div class="card rhythm"><div class="speaker">'+glyph("marigold",30)+'<span class="who" style="color:'+G.marigold.color+'">Marigold · coming up</span></div><p style="margin-top:8px">'+esc(pn.name||(pn.mode==="partner"?"Your partner":"Your crush"))+'\'s birthday is '+(pd===0?"today":pd===1?"tomorrow":"in "+pd+" days")+'. Want help making it feel like you meant it?</p><div class="row" style="margin-top:10px"><button class="btn btn-ghost" data-talk="marigold">Plan it with Marigold</button></div></div>';
   return h;
 }
+function whyThis(t){return t?'<details class="whythis"><summary>Why this?</summary><p class="why" style="margin-top:6px">'+t+'</p></details>':'';}
+function eveningPick(ins){
+  const day=Date.now()-18*3600e3,today=S.asks.filter(a=>a.ts>day),txt=today.map(a=>a.text||"").join(" ").toLowerCase(),d=S.days[dayKey(new Date())]||{};
+  const pool=g=>R.filter(r=>canUse(r)&&!r.reset&&r.g===g&&r.min<=15&&!r.bath);
+  let g="juniper",why=[];const h=new Date().getHours();
+  if(/anxious|anxiety|overthink|racing|can'?t (stop|shut|sleep)|spiral|worried|panic/.test(txt)||today.some(a=>a.guardian==="lily")){g="lily";why.push("Earlier today your mind was running hot, and you can't sleep on a racing head");}
+  else if(/grie|miss (him|her)|died|loss|funeral/.test(txt)||today.some(a=>a.guardian==="willow")){g="willow";why.push("You've been carrying grief today, and it deserves somewhere soft to land before sleep");}
+  else if(lowTank()||/tired|exhausted|drained|burn/.test(txt)){g="fern";why.push(lowTank()?"You started today with a low tank":"You told me you're running on empty");}
+  else{why.push(today.length?"You've had a full day":"It's the end of the day");}
+  if(M.name.includes("Waning")||M.name.includes("Crescent")&&!M.waxing)why.push("the moon is waning, so tonight is for letting go, not starting something");
+  if(ritualsToday()>=1)why.push("you've already done "+ritualsToday()+(ritualsToday()===1?" ritual":" rituals")+" today, so I kept this one short");
+  if(h>=22)why.push("it's late");
+  const p=pool(g).length?pool(g):pool("juniper");
+  const r=pickForNow(p,new Date(),"wind")||byId["two-minute-settle"];
+  return {r,why:esc(why.join(", ").replace(/^./,c=>c.toUpperCase()))+". "+esc(G[r.g].name)+" is better for tonight than anything that asks more of you."+(ins?" "+esc(ins):"")};
+}
 function rhythmHTML(){
   const part=partOfDay(),d=dayRec(),ins=rhythmInsight();
   const head=(g,t)=>'<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+G[g].color+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';
@@ -3503,6 +3532,7 @@ function rhythmHTML(){
     return ins?'<div class="card rhythm">'+head("aura","what I'm noticing")+'<p class="why" style="margin-top:8px">'+esc(ins)+'</p></div>':"";
   }
   const nk=nightKey();
+  if(!woundDown(nk)){const pk=eveningPick(ins);return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura picked '+esc(G[pk.r.g].name)+' for tonight</span></div><p style="margin-top:8px">Let\'s close the day. <b>'+esc(pk.r.title)+'</b> · '+pk.r.min+' min</p>'+whyThis(pk.why)+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pk.r.id)+'">Wind down with '+esc(G[pk.r.g].name)+'</button><button class="btn btn-ghost" data-wind="1">Already did</button></div></div>';}
   if(woundDown(nk))return '<div class="card rhythm">'+head("juniper","tonight")+'<p style="margin-top:8px">You wound down. The day is done asking things of you. Sleep well.</p></div>';
   const pool=R.filter(r=>canUse(r)&&!r.reset&&["juniper","willow","fern","lily"].includes(r.g)&&r.min<=15&&!r.bath&&r.tags.some(t=>/rest|calm|slow|sleep|still|busy|overwhelm|stirred/.test(t)));
   const r=pickForNow(pool,new Date(),"wind")||byId["two-minute-settle"];
@@ -3527,7 +3557,7 @@ function renderToday(){
     h+=yourCircleHTML();
     const dp=deeperHTML();
     h+='<details class="more"><summary>More for today</summary>'+(fu?rh:'')+'<div class="trio">'+
-      '<div class="card hcard"><div class="label">One thing to do</div><h3 style="margin-top:6px">'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min'+(b.why?". "+esc(b.why):known?"":". A good place to start.")+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
+      '<div class="card hcard"><div class="label">Aura picked this for today</div><h3 style="margin-top:6px">'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min'+(b.why?". "+esc(b.why):known?"":". A good place to start.")+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
       (memOn()&&b.remembered?'<div class="card hcard"><div class="label">One thing I remember</div><p style="margin-top:6px">'+esc(b.remembered)+'</p><div class="row" style="margin-top:8px"><button class="linkish" id="memOpen">See everything I remember</button></div></div>':
         !memOn()?'<div class="card hcard"><div class="label">Memory is off</div><p class="small muted" style="margin-top:6px">I\'m not keeping anything, so every visit starts fresh.</p><button class="linkish" id="memOpen">Change</button></div>':'')+
       '<div class="card hcard"><div class="label">'+esc(dp.label)+'</div><p class="small" style="margin-top:6px">'+esc(dp.text)+'</p><div class="row" style="margin-top:10px">'+dp.btn+'</div></div>'+
@@ -3547,12 +3577,27 @@ function readingHTML(x){
    (same?'':'<div class="head">'+glyph(x.guardian)+'<div><div class="who" style="color:'+g.color+'">'+esc(g.title)+'</div><div class="name">'+esc(g.name)+'</div></div></div>')+
    '<div class="body"><p class="voice"><button class="hear" data-hear="'+(x.guardian||"aura")+'" aria-label="Hear it">'+HEAR_ICON+'</button>'+esc(x.reading)+'</p>'+
    (x.memory?'<div class="recall" id="recall"><div class="label">From your archive · '+esc(x.memory.date)+(x.memory.moon?' · '+esc(x.memory.moon):'')+'</div><p class="small muted" style="margin-top:4px">After '+esc(x.memory.ritualTitle)+', you wrote:</p><blockquote>"'+esc(x.memory.quote)+'"</blockquote><p class="voice" style="font-size:18px;margin-top:6px">'+esc(x.memory.question)+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-fromhere="'+esc(x.memory.id)+'">Work from there</button><button class="btn btn-ghost" id="freshBtn">Start fresh</button></div></div>':'')+
-   (x.why?'<p class="why">'+x.why+'</p>':"")+
+   memStripHTML(x)+(x.tomorrow?'<p class="small" style="margin:8px 0 0"><b>Tomorrow</b> I\'ll ask you '+esc(x.tomorrow.replace(/^(I'll ask|ask)( you)? ?/i,""))+'</p>':'')+whyThis(x.why)+
    (x.care?'<div class="care">You matter more than any ritual. If you are thinking about hurting yourself, please reach out to someone you trust now, or call or text <b>988</b> (Suicide and Crisis Lifeline, US).</div>':"")+
    (x.note?'<p class="small muted">'+esc(x.note)+(x.signin?' <button class="linkish" id="siOpen">Sign in</button>':x.limit&&!isMember()?' <button class="linkish" data-paywall="More readings">Get more with '+esc(PLAN.name)+'</button>':"")+'</p>':"")+actionHTML(x)+(ch||"")+
    (x.promise?'<div class="ask dark"><span>You said: "'+esc(x.promise)+'". Want me to hold you to it?</span><button class="chip" data-holdme="7">Check in a week</button><button class="chip" data-holdme="2">In two days</button></div>':'')+
    '<div class="row"><button class="btn btn-ghost" data-talkread="'+x.guardian+'">Talk to '+esc(g.name)+'</button><button class="btn btn-ghost" data-laterread="1">Bring this back later</button><button class="btn btn-ghost" id="againBtn">Ask something else</button></div>'+
    '<p class="small muted memline" id="memLine">'+(!memOn()?'Memory is off, so I won\'t keep this. <button class="linkish" id="memOpen">Change</button>':x.noMem?'I won\'t remember this one. <button class="linkish" id="remAgain">Remember it after all</button>':'I\'ll remember this. <button class="linkish" id="noRem">Don\'t remember this</button> · <button class="linkish" id="memOpen">What I remember</button>')+'</p></div></div>';
+}
+/* Visible memory: small moments where Aura shows she remembers. */
+function memStripHTML(x){
+  if(!memOn()||!x.thread)return "";
+  const th=x.thread.toLowerCase(),same=S.asks.filter(a=>(a.thread||"").toLowerCase()===th&&!a.noMem&&a.id!==x.askId);
+  const lines=[];
+  if(same.length){const first=Math.min(...same.map(a=>a.ts)),days=Math.round((Date.now()-first)/864e5);
+    if(days>=2)lines.push("We've been carrying this for "+days+" days.");
+    const n30=same.filter(a=>Date.now()-a.ts<30*864e5).length;if(n30>=2)lines.push("This has come up "+(n30+1)+" times this month.");
+    else lines.push("This connects to something you told me before.");}
+  const helped=S.entries.find(e=>(e.thread||"").toLowerCase()===th&&e.after==="Lighter"&&e.ritualTitle&&!e.followup);
+  if(helped)lines.push("Last time, "+helped.ritualTitle+" helped.");
+  const still=same.find(a=>a.follow&&a.follow.still);
+  if(still)lines.push("Last time it was still bothering you after, so I'm not repeating what didn't work.");
+  return lines.length?'<div class="remember"><span class="label">I remember</span>'+lines.slice(0,3).map(l=>'<p>'+esc(l)+'</p>').join("")+'</div>':"";
 }
 function actionHTML(x){
   const g=G[x.guardian]||G.aura, a=x.action||"ritual";
@@ -3735,7 +3780,7 @@ function renderArchive(){
   h+='<div class="card"><div class="label">Ask your Archive</div><div class="composer" style="margin-top:8px"><label class="sr" for="archAsk">Ask your Archive</label><textarea id="archAsk" style="min-height:56px" placeholder="When did this first come up?"></textarea>'+micBtn("archAsk")+'</div><button class="btn btn-ghost full" style="margin-top:8px" id="archAskBtn">Ask</button><div id="archAnswer"></div></div>';
   const th=threadsOf();
   if(q&&th.some(x=>x[0]===q))h+=beforeAfterHTML(q);
-  if(th.length)h+='<div><div class="label">Your threads</div><div class="chips" style="margin-top:8px">'+th.slice(0,10).map(([k,v])=>'<button class="chip" data-thread="'+esc(k)+'" aria-pressed="'+(q===k)+'">'+esc(k)+' · '+v+'</button>').join("")+'</div></div>';
+  if(th.length)h+='<div><div class="label">What you\'ve been living through</div><p class="small muted" style="margin-top:4px">Aura keeps the thread, so you don\'t have to.</p><div class="chips" style="margin-top:8px">'+th.slice(0,10).map(([k,v])=>{const ts=S.entries.filter(e=>e.thread===k).map(e=>e.ts).concat(S.asks.filter(a=>a.thread===k).map(a=>a.ts));const days=ts.length?Math.max(1,Math.round((Date.now()-Math.min(...ts))/864e5)):1;return '<button class="chip" data-thread="'+esc(k)+'" aria-pressed="'+(q===k)+'">'+esc(k)+' · '+(days>1?days+" days":"today")+'</button>';}).join("")+'</div></div>';
   const op=S.promises.slice(0,8);
   if(op.length)h+='<div class="card"><div class="label">Promises to myself</div>'+op.map(pr=>'<div class="li"><span>'+esc(pr.text)+'<br><span class="small muted">'+fmtDate(pr.ts)+' · '+(pr.status==="done"?"Done":pr.status==="let"?"Let go":"Open")+'</span></span>'+(pr.status==="open"?'<span class="row"><button class="chip" data-cal="'+pr.id+'" aria-label="Add to calendar">📅</button><button class="chip" data-promise="'+pr.id+':done">Done</button></span>':'')+'</div>').join("")+'</div>';
   h+=goToHTML()+myRitualsHTML()+spacesHTML();
@@ -4314,6 +4359,8 @@ document.addEventListener("click",async ev=>{
   if(t.id==="adultOk"){confirmAdultNow();return;}
   if(t.id==="dob21Go"){submitDob();return;}
   if(t.id==="bdayGo"){submitBirthday();return;}
+  if(t.id==="introNext"){if(introAt<INTRO.length-1){introAt++;showIntro();}else introDone();return;}
+  if(t.id==="introSkip"){introDone();return;}
   if(d.pmode){PN.mode=d.pmode;document.querySelectorAll("[data-pmode]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.pmode===d.pmode));return;}
   if(t.id==="pnOpen"||t.closest&&t.closest("#pnOpen")){openPerson();return;}
   if(t.id==="pnSave"){savePerson();return;}
