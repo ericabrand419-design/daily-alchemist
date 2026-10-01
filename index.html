@@ -211,7 +211,7 @@ const seed={
   circle:[
     {id:'p1',name:'Aunt Denise',note:'Recovery after surgery'},
     {id:'p2',name:'Marcus',note:'New job and transition'},
-    {id:'p3',name:'Hendrix',note:'Peace, growth and protection'}
+    {id:'p3',name:'Jordan',note:'Peace, growth and protection'}
   ],
   paths:[
     {title:'Waiting without losing heart',why:'Suggested because you have an unresolved prayer you are still carrying.',days:7,progress:2},
@@ -222,6 +222,16 @@ const seed={
 let state=loadState();
 let currentResponse=null;
 let supabaseClient=null;
+const translation=document.getElementById('translation');
+const prayerStyle=document.getElementById('prayerStyle');
+const depth=document.getElementById('depth');
+const followToggle=document.getElementById('followToggle');
+const onTitle=document.getElementById('onTitle');
+const onBody=document.getElementById('onBody');
+const onNext=document.getElementById('onNext');
+const onboarding=document.getElementById('onboarding');
+const dayGreeting=document.getElementById('dayGreeting');
+const heartInput=document.getElementById('heartInput');
 
 const responses={
   anxiety:{match:/anx|worried|worry|afraid|fear|panic|peace|overwhelm/i, heard:"You’re carrying something that feels bigger in your mind than you want it to.",ref:'Psalm 46:1',verse:'“God is our refuge and strength, a very present help in trouble.”',why:'Psalm 46 does not pretend trouble is absent. It places God inside the trouble as refuge and strength, which fits a moment when you need steadiness more than an explanation.',prayer:'God, meet me in what I cannot settle by myself. Be my refuge right here, not later. Give me enough peace for the next thing in front of me.',step:'Name the one part of this situation that actually belongs to today. Pray over that part and let the rest stay outside this moment.'},
