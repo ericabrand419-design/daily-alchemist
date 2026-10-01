@@ -17,7 +17,11 @@ import { createHash } from "node:crypto";
 
 const read = (p) => readFileSync(new URL(p, import.meta.url), "utf8");
 const order = read("./src/js/ORDER.txt").split("\n").map((s) => s.trim()).filter(Boolean);
-const js = order.map((f) => read("./src/js/" + f)).join("");
+const rules = JSON.parse(read("./shared/product-rules.json"));
+const shared = "const HARD_RULE=" + JSON.stringify(rules.hardRule) + ";\n" +
+  "const PRIORITY_TEXT=" + JSON.stringify(rules.priorityText) + ";\n" +
+  "const PRIORITY_HEAVY_PATTERN=" + JSON.stringify(rules.heavyPattern) + ";\n";
+const js = shared + order.map((f) => read("./src/js/" + f)).join("");
 const bundle = "(function(){\n\"use strict\";\n" + js + "})();\n";
 const css = read("./src/styles.css");
 const webHead = read("./src/shell/web-head.html");
