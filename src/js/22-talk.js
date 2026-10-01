@@ -29,7 +29,7 @@ function openTalk(k){
   track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
   closeSheet();talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
-  el.innerHTML='<div class="hd">'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span><button class="iconbtn" id="talkX" aria-label="Close">×</button></div><div class="msgs" id="msgs"></div>'+
+  el.innerHTML='<div class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button>'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span></div><div class="msgs" id="msgs"></div>'+
     '<div class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Talk to '+esc(g.name)+'"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></div>';
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawMsgs();
