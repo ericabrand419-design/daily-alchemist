@@ -148,7 +148,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="fbOpen"||d.fb){openFeedback(d.fb||"settings");return;}
   if(d.fbmood){t.parentElement.querySelectorAll("[data-fbmood]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="fbSend"){sendFeedback(t.dataset.where);return;}
-  if(t.id==="showAll"||t.id==="showAll2"){S.showAll=true;saveLocal();renderCircle();return;}
+  if(t.id==="showAll"||d.showall){S.showAll=true;saveLocal();renderCircle();return;}
   if(t.id==="howOpen"||d.how){openHow();return;}
   if(t.id==="letterOpen"){openLetterFlow(t);return;}
   if(t.id==="trialSeen"){S.trialSeen=true;saveLocal();renderToday();return;}
@@ -226,7 +226,6 @@ document.addEventListener("click",async ev=>{
   if(d.have){t.setAttribute("aria-pressed",String(t.getAttribute("aria-pressed")!=="true"));return;}
   if(d.tone){t.parentElement.querySelectorAll("[data-tone]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="adultOk"){confirmAdultNow();return;}
-  if(t.id==="dob21Go"){submitDob();return;}
   if(t.id==="bdayGo"){submitBirthday();return;}
   if(t.id==="introNext"){if(introAt<INTRO.length-1){introAt++;showIntro();}else introDone();return;}
   if(t.id==="introSkip"){introDone();return;}
