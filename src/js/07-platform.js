@@ -74,7 +74,6 @@ async function submitBirthday(){
   else toast("Thank you. You're all set.");
 }
 function vesperGate(){
-  const g=G.vesper;
   if(accountsOn()&&ACCT.under21||S.profile.under21){openSheet('<div class="stack">'+glyph("vesper",56)+'<h2>Vesper is for 21 and older</h2><p>Marigold is here for love, dating and feeling good in your skin.</p><button class="btn btn-main full" data-talk="marigold">Talk to Marigold</button></div>');return;}
   if(!(accountsOn()?ACCT.adult21:S.profile.adult21)){openBirthday("Vesper\'s room is for 21 and older. When\'s your birthday?","vesper");return;}
   if(false){openSheet('<div class="stack">'+glyph("vesper",56)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+'</div><h2>Vesper\'s room is for 21 and older</h2></div><p>Enter your date of birth to continue.</p><label class="sr" for="dob21">Date of birth</label><input type="date" id="dob21" max="'+new Date().toISOString().slice(0,10)+'"><button class="btn btn-main full" id="dob21Go">Continue</button><p class="small muted">We only keep whether you are 21 or older, not your birthday.</p></div>');return;}
