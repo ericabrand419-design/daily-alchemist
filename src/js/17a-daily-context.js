@@ -100,7 +100,7 @@ function focusText(now){
   return "RIGHT NOW: "+DP_WORD[dp]+", "+now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+". Today's steward is "+G[STEWARD[dp]].name+". Plant ally: "+plantAlly(now).n+" (symbolic only; never suggest eating or taking herbs).\n"+
     "CURRENT FOCUS, decided by the app's priority engine (follow it): "+d+"\n"+
     (f.level!==4&&f.body.lines.length?"BODY: "+f.body.lines.join(" ")+"\n":"")+
-    (cycleAIText(now)?cycleAIText(now)+"\n":"")+wxAIText()+
+    (cycleAIText(now)?cycleAIText(now)+"\n":"")+movementAIText()+goalAIText()+wxAIText()+
     (ans.length?"HER DAILY QUESTION TODAY: "+ans.join(". ")+".\n":"")+
     "THE HARD RULE: "+HARD_RULE+"\n"+PRIORITY_TEXT+"\n";
 }
