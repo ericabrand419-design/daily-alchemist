@@ -6,17 +6,27 @@ const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","X
 const ORN='<svg class="orn" viewBox="0 0 220 20" aria-hidden="true"><path d="M4 10h78M138 10h78" stroke="#9A7414" stroke-width="1"/><path d="M82 10c8 0 12-6 18-6M138 10c-8 0-12-6-18-6M82 10c8 0 12 6 18 6M138 10c-8 0-12 6-18 6" fill="none" stroke="#9A7414" stroke-width="1"/><path d="M110 2l2.6 5.4L118 10l-5.4 2.6L110 18l-2.6-5.4L102 10l5.4-2.6z" fill="#BF1E73"/><circle cx="4" cy="10" r="1.6" fill="#9A7414"/><circle cx="216" cy="10" r="1.6" fill="#9A7414"/></svg>';
 function startRitual(r,ctx){
   closeSheet();
-  run={r:adapt(r),i:0,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
+  run={r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
   const el=document.createElement("div");el.className="rite";el.id="rite";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",r.title);
-  document.body.appendChild(el);document.body.style.overflow="hidden";
+  el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
 }
 function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;if(talkG)musicFor(talkG);else musicBack();}
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+glyph(r.g)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
-  if(i===-1){ /* intro */ }
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32,true)+'<span class="t">· '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  if(i===-1){
+    const needs=ritualNeeds(r);
+    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+
+      '<div class="ritualintro">'+
+      '<div class="count"><span class="seal">✦</span><span>Before you begin</span></div><h2>'+esc(r.title)+'</h2>'+ORN+
+      '<p class="purpose">'+esc(r.purpose||"")+'</p>'+
+      '<div class="gatherbox"><span class="sayl">Gather everything now</span><div class="needchips">'+(needs.length?needs.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
+      '<p class="prepnote">You should not discover a new supply halfway through. If something is missing, go back and tell Aura before you start.</p>'+
+      '</div></div><div class="foot"><button class="btn btn-ink" id="nextBtn">I have what I need</button></div>';
+    el.scrollTop=0;return;
+  }
   if(i<total){
     const s=r.steps[i];
     el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal">'+ROMAN[i+1]+'</span><span>of '+ROMAN[total]+'</span></div><h2>'+esc(s.t)+'</h2>'+ORN+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+

@@ -41,8 +41,13 @@ export async function GET(request) {
   for (const [userId, list] of Object.entries(byUser)) {
     const rows = await sb("prefs?user_id=eq." + userId + "&select=data");
     const data = rows && rows[0] && rows[0].data; if (!data) continue;
-    const x = data.extras || {}, name = firstName(data.profile);
-    const already = new Set(((await sb("push_sent?user_id=eq." + userId + "&select=key")) || []).map((r) => r.key));
+    const x = data.extras || {}, name = firstName(data.profile), contact=(data.profile&&data.profile.contact)||null;
+    if(!contact||contact.enabled!==true)continue;
+    const sentRows=((await sb("push_sent?user_id=eq." + userId + "&select=key,sent_at&order=sent_at.desc")) || []);
+    const already = new Set(sentRows.map((r) => r.key));
+    const cadenceDays=contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:7;
+    const lastContact=sentRows[0]&&Date.parse(sentRows[0].sent_at);
+    if(contact&&contact.enabled===true&&lastContact&&now-lastContact<(cadenceDays*864e5-6*36e5))continue;
     const due = [];
     for (const p of x.promises || []) if (p.status === "open" && p.due <= now) {
       const key = "promise:" + p.id + ":" + p.due;
@@ -67,7 +72,7 @@ export async function GET(request) {
     const hi = name ? name + ", " : "";
     if (member || inGrace) {
       const recent = (await sb("entries?user_id=eq." + userId + "&created_at=gte." + new Date(now - 7 * 864e5).toISOString() + "&select=id,data&order=created_at.desc&limit=30")) || [];
-      if (member) {
+      if (member && (!contact || contact.scope==="circle")) {
         const withG = recent.map((r) => ({ id: r.id, ...(r.data || {}) })).filter((e) => !e.private && GNAME[e.guardian] && e.ts);
         const latest = {};
         for (const e of withG) if (!latest[e.guardian] || e.ts > latest[e.guardian].ts) latest[e.guardian] = e;
@@ -77,11 +82,12 @@ export async function GET(request) {
           if (!already.has(key)) due.push({ key, title: "Aura", body: hi + g + " has been thinking about you. Want to tell " + g + " how it's going?" });
         }
       }
-      // First letter the day after she starts; then one a week. During the 30 days after the trial, the letter is sealed.
+      // Aurora's first in-app return letter is created by the app itself. After that, letters follow her chosen cadence.
       const lastL = (x.letters || []).reduce((m, l) => Math.max(m, l.ts || 0), 0);
       const firstEver = (await sb("entries?user_id=eq." + userId + "&select=created_at&order=created_at.asc&limit=1")) || [];
       const startedBeforeToday = firstEver[0] && Date.parse(firstEver[0].created_at) < now - 12 * 36e5;
-      const letterDue = lastL ? now - lastL > 6.75 * 864e5 && recent.length : startedBeforeToday;
+      const cadence=contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:7;
+      const letterDue = lastL ? now - lastL > (cadence-.25) * 864e5 && recent.length : false;
       if (letterDue) {
         const key = "letter:" + et.y + "-" + et.m + "-" + et.d;
         const body = member

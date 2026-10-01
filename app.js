@@ -115,6 +115,8 @@ function glyph(k, size){
   };
   return '<svg viewBox="0 0 64 64" aria-hidden="true"'+(size?' width="'+size+'" height="'+size+'"':'')+'>'+ring+(m[k]||m.aura)+'</svg>';
 }
+function guardianMark(k,size,label){const g=G[k]||G.aura;return '<button class="gmark'+(label?' labeled':'')+'" data-guardian="'+esc(k)+'" aria-label="Open '+esc(g.name)+'">'+glyph(k,size)+(label?'<span class="gmarkname">'+esc(g.name)+'</span>':'')+'</button>';}
+
 
 /* ------------------------------------------------------------------
    RITUALS. Real steps, household materials, built-in substitutions.
@@ -1248,6 +1250,7 @@ function mergeExtras(x){
   S.asks=byIdMerge(S.asks,x.asks).sort((a,b)=>b.ts-a.ts).slice(0,200);S.memNotes=byIdMerge(S.memNotes,x.memNotes);
   if(x.days&&typeof x.days==="object"){S.days=S.days||{};for(const [k,v] of Object.entries(x.days))S.days[k]={...v,...(S.days[k]||{})};}
   S.promises=byIdMerge(S.promises,x.promises);S.later=byIdMerge(S.later,x.later);S.plans=byIdMerge(S.plans,x.plans);
+  S.movements=byIdMerge(S.movements,x.movements).sort((a,b)=>(b.ts||0)-(a.ts||0));S.goals=byIdMerge(S.goals,x.goals).sort((a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0));
   S.myRituals=byIdMerge(S.myRituals,x.myRituals);for(const r of S.myRituals){if(typeof byId!=="undefined"&&!byId[r.id]){R.push(r);byId[r.id]=r;}}
   if(Array.isArray(x.cart))for(const c of x.cart)if(!(S.cart||[]).some(z=>z.tag===c.tag))(S.cart=S.cart||[]).push(c);
   S.misses={...(x.misses||{}),...(S.misses||{})};
@@ -1320,7 +1323,7 @@ function compat(a,b){if(!a||!b)return "";const pair=[a.el,b.el].sort().join("+")
   if(a.el===b.el)return "You're both "+a.el+" signs. You get each other without trying.";
   if(pair==="air+fire"||pair==="earth+water")return "Your elements feed each other.";
   return "Your elements balance each other. It takes a little more talking, and that's where the heat is.";}
-function needBirthday(){if(S.profile.minor)return false;if(!S.profile.bday)return true;return accountsOn()&&ACCT.user&&!ACCT.adult21&&!ACCT.under21;}
+function needBirthday(){if(S.profile.minor||S.profile.ageVerified)return false;if(!S.profile.bday)return true;return accountsOn()&&ACCT.user&&!ACCT.adult21&&!ACCT.under21;}
 let bdayAfter=null;
 function openBirthday(reason,after){
   bdayAfter=after||null;if(document.querySelector("#bdaySheet"))return;
@@ -1346,7 +1349,7 @@ async function setBirthday(v,after){
     if(!r||r.error||!r.adult_confirmed_at){track("bday_save_failed",{why:r&&r.error?String(r.error).slice(0,40):"network"});bdayErr("That didn't save. Check your connection and tap Continue again.");return false;}
     ACCT.adultAt=r.adult_confirmed_at;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;delete S.pendingDob;
   }
-  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;saveLocal();remotePut("prefs");
+  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;S.profile.ageVerified=true;saveLocal();remotePut("prefs");
   if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime)redeemFriend();
   return true;
 }
@@ -1376,13 +1379,13 @@ function overLimit(kind){if(accountsOn()&&ACCT.admin)return false;return usedTod
 function synced(){return MODE==="artifact"?cloud.on:!!ACCT.user;}
 
 async function remotePut(kind,id,data){
-  if(MODE==="artifact"){return cloudPut(kind==="chat"?"chat-"+id:kind==="prefs"?"profile":id,kind==="prefs"?S.profile:data).then(()=>{if(kind==="prefs"){cloudPut("draws",{draws:S.draws});if(S.ledger)cloudPut("ledger",{ledger:S.ledger});cloudPut("extras",{extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges}});}});}
+  if(MODE==="artifact"){return cloudPut(kind==="chat"?"chat-"+id:kind==="prefs"?"profile":id,kind==="prefs"?S.profile:data).then(()=>{if(kind==="prefs"){cloudPut("draws",{draws:S.draws});if(S.ledger)cloudPut("ledger",{ledger:S.ledger});cloudPut("extras",{extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges,movements:S.movements||[],goals:S.goals||[]}});}});}
   if(!ACCT.user||!ACCT.sb)return;
   const sb=ACCT.sb,uid=ACCT.user.id;
   try{
     if(kind==="entry")await sb.from("entries").upsert({id,user_id:uid,data});
     else if(kind==="chat")await sb.from("chats").upsert({user_id:uid,guardian:id,msgs:data.msgs,updated_at:new Date().toISOString()});
-    else await sb.from("prefs").upsert({user_id:uid,data:{profile:S.profile,draws:S.draws,ledger:S.ledger||null,extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges}},updated_at:new Date().toISOString()});
+    else await sb.from("prefs").upsert({user_id:uid,data:{profile:S.profile,draws:S.draws,ledger:S.ledger||null,extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges,movements:S.movements||[],goals:S.goals||[]}},updated_at:new Date().toISOString()});
   }catch(e){}
 }
 async function api(path,body){
@@ -1474,7 +1477,7 @@ async function refreshMe(){
   const r=await api("/api/me",S.pendingDob?{dob:S.pendingDob}:{});
   if(!r.error&&S.pendingDob&&(r.adult21_at||r.under21_at||r.under18_at)){delete S.pendingDob;saveLocal();}
   if(!r.error&&r.under18_at){S.profile.minor=true;saveLocal();showMinor();return;}
-  if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt&&!S.profile.adult){S.profile.adult=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.monitorScope=Array.isArray(r.monitor_scope)?r.monitor_scope:null;ACCT.admin=!!r.admin;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
+  if(!r.error){ACCT.member=!!r.member;ACCT.paid=!!r.paid;ACCT.lifetime=!!r.lifetime;ACCT.adultAt=r.adult_confirmed_at||null;if(ACCT.adultAt){S.profile.adult=true;S.profile.ageVerified=true;saveLocal();}ACCT.cohort=r.cohort||null;ACCT.monitorAnswer=r.monitor_answer||null;ACCT.monitorUntil=r.monitor_until||null;ACCT.monitorScope=Array.isArray(r.monitor_scope)?r.monitor_scope:null;ACCT.admin=!!r.admin;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;ACCT.trialUntil=r.trial_until||null;ACCT.until=r.member_until||null;if(r.usage){const k=dayKey(new Date());S.usage={[k]:{read:r.usage.read||0,talk:r.usage.talk||0}};}}
   renderAll();
   if(!r.error&&S.profile.onboarded&&needBirthday()&&!$("#scrim")){setTimeout(()=>openBirthday(),600);return;}
   if(!r.error&&S.friendCode&&!ACCT.lifetime){await redeemFriend();return;}
@@ -1647,6 +1650,28 @@ const SUBS={
   tea:{alt:[],text:"hot water with a slice of lemon"}
 };
 const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"]};
+function ritualNeeds(r){
+  const out=[],keys=new Set();
+  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push(label);};
+  for(const n of (r.needs||[])){add(n[0],n[1]);}
+  const txt=(r.steps||[]).map(x=>[x.t,x.d,x.say].filter(Boolean).join(" ")).join(" ").toLowerCase();
+  const has=k=>(r.needs||[]).some(n=>n[0]===k);
+  if(/\b(write|writing|wrote|journal|record|list|letter|note|label|draw)\b/.test(txt)){add("paper","Paper");add("pen","A pen or pencil");}
+  if(/\bcold water\b/.test(txt))add("water","Cold water");
+  else if(/\bwarm water\b/.test(txt))add("water","Warm water");
+  else if(/\bhot water\b/.test(txt))add("water","Hot water");
+  else if(/\bwater\b/.test(txt)&&!has("bowl"))add("water","Water");
+  if(/\bbowl\b/.test(txt)&&!has("bowl"))add("bowl","A bowl");
+  if((/\b(light|burn|flame)\b/.test(txt)||has("candle"))&&!/phone.{0,12}flashlight/.test(txt))add("lighter","Matches or a lighter");
+  if(/\bscissors\b|\bcut\b/.test(txt))add("scissors","Scissors");
+  if(/\btowel\b/.test(txt))add("towel","A towel");
+  if(/\bchair\b/.test(txt))add("chair","A chair");
+  if(/\benvelope\b/.test(txt))add("envelope","An envelope");
+  if(/\bplate\b/.test(txt))add("plate","A plate");
+  if(/\bshower\b/.test(txt))add("shower","Access to a shower");
+  if(/\bbath\b/.test(txt)&&r.bath)add("bath","Access to a bath or basin");
+  return out;
+}
 function known(){return S.profile.known||(S.profile.known=[...S.profile.have]);}
 function missingFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
 function unknownFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
@@ -1759,7 +1784,7 @@ function resetProgress(){
 /* Export and delete */
 async function exportArchive(){
   if(typeof cycleSync==="function")await cycleSync();
-  const data=JSON.stringify({app:"The Daily Alchemist",exported:new Date().toISOString(),profile:S.profile,entries:S.entries,chats:S.chats,ledger:S.ledger||{},days:S.days||{},asks:S.asks||[],promises:S.promises||[],cycle:{mode:C.mode,irregular:C.irregular,consent:C.consent,events:C.events}},null,2);
+  const data=JSON.stringify({app:"The Daily Alchemist",exported:new Date().toISOString(),profile:S.profile,entries:S.entries,chats:S.chats,ledger:S.ledger||{},days:S.days||{},asks:S.asks||[],promises:S.promises||[],movements:S.movements||[],goals:S.goals||[],cycle:{mode:C.mode,irregular:C.irregular,consent:C.consent,events:C.events}},null,2);
   const filename="daily-alchemist-archive-"+new Date().toISOString().slice(0,10)+".json";
   if(MODE==="artifact"){
     try{const dl=await window.claude.use("downloads");if(!dl){toast("Export isn't available in this view.");return;}await dl.save({filename,data});}catch(e){if(!e||e.code!=="declined")toast("Export didn't finish. Try again.");}
@@ -1773,7 +1798,7 @@ async function clearMyData(){
   const keep=S.profile||{},snd={prefMusic:S.prefMusic,prefMusicVol:S.prefMusicVol,prefVoiceOff:S.prefVoiceOff,prefVoice:S.prefVoice};
   try{localStorage.removeItem(KEY);localStorage.removeItem(CYC_KEY);}catch(e){}
   if(typeof cycleReset==="function")cycleReset();
-  S={profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false,adult:keep.adult,adult21:keep.adult21,under21:keep.under21},entries:[],draws:{},chats:{},usage:S.usage||{},...snd,seenIntro:true};
+  S={profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false,adult:keep.adult,adult21:keep.adult21,under21:keep.under21,ageVerified:keep.ageVerified},entries:[],draws:{},chats:{},movements:[],goals:[],usage:S.usage||{},...snd,seenIntro:true};
   saveLocal();return true;
 }
 async function deleteEverything(){
@@ -2581,11 +2606,12 @@ function ritualCard(r,opts){
     return '<article class="page locked"><div class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+'</div><h3>'+esc(r.title)+'</h3><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(CHAMBERS[r.g]?CHAMBERS[r.g].name:"Chamber")+'</span></div><p class="needs">'+esc(r.purpose)+'</p><div class="actions"><button class="btn btn-ink" data-paywall="'+esc(G[r.g].name)+'\'s chamber">Unlock with '+esc(PLAN.name)+'</button></div></article>';
   }
   const a=adapt(r), unk=unknownFor(r)[0];
-  const needs=r.needs.length?r.needs.map(n=>esc(n[1])).join(" · "):"Nothing but you.";
+  const needList=ritualNeeds(r),needs=needList.length?needList.map(esc).join(" · "):"Nothing but you.";
   const ownable=r.needs.filter(n=>SUBS[n[0]]&&S.profile.have.includes(n[0]));
-  return '<article class="page" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'"><div class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+(r.reset?" · Reset day "+r.reset:"")+(r.composed?" · Written for you":"")+'</div>'+
-   '<h3>'+esc(r.title)+'</h3><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(r.moon==="Any"?"Any moon":r.moon+" moon")+'</span><span>'+r.steps.length+' steps</span></div>'+
-   '<p class="needs"><b>You will need</b>'+needs+'</p>'+
+  return '<article class="page ritualcard" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
+   '<button class="ritualguardian" data-guardian="'+esc(r.g)+'">'+glyph(r.g,42)+'<span><span class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+(r.reset?" · Reset day "+r.reset:"")+(r.composed?" · Written for you":"")+'</span><span class="small">Open '+esc(G[r.g].name)+"'s chamber</span></span></button>"+
+   '<h3>'+esc(r.title)+'</h3><p class="ritualpurpose">'+esc(r.purpose||"")+'</p><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(r.moon==="Any"?"Any moon":r.moon+" moon")+'</span><span>'+r.steps.length+' steps</span></div>'+
+   '<div class="needs"><b>Gather before you begin</b><div class="needchips">'+(needList.length?needList.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
    (a.notes.length?'<p class="adj">'+a.notes.map(esc).join(" ")+' The steps already say so.</p>':"")+
    cartOffer(r)+(unk?'<div class="ask"><span>Do you usually have '+esc(ASKN[unk[0]])+'?</span><button class="chip" data-own="'+unk[0]+':1">Yes</button><button class="chip" data-own="'+unk[0]+':0">No</button></div>':"")+
    whyNow(r,opts&&opts.why)+
@@ -2594,7 +2620,7 @@ function ritualCard(r,opts){
 }
 /* ------------------------------------------------------------------
    INNER CIRCLE HEADLINERS
-   1. Letters from Aura: the day after you start, then weekly.
+   1. Letters from Aura: first return, then at the cadence she chooses.
       For 30 days after the free week ends, she keeps writing, but the letters stay sealed until you join.
    2. Guardians who check in on you by name, a few days after you worked with them.
 ------------------------------------------------------------------ */
@@ -2606,7 +2632,18 @@ function weekEntries(since,until){until=until||Infinity;return S.entries.filter(
 function weekChats(since,until){until=until||Infinity;const out=[];for(const k of ALL)for(const m of (S.chats[k]||[]))if(m.role==="me"&&(m.ts||0)>since&&(m.ts||0)<=until)out.push({g:k,text:m.text});return out;}
 function lastLetter(){return S.letters.slice().sort((a,b)=>b.ts-a.ts)[0]||null;}
 function letterSince(){const l=lastLetter();return l?l.ts:Date.now()-WEEK;}
-function firstActivity(){let f=Infinity;for(const e of S.entries)if(e.ts<f)f=e.ts;for(const k of ALL)for(const m of (S.chats[k]||[]))if(m.role==="me"&&m.ts&&m.ts<f)f=m.ts;return f===Infinity?0:f;}
+function firstActivity(){let f=Infinity;for(const e of S.entries)if(e.ts<f)f=e.ts;for(const a of (S.asks||[]))if(a.ts&&a.ts<f)f=a.ts;for(const k of ALL)for(const m of (S.chats[k]||[]))if(m.role==="me"&&m.ts&&m.ts<f)f=m.ts;return f===Infinity?0:f;}
+function contactPref(){return S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};}
+function contactDays(){return {daily:1,"3days":3,weekly:7}[contactPref().cadence]||7;}
+function contactSettingsHTML(){
+  const c=contactPref(),on=c.enabled===true,off=c.enabled===false;
+  return '<details class="group contactprefs"><summary>Letters and check-ins</summary><p class="small muted">Choose whether Aura reaches out between visits, how often, and whether guardians can check in too. You can change this any time.</p>'+
+    '<div class="label" style="margin-top:10px">Reach out to me?</div><div class="chips"><button class="chip" data-contacton="1" aria-pressed="'+on+'">Yes</button><button class="chip" data-contacton="0" aria-pressed="'+off+'">No</button></div>'+
+    '<div class="label" style="margin-top:12px">How often?</div><div class="chips"><button class="chip" data-contactcad="daily" aria-pressed="'+(c.cadence==="daily")+'">Daily</button><button class="chip" data-contactcad="3days" aria-pressed="'+(c.cadence==="3days")+'">Every 3 days</button><button class="chip" data-contactcad="weekly" aria-pressed="'+(c.cadence==="weekly")+'">Weekly</button></div>'+
+    '<div class="label" style="margin-top:12px">Who can reach out?</div><div class="chips"><button class="chip" data-contactscope="aura" aria-pressed="'+(c.scope==="aura")+'">Aura only</button><button class="chip" data-contactscope="circle" aria-pressed="'+(c.scope==="circle")+'">Aura + guardians</button></div>'+
+    '<button class="btn btn-main full" id="contactSave" style="margin-top:12px">Save contact preferences</button></details>';
+}
+function firstReturnLetter(){return (S.letters||[]).find(l=>l.kind==="first-return")||null;}
 /* Is she in the 30 days after her free week, when Aura still writes but the letters stay sealed? */
 function graceActive(){
   if(isMember())return false;
@@ -2614,19 +2651,20 @@ function graceActive(){
   const te=trialEnds();return te>0&&Date.now()>=te&&Date.now()<te+GRACE_DAYS*864e5;
 }
 function letterDue(){
-  const l=lastLetter();
-  if(!l){const f=firstActivity();return !!f&&dayKey(new Date(f))!==dayKey(new Date());}
-  if(Date.now()-l.ts<WEEK-6*36e5)return false;
-  const since=Math.max(letterSince(),Date.now()-WEEK);
+  if(contactPref().enabled!==true)return false;
+  const l=lastLetter(),gap=contactDays()*864e5;
+  if(!l)return false;
+  if(Date.now()-l.ts<gap-6*36e5)return false;
+  const since=Math.max(letterSince(),Date.now()-gap);
   return weekEntries(since).length>0||weekChats(since).length>0;
 }
 function letterMaterial(since,until){
-  if(!since)since=Math.max(letterSince(),Date.now()-WEEK);
+  if(!since)since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
   const es=weekEntries(since,until), ch=weekChats(since,until);
   return {es,ch,text:
     "HER NAME: "+(firstName()||"(not given)")+"\n"+
-    "THIS WEEK'S RITUALS AND ENTRIES:\n"+(es.map(e=>"- "+fmtDate(e.ts)+" | "+(G[e.guardian]||G.aura).name+" | "+(e.ritualTitle||"entry")+" | carrying: "+(e.carrying||"").slice(0,140)+" | wrote: "+(e.text||"").slice(0,220)+(e.after?" | after: "+e.after:"")).join("\n")||"(none)")+"\n"+
-    "WHAT SHE TOLD GUARDIANS THIS WEEK:\n"+(ch.slice(-10).map(c=>"- to "+G[c.g].name+": "+c.text.slice(0,160)).join("\n")||"(nothing)")+"\n"+
+    "RITUALS AND ENTRIES SINCE THE LAST LETTER:\n"+(es.map(e=>"- "+fmtDate(e.ts)+" | "+(G[e.guardian]||G.aura).name+" | "+(e.ritualTitle||"entry")+" | carrying: "+(e.carrying||"").slice(0,140)+" | wrote: "+(e.text||"").slice(0,220)+(e.after?" | after: "+e.after:"")).join("\n")||"(none)")+"\n"+
+    "WHAT SHE TOLD GUARDIANS SINCE THE LAST LETTER:\n"+(ch.slice(-10).map(c=>"- to "+G[c.g].name+": "+c.text.slice(0,160)).join("\n")||"(nothing)")+"\n"+
     "LONG-TERM MEMORY:\n"+ledgerText()+"\n"+
     "WHAT HAS WORKED FOR HER:\n"+workedText()+"\n"+
     "PAST LETTERS (do not repeat them): "+(S.letters.filter(l=>!l.sealed).slice(0,2).map(l=>l.title).join("; ")||"none")};
@@ -2638,39 +2676,65 @@ function localLetter(m){
   const good=es.filter(e=>GOOD.includes(e.after));
   const carried=es.map(e=>e.carrying).filter(Boolean);
   const next=gs[0]||"lily";
-  let t=(n?n+",\n\n":"")+"I have been with you all week, so let me tell you what I saw.\n\n";
+  let t=(n?n+",\n\n":"")+"I've been keeping the thread since I last wrote. Here's what I noticed.\n\n";
   if(carried.length)t+="You came in carrying "+carried.slice(-2).map(c=>'"'+c.slice(0,80)+'"').join(" and ")+". You didn't pretend it was lighter than it was. That matters.\n\n";
   if(gs.length)t+="You spent time with "+namesList(gs)+". "+(good.length?good[good.length-1].ritualTitle+" left you "+good[good.length-1].after.toLowerCase()+", so remember that one.":"Not every ritual has to land to count. You showed up.")+"\n\n";
-  else if(m.ch.length)t+="You talked things through with the circle this week. That is its own kind of ritual.\n\n";
-  t+="This coming week, I'd like you to go back to "+G[next].name+". Not to fix anything. Just to keep the thread going.\n\nI'll be here.\nAura";
-  return {title:"Your week, looked at kindly",letter:t,next_guardian:next,intention:"Keep the thread going."};
+  else if(m.ch.length)t+="You talked things through with the circle since I last wrote. That is its own kind of ritual.\n\n";
+  t+="Before I write again, I'd like you to go back to "+G[next].name+". Not to fix anything. Just to keep the thread going.\n\nI'll be here.\nAura";
+  return {title:"What I noticed",letter:t,next_guardian:next,intention:"Keep the thread going."};
 }
 async function composeLetter(m){
   let out=null;
   try{
-    out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist, a ritual and reflection app. Warm, perceptive, grounded, a little mystical, never preachy. Once a week you write each member a personal letter looking back at her week.\n\n"+m.text+"\n\n"+
-      "Write this week's letter. 170 to 260 words. Address her by first name if you have it. Be specific: name what she actually carried, what she did, what helped and what didn't, using her own words where you can. Point out one pattern or shift you noticed. Suggest one guardian to spend time with next week and why, and close with one simple intention for the week. Sign it Aura. Plain words, short paragraphs, no em dashes, no bullet points, no diagnosing, no therapy language. Only use what is in the material.\n"+
+    out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist, a ritual and reflection app. Warm, perceptive, grounded, a little mystical, never preachy. You write each member personal letters at the cadence she chose: daily, every three days or weekly. Look back only over the time since the last letter.\n\n"+m.text+"\n\n"+
+      "Write a personal letter looking back since the last letter. 170 to 260 words. Address her by first name if you have it. Be specific: name what she actually carried, what she did, what helped and what didn't, using her own words where you can. Point out one pattern or shift you noticed. Suggest one guardian to spend time with before the next letter and why, and close with one simple intention until then. Sign it Aura. Plain words, short paragraphs, no em dashes, no bullet points, no diagnosing, no therapy language. Only use what is in the material.\n"+
       'Reply with ONLY JSON: {"title":"a short, warm title for the letter, under 7 words","letter":"the full letter with \\n\\n between paragraphs","next_guardian":"one key from: '+ALL.filter(k=>k!=="aura").join(", ")+'","intention":"one short line"}',null,{tier:"deep"});
   }catch(e){out=null;}
   if(!out||!out.letter)out=localLetter(m);
-  return {title:clean(String(out.title||"Your week")).slice(0,80),text:clean(String(out.letter)),next:G[out.next_guardian]&&out.next_guardian!=="aura"?out.next_guardian:null,intention:clean(String(out.intention||"")).slice(0,160)};
+  return {title:clean(String(out.title||"From Aura")).slice(0,80),text:clean(String(out.letter)),next:G[out.next_guardian]&&out.next_guardian!=="aura"?out.next_guardian:null,intention:clean(String(out.intention||"")).slice(0,160)};
 }
 async function writeLetter(){
-  const since=Math.max(letterSince(),Date.now()-WEEK);
+  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
   const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),...(await composeLetter(letterMaterial(since)))};
   S.letters.unshift(L);S.letters=S.letters.slice(0,60);saveLocal();remotePut("prefs");
   return L;
 }
+function firstReturnText(){
+  const n=firstName(),a=(S.asks||[]).find(x=>!x.noMem&&x.text),e=S.entries.find(usable),bits=[];
+  if(a&&a.thread)bits.push("I remember you left me holding "+a.thread.toLowerCase()+".");
+  else if(e&&e.ritualTitle)bits.push("I remember you spent time with "+(G[e.guardian]||G.aura).name+" and "+e.ritualTitle+".");
+  else bits.push("I remember that you showed up and gave me something real to hold.");
+  return (n?n+",\n\n":"")+"You came back. Good. That is how this place becomes yours instead of just another app. "+bits.join(" ")+" I don't need you to start over.\n\nBefore I keep reaching for you between visits, I want you to decide how much of that you actually want. Daily, every few days, weekly, Aura only, or the whole Circle. You can change it whenever you want.\n\nI'll keep the thread either way.\n\nAura";
+}
+function createFirstReturnLetter(){
+  if(firstReturnLetter())return firstReturnLetter();
+  const L={id:"let_"+Date.now(),kind:"first-return",ts:Date.now(),since:firstActivity(),until:Date.now(),sealed:false,title:"You came back",text:firstReturnText(),intention:"Choose how you want us to reach you.",read:false};
+  S.letters.unshift(L);saveLocal();remotePut("prefs");return L;
+}
+let returnLetterBusy=false;
+function maybeFirstReturnLetter(){
+  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded||!firstActivity()||!S.firstAwayAt)return false;
+  if(Date.now()-S.firstAwayAt<3000)return false;
+  if($("#gate")||$("#intro")||$("#rite"))return false;
+  if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
+  returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
+}
+function noteAppAway(){
+  if(!firstReturnLetter()&&firstActivity()){S.firstAwayAt=Date.now();saveLocal();}
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")noteAppAway();else if(document.visibilityState==="visible")setTimeout(maybeFirstReturnLetter,250);});
+window.addEventListener("pagehide",noteAppAway);
+setTimeout(maybeFirstReturnLetter,1800);
 /* During the 30 days after the free week: Aura still writes, but the letter stays sealed.
    Only the envelope is stored now. The words are written from that week's Archive when she joins and opens it. */
 function sealLetter(){
-  const since=Math.max(letterSince(),Date.now()-WEEK);
+  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
   const gs=[...new Set(weekEntries(since).map(e=>e.guardian).concat(weekChats(since).map(c=>c.g)).filter(g=>g&&g!=="aura"&&G[g]))];
   const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),sealed:true,gs,title:"A sealed letter"};
   S.letters.unshift(L);S.letters=S.letters.slice(0,60);saveLocal();remotePut("prefs");
   return L;
 }
-function sealedAbout(L){return L.gs&&L.gs.length?"I wrote about your week, and your time with "+namesList(L.gs.slice(0,3))+".":"I wrote about your week.";}
+function sealedAbout(L){return L.gs&&L.gs.length?"I wrote about what you've been carrying, and your time with "+namesList(L.gs.slice(0,3))+".":"I wrote about what you've been carrying.";}
 async function unsealLetter(L){
   toast("Opening your letter...");
   Object.assign(L,await composeLetter(letterMaterial(L.since,L.until)),{sealed:false});
@@ -2679,7 +2743,7 @@ async function unsealLetter(L){
 }
 function sealedCount(){return S.letters.filter(l=>l.sealed).length;}
 function envelopeSVG(sealed){return '<svg viewBox="0 0 64 44" width="58" height="40" aria-hidden="true"><rect x="1.5" y="1.5" width="61" height="41" rx="4" fill="#F3EAD3" stroke="#9A7414"/><path d="M2 3l30 22L62 3" fill="none" stroke="#9A7414" stroke-width="1.5"/><circle cx="32" cy="25" r="7" fill="#BF1E73"/><path d="M29 25a3 3 0 1 0 6 0a4 4 0 0 1-6 0z" fill="#F4D778"/>'+(sealed?'<rect x="44" y="26" width="14" height="12" rx="2" fill="#16132A"/><path d="M47 26v-3a4 4 0 0 1 8 0v3" fill="none" stroke="#16132A" stroke-width="2"/><circle cx="51" cy="32" r="1.6" fill="#E7C45A"/>':'')+'</svg>';}
-function auraSays(html,label){return '<div class="handoff aurasays" style="padding:0">'+glyph("aura")+'<p><span class="who2">'+(label||"Aura")+'</span>'+html+'</p></div>';}
+function auraSays(html,label){return '<div class="handoff aurasays" style="padding:0">'+guardianMark("aura")+'<p><span class="who2">'+(label||"Aura")+'</span>'+html+'</p></div>';}
 function letterCardHTML(){
   if(lastRead)return "";
   const mem=isMember();
@@ -2687,11 +2751,11 @@ function letterCardHTML(){
   const l=lastLetter();
   if(!mem){
     if(l&&l.sealed&&Date.now()-l.ts<3*864e5)return '<button class="card letterc link" data-letter="'+l.id+'">'+envelopeSVG(true)+'<span><span class="label">A sealed letter from Aura</span><span class="lt">'+(firstName()?esc(firstName())+", I":"I")+' wrote to you.</span><span class="small muted">'+esc(sealedAbout(l))+' It\'s waiting in your mailbox. It opens when you join the Inner Circle.</span></span></button>';
-    const since=Math.max(letterSince(),Date.now()-WEEK);
+    const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
     if(!(weekEntries(since).length+weekChats(since).length))return "";
     return '<button class="card letterc link" data-paywall="A letter from Aura">'+envelopeSVG(true)+'<span><span class="label">A letter from Aura</span><span class="lt">I\'ve been paying attention to your week.</span><span class="small muted">In the Inner Circle, I write to you about it. What you carried, what helped, and where to go next.</span></span></button>';
   }
-  if(letterDue())return '<button class="card letterc link" id="letterOpen">'+envelopeSVG()+'<span><span class="label">A letter from Aura</span><span class="lt">'+(firstName()?esc(firstName())+", I":"I")+' wrote you a letter.</span><span class="small muted">I looked back at your week. Tap to open it.</span></span></button>';
+  if(letterDue())return '<button class="card letterc link" id="letterOpen">'+envelopeSVG()+'<span><span class="label">A letter from Aura</span><span class="lt">'+(firstName()?esc(firstName())+", I":"I")+' wrote you a letter.</span><span class="small muted">I looked back at what you have carried since I last wrote. Tap to open it.</span></span></button>';
   const sc=sealedCount();
   if(sc)return '<button class="card letterc link" data-letter="'+S.letters.find(x=>x.sealed).id+'">'+envelopeSVG()+'<span><span class="label">Your mailbox</span><span class="lt">'+(sc===1?"One letter I wrote you is":sc+" letters I wrote you are")+' ready to open.</span><span class="small muted">I kept writing while you were away. Tap to open.</span></span></button>';
   if(l&&!l.sealed&&Date.now()-l.ts<2*864e5&&!l.read)return '<button class="card letterc link" data-letter="'+l.id+'">'+envelopeSVG()+'<span><span class="label">A letter from Aura</span><span class="lt">'+esc(l.title)+'</span><span class="small muted">Tap to read it.</span></span></button>';
@@ -2701,9 +2765,10 @@ function showLetter(L){
   track("letter_open");L.read=true;saveLocal();renderToday();renderArchive();
   openSheet('<div class="stack"><div class="page letter"><div class="kicker">A letter from Aura · '+esc(fmtDate(L.ts))+'</div><h3>'+esc(L.title)+'</h3>'+
     L.text.split(/\n{2,}/).map(p=>'<p>'+esc(p).replace(/\n/g,"<br>")+'</p>').join("")+
-    (L.intention?'<div class="intent"><b>This week</b>'+esc(L.intention)+'</div>':"")+'</div>'+
+    (L.intention?'<div class="intent"><b>'+esc(L.kind==="first-return"?"From here":"This time")+'</b>'+esc(L.intention)+'</div>':"")+'</div>'+
+    (L.kind==="first-return"?contactSettingsHTML():"")+
     (L.next?'<button class="btn btn-main full" data-talk="'+L.next+'">Go to '+esc(G[L.next].name)+'</button>':"")+
-    '<button class="btn btn-ghost full" data-talk="aura">Write back to Aura</button><p class="small muted" style="text-align:center">Every letter is kept in your mailbox, in the Archive.</p></div>');
+    '<button class="btn btn-ghost full" data-talk="aura">Write back to Aura</button><button class="btn btn-ghost full" data-tabgo="archive">Open my mailbox</button><p class="small muted" style="text-align:center">Every letter is kept in your mailbox, in the Archive.</p></div>');
 }
 async function openLetter(id){
   const L=S.letters.find(x=>x.id===id);if(!L)return;
@@ -2720,12 +2785,12 @@ async function openLetterFlow(btn){
 }
 function letterRow(l){return '<button class="li" data-letter="'+l.id+'"><span>'+(l.sealed?"🔒 ":"")+esc(l.sealed?"Sealed letter":l.title)+'<br><span class="small muted">'+esc(fmtDate(l.ts))+(l.sealed?" · "+esc(sealedAbout(l)):"")+'</span></span><span class="small muted">'+(l.sealed?(isMember()?"Open":"Sealed"):"Read")+'</span></button>';}
 function lettersArchiveHTML(){
-  const mem=isMember(), sc=sealedCount();
+  const mem=isMember(), sc=sealedCount(),unread=S.letters.filter(l=>!l.read).length;
   if(!S.letters.length){
-    if(!mem)return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("In the Inner Circle, I write to you every week about what you carried, what helped and where to go next. Every letter stays here.")+'<button class="btn btn-ghost" style="margin-top:10px" data-paywall="Letters from Aura">See the Inner Circle</button></div>';
-    return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("My first letter comes the day after you start. Every one I write you stays here.")+'</div>';
+    if(!mem)return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("In the Inner Circle, I write to you at the rhythm you choose about what you carried, what helped and where to go next. Every letter stays here.")+'<button class="btn btn-ghost" style="margin-top:10px" data-paywall="Letters from Aura">See the Inner Circle</button></div>';
+    return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("My first letter comes when you return after your first visit. After that, you choose the rhythm. Every one I write stays here.")+'</div>';
   }
-  return '<div class="card"><div class="label">Your mailbox</div>'+S.letters.slice(0,20).map(letterRow).join("")+
+  return '<div class="card mailbox"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>'+S.letters.length+' letter'+(S.letters.length===1?"":"s")+(unread?" · "+unread+" unread":"")+'</h3></div></div><p class="small muted" style="margin:6px 0 10px">Everything Aura writes you stays here. Tap any letter to open it.</p>'+S.letters.slice(0,30).map(letterRow).join("")+
     (!mem&&sc?'<div style="margin-top:10px">'+auraSays(sc===1?"One of these is sealed. It opens the moment you join.":sc+" of these are sealed. They all open the moment you join.")+'</div><button class="btn btn-main full" style="margin-top:10px" data-paywall="Open your letters">Open my letters</button>':"")+'</div>';
 }
 
@@ -2737,7 +2802,7 @@ function lastTouch(){
   return t;
 }
 function nudgeCandidate(){
-  if(!isMember())return null;
+  const cp=contactPref();if(!isMember()||cp.enabled!==true||cp.scope!=="circle")return null;
   const now=Date.now();
   if(S.nudges.some(n=>now-n.ts<20*36e5))return null;
   const t=lastTouch();let best=null;
@@ -2770,7 +2835,7 @@ async function makeNudge(){
 function nudgeHTML(){
   const nd=pendingNudge();if(!nd||!G[nd.g])return "";
   const g=G[nd.g];
-  return '<div class="card checkin nudge" style="border-color:'+g.color+'66"><div class="handoff" style="padding:0">'+glyph(nd.g)+'<p><span class="who2" style="color:'+g.color+'">'+esc(g.name)+' is checking in</span>'+esc(nd.text)+'</p></div><div class="row" style="margin-top:10px"><button class="btn btn-main" data-nudge="'+nd.id+':reply">Answer '+esc(g.name)+'</button><button class="btn btn-ghost" data-nudge="'+nd.id+':later">Not now</button></div></div>';
+  return '<div class="card checkin nudge" style="border-color:'+g.color+'66"><div class="handoff" style="padding:0">'+guardianMark(nd.g)+'<p><span class="who2" style="color:'+g.color+'">'+esc(g.name)+' is checking in</span>'+esc(nd.text)+'</p></div><div class="row" style="margin-top:10px"><button class="btn btn-main" data-nudge="'+nd.id+':reply">Answer '+esc(g.name)+'</button><button class="btn btn-ghost" data-nudge="'+nd.id+':later">Not now</button></div></div>';
 }
 function nudgeAction(id,act){
   const nd=S.nudges.find(n=>n.id===id);if(!nd)return;
@@ -3216,8 +3281,8 @@ function readingHTML(x){
   const g=G[x.guardian]||G.aura, same=x.guardian==="aura";
   const ch=chamberNudge(x);
   return '<div class="reading" style="border-color:'+g.color+'55">'+
-   '<div class="handoff">'+glyph("aura")+'<p><span class="who2">Aura</span>'+esc(x.aura||("That's "+g.name+"'s work."))+(x.intro?' '+esc(x.intro):'')+'</p></div>'+
-   (same?'':'<div class="head">'+glyph(x.guardian)+'<div><div class="who" style="color:'+g.color+'">'+esc(g.title)+'</div><div class="name">'+esc(g.name)+'</div></div></div>')+
+   '<div class="handoff">'+guardianMark("aura")+'<p><span class="who2">Aura</span>'+esc(x.aura||("That's "+g.name+"'s work."))+(x.intro?' '+esc(x.intro):'')+'</p></div>'+
+   (same?'':'<div class="head">'+guardianMark(x.guardian)+'<div><div class="who" style="color:'+g.color+'">'+esc(g.title)+'</div><div class="name">'+esc(g.name)+'</div></div></div>')+
    '<div class="body"><p class="voice">'+(voiceEnabled()?'<button class="hear" data-hear="'+(x.guardian||"aura")+'" aria-label="Hear it">'+HEAR_ICON+'</button>':'')+esc(x.reading)+'</p>'+
    (x.memory?'<div class="recall" id="recall"><div class="label">From your archive · '+esc(x.memory.date)+(x.memory.moon?' · '+esc(x.memory.moon):'')+'</div><p class="small muted" style="margin-top:4px">After '+esc(x.memory.ritualTitle)+', you wrote:</p><blockquote>"'+esc(x.memory.quote)+'"</blockquote><p class="voice" style="font-size:18px;margin-top:6px">'+esc(x.memory.question)+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-fromhere="'+esc(x.memory.id)+'">Work from there</button><button class="btn btn-ghost" id="freshBtn">Start fresh</button></div></div>':'')+
    memStripHTML(x)+(x.tomorrow?'<p class="small" style="margin:8px 0 0"><b>Tomorrow</b> I\'ll ask you '+esc(x.tomorrow.replace(/^(I'll ask|ask)( you)? ?/i,""))+'</p>':'')+whyThis(x.why)+
@@ -3374,7 +3439,7 @@ function focusText(now){
   return "RIGHT NOW: "+DP_WORD[dp]+", "+now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+". Today's steward is "+G[STEWARD[dp]].name+". Plant ally: "+plantAlly(now).n+" (symbolic only; never suggest eating or taking herbs).\n"+
     "CURRENT FOCUS, decided by the app's priority engine (follow it): "+d+"\n"+
     (f.level!==4&&f.body.lines.length?"BODY: "+f.body.lines.join(" ")+"\n":"")+
-    (cycleAIText(now)?cycleAIText(now)+"\n":"")+wxAIText()+
+    (cycleAIText(now)?cycleAIText(now)+"\n":"")+movementAIText()+goalAIText()+wxAIText()+
     (ans.length?"HER DAILY QUESTION TODAY: "+ans.join(". ")+".\n":"")+
     "THE HARD RULE: "+HARD_RULE+"\n"+PRIORITY_TEXT+"\n";
 }
@@ -3386,7 +3451,7 @@ function focusCardHTML(f){
   if(f.level===3)return followHTML()||checkinHTML();
   return stewardHTML(f);
 }
-function speaker(g,t){return '<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';}
+function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30,true)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">· '+esc(t)+'</span></div>';}
 function safetyCardHTML(f){
   return '<div class="card rhythm focus">'+speaker("aura","checking on you")+'<p style="margin-top:8px">Earlier you told me something that worried me. Before anything else today: are you safe right now?</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-safe="ok">I\'m safe</button><button class="btn btn-ghost" data-safe="'+esc(f.safety.kind)+'">Not really</button></div></div>';
 }
@@ -3417,7 +3482,7 @@ function arcHTML(dp){
   if(arc[k])return '<div class="arcq done"><span class="label">'+esc(q)+'</span><p>'+esc(arc[k])+'</p></div>';
   return '<div class="arcq">'+(prev?'<p class="small muted">'+esc(prev)+'</p>':'')+'<label for="arcIn" class="q2">'+esc(q)+'</label><div class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="arcIn" maxlength="140" placeholder="A few words is plenty" style="flex:1;min-width:0"><button class="chip" data-arc="'+k+'">Keep</button></div></div>';
 }
-function dayRitualHTML(){const dr=dayRitual();if(!dr)return "";return '<div class="dayrit"><span class="label">Today\'s ritual</span><p style="margin-top:4px"><b>'+esc(dr.r.title)+'</b> with '+esc(G[dr.r.g].name)+' · '+dr.r.min+' min</p><p class="small muted">'+esc(dr.why)+'</p><div class="row" style="margin-top:8px"><button class="btn btn-ghost sm" data-begin="'+esc(dr.r.id)+'">Begin</button><button class="btn btn-ghost sm" data-peek="'+esc(dr.r.id)+'">See it first</button></div></div>';}
+function dayRitualHTML(){const dr=dayRitual();if(!dr)return "";return '<div class="dayrit"><span class="label">Today\'s ritual</span><p style="margin-top:4px"><b>'+esc(dr.r.title)+'</b> with '+esc(G[dr.r.g].name)+' · '+dr.r.min+' min</p><p class="small muted">'+esc(dr.why)+'</p><p class="small muted">This is your ritual for the day. The day around it can change, but this one does not reshuffle unless your real-life situation takes priority.</p><div class="row" style="margin-top:8px"><button class="btn btn-ghost sm" data-begin="'+esc(dr.r.id)+'">Begin</button><button class="btn btn-ghost sm" data-peek="'+esc(dr.r.id)+'">See it first</button></div></div>';}
 function stewardHTML(f){
   const dp=f.dp,d=dayRec(),ins=f.insight||"",cyc=f.body.cyc;
   const why=ins?'<p class="why" style="margin-top:10px">'+esc(ins)+'</p>':'';
@@ -3433,9 +3498,10 @@ function stewardHTML(f){
     return '<div class="card rhythm">'+speaker("aurora","this morning")+'<p style="margin-top:8px">'+esc(sun)+'You\'ve got something to work with today. Let\'s spend it on purpose.</p>'+why+arcHTML(dp)+dayRitualHTML()+'</div>';
   }
   if(dp==="afternoon"){
-    const rowan=d.moved==null?'<div class="subrow">'+glyph("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> did you move your body today?</p>'+chipsQ("moved",MOVEDQ,null)+'</div></div>':
-      d.moved===0?'<div class="subrow">'+glyph("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> no judgment. Want the smallest version?</p><div class="row" style="margin-top:6px"><button class="btn btn-ghost sm" data-begin="'+(lowTank()?"one-song-dance":"walk-it-off")+'">Move with Rowan</button><button class="chip" data-moved="1">Did a little</button></div></div></div>':'';
-    return '<div class="card rhythm">'+speaker("sol","midday")+'<p style="margin-top:8px">Halfway. What actually got done, and what deserves the rest of the day? Real version, not the tidy one.</p>'+why+arcHTML(dp)+rowan+'</div>';
+    const rowan=d.moved==null?'<div class="subrow">'+guardianMark("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> did you move your body today?</p>'+chipsQ("moved",MOVEDQ,null)+'<button class="linkish small" data-guardian="rowan" style="margin-top:5px">Open movement with Rowan</button></div></div>':
+      d.moved===0?'<div class="subrow">'+guardianMark("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> no judgment. Want the smallest version?</p><div class="row" style="margin-top:6px"><button class="btn btn-ghost sm" data-begin="'+(lowTank()?"one-song-dance":"walk-it-off")+'">Move with Rowan</button><button class="chip" data-moved="1">Did a little</button></div><button class="linkish small" data-guardian="rowan" style="margin-top:5px">Log it with Rowan</button></div></div>':'';
+    const goal=activeGoals()[0],goalLine=goal?'<div class="subrow">'+guardianMark("sol",24)+'<div><p class="small"><b style="color:'+G.sol.color+'">Sol is holding:</b> '+esc(goal.title)+(goal.next?'<br><span class="muted">Next move: '+esc(goal.next)+'</span>':'')+'</p><button class="linkish small" data-guardian="sol" style="margin-top:5px">Open goals with Sol</button></div></div>':'';
+    return '<div class="card rhythm">'+speaker("sol","midday")+'<p style="margin-top:8px">Halfway. What actually got done, and what deserves the rest of the day? Real version, not the tidy one.</p>'+why+arcHTML(dp)+goalLine+rowan+'</div>';
   }
   if(dp==="transition"&&!woundDown(nightKey())){
     const r=byId["threshold-reset"]&&canUse(byId["threshold-reset"])?byId["threshold-reset"]:eveningPick0().r;
@@ -3637,11 +3703,13 @@ function renderSky(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
   document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
-  const w=wxNow();
-  const top=esc(now.toLocaleDateString(undefined,{weekday:"long"}))+' · '+esc(M.name)+' · '+esc(se.name)+(w?' · '+esc(wxTemp(w))+' '+esc(WX_WORD[w.kind]):'');
-  $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt"><span class="aline">'+top+'</span>'+
-    (quiet?'<span class="aread muted">Your day comes first. Tap for today\'s sky.</span>':
-     '<span class="aplant">Plant ally: <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+'</span></button>';
+  const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
+  const meta=esc(M.name)+' · '+esc(se.name);
+  $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt">'+
+    '<span class="adate">'+date+'</span><span class="aline">'+meta+'</span>'+
+    (quiet?'<span class="aread">Your day comes first. The sky can wait.</span>':
+     '<span class="aplant">Today\'s plant ally · <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+
+    '<span class="aopen">Open today\'s alchemy <span aria-hidden="true">›</span></span></span></button>';
 }
 function openAlchemy(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),day=DAY_RULE[now.getDay()],dr=drawPick()!=null?todayDraw():null,cyc=cycleContext(now);
@@ -3650,7 +3718,6 @@ function openAlchemy(){
   let h='<div class="stack alchsheet"><div class="label">Daily Alchemy</div><h2>'+esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2>'+
    '<p class="voice">'+esc(alchemySentence(now))+'</p>'+
    (f.level<=3?'<p class="small" style="color:var(--gold)">'+esc(f.level===1?"Right now, you matter more than any of this.":"What's happening in your life comes before any of this today. The sky can wait.")+'</p>':'')+
-   (wxNow()?'<details class="group"><summary>The weather</summary><p>'+esc(wxNow().label)+', '+esc(wxTemp(wxNow()))+(wxNow().city?' in '+esc(wxNow().city):'')+'.'+(wxNow().soon?' '+esc(WX_OPEN[wxNow().soon])+' coming in the next few hours.':'')+'</p><p class="small muted">'+(["rain","storm","snow"].includes(wxNow().kind)?'Rituals that send you outside wait for a better sky today. ':'')+(wxMode()==="precise"?'Using your phone\'s location, rounded to about a kilometer.':'Using your rough location from your connection.')+' Change it in Settings, under Weather.</p></details>':'')+
    '<details class="group" open><summary>The moon</summary><p>'+esc(M.name)+', '+Math.round(M.ill*100)+'% lit. '+(M.waxing?"Full moon in "+fullIn+(fullIn===1?" day":" days")+", new moon in "+newIn+".":"New moon in "+newIn+(newIn===1?" day":" days")+", full moon in "+fullIn+".")+'</p><p class="small muted">'+esc(MOON_TALK[M.name])+'</p></details>'+
    '<details class="group"><summary>The season</summary><p>'+esc(se.name)+'. '+esc(se.next)+' begins in '+se.days+' days.</p><p class="small muted">On the wheel of the year it\'s '+esc(SEA.cur.name)+', the time of '+esc(SEA.cur.sense)+'. '+esc(SEA.next.name)+' is '+SEA.days+' days out.</p></details>'+
    '<details class="group"><summary>The day</summary><p>'+esc(day[0])+' belongs to '+esc(day[1])+': '+esc(day[2])+'.</p><p class="small muted">At home in the Circle today: '+esc(day[3].filter(k=>G[k]&&allowedG(k)).map(k=>G[k].name).join(", "))+'.</p></details>'+
@@ -4003,8 +4070,12 @@ function cardSVG(id,rev){
   if(c.major)art=SIGIL[c.i]||"";
   else if(c.rank<10)art=(PIPS[c.rank+1]||[]).map(([x,y])=>suitMark(c.suit,x,y,c.rank===0?22:10)).join("");
   else art=COURT[c.rank]+suitMark(c.suit,50,110,11);
-  const nm=c.major?c.name.replace(/^The /,"THE "):c.name;
-  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true"><rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+GOLD+'" stroke-opacity=".45" stroke-width=".6"/>'+
+  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#B55A36",cups:"#4D7F91",swords:"#6B668C",pentacles:"#7C7040"}[c.suit]||GOLD);
+  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true">'+
+    '<rect x="0" y="0" width="100" height="160" rx="8" fill="#F7EDCF"/><circle cx="50" cy="73" r="31" fill="'+accent+'" fill-opacity=".055"/>'+
+    '<path d="M12 14h12M76 14h12M12 146h12M76 146h12" stroke="'+accent+'" stroke-opacity=".65" stroke-width="1.2"/>'+
+    '<circle cx="16" cy="18" r="1.4" fill="'+accent+'"/><circle cx="84" cy="18" r="1.4" fill="'+accent+'"/><circle cx="16" cy="142" r="1.4" fill="'+accent+'"/><circle cx="84" cy="142" r="1.4" fill="'+accent+'"/>'+
+    '<rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+accent+'" stroke-opacity=".5" stroke-width=".8"/>'+
     '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" letter-spacing="1.5" fill="'+GOLD+'">'+esc(c.num)+'</text>'+art+
     '<path d="M14 128h72" stroke="'+GOLD+'" stroke-opacity=".5" stroke-width=".6"/><text x="50" y="142" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6.4:nm.length>12?7.4:8.4)+'" font-weight="600" fill="'+INK+'">'+esc(nm.toUpperCase())+'</text></svg>';
 }
@@ -4112,8 +4183,9 @@ const WX_WORD={clear:"clear",clouds:"cloudy",rain:"rain",storm:"storms",snow:"sn
 const WX_OPEN={clear:"Clear skies",clouds:"Gray skies",rain:"Rain",storm:"A storm",snow:"Snow",fog:"Fog",wind:"Wind",hot:"Heat",cold:"Cold"};
 function wxApply(){
   const w=wxNow(),root=document.documentElement;
-  if(!w){delete root.dataset.weather;const l=$("#wxLayer");if(l)l.remove();return;}
-  root.dataset.weather=w.kind+(w.kind==="clear"&&!w.isDay?"-night":"");
+  if(!w){delete root.dataset.weather;delete root.dataset.daylight;const l=$("#wxLayer");if(l)l.remove();return;}
+  root.dataset.weather=w.kind==="clear"?(w.isDay?"clear-day":"clear-night"):w.kind;
+  root.dataset.daylight=w.isDay?"1":"0";
   if(!$("#wxLayer")){const l=document.createElement("div");l.id="wxLayer";l.setAttribute("aria-hidden","true");document.body.insertBefore(l,document.body.firstChild);}
   if(typeof renderSky==="function"&&$("#sky"))renderSky();
   if(typeof renderToday==="function"&&$("#v-today")&&!lastRead&&!$("#rite")&&!document.activeElement?.matches?.("textarea,input")&&root.dataset.wxShown!==root.dataset.weather){root.dataset.wxShown=root.dataset.weather;renderToday();}
@@ -4133,10 +4205,101 @@ function wxOK(r){return wxPenalty(r)<3;}
 function wxClause(){const w=wxNow();return w?WX_OPEN[w.kind]+(w.kind==="clear"&&!w.isDay?" tonight":" outside"):"";}
 function wxAIText(){
   const w=wxNow();if(!w)return "";
-  return "WEATHER WHERE SHE IS: "+w.label+", "+wxTemp(w)+(w.isDay?"":" (dark out)")+(w.soon?", "+WX_WORD[w.soon]+" coming in the next few hours":"")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but it never outranks her life.\n";
+  return "WEATHER WHERE SHE IS: "+w.label+(w.isDay?" in daylight":" after dark")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but do not turn it into a forecast and never let it outrank her life.\n";
 }
 setTimeout(()=>wxRefresh(),1500);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")wxRefresh();});
+/* ------------------------------------------------------------------
+   GUARDIAN TRACKERS. Not dashboards for their own sake:
+   Iris keeps body-cycle rhythm, Rowan learns what movement actually
+   helps, and Sol keeps goals moving. No calories, streaks or guilt.
+------------------------------------------------------------------ */
+if(!S.movements)S.movements=[];
+if(!S.goals)S.goals=[];
+
+function todayMoves(d){
+  const k=dayKey(d||new Date());
+  return (S.movements||[]).filter(x=>dayKey(new Date(x.ts))===k).sort((a,b)=>b.ts-a.ts);
+}
+function movementDays(days){
+  const cut=Date.now()-(days||7)*864e5;
+  return new Set((S.movements||[]).filter(x=>x.ts>=cut).map(x=>dayKey(new Date(x.ts)))).size;
+}
+function movementInsight(){
+  const recent=(S.movements||[]).filter(x=>Date.now()-x.ts<30*864e5);
+  if(!recent.length)return "";
+  const by={};for(const x of recent)by[x.type]=(by[x.type]||0)+1;
+  const top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];
+  const felt=recent.filter(x=>x.feel),better=felt.filter(x=>x.feel==="better").length;
+  const bits=[];
+  const week=movementDays(7);if(week)bits.push("You moved on "+week+" day"+(week===1?"":"s")+" this week");
+  if(top&&top[1]>=2)bits.push((top[0]==="other"?"Movement":top[0].charAt(0).toUpperCase()+top[0].slice(1))+" is what you reach for most");
+  if(felt.length>=3&&better>=2)bits.push("you've usually felt better after moving");
+  return bits.join(". ")+(bits.length?".":"");
+}
+function movementAIText(){
+  const ins=movementInsight();if(!ins)return "";
+  return "ROWAN (movement history, no calories or fitness scoring): "+ins+" Use this only when movement is relevant. Never shame her for not moving.\n";
+}
+function rowanPanelHTML(){
+  const today=todayMoves(),ins=movementInsight();
+  return '<div class="card tracker rowantrack"><div class="label">Movement with Rowan</div><p style="margin-top:6px">This is not exercise scoring. I keep track of how you moved and whether it actually helped.</p>'+
+    (today.length?'<div class="trackerstat"><b>'+today.length+'</b><span>movement'+(today.length===1?"":"s")+" today</span></div>":"")+
+    (ins?'<div class="remember"><span class="label">Rowan has noticed</span><p>'+esc(ins)+'</p></div>':"")+
+    '<div class="field"><label for="moveType">What did you do?</label><select id="moveType"><option value="walk">Walk</option><option value="strength">Strength</option><option value="stretch">Stretch or mobility</option><option value="dance">Dance</option><option value="yoga">Yoga</option><option value="chores">Chores or yard work</option><option value="sport">Sport</option><option value="other">Something else</option></select></div>'+
+    '<div class="row trackerfields"><div class="field"><label for="moveMin">Minutes <span class="muted">(optional)</span></label><input id="moveMin" type="number" inputmode="numeric" min="1" max="300" placeholder="10"></div><div class="field"><label for="moveFeel">Afterward</label><select id="moveFeel"><option value="">Not sure yet</option><option value="better">Better</option><option value="same">About the same</option><option value="tired">More tired</option></select></div></div>'+
+    '<button class="btn btn-main full" id="moveSave">Log movement</button>'+
+    (today.length?'<details class="cyclog"><summary>Today</summary>'+today.map(x=>'<div class="li"><span><b>'+esc(x.type.charAt(0).toUpperCase()+x.type.slice(1))+'</b>'+(x.min?" · "+x.min+" min":"")+(x.feel?" · "+esc(x.feel==="better"?"felt better":x.feel==="same"?"felt the same":"felt more tired"):"")+'</span><button class="x2" data-movedel="'+x.id+'" aria-label="Delete">×</button></div>').join("")+'</details>':"")+
+    '<p class="small muted">No streaks. No calorie counts. Rowan uses this to learn what kind of movement helps you under what conditions.</p></div>';
+}
+function saveMovement(){
+  const type=($("#moveType")||{}).value||"other",min=Math.max(0,Math.min(300,+((($("#moveMin")||{}).value)||0))),feel=($("#moveFeel")||{}).value||"";
+  const x={id:"mv_"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),ts:Date.now(),type,min:min||null,feel};
+  S.movements.unshift(x);S.movements=S.movements.slice(0,500);
+  const d=S.days[dayKey(new Date())]=S.days[dayKey(new Date())]||{};d.moved=1;
+  persistAll();track("movement_log",{type});return x;
+}
+
+function activeGoals(){return (S.goals||[]).filter(g=>g.status==="open").sort((a,b)=>b.updated-a.updated);}
+function goalInsight(){
+  const gs=S.goals||[],done=gs.filter(g=>g.status==="done"&&Date.now()-(g.doneAt||0)<30*864e5).length,open=activeGoals();
+  const stuck=open.filter(g=>(g.updates||[]).slice(-1)[0]?.state==="stuck");
+  const bits=[];if(open.length)bits.push("You have "+open.length+" active goal"+(open.length===1?"":"s"));if(done)bits.push("you finished "+done+" in the last 30 days");if(stuck.length)bits.push(stuck.length+" "+(stuck.length===1?"is":"are")+" currently stuck");
+  return bits.join(". ")+(bits.length?".":"");
+}
+function goalAIText(){
+  const open=activeGoals().slice(0,3);if(!open.length)return "";
+  return "SOL (goals she chose to track): "+open.map(g=>g.title+"; next move: "+(g.next||"not set")).join(" | ")+". Help with the next move, not motivation theater.\n";
+}
+function solGoalsHTML(){
+  const open=activeGoals(),done=(S.goals||[]).filter(g=>g.status==="done").slice(0,4),ins=goalInsight();
+  return '<div class="card tracker soltrack"><div class="label">What you are building with Sol</div><p style="margin-top:6px">A goal only belongs here if keeping the thread helps you take the next real step.</p>'+
+    (ins?'<div class="remember"><span class="label">Sol has the thread</span><p>'+esc(ins)+'</p></div>':"")+
+    open.map(g=>'<div class="goalrow"><div><b>'+esc(g.title)+'</b><p class="small muted">Next move</p><div class="row goalnext"><input type="text" maxlength="140" value="'+esc(g.next||"")+'" id="goalnext-'+g.id+'" placeholder="The next thing you can actually do"><button class="chip" data-goalupdate="'+g.id+'">Save</button></div></div><div class="row"><button class="chip" data-goalact="'+g.id+':done">Done</button><button class="chip" data-goalact="'+g.id+':stuck">I am stuck</button><button class="chip" data-goalact="'+g.id+':pause">Pause it</button></div></div>').join("")+
+    '<details class="cyclog"'+(!open.length?' open':'')+'><summary>Add a goal</summary><div class="field"><label for="goalTitle">What are you trying to make happen?</label><input type="text" id="goalTitle" maxlength="120" placeholder="Finish the bathroom, launch the app, apply for three jobs"></div><div class="field"><label for="goalNext">What is the next move?</label><input type="text" id="goalNext" maxlength="140" placeholder="One action, not the whole plan"></div><button class="btn btn-main full" id="goalAdd">Let Sol hold this</button></details>'+
+    (done.length?'<details class="cyclog"><summary>Finished</summary>'+done.map(g=>'<div class="li"><span>✓ '+esc(g.title)+'</span></div>').join("")+'</details>':"")+
+    '<p class="small muted">No streaks. Sol cares about movement, blockers and the next honest step.</p></div>';
+}
+function addGoal(){
+  const title=(($("#goalTitle")||{}).value||"").trim().slice(0,120),next=(($("#goalNext")||{}).value||"").trim().slice(0,140);
+  if(!title)return null;
+  const g={id:"gl_"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),title,next,status:"open",created:Date.now(),updated:Date.now(),updates:[]};
+  S.goals.unshift(g);S.goals=S.goals.slice(0,100);persistAll();if(memOn())updateLedger("Goal with Sol: "+title+(next?". Next move: "+next:""));return g;
+}
+function trackerPanelHTML(k){return k==="rowan"?rowanPanelHTML():k==="sol"?solGoalsHTML():"";}
+function trackerClick(t,d){
+  if(t.id==="moveSave"){saveMovement();toast("Rowan has it.");closeSheet();openGuardian("rowan");return true;}
+  if(d.movedel){S.movements=S.movements.filter(x=>x.id!==d.movedel);persistAll();closeSheet();openGuardian("rowan");return true;}
+  if(t.id==="goalAdd"){const g=addGoal();if(!g){toast("Name the goal first.");return true;}toast("Sol has the thread.");closeSheet();openGuardian("sol");return true;}
+  if(d.goalupdate){const g=S.goals.find(x=>x.id===d.goalupdate);if(g){g.next=((document.getElementById("goalnext-"+g.id)||{}).value||"").trim().slice(0,140);g.updated=Date.now();(g.updates=g.updates||[]).push({ts:Date.now(),state:"next",note:g.next});persistAll();toast("Next move updated.");}return true;}
+  if(d.goalact){const [id,act]=d.goalact.split(":"),g=S.goals.find(x=>x.id===id);if(!g)return true;g.updated=Date.now();g.updates=g.updates||[];
+    if(act==="done"){g.status="done";g.doneAt=Date.now();g.updates.push({ts:Date.now(),state:"done"});if(memOn())updateLedger("She finished a goal she tracked with Sol: "+g.title);toast("Done. Sol kept the receipt.");closeSheet();openGuardian("sol");}
+    else if(act==="pause"){g.status="paused";g.updates.push({ts:Date.now(),state:"paused"});toast("Paused. No guilt.");closeSheet();openGuardian("sol");}
+    else if(act==="stuck"){g.updates.push({ts:Date.now(),state:"stuck"});persistAll();const list=S.chats.sol=S.chats.sol||[];guardianOpens(list,{text:"You're stuck on "+g.title+". The next move was: "+(g.next||"not clear yet")+". Tell me what's actually in the way."});saveLocal();closeSheet();openTalk("sol");}
+    persistAll();return true;
+  }
+  return false;
+}
 /* ------------------------------------------------------------------
    JOURNEYS
 ------------------------------------------------------------------ */
@@ -4238,7 +4401,7 @@ function openGuardian(k){
   let h='<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+' · '+esc(g.element)+'</div><h2 style="margin:2px 0 0">'+esc(g.name)+'</h2></div></div>'+
    '<p><b>'+esc(g.name)+'\'s job:</b> '+esc(JOB[k]||g.domain)+'</p><p class="small muted">'+esc(g.domain)+' '+esc(g.voice)+(usedN?" You have walked with "+esc(g.name)+" "+usedN+" time"+(usedN>1?"s":"")+".":"")+'</p>'+
    '<div class="chips">'+g.phrases.map(p=>'<span class="tag" style="font-family:var(--f-display);font-style:italic;font-size:15px">'+esc(p)+'</span>').join("")+'</div>'+
-   '<button class="btn btn-main full" data-talk="'+k+'">Talk to '+esc(g.name)+'</button>'+(k==="iris"?irisPanelHTML():'');
+   '<button class="btn btn-main full" data-talk="'+k+'">Talk to '+esc(g.name)+'</button>'+(k==="iris"?irisPanelHTML():trackerPanelHTML(k));
   if(k==="iris")setTimeout(()=>cycleSync().then(rerenderIris),0);
   if(rs.length)h+='<div class="label">'+esc(g.name)+'\'s rituals</div>'+rs.map(r=>ritualCard(r)).join("");
   if(c)h+='<div class="card"><div class="row between"><h3>'+esc(c.name)+'</h3>'+(isMember()?'':'<span class="badge">Members</span>')+'</div><p class="small muted" style="margin-top:6px">'+esc(c.d)+'</p><button class="btn btn-ghost full" style="margin-top:12px" data-chamber="'+k+'">Open the chamber</button></div>';
@@ -4337,17 +4500,27 @@ const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","X
 const ORN='<svg class="orn" viewBox="0 0 220 20" aria-hidden="true"><path d="M4 10h78M138 10h78" stroke="#9A7414" stroke-width="1"/><path d="M82 10c8 0 12-6 18-6M138 10c-8 0-12-6-18-6M82 10c8 0 12 6 18 6M138 10c-8 0-12 6-18 6" fill="none" stroke="#9A7414" stroke-width="1"/><path d="M110 2l2.6 5.4L118 10l-5.4 2.6L110 18l-2.6-5.4L102 10l5.4-2.6z" fill="#BF1E73"/><circle cx="4" cy="10" r="1.6" fill="#9A7414"/><circle cx="216" cy="10" r="1.6" fill="#9A7414"/></svg>';
 function startRitual(r,ctx){
   closeSheet();
-  run={r:adapt(r),i:0,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
+  run={r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
   const el=document.createElement("div");el.className="rite";el.id="rite";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",r.title);
-  document.body.appendChild(el);document.body.style.overflow="hidden";
+  el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
 }
 function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;if(talkG)musicFor(talkG);else musicBack();}
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+glyph(r.g)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
-  if(i===-1){ /* intro */ }
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32,true)+'<span class="t">· '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  if(i===-1){
+    const needs=ritualNeeds(r);
+    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+
+      '<div class="ritualintro">'+
+      '<div class="count"><span class="seal">✦</span><span>Before you begin</span></div><h2>'+esc(r.title)+'</h2>'+ORN+
+      '<p class="purpose">'+esc(r.purpose||"")+'</p>'+
+      '<div class="gatherbox"><span class="sayl">Gather everything now</span><div class="needchips">'+(needs.length?needs.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
+      '<p class="prepnote">You should not discover a new supply halfway through. If something is missing, go back and tell Aura before you start.</p>'+
+      '</div></div><div class="foot"><button class="btn btn-ink" id="nextBtn">I have what I need</button></div>';
+    el.scrollTop=0;return;
+  }
   if(i<total){
     const s=r.steps[i];
     el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal">'+ROMAN[i+1]+'</span><span>of '+ROMAN[total]+'</span></div><h2>'+esc(s.t)+'</h2>'+ORN+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
@@ -4654,7 +4827,7 @@ function openAltar(first){
       '<div><div class="label">A few things about you</div><p class="small muted" style="margin-top:6px">Just three things. I\'ll learn the rest as we go, and you can change anything in Settings. For reflection and ritual, not medical or mental health care.</p></div>'+
       '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>'+
       (first?'<div class="card" id="memChoice"><div class="label">What I remember</div><p class="small" style="margin-top:6px">I can remember the people, goals, patterns and moments you share, so I can support you over time. You decide what I keep, and you can see it or make me forget it any time.</p><div class="chips" style="margin-top:8px"><button class="chip" data-mem="on" aria-pressed="'+memOn()+'">Remember what I share</button><button class="chip" data-mem="off" aria-pressed="'+!memOn()+'">Don\'t remember anything</button></div></div>':'')+
-      (p.bday&&!needBirthday()?'':'<div class="field"><label for="age18">Your birthday</label><input type="date" id="age18" max="'+new Date().toISOString().slice(0,10)+'"><p class="small muted" style="margin-top:6px">The Daily Alchemist is for adults. I keep your month and day for your sign and your birthday, never the year.</p></div>');
+      (!needBirthday()?'':'<div class="field"><label for="age18">Your birthday</label><input type="date" id="age18" max="'+new Date().toISOString().slice(0,10)+'"><p class="small muted" style="margin-top:6px">The Daily Alchemist is for adults. I keep your month and day for your sign and your birthday, never the year.</p></div>');
   }else{
     h='<div class="stack"><div><div class="label">'+(first?"Before we begin":"Settings")+'</div><h2>'+(first?"Aura would like to know you.":"What Aura knows")+'</h2><p class="muted" style="margin-top:6px">So you never have to explain it twice.'+(first?' That\'s all Aura needs to start. She\'ll learn the rest as you go, and only ask once.':' Everything here shapes what Aura gives you.')+'</p>'+(first?'<p class="small muted" style="margin-top:8px">The Daily Alchemist is for reflection and ritual. It is not medical or mental health care. You must be 18 or older to use it.</p>':'')+'</div>'+
    '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>';
@@ -4699,6 +4872,7 @@ document.addEventListener("click",async ev=>{
   if(t.tagName==="INPUT"){irisClick(t,d);return;}
   if(focusClick(t,d))return;
   if(irisClick(t,d))return;
+  if(trackerClick(t,d))return;
   if(d.mic){toggleMic(t);return;}
   if(t.id==="customAdd"){const v=($("#customIn").value||"").trim().slice(0,40);if(!v)return;if(!S.profile.custom.includes(v))S.profile.custom.push(v);persist("profile");$("#pCustom").insertAdjacentHTML("beforeend",'<span class="chip" aria-pressed="true">'+esc(v)+' <button class="x2 in" data-delcustom="'+(S.profile.custom.length-1)+'" aria-label="Remove">×</button></span>');$("#customIn").value="";toast("Aura knows you have "+v+".");return;}
   if(d.delcustom!==undefined){S.profile.custom.splice(+d.delcustom,1);persist("profile");t.closest(".chip").remove();return;}
@@ -4708,6 +4882,10 @@ document.addEventListener("click",async ev=>{
   if(d.delcorr!==undefined){S.corr.splice(+d.delcorr,1);persistAll();closeSheet();openAltar(false);return;}
   if(t.id==="seasonSet"){const nm=($("#seasonName").value||"").trim();if(!nm)return;S.pseason={name:nm,start:Date.now()};persistAll();renderSky();closeSheet();openAltar(false);toast("Your season is named.");return;}
   if(t.id==="seasonEnd"){S.pseason=null;persistAll();renderSky();closeSheet();openAltar(false);return;}
+  if(d.contacton!==undefined){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.enabled=d.contacton==="1";document.querySelectorAll("[data-contacton]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
+  if(d.contactcad){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.cadence=d.contactcad;document.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
+  if(d.contactscope){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.scope=d.contactscope;document.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
+  if(t.id==="contactSave"){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};if(c.enabled==null){toast("Choose whether you want us to reach out.");return;}persist("profile");if(c.enabled){const ok=await enablePush();toast(ok?"Saved. We'll follow your rhythm.":"Saved. You'll still see letters and check-ins when you open the app.");}else toast("Saved. We won't reach out while you're away.");return;}
   if(t.id==="pushOn"){await enablePush();return;}
   if(d.altar){openAltarItems(d.altar);return;}
   if(d.tend){const sp=S.spaces.find(z=>z.id===d.tend);const r=tendRitual(sp);startRitual(r,{space:sp.id,theme:"space",thread:"Home"});return;}
@@ -4877,14 +5055,14 @@ document.addEventListener("click",async ev=>{
     setTimeout(renderCircle,1100);return;}
   if(d.cardask&&threeMode()&&threeDone()){const cs=drawnCards();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="My three cards today: "+cs.map(x=>SPREAD_POS[x.pos][1]+", "+x.title).join("; ")+". Help me understand what they mean for me right now.";sendTalk();}},350);return;}
   if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
-  if(d.guardian){openGuardian(d.guardian);return;}
+  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk();openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}
   if(d.entry){openEntry(d.entry);return;}
   /* ritual mode */
   if(t.id==="riteX"){if(run)track("ritual_exit",{id:run.r.id,step:run.i+1,of:run.r.steps.length});endRitual();return;}
   if(t.id==="nextBtn"){run.i++;track("ritual_step",{id:run.r.id,step:run.i+1,of:run.r.steps.length});drawStep();return;}
-  if(t.id==="prevBtn"){run.i=Math.max(0,run.i-1);drawStep();return;}
+  if(t.id==="prevBtn"){run.i=Math.max(-1,run.i-1);drawStep();return;}
   if(t.id==="holdBtn"){
     const s=run.r.steps[run.i];let left=s.hold;t.disabled=true;t.textContent="Holding";
     let wl=null;try{if(navigator.wakeLock)wl=await navigator.wakeLock.request("screen");}catch(e){}

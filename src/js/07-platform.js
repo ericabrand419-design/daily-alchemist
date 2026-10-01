@@ -29,7 +29,7 @@ function compat(a,b){if(!a||!b)return "";const pair=[a.el,b.el].sort().join("+")
   if(a.el===b.el)return "You're both "+a.el+" signs. You get each other without trying.";
   if(pair==="air+fire"||pair==="earth+water")return "Your elements feed each other.";
   return "Your elements balance each other. It takes a little more talking, and that's where the heat is.";}
-function needBirthday(){if(S.profile.minor)return false;if(!S.profile.bday)return true;return accountsOn()&&ACCT.user&&!ACCT.adult21&&!ACCT.under21;}
+function needBirthday(){if(S.profile.minor||S.profile.ageVerified)return false;if(!S.profile.bday)return true;return accountsOn()&&ACCT.user&&!ACCT.adult21&&!ACCT.under21;}
 let bdayAfter=null;
 function openBirthday(reason,after){
   bdayAfter=after||null;if(document.querySelector("#bdaySheet"))return;
@@ -55,7 +55,7 @@ async function setBirthday(v,after){
     if(!r||r.error||!r.adult_confirmed_at){track("bday_save_failed",{why:r&&r.error?String(r.error).slice(0,40):"network"});bdayErr("That didn't save. Check your connection and tap Continue again.");return false;}
     ACCT.adultAt=r.adult_confirmed_at;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;delete S.pendingDob;
   }
-  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;saveLocal();remotePut("prefs");
+  S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;S.profile.ageVerified=true;saveLocal();remotePut("prefs");
   if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime)redeemFriend();
   return true;
 }
@@ -85,13 +85,13 @@ function overLimit(kind){if(accountsOn()&&ACCT.admin)return false;return usedTod
 function synced(){return MODE==="artifact"?cloud.on:!!ACCT.user;}
 
 async function remotePut(kind,id,data){
-  if(MODE==="artifact"){return cloudPut(kind==="chat"?"chat-"+id:kind==="prefs"?"profile":id,kind==="prefs"?S.profile:data).then(()=>{if(kind==="prefs"){cloudPut("draws",{draws:S.draws});if(S.ledger)cloudPut("ledger",{ledger:S.ledger});cloudPut("extras",{extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges}});}});}
+  if(MODE==="artifact"){return cloudPut(kind==="chat"?"chat-"+id:kind==="prefs"?"profile":id,kind==="prefs"?S.profile:data).then(()=>{if(kind==="prefs"){cloudPut("draws",{draws:S.draws});if(S.ledger)cloudPut("ledger",{ledger:S.ledger});cloudPut("extras",{extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges,movements:S.movements||[],goals:S.goals||[]}});}});}
   if(!ACCT.user||!ACCT.sb)return;
   const sb=ACCT.sb,uid=ACCT.user.id;
   try{
     if(kind==="entry")await sb.from("entries").upsert({id,user_id:uid,data});
     else if(kind==="chat")await sb.from("chats").upsert({user_id:uid,guardian:id,msgs:data.msgs,updated_at:new Date().toISOString()});
-    else await sb.from("prefs").upsert({user_id:uid,data:{profile:S.profile,draws:S.draws,ledger:S.ledger||null,extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges}},updated_at:new Date().toISOString()});
+    else await sb.from("prefs").upsert({user_id:uid,data:{profile:S.profile,draws:S.draws,ledger:S.ledger||null,extras:{asks:(S.asks||[]).slice(0,150),memNotes:S.memNotes||[],promises:S.promises,later:S.later,myRituals:S.myRituals,cart:S.cart,misses:S.misses,plans:S.plans,days:S.days,spaces:S.spaces,dates:S.dates,corr:S.corr,pseason:S.pseason,letters:S.letters,nudges:S.nudges,movements:S.movements||[],goals:S.goals||[]}},updated_at:new Date().toISOString()});
   }catch(e){}
 }
 async function api(path,body){

@@ -26,6 +26,7 @@ function mergeExtras(x){
   S.asks=byIdMerge(S.asks,x.asks).sort((a,b)=>b.ts-a.ts).slice(0,200);S.memNotes=byIdMerge(S.memNotes,x.memNotes);
   if(x.days&&typeof x.days==="object"){S.days=S.days||{};for(const [k,v] of Object.entries(x.days))S.days[k]={...v,...(S.days[k]||{})};}
   S.promises=byIdMerge(S.promises,x.promises);S.later=byIdMerge(S.later,x.later);S.plans=byIdMerge(S.plans,x.plans);
+  S.movements=byIdMerge(S.movements,x.movements).sort((a,b)=>(b.ts||0)-(a.ts||0));S.goals=byIdMerge(S.goals,x.goals).sort((a,b)=>(b.updated||b.created||0)-(a.updated||a.created||0));
   S.myRituals=byIdMerge(S.myRituals,x.myRituals);for(const r of S.myRituals){if(typeof byId!=="undefined"&&!byId[r.id]){R.push(r);byId[r.id]=r;}}
   if(Array.isArray(x.cart))for(const c of x.cart)if(!(S.cart||[]).some(z=>z.tag===c.tag))(S.cart=S.cart||[]).push(c);
   S.misses={...(x.misses||{}),...(S.misses||{})};

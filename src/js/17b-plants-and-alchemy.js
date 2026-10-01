@@ -101,11 +101,13 @@ function renderSky(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
   document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
-  const w=wxNow();
-  const top=esc(now.toLocaleDateString(undefined,{weekday:"long"}))+' · '+esc(M.name)+' · '+esc(se.name)+(w?' · '+esc(wxTemp(w))+' '+esc(WX_WORD[w.kind]):'');
-  $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt"><span class="aline">'+top+'</span>'+
-    (quiet?'<span class="aread muted">Your day comes first. Tap for today\'s sky.</span>':
-     '<span class="aplant">Plant ally: <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+'</span></button>';
+  const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
+  const meta=esc(M.name)+' · '+esc(se.name);
+  $("#sky").innerHTML='<button class="alch" id="alchOpen" aria-label="Open today\'s Daily Alchemy">'+moonSVG(M)+'<span class="alt">'+
+    '<span class="adate">'+date+'</span><span class="aline">'+meta+'</span>'+
+    (quiet?'<span class="aread">Your day comes first. The sky can wait.</span>':
+     '<span class="aplant">Today\'s plant ally · <b>'+esc(pn.p.n)+'</b></span><span class="aread">“'+esc(pn.say)+'”</span>')+
+    '<span class="aopen">Open today\'s alchemy <span aria-hidden="true">›</span></span></span></button>';
 }
 function openAlchemy(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),day=DAY_RULE[now.getDay()],dr=drawPick()!=null?todayDraw():null,cyc=cycleContext(now);
@@ -114,7 +116,6 @@ function openAlchemy(){
   let h='<div class="stack alchsheet"><div class="label">Daily Alchemy</div><h2>'+esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}))+'</h2>'+
    '<p class="voice">'+esc(alchemySentence(now))+'</p>'+
    (f.level<=3?'<p class="small" style="color:var(--gold)">'+esc(f.level===1?"Right now, you matter more than any of this.":"What's happening in your life comes before any of this today. The sky can wait.")+'</p>':'')+
-   (wxNow()?'<details class="group"><summary>The weather</summary><p>'+esc(wxNow().label)+', '+esc(wxTemp(wxNow()))+(wxNow().city?' in '+esc(wxNow().city):'')+'.'+(wxNow().soon?' '+esc(WX_OPEN[wxNow().soon])+' coming in the next few hours.':'')+'</p><p class="small muted">'+(["rain","storm","snow"].includes(wxNow().kind)?'Rituals that send you outside wait for a better sky today. ':'')+(wxMode()==="precise"?'Using your phone\'s location, rounded to about a kilometer.':'Using your rough location from your connection.')+' Change it in Settings, under Weather.</p></details>':'')+
    '<details class="group" open><summary>The moon</summary><p>'+esc(M.name)+', '+Math.round(M.ill*100)+'% lit. '+(M.waxing?"Full moon in "+fullIn+(fullIn===1?" day":" days")+", new moon in "+newIn+".":"New moon in "+newIn+(newIn===1?" day":" days")+", full moon in "+fullIn+".")+'</p><p class="small muted">'+esc(MOON_TALK[M.name])+'</p></details>'+
    '<details class="group"><summary>The season</summary><p>'+esc(se.name)+'. '+esc(se.next)+' begins in '+se.days+' days.</p><p class="small muted">On the wheel of the year it\'s '+esc(SEA.cur.name)+', the time of '+esc(SEA.cur.sense)+'. '+esc(SEA.next.name)+' is '+SEA.days+' days out.</p></details>'+
    '<details class="group"><summary>The day</summary><p>'+esc(day[0])+' belongs to '+esc(day[1])+': '+esc(day[2])+'.</p><p class="small muted">At home in the Circle today: '+esc(day[3].filter(k=>G[k]&&allowedG(k)).map(k=>G[k].name).join(", "))+'.</p></details>'+

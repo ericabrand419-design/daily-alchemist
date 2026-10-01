@@ -60,7 +60,7 @@ function openGuardian(k){
   let h='<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+' · '+esc(g.element)+'</div><h2 style="margin:2px 0 0">'+esc(g.name)+'</h2></div></div>'+
    '<p><b>'+esc(g.name)+'\'s job:</b> '+esc(JOB[k]||g.domain)+'</p><p class="small muted">'+esc(g.domain)+' '+esc(g.voice)+(usedN?" You have walked with "+esc(g.name)+" "+usedN+" time"+(usedN>1?"s":"")+".":"")+'</p>'+
    '<div class="chips">'+g.phrases.map(p=>'<span class="tag" style="font-family:var(--f-display);font-style:italic;font-size:15px">'+esc(p)+'</span>').join("")+'</div>'+
-   '<button class="btn btn-main full" data-talk="'+k+'">Talk to '+esc(g.name)+'</button>'+(k==="iris"?irisPanelHTML():'');
+   '<button class="btn btn-main full" data-talk="'+k+'">Talk to '+esc(g.name)+'</button>'+(k==="iris"?irisPanelHTML():trackerPanelHTML(k));
   if(k==="iris")setTimeout(()=>cycleSync().then(rerenderIris),0);
   if(rs.length)h+='<div class="label">'+esc(g.name)+'\'s rituals</div>'+rs.map(r=>ritualCard(r)).join("");
   if(c)h+='<div class="card"><div class="row between"><h3>'+esc(c.name)+'</h3>'+(isMember()?'':'<span class="badge">Members</span>')+'</div><p class="small muted" style="margin-top:6px">'+esc(c.d)+'</p><button class="btn btn-ghost full" style="margin-top:12px" data-chamber="'+k+'">Open the chamber</button></div>';

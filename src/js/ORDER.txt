@@ -21,6 +21,7 @@
 17c-iris.js
 17d-tarot.js
 17e-weather.js
+17f-trackers.js
 18-journeys-view.js
 19-circle-view.js
 20-archive-view.js

@@ -100,7 +100,7 @@ function focusText(now){
   return "RIGHT NOW: "+DP_WORD[dp]+", "+now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"})+". Today's steward is "+G[STEWARD[dp]].name+". Plant ally: "+plantAlly(now).n+" (symbolic only; never suggest eating or taking herbs).\n"+
     "CURRENT FOCUS, decided by the app's priority engine (follow it): "+d+"\n"+
     (f.level!==4&&f.body.lines.length?"BODY: "+f.body.lines.join(" ")+"\n":"")+
-    (cycleAIText(now)?cycleAIText(now)+"\n":"")+wxAIText()+
+    (cycleAIText(now)?cycleAIText(now)+"\n":"")+movementAIText()+goalAIText()+wxAIText()+
     (ans.length?"HER DAILY QUESTION TODAY: "+ans.join(". ")+".\n":"")+
     "THE HARD RULE: "+HARD_RULE+"\n"+PRIORITY_TEXT+"\n";
 }
@@ -112,7 +112,7 @@ function focusCardHTML(f){
   if(f.level===3)return followHTML()||checkinHTML();
   return stewardHTML(f);
 }
-function speaker(g,t){return '<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';}
+function speaker(g,t){return '<div class="speaker">'+guardianMark(g,30,true)+'<span class="who" style="color:'+(g==="aura"?"var(--gold)":G[g].color)+'">· '+esc(t)+'</span></div>';}
 function safetyCardHTML(f){
   return '<div class="card rhythm focus">'+speaker("aura","checking on you")+'<p style="margin-top:8px">Earlier you told me something that worried me. Before anything else today: are you safe right now?</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-safe="ok">I\'m safe</button><button class="btn btn-ghost" data-safe="'+esc(f.safety.kind)+'">Not really</button></div></div>';
 }
@@ -143,7 +143,7 @@ function arcHTML(dp){
   if(arc[k])return '<div class="arcq done"><span class="label">'+esc(q)+'</span><p>'+esc(arc[k])+'</p></div>';
   return '<div class="arcq">'+(prev?'<p class="small muted">'+esc(prev)+'</p>':'')+'<label for="arcIn" class="q2">'+esc(q)+'</label><div class="row" style="margin-top:6px;flex-wrap:nowrap"><input type="text" id="arcIn" maxlength="140" placeholder="A few words is plenty" style="flex:1;min-width:0"><button class="chip" data-arc="'+k+'">Keep</button></div></div>';
 }
-function dayRitualHTML(){const dr=dayRitual();if(!dr)return "";return '<div class="dayrit"><span class="label">Today\'s ritual</span><p style="margin-top:4px"><b>'+esc(dr.r.title)+'</b> with '+esc(G[dr.r.g].name)+' · '+dr.r.min+' min</p><p class="small muted">'+esc(dr.why)+'</p><div class="row" style="margin-top:8px"><button class="btn btn-ghost sm" data-begin="'+esc(dr.r.id)+'">Begin</button><button class="btn btn-ghost sm" data-peek="'+esc(dr.r.id)+'">See it first</button></div></div>';}
+function dayRitualHTML(){const dr=dayRitual();if(!dr)return "";return '<div class="dayrit"><span class="label">Today\'s ritual</span><p style="margin-top:4px"><b>'+esc(dr.r.title)+'</b> with '+esc(G[dr.r.g].name)+' · '+dr.r.min+' min</p><p class="small muted">'+esc(dr.why)+'</p><p class="small muted">This is your ritual for the day. The day around it can change, but this one does not reshuffle unless your real-life situation takes priority.</p><div class="row" style="margin-top:8px"><button class="btn btn-ghost sm" data-begin="'+esc(dr.r.id)+'">Begin</button><button class="btn btn-ghost sm" data-peek="'+esc(dr.r.id)+'">See it first</button></div></div>';}
 function stewardHTML(f){
   const dp=f.dp,d=dayRec(),ins=f.insight||"",cyc=f.body.cyc;
   const why=ins?'<p class="why" style="margin-top:10px">'+esc(ins)+'</p>':'';
@@ -159,9 +159,10 @@ function stewardHTML(f){
     return '<div class="card rhythm">'+speaker("aurora","this morning")+'<p style="margin-top:8px">'+esc(sun)+'You\'ve got something to work with today. Let\'s spend it on purpose.</p>'+why+arcHTML(dp)+dayRitualHTML()+'</div>';
   }
   if(dp==="afternoon"){
-    const rowan=d.moved==null?'<div class="subrow">'+glyph("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> did you move your body today?</p>'+chipsQ("moved",MOVEDQ,null)+'</div></div>':
-      d.moved===0?'<div class="subrow">'+glyph("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> no judgment. Want the smallest version?</p><div class="row" style="margin-top:6px"><button class="btn btn-ghost sm" data-begin="'+(lowTank()?"one-song-dance":"walk-it-off")+'">Move with Rowan</button><button class="chip" data-moved="1">Did a little</button></div></div></div>':'';
-    return '<div class="card rhythm">'+speaker("sol","midday")+'<p style="margin-top:8px">Halfway. What actually got done, and what deserves the rest of the day? Real version, not the tidy one.</p>'+why+arcHTML(dp)+rowan+'</div>';
+    const rowan=d.moved==null?'<div class="subrow">'+guardianMark("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> did you move your body today?</p>'+chipsQ("moved",MOVEDQ,null)+'<button class="linkish small" data-guardian="rowan" style="margin-top:5px">Open movement with Rowan</button></div></div>':
+      d.moved===0?'<div class="subrow">'+guardianMark("rowan",24)+'<div><p class="small"><b style="color:'+G.rowan.color+'">Rowan:</b> no judgment. Want the smallest version?</p><div class="row" style="margin-top:6px"><button class="btn btn-ghost sm" data-begin="'+(lowTank()?"one-song-dance":"walk-it-off")+'">Move with Rowan</button><button class="chip" data-moved="1">Did a little</button></div><button class="linkish small" data-guardian="rowan" style="margin-top:5px">Log it with Rowan</button></div></div>':'';
+    const goal=activeGoals()[0],goalLine=goal?'<div class="subrow">'+guardianMark("sol",24)+'<div><p class="small"><b style="color:'+G.sol.color+'">Sol is holding:</b> '+esc(goal.title)+(goal.next?'<br><span class="muted">Next move: '+esc(goal.next)+'</span>':'')+'</p><button class="linkish small" data-guardian="sol" style="margin-top:5px">Open goals with Sol</button></div></div>':'';
+    return '<div class="card rhythm">'+speaker("sol","midday")+'<p style="margin-top:8px">Halfway. What actually got done, and what deserves the rest of the day? Real version, not the tidy one.</p>'+why+arcHTML(dp)+goalLine+rowan+'</div>';
   }
   if(dp==="transition"&&!woundDown(nightKey())){
     const r=byId["threshold-reset"]&&canUse(byId["threshold-reset"])?byId["threshold-reset"]:eveningPick0().r;

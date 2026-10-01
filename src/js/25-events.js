@@ -22,6 +22,7 @@ document.addEventListener("click",async ev=>{
   if(t.tagName==="INPUT"){irisClick(t,d);return;}
   if(focusClick(t,d))return;
   if(irisClick(t,d))return;
+  if(trackerClick(t,d))return;
   if(d.mic){toggleMic(t);return;}
   if(t.id==="customAdd"){const v=($("#customIn").value||"").trim().slice(0,40);if(!v)return;if(!S.profile.custom.includes(v))S.profile.custom.push(v);persist("profile");$("#pCustom").insertAdjacentHTML("beforeend",'<span class="chip" aria-pressed="true">'+esc(v)+' <button class="x2 in" data-delcustom="'+(S.profile.custom.length-1)+'" aria-label="Remove">×</button></span>');$("#customIn").value="";toast("Aura knows you have "+v+".");return;}
   if(d.delcustom!==undefined){S.profile.custom.splice(+d.delcustom,1);persist("profile");t.closest(".chip").remove();return;}
@@ -31,6 +32,10 @@ document.addEventListener("click",async ev=>{
   if(d.delcorr!==undefined){S.corr.splice(+d.delcorr,1);persistAll();closeSheet();openAltar(false);return;}
   if(t.id==="seasonSet"){const nm=($("#seasonName").value||"").trim();if(!nm)return;S.pseason={name:nm,start:Date.now()};persistAll();renderSky();closeSheet();openAltar(false);toast("Your season is named.");return;}
   if(t.id==="seasonEnd"){S.pseason=null;persistAll();renderSky();closeSheet();openAltar(false);return;}
+  if(d.contacton!==undefined){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.enabled=d.contacton==="1";document.querySelectorAll("[data-contacton]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
+  if(d.contactcad){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.cadence=d.contactcad;document.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
+  if(d.contactscope){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.scope=d.contactscope;document.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
+  if(t.id==="contactSave"){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};if(c.enabled==null){toast("Choose whether you want us to reach out.");return;}persist("profile");if(c.enabled){const ok=await enablePush();toast(ok?"Saved. We'll follow your rhythm.":"Saved. You'll still see letters and check-ins when you open the app.");}else toast("Saved. We won't reach out while you're away.");return;}
   if(t.id==="pushOn"){await enablePush();return;}
   if(d.altar){openAltarItems(d.altar);return;}
   if(d.tend){const sp=S.spaces.find(z=>z.id===d.tend);const r=tendRitual(sp);startRitual(r,{space:sp.id,theme:"space",thread:"Home"});return;}
@@ -200,14 +205,14 @@ document.addEventListener("click",async ev=>{
     setTimeout(renderCircle,1100);return;}
   if(d.cardask&&threeMode()&&threeDone()){const cs=drawnCards();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="My three cards today: "+cs.map(x=>SPREAD_POS[x.pos][1]+", "+x.title).join("; ")+". Help me understand what they mean for me right now.";sendTalk();}},350);return;}
   if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
-  if(d.guardian){openGuardian(d.guardian);return;}
+  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk();openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}
   if(d.entry){openEntry(d.entry);return;}
   /* ritual mode */
   if(t.id==="riteX"){if(run)track("ritual_exit",{id:run.r.id,step:run.i+1,of:run.r.steps.length});endRitual();return;}
   if(t.id==="nextBtn"){run.i++;track("ritual_step",{id:run.r.id,step:run.i+1,of:run.r.steps.length});drawStep();return;}
-  if(t.id==="prevBtn"){run.i=Math.max(0,run.i-1);drawStep();return;}
+  if(t.id==="prevBtn"){run.i=Math.max(-1,run.i-1);drawStep();return;}
   if(t.id==="holdBtn"){
     const s=run.r.steps[run.i];let left=s.hold;t.disabled=true;t.textContent="Holding";
     let wl=null;try{if(navigator.wakeLock)wl=await navigator.wakeLock.request("screen");}catch(e){}
