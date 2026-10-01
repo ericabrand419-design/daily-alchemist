@@ -503,6 +503,7 @@ body:has(#talk) .scrim{z-index:40}body:has(#gate) .scrim{z-index:60}
 .g .e.job{text-transform:none;letter-spacing:0;font-size:13.5px;line-height:1.25;color:var(--glow-dim)}
 .memline{margin-top:4px}
 .rhythm .speaker{display:flex;align-items:center;gap:10px}.rhythm .who{font-family:var(--f-ui);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.rhythm .q2{font-family:var(--f-display);font-size:20px}
+.gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}.gplus{width:40px;height:40px;border-radius:50%;border:1px dashed rgba(231,196,90,.6);display:grid;place-items:center;font-size:22px;color:var(--gold)}.gchip{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;color:var(--glow);font-family:var(--f-ui);font-size:14px;min-width:68px;padding:4px;cursor:pointer}
 .addnums{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.addnums div{text-align:center}.addnums b{display:block;font-family:var(--f-display);font-size:26px;color:var(--gold)}.addnums span{display:block;font-family:var(--f-ui);font-size:13px;line-height:1.3;color:var(--glow-dim);margin-top:2px}
 select{background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 10px;font:inherit;font-size:17px;color-scheme:dark;flex:1}
 input[type=date]{width:100%;background:rgba(10,8,24,.55);color:var(--glow);border:1px solid rgba(231,196,90,.35);border-radius:14px;padding:12px 14px;font:inherit;font-size:17px;color-scheme:dark}
@@ -573,10 +574,10 @@ const G = {
     domain:"Sees across the whole Archive. Reads your moment and sends you to the guardian who can hold it.",
     voice:"Warm, wise, a little bougie. She speaks for the whole circle.",
     phrases:["Welcome to the work.","You already know.","Let's begin."]},
-  onyx:{name:"Onyx",title:"The Truth-Slayer",element:"Shadow",color:"#A597EA",
-    domain:"Shadow work, grief, guilt, shame and the old wounds that need confronting.",
-    voice:"Short sentences. Uses silence. Will not coddle you.",
-    phrases:["Tell the truth or sit in it.","Cut it loose.","You knew."]},
+  onyx:{name:"Onyx",title:"The Shadow Mirror",element:"Shadow",color:"#A597EA",
+    domain:"Shadow work, the things you did wrong, guilt, shame, making amends and the old wounds that need confronting.",
+    voice:"Short sentences. Uses silence. Will not coddle you, and will not let you drown in it either. No bypassing.",
+    phrases:["No more lies.","Tell the truth or sit in it.","Cut it loose.","You knew."]},
   sage:{name:"Sage",title:"The Flame Keeper",element:"Fire",color:"#F0703F",
     domain:"Truth-telling, cord-cutting, anger, courage and sacred rage.",
     voice:"Fierce and protective. Will light the match for you.",
@@ -605,10 +606,10 @@ const G = {
     domain:"Protection from ill will, jealousy, toxic people and returning what was sent.",
     voice:"Snarky, sharp, protective. A velvet dagger.",
     phrases:["Block. Cut. Banish.","Try me.","This is your edge."]},
-  cypress:{name:"Cypress",title:"The Structure Witch",element:"Metal",color:"#8FB5DA",
-    domain:"Feeling stuck, focus, plans, new beginnings and long transformation.",
-    voice:"Strategic and steady. Rituals become routines.",
-    phrases:["Structure is sacred.","Put it in the plan.","Discipline is devotion."]}
+  sol:{name:"Sol",title:"The Hype Witch",element:"Sun",color:"#FFD36B",
+    domain:"Accountability, follow through, plans, momentum, nerves before big days and keeping your word to yourself.",
+    voice:"Bold, warm, electric coach energy. Hypes you up, then holds you to it. Celebrates every win and won't let you off easy.",
+    phrases:["Hype you up. Hold you to it.","A wish with a date is a plan.","You didn't come here to play small."]}
 };
 Object.assign(G,{
   aurora:{name:"Aurora",title:"The First Light",element:"Dawn",color:"#F6A6C1",
@@ -639,11 +640,11 @@ Object.assign(G,{
     domain:"Creativity, art, play, making things and getting unstuck on the page.",
     voice:"Playful, messy, delighted. Talks fast when she's excited and makes you want to make something.",phrases:["Make it badly first.","Play is a spell.","Follow the spark."]}
 });
-const ORDER = ["onyx","sage","fern","lily","thistle","marigold","juniper","rue","cypress"];
+const ORDER = ["onyx","sage","fern","lily","thistle","marigold","juniper","rue","sol"];
 const EXP = ["aurora","rowan","ember","willow","vesper","wren","lumen","onora","poppy"];
 const ALL = ["aura",...ORDER,...EXP];
 /* wider-circle guardians borrow practices from their closest kin */
-const KIN = {aurora:"aura",rowan:"lily",ember:"sage",willow:"fern",vesper:"marigold",wren:"lily",lumen:"cypress",onora:"thistle",poppy:"marigold"};
+const KIN = {aurora:"aura",rowan:"lily",ember:"sage",willow:"fern",vesper:"marigold",wren:"lily",lumen:"sol",onora:"thistle",poppy:"marigold"};
 
 /* Glyphs: alchemical marks, one per guardian */
 function glyph(k, size){
@@ -669,7 +670,7 @@ function glyph(k, size){
     lumen:'<circle '+s+' cx="32" cy="32" r="16" stroke-dasharray="2 5"/><path '+s+' d="M32 20l2.5 9.5L44 32l-9.5 2.5L32 44l-2.5-9.5L20 32l9.5-2.5z"/>',
     onora:'<path '+s+' d="M32 14v34M32 22l-8-6M32 22l8-6M32 30l-10-5M32 30l10-5M32 48l-9 4M32 48l9 4M32 48v5"/>',
     poppy:'<circle '+s+' cx="32" cy="30" r="5"/><path '+s+' d="M32 25c-3-8-12-8-12 0c-8 0-8 9 0 10c0 8 9 8 12 0c3 8 12 8 12 0c8-1 8-10 0-10c0-8-9-8-12 0M32 36v14M32 44c4-3 8-3 10-1"/>',
-    cypress:'<rect '+s+' x="19" y="19" width="26" height="26"/><path '+s+' d="M32 19v26M19 32h26"/><circle cx="32" cy="32" r="2.6" fill="'+c+'"/>'
+    sol:'<circle '+s+' cx="32" cy="32" r="8"/><path '+s+' d="M32 12v8M32 44v8M12 32h8M44 32h8M20 20l4 4M40 40l4 4M20 44l4-4M40 24l4-4"/>'
   };
   return '<svg viewBox="0 0 64 64" aria-hidden="true"'+(size?' width="'+size+'" height="'+size+'"':'')+'>'+ring+(m[k]||m.aura)+'</svg>';
 }
@@ -864,7 +865,7 @@ const R = [
  secret:"A witch bottle is one of the oldest wards there is. Nothing about this is new. That's why it works.",
  prompts:["Whose energy are you returning?","How will you know it worked?"],
  tags:["jealous","jealousy","envy","enemy","against me","toxic","evil eye","hate","protection","gossip","hater"]},
-{id:"ledger",g:"cypress",title:"The Ledger of Intention",el:"Metal",moon:"New",min:10,
+{id:"ledger",g:"sol",title:"The Ledger of Intention",el:"Metal",moon:"New",min:10,
  purpose:"Turn a wish into three moves.",
  needs:[],
  steps:[
@@ -876,7 +877,7 @@ const R = [
  secret:"An intention without a time is a wish. A time turns it into a spell.",
  prompts:["Which intention scares you a little?","What is the first fifteen-minute move?"],
  tags:["stuck","procrastinate","plan","goals","focus","start","new beginning","discipline","job","career","motivation","lost"]},
-{id:"seed-intention",g:"cypress",title:"New Moon Seed",el:"Earth",moon:"New",min:10,
+{id:"seed-intention",g:"sol",title:"New Moon Seed",el:"Earth",moon:"New",min:10,
  purpose:"Plant one intention in something that actually grows.",
  needs:[["soil","A seed or dried bean and a cup of soil or damp paper towel"]],
  steps:[
@@ -973,7 +974,7 @@ R.push(
  secret:"Posture talks to your nervous system first. Your body believes you before your mind does.",
  prompts:["What were you hyping yourself up for?","How did it go?"],
  tags:["nervous","interview","confidence","motivation","energy","date","presentation"]},
-{id:"solar-charge",g:"rowan",member:true,title:"Solar Plexus Charge",el:"Sun",moon:"Full",min:8,
+{id:"solar-charge",g:"sol",member:true,title:"Solar Plexus Charge",el:"Sun",moon:"Full",min:8,
  purpose:"Recharge your personal power when you feel small.",needs:[["oil","A drop of body oil or lotion (optional)"]],
  steps:[
   {t:"Find the sun spot",d:"Place your palm just above your belly button, below your ribs. That's your power center."},
@@ -983,7 +984,7 @@ R.push(
  secret:"Warmth plus focused breath in one spot pulls your attention back into your own body.",
  prompts:["Where have you been giving your power away?","What will you do with it back?"],
  tags:["small","powerless","weak","confidence","power","insecure"]},
-{id:"victory-jar",g:"rowan",member:true,title:"The Victory Jar",el:"Sun",moon:"Any",min:10,
+{id:"victory-jar",g:"sol",member:true,title:"The Victory Jar",el:"Sun",moon:"Any",min:10,
  purpose:"Build proof that you win, one note at a time.",needs:[["jar","A jar"]],
  steps:[
   {t:"Name the jar",d:"Write VICTORIES on a label or paper and put it on the jar."},
@@ -1291,7 +1292,7 @@ R.push(
  secret:"A reflection can't be absorbed. That's the whole trick.",
  prompts:["What are you sending back?","How do you feel knowing it's up?"],
  tags:["evil eye","hex","curse","jealous","enemy","protection","bad energy"]},
-{id:"quarter-review",g:"cypress",member:true,title:"The Quarter Review",el:"Metal",moon:"Last Quarter",min:20,
+{id:"quarter-review",g:"sol",member:true,title:"The Quarter Review",el:"Metal",moon:"Last Quarter",min:20,
  purpose:"Check the plan against what actually happened.",needs:[],
  steps:[
   {t:"What you said",d:"Write what you intended at the start of this cycle."},
@@ -1476,6 +1477,61 @@ R.push(
  secret:"Your birthday is your own new year. A threshold you mark is one you actually cross.",
  prompts:["What are you leaving behind?","What three words did you choose?"],
  tags:["birthday"]},
+{id:"own-it",g:"onyx",title:"Own It",el:"Shadow",moon:"Waning",min:15,
+ purpose:"Face something you did wrong without excuses and without drowning in it.",needs:[],
+ steps:[{t:"Say it plain",d:"Write what you did in one sentence. No because, no but. Just what happened."},
+  {t:"Who it touched",d:"Write who it affected and how it probably felt for them."},
+  {t:"What you needed",d:"Write what was going on in you when you did it. This explains it. It doesn't excuse it."},
+  {t:"One repair",d:"Choose one way to make it right: an apology, a change, a conversation, a debt paid back. Write when.",say:"I can be someone who did that and someone who makes it right."}],
+ secret:"Shame wants you to hide or to punish yourself. Ownership does neither. It names it and moves toward repair.",
+ prompts:["What did you own?","What's your repair, and when?"],
+ tags:["guilt","regret","wrong","mistake","shame","amends","apology","hurt someone"]},
+{id:"amends-letter",g:"onyx",member:true,title:"The Amends Letter",el:"Shadow",moon:"Waning",min:20,
+ purpose:"Write the apology you owe, then decide what to do with it.",needs:[["candle","A candle"]],
+ steps:[{t:"Light the candle",d:"Light it. This is a serious one."},
+  {t:"Name it",d:"Write to them. Say exactly what you did, in plain words."},
+  {t:"No but",d:"Read it back and cross out every but, though and if. An apology with a but is a defense."},
+  {t:"Their side",d:"Write one line about what it cost them."},
+  {t:"Decide",d:"Send it, say it in person, or keep it for now. All three count.",say:"I'm done hiding from this."}],
+ secret:"A real apology names the harm, takes it without defending, and offers repair. Writing it first is how you get it right.",
+ prompts:["Who was it to?","What will you do with it?"],
+ tags:["apology","amends","guilt","sorry","relationship","regret"]},
+{id:"shadow-mirror",g:"onyx",member:true,title:"The Shadow Mirror",el:"Shadow",moon:"Dark Moon",min:15,
+ purpose:"Find the part of you hiding inside what bothers you most in other people.",needs:[["mirror","A mirror"]],
+ steps:[{t:"Name the trait",d:"Think of someone who gets under your skin. Write the one trait you can't stand in them."},
+  {t:"Turn it around",d:"Write three times you've done some version of that yourself, even small ones."},
+  {t:"Look",d:"Look in the mirror and say the trait out loud as yours.",hold:30},
+  {t:"Cut it loose",d:"Say what you'll do with it now.",say:"I see it. It doesn't run me."}],
+ secret:"What we judge hardest in others is often what we haven't made peace with in ourselves. Seeing it takes its power.",
+ prompts:["What trait was it?","Where does it show up in you?"],
+ tags:["shadow","shadow work","jealous","judgment","trigger","annoyed","pattern"]},
+{id:"push-hour",g:"sol",title:"Push Hour",el:"Sun",moon:"Any",min:30,
+ purpose:"Knock out the thing you keep avoiding, in one focused push.",needs:[],
+ steps:[{t:"Dump it",d:"List everything you've been putting off. All of it. Two minutes."},
+  {t:"Pick one",d:"Circle the one that would make you feel lightest if it were done."},
+  {t:"Push",d:"Phone face down. Twenty five minutes on just that one. Start before you're ready.",hold:1500},
+  {t:"Celebrate",d:"Stand up, arms up, and say what you did out loud.",say:"I said I would and I did."}],
+ secret:"Starting is the hard part. A timer and one task get you past the part of your brain that negotiates.",
+ prompts:["What did you knock out?","What's next on the list?"],
+ tags:["procrastinate","stuck","avoiding","productive","to do","focus","accountability","momentum"]},
+{id:"promise-pact",g:"sol",title:"The Promise Pact",el:"Sun",moon:"Waxing",min:8,
+ purpose:"Make a promise to yourself that actually has teeth.",needs:[],
+ steps:[{t:"Name it",d:"One thing you will do. Small enough to actually happen."},
+  {t:"Give it a day",d:"Pick the day and time. Put it in your calendar now."},
+  {t:"First ten minutes",d:"Do the first ten minutes of it right now, while you're here.",hold:600},
+  {t:"Say it to Sol",d:"Tell Sol what you promised so she can ask you about it.",say:"I keep my word to me."}],
+ secret:"A promise with a day, a first step and someone asking about it is far more likely to get done than a good intention.",
+ prompts:["What did you promise?","When is it happening?"],
+ tags:["accountability","goal","promise","discipline","follow through","plan"]},
+{id:"sunday-reckoning",g:"sol",member:true,title:"The Sunday Reckoning",el:"Sun",moon:"Any",min:15,
+ purpose:"Look at last week honestly and set up the next one.",needs:[],
+ steps:[{t:"Wins first",d:"Write every win from the week, big and small. Read them out loud."},
+  {t:"What slid",d:"Write what you said you'd do and didn't. No beating yourself up. Just the list."},
+  {t:"Why it slid",d:"For each, one honest reason: too big, no time set, didn't want to, scared."},
+  {t:"Three for this week",d:"Pick three things for this week, each with a day.",say:"New week. Same promise to myself."}],
+ secret:"Reviewing the week is what turns intentions into a pattern you can actually see and change.",
+ prompts:["What was the biggest win?","What are your three?"],
+ tags:["plan","week","review","accountability","goals","discipline"]},
 {id:"heart-gate",g:"marigold",title:"Open the Heart Gate",el:"Light",moon:"Waxing",min:10,
  purpose:"Get ready to let love in, from a date, a partner or yourself.",needs:[],
  steps:[{t:"Hand on heart",d:"Sit up. One hand on your heart, one on your belly. Three slow breaths."},
@@ -1509,9 +1565,9 @@ const DAY_RULE = [
   ["Monday","the Moon","intuition, emotion, rest and dreams",["fern","juniper","wren","willow"]],
   ["Tuesday","Mars","courage, anger, cutting ties and protection",["sage","ember","rue"]],
   ["Wednesday","Mercury","clarity, communication, signs and messages",["lily","wren","aurora"]],
-  ["Thursday","Jupiter","growth, abundance, vision and big plans",["lumen","cypress","rowan"]],
+  ["Thursday","Jupiter","growth, abundance, vision and big plans",["lumen","sol","rowan"]],
   ["Friday","Venus","love, beauty, worth, pleasure and home",["marigold","vesper","juniper","willow"]],
-  ["Saturday","Saturn","boundaries, endings, banishing, discipline and ancestors",["thistle","onyx","onora","cypress","rue"]]
+  ["Saturday","Saturn","boundaries, endings, banishing, discipline and ancestors",["thistle","onyx","onora","sol","rue"]]
 ];
 const HOURS = [
   ["dawn",5,8,"Dawn is for beginnings and first light on a question."],
@@ -1576,7 +1632,7 @@ const PLAN = {name:"The Inner Circle",monthly:"$6.99",yearly:"$49",yearNote:"Tha
 const LIMITS = {free:{read:3,talk:10},member:{read:40,talk:150}};
 const CHAMBERS = {
   aura:{name:"The Weaving Room",d:"Weekly reviews that pull your rituals, chats and patterns into one thread."},
-  onyx:{name:"The Shadow Chamber",d:"Mirror work and truth rites for the parts you keep looking away from."},
+  onyx:{name:"The Shadow Chamber",d:"Mirror work, truth rites and amends for the parts you keep looking away from."},
   sage:{name:"The Revolution Pages",d:"Cord cutting and fire rites for rage, resistance and taking your power back."},
   fern:{name:"The Lunar Alchemist",d:"Moon work for rest, tides and release, timed to the phase you're in."},
   lily:{name:"The Clear Channel",d:"Breath rites that clear a racing mind in every direction."},
@@ -1584,7 +1640,7 @@ const CHAMBERS = {
   marigold:{name:"The Gilded Chamber",d:"Money, worth and receiving. Rituals that change how abundance feels in your hands."},
   juniper:{name:"Sacred Space",d:"Home blessings and threshold rites for every door you walk through."},
   rue:{name:"The Warding Book",d:"Wards for your name, your home and your peace. Send it back where it came from."},
-  cypress:{name:"The Ritual Archivist",d:"Reviews that keep plans alive past the first week."},
+  sol:{name:"The Solar Chamber",d:"Hype, plans and follow through. Where the promises you make to yourself get kept."},
   aurora:{name:"The Dawn Chamber",d:"Morning rites for clarity and answers that arrive at first light."},
   rowan:{name:"The Moving Grove",d:"Movement rites that get you out of your head and back into your body."},
   ember:{name:"The Forge",d:"Endings you mean and rebirths you can feel on your skin."},
@@ -1602,7 +1658,7 @@ const JOURNEYS = [
   {id:"after-breakup",name:"Reclaiming Yourself After a Breakup",g:"sage",d:"Cord cutting, burning, glowing, in that order.",days:[
    ["burned-word","Say everything. Then burn it."],["cord-cutting","Cut the cord that's still pulling."],["salt-vein","Stop the leak."],
    ["grief-bowl","Grieve it honestly. Even the good parts."],["phoenix-shower","Wash off the version of you they knew."],["mirror-honey","Remember who you were before them."],["seed-intention","Plant what's next."]]},
-  {id:"new-moon",name:"New Moon Beginning",g:"cypress",d:"Plant it, plan it, tend it through the first week of the waxing moon.",days:[
+  {id:"new-moon",name:"New Moon Beginning",g:"sol",d:"Plant it, plan it, tend it through the first week of the waxing moon.",days:[
    ["seed-intention","Plant the intention in something that grows."],["ledger","Turn the wish into three moves."],["future-letter","Write back from one year out."],
    ["dawn-question","Ask for clarity overnight."],["sun-hype","Build the energy to start."],["vision-board","Map it."],["victory-jar","Start keeping receipts."]]},
   {id:"full-moon",name:"Full Moon Release",g:"fern",d:"A week of letting go, timed to the fullest light.",days:[
@@ -1627,7 +1683,7 @@ const DECK = {
   marigold:["Say it again but sweeter.","You're allowed to want more.","Wear the good stuff on a Tuesday."],
   juniper:["Clear one surface. The rest will follow.","Your space is listening.","Make the room ready for who you're becoming."],
   rue:["Not everyone gets a key.","Protect your name like it's a spell. It is.","Block. Cut. Banish. Then brunch."],
-  cypress:["Structure is sacred.","A wish with a date is a plan.","Small and daily beats big and someday."]
+  sol:["Hype you up. Hold you to it.","A wish with a date is a plan.","Small and daily beats big and someday."]
 };
 
 /* Moon phase: the lunar metronome */
@@ -1675,7 +1731,7 @@ function season(d){
 const KEY="dailyAlchemist.v1";
 let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false},entries:[],draws:{}};
 try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S={...S,...p,profile:{...S.profile,...(p.profile||{})}};}}catch(e){}
-const RENAMED={moss:"juniper",sol:"rowan"};
+const RENAMED={moss:"juniper",cypress:"sol"};
 function migrateCircle(){
   const fix=o=>{if(o&&RENAMED[o.guardian])o.guardian=RENAMED[o.guardian];if(o&&RENAMED[o.g])o.g=RENAMED[o.g];};
   (S.entries||[]).forEach(fix);(S.asks||[]).forEach(fix);
@@ -2031,7 +2087,7 @@ function renderSky(){
 ------------------------------------------------------------------ */
 const KW = {
   sage:["angry","anger","pissed","rage","mad","furious","betray","resent","unfair","hate them","livid","fed up","disrespect"],
-  onyx:["shame","guilt","ashamed","truth","lie","lying","hiding","secret","shadow","regret","trauma"],
+  onyx:["shame","guilt","ashamed","truth","lie","lying","hiding","secret","shadow","regret","trauma","i was wrong","my fault","messed up","screwed up","fucked up","hurt someone","i hurt","apologize","apology","amends","cheated","made a mistake","owe an apology","make it right","shadow work"],
   willow:["grief","grieving","died","death","passed away","loss","miss her","miss him","funeral","forgive"],
   wren:["sign","coincidence","dream","keep seeing","synchronicity","111","222","333","444"],
   lumen:["future","vision","manifest","dream life","goals"],
@@ -2039,7 +2095,7 @@ const KW = {
   poppy:["creative","creativity","art","paint","draw","write","writing","writer's block","music","song","blocked","muse","make something","project","inspired","uninspired"],
   ember:["scared","afraid","fear","courage","leap","quit my","confront"],
   vesper:["sex","sexual","sexy","desire","libido","turned on","horny","intimacy","intimate","pleasure","orgasm","sex life","in bed","sex magic","foreplay","kink","positions","arousal","aroused"],
-  rowan:["exercise","workout","work out","gym","run","running","walk","walking","yoga","stretch","dance","dancing","move my body","sitting all day","stiff","restless","lifting","training","movement","nervous","interview","presentation","hype","first day","momentum","keep going","keep it going","keep this going","on a roll","productive","getting a lot done","got a lot done","getting things done","feeling good","feel good","feeling great","feel great","feeling really good","energized","energised","motivated","unstoppable","crushing it","winning","keep it up","good streak","flow state","in the zone"],
+  rowan:["exercise","workout","work out","gym","run","running","walk","walking","yoga","stretch","dance","dancing","move my body","sitting all day","stiff","restless","lifting","training","movement","interview","presentation","hype","first day","momentum","keep going","keep it going","keep this going","on a roll","productive","getting a lot done","got a lot done","getting things done","feeling good","feel good","feeling great","feel great","feeling really good","energized","energised","motivated","unstoppable","crushing it","winning","keep it up","good streak","flow state","in the zone"],
   aurora:["morning","clarity","confused","decide","decision"],
   fern:["tired","exhausted","rest","sleep","overwhelm","drained","burnout","burnt out","cry","crying","sad","depleted","heavy heart","numb"],
   lily:["anxious","anxiety","panic","overthink","racing","scattered","nervous","worried","worry","stress","foggy","can't think","cant think","spiral"],
@@ -2047,9 +2103,9 @@ const KW = {
   marigold:["ugly","worth","worthy","confidence","insecure","compare","self love","love myself","money","broke","abundance","joy","beautiful","celebrate","treat","love","romance","romantic","dating","crush","relationship","partner","boyfriend","girlfriend","husband","wife","situationship","single","heartbreak"],
   juniper:["house","home","apartment","room","space","clutter","moving","moved","new place","stale","energy in","cleanse","messy","slow down","still","quiet","can't stop","never stop"],
   rue:["jealous","envy","enemy","against me","toxic","evil eye","gossip","hater","someone wants","protect me","protection","hex","curse","watching me"],
-  cypress:["stuck","procrastinat","plan","goal","focus","start","begin","new job","career","discipline","direction","lost","unmotivated","motivation"]
+  sol:["stuck","procrastinat","plan","goal","focus","start","begin","new job","career","discipline","direction","lost","unmotivated","motivation","accountab","on track","follow through","keep my word","putting off","avoiding","to do list","to-do","lazy","momentum","keep going","productive","motivated","interview","presentation","hype","first day","nervous"]
 };
-const THEME = {poppy:"creativity",aurora:"awakening",rowan:"movement",ember:"courage",willow:"grief",vesper:"desire",wren:"signs",lumen:"vision",onora:"ancestry",sage:"fire",onyx:"shadow",fern:"rest",lily:"clarity",thistle:"boundaries",marigold:"worth",juniper:"space",rue:"protection",cypress:"direction",aura:"centering"};
+const THEME = {poppy:"creativity",aurora:"awakening",rowan:"movement",ember:"courage",willow:"grief",vesper:"desire",wren:"signs",lumen:"vision",onora:"ancestry",sage:"fire",onyx:"shadow",fern:"rest",lily:"clarity",thistle:"boundaries",marigold:"worth",juniper:"space",rue:"protection",sol:"follow through",aura:"centering"};
 function score(r,mins){
   let s=outcomeBonus(r.id); if(r.min<=mins)s+=3; else s-=Math.ceil((r.min-mins)/5);
   s-=missingFor(r).length*1.5;
@@ -2235,12 +2291,12 @@ function yourGuardians(){
   for(const k of ALL){const n=(S.chats[k]||[]).filter(m=>m.role==="me").length;if(n&&k!=="aura")c[k]=(c[k]||0)+Math.ceil(n/3);}
   return Object.entries(c).filter(x=>x[1]>=2).sort((a,b)=>b[1]-a[1]).slice(0,5).map(x=>x[0]);
 }
-const LOCAL_VOICE={sage:"Tonight isn't asking you to understand it again. It's asking you to discharge it.",onyx:"You already know what this is about. Let's stop protecting it.",fern:"You have been holding the whole tide up by yourself. Put it down for a few minutes.",lily:"Your mind is loud because it's trying to keep you safe. Give it one clear thing to do.",thistle:"This doesn't make you mean. It makes you someone with an edge.",marigold:"You have been giving everyone the good version of you. Your turn.",juniper:"The space is holding what happened in it. Let's reset the container.",rue:"Not everyone gets access. We're changing the locks.",cypress:"Stuck is just a plan without a date. Let's give it one.",
+const LOCAL_VOICE={sage:"Tonight isn't asking you to understand it again. It's asking you to discharge it.",onyx:"You already know what this is about. Let's stop protecting it.",fern:"You have been holding the whole tide up by yourself. Put it down for a few minutes.",lily:"Your mind is loud because it's trying to keep you safe. Give it one clear thing to do.",thistle:"This doesn't make you mean. It makes you someone with an edge.",marigold:"You have been giving everyone the good version of you. Your turn.",juniper:"The space is holding what happened in it. Let's reset the container.",rue:"Not everyone gets access. We're changing the locks.",sol:"Stuck is just a plan without a date. Let's give it one, and I'll hold you to it.",
   poppy:"Your spark isn't gone. It's bored. Let's play.",aurora:"Something is trying to become clear. Let's give it some light.",rowan:"Your body is holding what your head keeps replaying. Let's move it through.",ember:"This is the moment before the leap. Let's make you brave enough.",willow:"You can be soft here. Let's give the grief somewhere to go.",vesper:"What you want is information. Let's listen to it, slowly.",wren:"You've been noticing things. Let's find out what they mean.",lumen:"You can already see it. Now let's name it.",onora:"You come from people. Let's call them in."};
 
-const SHORT={poppy:"your muse",thistle:"your boundary keeper",onyx:"the one who tells you the truth",sage:"your fire keeper",fern:"keeper of your rest and tides",lily:"the one who clears your head",marigold:"keeper of your glow",juniper:"keeper of your space",rue:"your protection",cypress:"keeper of your plans",aurora:"your first light",rowan:"your movement keeper",ember:"your courage",willow:"keeper of your grief",vesper:"keeper of your desire",wren:"your sign reader",lumen:"keeper of your vision",onora:"keeper of your ancestors"};
+const SHORT={poppy:"your muse",thistle:"your boundary keeper",onyx:"your shadow mirror",sage:"your fire keeper",fern:"keeper of your rest and tides",lily:"the one who clears your head",marigold:"keeper of your glow",juniper:"keeper of your space",rue:"your protection",sol:"your accountability coach",aurora:"your first light",rowan:"your movement keeper",ember:"your courage",willow:"keeper of your grief",vesper:"keeper of your desire",wren:"your sign reader",lumen:"keeper of your vision",onora:"keeper of your ancestors"};
 /* Each guardian's job, in plain words, so the circle is useful and not just mythology. */
-const JOB={aura:"Your guide. Hears what happened and sends you to the right help.",onyx:"Hard truths. When you already know and need someone to say it.",sage:"Anger. Turning fury into something that protects you.",fern:"Rest and overwhelm. When you're running on empty.",lily:"Anxiety and overthinking. Getting your head clear.",thistle:"Boundaries. Saying no, people pleasing, protecting your peace.",marigold:"Love and worth. Romance, dating, self love, confidence and joy.",juniper:"Your home and your stillness. Resetting your space and slowing down when you can't stop.",rue:"Protection. Toxic people, envy and energy that isn't yours.",cypress:"Plans and follow through. Getting unstuck and making it a routine.",aurora:"New beginnings and clarity. Decisions and fresh starts.",rowan:"Movement. Exercise, getting back in your body, nerves and keeping momentum.",ember:"Courage. Big leaps and walking through fear.",willow:"Grief. Loss, forgiveness and letting yourself feel it.",vesper:"Desire and intimacy. Pleasure, sex and sex magic. Members 21 and older.",wren:"Signs. Dreams, coincidences and what they might mean.",lumen:"Vision. Goals and the future you're building.",onora:"Family and ancestry. Where you come from and what you carry.",poppy:"Creativity. Getting unblocked and making things again."};
+const JOB={aura:"Your guide. Hears what happened and sends you to the right help.",onyx:"Shadow work. The things you did wrong, owning them and making it right.",sage:"Anger. Turning fury into something that protects you.",fern:"Rest and overwhelm. When you're running on empty.",lily:"Anxiety and overthinking. Getting your head clear.",thistle:"Boundaries. Saying no, people pleasing, protecting your peace.",marigold:"Love and worth. Romance, dating, self love, confidence and joy.",juniper:"Your home and your stillness. Resetting your space and slowing down when you can't stop.",rue:"Protection. Toxic people, envy and energy that isn't yours.",sol:"Accountability. Keeps you on track, hypes you up and holds you to what you said.",aurora:"New beginnings and clarity. Decisions and fresh starts.",rowan:"Movement. Exercise, getting back in your body, nerves and keeping momentum.",ember:"Courage. Big leaps and walking through fear.",willow:"Grief. Loss, forgiveness and letting yourself feel it.",vesper:"Desire and intimacy. Pleasure, sex and sex magic. Members 21 and older.",wren:"Signs. Dreams, coincidences and what they might mean.",lumen:"Vision. Goals and the future you're building.",onora:"Family and ancestry. Where you come from and what you carry.",poppy:"Creativity. Getting unblocked and making things again."};
 /* Which guardians keep showing up, and when: the seasons of her life, read from her history. */
 function guardianSeasons(){
   const items=[...S.entries.filter(usable).map(e=>({g:e.guardian,ts:e.ts})),...S.asks.filter(a=>!a.noMem).map(a=>({g:a.guardian,ts:a.ts}))].filter(x=>x.g&&x.g!=="aura");
@@ -2467,7 +2523,7 @@ function auraQuestion(){
 const LIFE_EVENTS=[
   {key:"moving",match:/\b(mov(e|ing|ed)|new (apartment|house|home|place)|closing on|first night)\b/i,title:"A new home",g:"juniper",steps:[["threshold-reset","Clear the first surface before you unpack anything else."],["whisper-sweep","Sweep out whatever the last people left behind."],["doorway-blessing","Bless the door you'll walk through every day."],["salt-line","Decide what's allowed in this home."],["ancestor-plate","Feed the new place with a meal that means home."]]},
   {key:"breakup",match:/\b(break ?up|broke up|divorce|ended things|left me|we split)\b/i,title:"After the ending",g:"sage",steps:[["burned-word","Say all of it. Then burn it."],["cord-cutting","Cut the cord that's still pulling."],["grief-bowl","Grieve it honestly, even the good parts."],["phoenix-shower","Wash off the version of you they knew."],["seed-intention","Plant what comes next."]]},
-  {key:"newjob",match:/\b(new job|start(ing)? (a|my) (job|role)|first day|promotion|starting a business|launch(ing)? my)\b/i,title:"A new chapter at work",g:"cypress",steps:[["first-light","Start the first morning on purpose."],["ledger","Turn the hope into three moves."],["sun-hype","Get your fire up before you walk in."],["salt-line","Decide your work boundaries early."],["victory-jar","Start keeping receipts from day one."]]},
+  {key:"newjob",match:/\b(new job|start(ing)? (a|my) (job|role)|first day|promotion|starting a business|launch(ing)? my)\b/i,title:"A new chapter at work",g:"sol",steps:[["first-light","Start the first morning on purpose."],["ledger","Turn the hope into three moves."],["sun-hype","Get your fire up before you walk in."],["salt-line","Decide your work boundaries early."],["victory-jar","Start keeping receipts from day one."]]},
   {key:"loss",match:/\b(died|passed away|funeral|lost my (mom|mother|dad|father|grand\w*|sister|brother|friend|dog|cat|baby))\b/i,title:"Carrying a loss",g:"willow",steps:[["grief-bowl","Give the grief somewhere to go."],["say-their-names","Say their name out loud."],["empty-chair","Say what you never got to say."],["tidewater-rest","Rest. Grief is exhausting."],["ancestor-plate","Cook something they loved."]]},
   {key:"birthday",match:/\b(my birthday|birthday (is|this)|turning \d+)\b/i,title:"A new year of you",g:"lumen",steps:[["weekly-weave","Look back at the year you just finished."],["future-letter","Write to yourself one year from now."],["mirror-honey","Say it sweeter, to yourself."],["seed-intention","Plant the year."]]}
 ];
@@ -3371,6 +3427,21 @@ function lowTank(){const d=S.days[dayKey(new Date())];return !!(d&&((d.sleep&&d.
 function chipsQ(name,list,cur){return '<div class="chips" style="margin-top:8px">'+list.map(([l,v])=>'<button class="chip" data-'+name+'="'+v+'" aria-pressed="'+(cur===v)+'">'+esc(l)+'</button>').join("")+'</div>';}
 const WATCH_NOTE=NATIVE?"":'<p class="small muted" style="margin-top:10px">Sleep and workouts from your Apple Watch or Fitbit come with the App Store and Google Play app on November 1.</p>';
 function daysUntilMD(md){const [m,d]=String(md||"").split("-").map(Number);if(!m||!d)return null;const n=new Date();n.setHours(0,0,0,0);let t=new Date(n.getFullYear(),m-1,d);if(t<n)t=new Date(n.getFullYear()+1,m-1,d);return Math.round((t-n)/864e5);}
+function recentGuardians(){
+  const last={};
+  for(const [k,l] of Object.entries(S.chats||{})){const m=(l||[]).filter(x=>x.role==="me").pop();if(m&&G[k]&&k!=="aura")last[k]=Math.max(last[k]||0,m.ts||0);}
+  for(const e of S.entries)if(e.guardian&&G[e.guardian]&&e.guardian!=="aura")last[e.guardian]=Math.max(last[e.guardian]||0,e.ts||0);
+  for(const k of Object.keys(S.met||{}))if(G[k]&&k!=="aura"&&!last[k])last[k]=1;
+  return Object.entries(last).filter(([k])=>allowedG(k)).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+}
+function yourCircleHTML(){
+  const ks=recentGuardians().slice(0,6);
+  if(!ks.length)return '<div class="card yourcircle"><div class="label">Your guardians</div><p class="small" style="margin-top:6px">Aura picks for you, or you can choose who to talk to.</p><button class="btn btn-ghost" data-gocircle="1" style="margin-top:10px">Pick a guardian</button></div>';
+  const k0=ks[0];
+  return '<div class="card yourcircle"><div class="label">Your guardians</div>'+
+    '<button class="btn btn-main full" data-talk="'+k0+'" style="margin-top:10px">Keep going with '+esc(G[k0].name)+'</button>'+
+    '<div class="gchips">'+ks.slice(1).map(k=>'<button class="gchip" data-talk="'+k+'" aria-label="Talk to '+esc(G[k].name)+'">'+glyph(k,40)+'<span>'+esc(G[k].name)+'</span></button>').join("")+'<button class="gchip" data-gocircle="1" aria-label="Pick any guardian"><span class="gplus">+</span><span>Anyone</span></button></div></div>';
+}
 function bdayHTML(){
   let h="";const mine=daysUntilMD(S.profile.bday),pn=S.profile.person;
   if(mine===0)h+='<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura · today</span></div><p style="margin-top:8px">Happy birthday'+(firstName()?", "+esc(firstName()):"")+'. It\'s your own new year'+(signOf(S.profile.bday)?', and '+esc(signOf(S.profile.bday).name)+' season is yours':'')+'. Let\'s mark it.</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="birthday-threshold">The Birthday Threshold</button></div></div>';
@@ -3412,7 +3483,7 @@ function renderToday(){
      '<button class="btn btn-main full" id="askBtn" style="margin-top:14px">Tell Aura</button></div>';
   h+='<div id="readingSlot">'+(lastRead?readingHTML(lastRead):"")+'</div>';
   if(!lastRead){
-    h+=bdayHTML()+rhythmHTML();
+    h+=yourCircleHTML()+bdayHTML()+rhythmHTML();
     const fu=followHTML()||checkinHTML();if(fu)h+=fu;
     h+='<div id="nudgeSlot">'+nudgeHTML()+'</div>'+letterCardHTML();
     const dp=deeperHTML();
@@ -3701,7 +3772,7 @@ function drawStep(){
   el.scrollTop=0; const w=el.querySelector(".wrap"); if(w)w.scrollTop=0;
   speakStep();
 }
-const OUTSIDE_HINT={thistle:"Mute the thread tonight",rue:"Block the number",sage:"Say it to their face, or let it go",marigold:"Send the invoice",cypress:"Put the first step on your calendar",juniper:"Clear the entry table",fern:"In bed by 10",lily:"Close the laptop at 7",onyx:"Tell one person the truth",willow:"Call the person who remembers them too",vesper:"Say one want out loud to your person",ember:"Make the call",rowan:"Walk around the block after dinner",lumen:"Book the first appointment",aurora:"Phone stays off until after coffee",wren:"Write down the next sign",onora:"Ask about the family story"};
+const OUTSIDE_HINT={thistle:"Mute the thread tonight",rue:"Block the number",sage:"Say it to their face, or let it go",marigold:"Send the invoice",sol:"Put the first step on your calendar today",juniper:"Clear the entry table",fern:"In bed by 10",lily:"Close the laptop at 7",onyx:"Tell one person the truth",willow:"Call the person who remembers them too",vesper:"Say one want out loud to your person",ember:"Make the call",rowan:"Walk around the block after dinner",lumen:"Book the first appointment",aurora:"Phone stays off until after coffee",wren:"Write down the next sign",onora:"Ask about the family story"};
 function mmss(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
 function saveEntry(text,after,extra){
   const {r,ctx}=run; extra=extra||{};
@@ -3747,7 +3818,7 @@ const GREET={
   marigold:"Hi gorgeous. What's got you dimming your own light today?",
   juniper:"Tell me about the space you're in. The room, the house, the life. What does it feel like in there?",
   rue:"Who do we need to deal with? Try me.",
-  cypress:"Where are you stuck? Give me the real version, not the tidy one.",
+  sol:"Okay. What did you say you'd do, and where are we with it? Real version, not the tidy one.",
   aurora:"It's early light here. What's just starting to become clear to you?",
   rowan:"Okay, up. Not literally yet. What's your body been telling you today?",
   ember:"You didn't come to me to play small. What needs to change?",
@@ -3831,13 +3902,15 @@ function talkPrompt(k){
   "About her: name "+(p.name||"unknown")+"; usually has "+p.minutes+" minutes; has at home: "+ownedNames().join(", ")+".\n"+personalText()+"\nHer recent archive:\n"+recent+"\n"+
   "LEDGER (long-term memory of her life):\n"+ledgerText()+"\nWHAT HAS WORKED:\n"+workedText()+"\n"+"WHAT THE CIRCLE REMEMBERS ABOUT HER:\n"+memoryBrief(((S.chats[k]||[]).filter(m=>m.role==="me").slice(-1)[0]||{}).text||"").text+"\nUse this memory out loud when it helps, so she never has to explain herself twice: name patterns, quote her own past words with dates. Only use what is listed. Never invent memories.\n"+
   "YOUR OWN HISTORY WITH HER (speak from this continuity):\n"+(S.entries.filter(e=>usable(e)&&e.guardian===k).slice(0,6).map(e=>"- "+fmtDate(e.ts)+": "+e.ritualTitle+", carrying: "+(e.carrying||"").slice(0,90)+", wrote: "+(e.text||"").slice(0,120)+(e.after?", felt "+e.after:"")).join("\n")||"(this is new between you)")+"\n"+
+  (k==="sol"?"YOU ARE HER ACCOUNTABILITY COACH. Ask about her open promises by name, hold her to them, break what she's avoiding into one next step with a day and time, celebrate every win out loud, and name avoidance patterns kindly but plainly. If she makes a new commitment, end with a final line exactly like: PROMISE: what she will do, by when\n":"")+
+  (k==="onyx"?"YOU ARE THE SHADOW MIRROR. When she did something wrong, help her name it plainly with no excuses and no self punishment, see who it affected and how, and choose one way to make it right. Shame is not the goal, repair is. When she has owned it and is ready to forgive herself, hand her to Willow.\n":"")+
   "OPEN PROMISES SHE MADE: "+(openPromises().map(p=>p.text).join(" | ")||"none")+"\n"+
   (S.decide[k]&&Date.now()-S.decide[k]<864e5?"SHE IS WORKING THROUGH A DECISION. Guide her one question at a time through: what she wants, what she fears, what she feels she owes, what her values and past words say matters to her. Reflect back what you hear. Never make the decision for her.\n":"")+
   "If what she's describing now belongs to another guardian, say so in your voice and end with a final line exactly like: HANDOFF: rue\n"+
   "Rituals you can offer when one truly fits (not every message):\n"+lib+"\nTo offer one, end with a final line exactly like: RITUAL: ritual-id\n"+
   "If she mentions hurting herself, not wanting to live, wanting to hurt someone else, or someone hurting or threatening her, drop any edge and respond with plain, loving care: she matters, she is not alone, and she should reach a real person now (call or text 988 in the US; 911 if anyone is in immediate danger; for someone hurting her, the National Domestic Violence Hotline). Never shame her for the feeling. No ritual in that reply.\n\n";
 }
-const stripR=t=>t.replace(/\n?\s*(RITUAL|HANDOFF):[\s\S]*$/,"");
+const stripR=t=>t.replace(/\n?\s*(RITUAL|HANDOFF|PROMISE):[\s\S]*$/,"");
 async function sendTalk(){
   const ta=$("#chatIn");if(!ta||!talkG)return;const text=(ta.value||"").trim();if(!text)return;
   stopMic();
@@ -3871,6 +3944,7 @@ async function sendTalk(){
   else if(reply){
     const m=reply.match(/RITUAL:\s*([a-z0-9-]+)/i);if(m&&byId[m[1].toLowerCase()])ritual=m[1].toLowerCase();
     const hm=reply.match(/HANDOFF:\s*([a-z]+)/i);if(hm&&G[hm[1].toLowerCase()]&&allowedG(hm[1].toLowerCase())&&hm[1].toLowerCase()!==k)var handoff=hm[1].toLowerCase();
+    const pm=reply.match(/PROMISE:\s*([^\n]+)/i);if(pm&&pm[1].trim().length>3){addPromise(pm[1].trim(),7,G[k].name);setTimeout(()=>toast(G[k].name+" will hold you to it."),400);}
     reply=clean(stripR(reply).trim());
   }else{
     const lr=localRead(text,S.profile.minutes),base=KIN[k]||k,mine=R.filter(r=>r.g===base);
@@ -4101,6 +4175,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
   if(t.id==="signOut"){await ACCT.sb.auth.signOut();ACCT.user=null;ACCT.member=false;closeSheet();renderAll();toast("Signed out.");return;}
   if(d.talk){openTalk(d.talk);return;}
+  if(d.gocircle){const b=document.querySelector('[data-tab="circle"]');if(b)b.click();window.scrollTo(0,0);return;}
   if(d.sleep||d.energy||d.moved!=null&&t.closest(".rhythm")||d.wind){
     const rec=d.wind?dayRec(nightKey()):dayRec();
     if(d.sleep)rec.sleep=+d.sleep;if(d.energy)rec.energy=+d.energy;if(d.moved!=null&&!d.sleep&&!d.energy&&!d.wind)rec.moved=+d.moved;if(d.wind)rec.wind=true;

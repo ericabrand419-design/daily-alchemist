@@ -6,7 +6,7 @@
 import webpush from "web-push";
 import { json, env, sb, isMember, isPaid, GRACE_DAYS } from "../api/_lib.js";
 
-const GNAME = {sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",rowan:"Rowan",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const GNAME = {sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",sol:"Sol",cypress:"Sol",aurora:"Aurora",rowan:"Rowan",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 function easternWeekday(d) {
   return new Intl.DateTimeFormat("en-US", { timeZone: "America/New_York", weekday: "short" }).format(d);
 }

@@ -127,7 +127,7 @@ a.btn{text-decoration:none;display:inline-block}
 const C=window.DA_CONFIG||{};const API=(C.apiBase||"");
 const $=s=>document.querySelector(s);
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const GN={aura:"Aura",sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",rowan:"Rowan",sol:"Rowan",moss:"Juniper",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const GN={aura:"Aura",sage:"Sage",onyx:"Onyx",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",aurora:"Aurora",rowan:"Rowan",sol:"Sol",cypress:"Sol",moss:"Juniper",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 const TABN={today:"Today",journeys:"Journeys",circle:"Circle",archive:"Archive"};
 const nice=id=>String(id||"").replace(/-/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 function say(e){const m=e.meta||{},g=GN[m.g]||"a guardian";
@@ -249,7 +249,7 @@ $("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const befo
 $("#openLink").onclick=async()=>{const res=await fetch(API+"/api/share",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:"{}"});const d=await res.json().catch(()=>({}));if(!d.code){$("#openBox").hidden=false;$("#openBox").textContent="Couldn't get your link. Try again in a minute.";return;}
   $("#openBox").hidden=false;$("#openBox").innerHTML='<div class="linkbox"><code>'+esc(invLink(d.code))+'</code><button class="btn small" data-copy="'+esc(d.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(d.code,"",false)+'</div><p class="note">'+(d.uses||0)+' people have joined with it so far. You can turn it off below any time.</p>';await invites("list");};
 document.addEventListener("click",e=>{const sh=e.target.closest("[data-share]");if(sh){shareInv(sh.dataset.share,sh.dataset.name);return;}const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
-const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",cypress:"Cypress",aurora:"Aurora",rowan:"Rowan",sol:"Rowan",moss:"Juniper",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
+const GNAMES={aura:"Aura",onyx:"Onyx",sage:"Sage",fern:"Fern",lily:"Lily",thistle:"Thistle",marigold:"Marigold",juniper:"Juniper",rue:"Rue",aurora:"Aurora",rowan:"Rowan",sol:"Sol",cypress:"Sol",moss:"Juniper",ember:"Ember",willow:"Willow",vesper:"Vesper",wren:"Wren",lumen:"Lumen",onora:"Onora",poppy:"Poppy"};
 let MUS={tracks:{},url:""},musBusy=false;
 async function music(action,g){
   const res=await fetch(API+"/api/music",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:JSON.stringify({action,g})});

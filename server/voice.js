@@ -21,7 +21,7 @@ const VOICES = {
   wren:     ["Priyanka - Calm, Neutral and Relaxed", "BpjGufoPiobT79j2vtj4", "7398804d9eaf2f463899a907587c33a390591775784f87857b6d0e1e4e3e66f6"],
   onora:    ["Kelli LaShae - Warm Southern Narrator", "Z5JpFCNFIz8Nhe4KEikq", "f671d623811fd0dc84fc9eb65f91c3e9a96728bbe850dc243d0728f6b18d3f25"],
   poppy:    ["Eve - Authentic, Energetic and Happy", "BZgkqPqms7Kj9ulSkVzn", "cab0f4a4d83ff44919f93c5d01052405fa3c50c414d1ecab061b67b0bd8d536a"],
-  cypress:  ["Annie K - Grounded Narrator", "XW70ikSsadUbinwLMZ5w", "61a1827b7c3cd70efa264bee820ad4af827f9663372914fcdd46a091d9656f03"],
+  sol:      ["Cecily - Pro Black Woman Voice Over", "NQMJRVvPew6HsaebYnZj", "6b4cf07e3d6a1bd3fba4d6a45848a7ce28bc3ccde1e06085bc44948fdd6310db"],
   onyx:     ["Donovan - Articulate, Strong and Deep", "DMyrgzQFny3JI1Y1paM5", "37242178387aa74ac807790c7307e81312f0791cf06777a4791b86d941a77525"],
   juniper:  ["Milo - Calm, Soothing and Meditative", "GUDYcgRAONiI1nXDcNQQ", "465295810ef94f8627fad34ba88551a02745957d1c3b09877a3fc3de528d6f2f"],
   rowan:     ["Dan - African American calm & friendly", "1cuDPO8sIMatoOE4Z2Zv", "ed61d975d16c815a99c1bfed80609b8724afe0fbdc886513a3e74e0e2ef2ea9b"],
