@@ -77,6 +77,8 @@ button{cursor:pointer}
 .top .brand{flex:1;min-width:0}
 .brand .eyebrow{font-family:var(--f-ui);font-size:15.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--glow-faint)}
 .brand h1{margin:0;font-family:var(--f-sc);font-weight:400;font-size:28.5px;line-height:1.05;letter-spacing:.01em}
+.setbtn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:rgba(244,241,230,.06);border:1px solid rgba(244,241,230,.18);color:var(--glow-dim);padding:0}.setbtn svg{width:22px;height:22px}.setbtn:focus-visible,.setbtn:hover{color:var(--glow)}
+.topctl{display:flex!important;flex-direction:row!important;align-items:center;gap:8px}
 .seal-btn{border:0;background:none;padding:0;width:52px;height:52px;flex:none;filter:drop-shadow(0 3px 6px rgba(0,0,0,.45))}
 .seal-btn canvas{width:52px;height:52px;display:block}
 
@@ -234,6 +236,7 @@ nav.tabs button[aria-selected="true"] svg{color:var(--gold)}
 .switch input{width:22px;height:22px;accent-color:var(--fuchsia)}
 
 /* ritual mode */
+.rite .guide{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:14px 0 4px}.rite .btn.sm{padding:9px 14px;font-size:15px;color:#3a2a1a;border-color:rgba(154,116,20,.5)}
 .rite{position:fixed;inset:0;z-index:30;background:var(--parch);color:var(--ink);display:flex;flex-direction:column;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
 .rite::before{content:"";position:absolute;inset:10px;border:1px solid rgba(154,116,20,.55);box-shadow:inset 0 0 0 4px var(--parch),inset 0 0 0 5px rgba(154,116,20,.35);pointer-events:none;border-radius:4px}
 .rite .wrap{position:relative;flex:1;overflow:auto;max-width:560px;width:100%;margin:0 auto;padding:26px 30px 20px;display:flex;flex-direction:column;gap:16px}
@@ -519,7 +522,9 @@ input[type=date]{width:100%;background:rgba(10,8,24,.55);color:var(--glow);borde
 textarea{min-height:124px}.talk textarea{min-height:48px}
 input::placeholder,textarea::placeholder{text-overflow:ellipsis}
 .topctl{display:grid;justify-items:center;gap:8px;flex:none}
-.sndbar{display:flex;gap:6px;align-items:center}
+.sndbar{display:flex;gap:6px;align-items:center}.snd.one{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;padding:0;background:rgba(244,241,230,.06);border:1px solid rgba(231,196,90,.35);color:var(--gold)}.snd.one svg{width:22px;height:22px}.snd.one.off{color:var(--glow-dim);border-color:rgba(244,241,230,.18)}.rite .snd.one{background:rgba(42,30,58,.06);border-color:rgba(154,116,20,.45);color:#7a5a12}
+.sndrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:6px 0;border-top:1px solid rgba(244,241,230,.08)}.sndrow>span{font-family:var(--f-display);font-size:19px}
+body:has(#rite) .scrim{z-index:45}
 .snd{width:34px;height:34px;border-radius:50%;border:1px solid rgba(231,196,90,.45);background:rgba(231,196,90,.08);color:var(--gold);display:grid;place-items:center;padding:0;position:relative}
 .snd svg,.talk .hd .snd svg,.rite .bar .snd svg{width:17px;height:17px;filter:none}
 .snd.off{opacity:.75}
@@ -544,7 +549,7 @@ body.novoice .hear{display:none}
       <h1 class="foil shine">The Daily Alchemist</h1>
     </div>
     <div class="topctl">
-    <button class="seal-btn gear" id="altarBtn" aria-label="Settings"><svg viewBox="0 0 72 72" aria-hidden="true"><defs><radialGradient id="wx" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#E4579B"/><stop offset=".55" stop-color="#BF1E73"/><stop offset="1" stop-color="#7E0F49"/></radialGradient><linearGradient id="gf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF1B8"/><stop offset=".5" stop-color="#E7C45A"/><stop offset="1" stop-color="#A57C18"/></linearGradient></defs><path d="M68.4 36.0 Q68.4 36.0 67.9 38.8 Q67.4 41.5 67.4 44.5 Q67.5 47.5 66.4 50.2 Q65.3 52.9 63.3 55.1 Q61.4 57.3 59.2 59.1 Q56.9 61.0 54.4 62.2 Q51.8 63.4 49.5 65.2 Q47.3 67.0 44.4 67.0 Q41.5 67.0 38.7 67.9 Q36.0 68.8 33.3 68.0 Q30.5 67.1 27.8 66.5 Q25.2 65.8 21.8 66.0 Q18.5 66.3 16.3 64.2 Q14.1 62.1 12.9 59.3 Q11.6 56.4 9.9 54.2 Q8.2 52.1 6.4 49.7 Q4.6 47.4 3.3 44.7 Q2.1 42.0 2.4 39.0 Q2.8 36.0 3.3 33.2 Q3.8 30.3 3.7 27.3 Q3.6 24.2 5.2 21.7 Q6.8 19.1 8.3 16.6 Q9.8 14.1 12.5 12.6 Q15.2 11.2 17.6 9.8 Q20.1 8.4 22.6 7.3 Q25.1 6.1 27.8 5.1 Q30.4 4.1 33.2 3.0 Q36.0 2.0 38.8 3.2 Q41.6 4.5 44.5 4.6 Q47.4 4.7 50.6 4.9 Q53.8 5.1 55.4 8.1 Q56.9 11.0 59.2 12.9 Q61.4 14.7 62.4 17.4 Q63.4 20.2 64.5 22.7 Q65.7 25.2 66.6 27.8 Q67.6 30.4 68.0 33.2Z" fill="url(#wx)"/><circle cx="36" cy="36" r="26" fill="none" stroke="#7E0F49" stroke-opacity=".55" stroke-width="2.4"/><circle cx="36" cy="36" r="24.5" fill="none" stroke="url(#gf)" stroke-width="1.6"/><circle cx="36" cy="36" r="21.8" fill="none" stroke="url(#gf)" stroke-width=".8" stroke-opacity=".8"/><path d="M51.8 33.5 L51.8 38.5 L48.3 38.1 L46.2 43.2 L49.0 45.4 L45.4 49.0 L43.2 46.2 L38.1 48.3 L38.5 51.8 L33.5 51.8 L33.9 48.3 L28.8 46.2 L26.6 49.0 L23.0 45.4 L25.8 43.2 L23.7 38.1 L20.2 38.5 L20.2 33.5 L23.7 33.9 L25.8 28.8 L23.0 26.6 L26.6 23.0 L28.8 25.8 L33.9 23.7 L33.5 20.2 L38.5 20.2 L38.1 23.7 L43.2 25.8 L45.4 23.0 L49.0 26.6 L46.2 28.8 L48.3 33.9Z" fill="url(#gf)" stroke="#7E0F49" stroke-opacity=".5" stroke-width=".6"/><circle cx="36" cy="36" r="6.2" fill="#A3175F" stroke="#FFF1B8" stroke-opacity=".7" stroke-width=".8"/><path d="M36 32.2l1 2.8 2.8 1-2.8 1-1 2.8-1-2.8-2.8-1 2.8-1z" fill="#FFF1B8"/><path d="M17 24c4-7 11-11 19-11" stroke="#fff" stroke-opacity=".28" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="gl">Settings</span></button>
+    <button class="setbtn" id="altarBtn" aria-label="Settings"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 2.8v2.6M12 18.6v2.6M2.8 12h2.6M18.6 12h2.6M5.5 5.5l1.8 1.8M16.7 16.7l1.8 1.8M5.5 18.5l1.8-1.8M16.7 7.3l1.8-1.8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
       <div class="sndbar"></div>
     </div>
   </header>
@@ -2735,10 +2740,21 @@ document.addEventListener("visibilitychange",()=>{if(document.visibilityState===
 const SND_MUSIC='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/></svg>';
 const SND_VOICE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 function voiceMuted(){return S.prefVoiceOff===true;}
+const SND_MUTE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 /* Main pages and the welcome screen only have music, so only the music switch shows there.
    Chats and rituals, where the guardians speak, also get the voice switch. */
+function soundSheet(){
+  const m=musicOn()&&(musicAudible()||!MUSIC.started),v=!voiceMuted(),soft=S.prefMusicVol!=="normal";
+  const row=(lab,on,a,b,da,db)=>'<div class="sndrow"><span>'+lab+'</span><div class="chips"><button class="chip" data-sndset="'+da+'" aria-pressed="'+on+'">'+a+'</button><button class="chip" data-sndset="'+db+'" aria-pressed="'+!on+'">'+b+'</button></div></div>';
+  return '<div class="stack" id="sndSheet"><div class="label">Sound</div>'+row("Music",m,"On","Off","music-on","music-off")+row("Volume",soft,"Softer","Fuller","vol-soft","vol-full")+row("Guardian voices",v,"On","Off","voice-on","voice-off")+'<p class="small muted">Stays this way until you change it. Guided rituals read each step aloud when you choose Guide me aloud.</p></div>';
+}
+function openSound(){openSheet(soundSheet());}
 function renderSnd(){
   document.body.classList.toggle("novoice",voiceMuted());
+  const anyOn=(musicOn()&&(musicAudible()||!MUSIC.started))||!voiceMuted();
+  document.querySelectorAll(".sndbar").forEach(b=>{b.innerHTML='<button class="snd one'+(anyOn?"":" off")+'" data-snd="menu" aria-label="Sound settings">'+(anyOn?SND_VOICE:SND_MUTE)+'</button>';});
+  const sh=$("#sndSheet");if(sh)sh.outerHTML=soundSheet();
+  return;
   document.querySelectorAll(".sndbar").forEach(b=>{const m=musicOn()&&(musicAudible()||!MUSIC.started||document.visibilityState==="hidden"),v=!voiceMuted(),both=!!b.closest(".talk,.rite");
     b.innerHTML='<button class="snd lab'+(m?"":" off")+'" data-snd="music" aria-pressed="'+m+'" aria-label="'+(m?"Music is on. Tap to turn it off":"Music is off. Tap to turn it on")+'">'+SND_MUSIC+'<span>'+(m?"Music on":"Music off")+'</span></button>'+
       (both?'<button class="snd lab'+(v?"":" off")+'" data-snd="voice" aria-pressed="'+v+'" aria-label="'+(v?"Voices are on. Tap to turn them off":"Voices are off. Tap to turn them on")+'">'+SND_VOICE+'<span>'+(v?"Voice on":"Voice off")+'</span></button>':'');});
@@ -3917,20 +3933,22 @@ function renderArchive(){
     h+='<div class="empty"><h3>Nothing archived yet.</h3><p class="muted">Finish any ritual and write a few lines after. It lands here, and Aura starts noticing your patterns.</p><button class="btn btn-main" style="margin-top:14px" data-tab-go="today">Start with today</button></div>';
     $("#v-archive").innerHTML=h;return;
   }
-  h+=lettersArchiveHTML()+altarHTML();
+  h+='<div class="card"><div class="label">Ask your Archive</div><div class="composer" style="margin-top:8px"><label class="sr" for="archAsk">Ask your Archive</label><textarea id="archAsk" style="min-height:56px" placeholder="When did this first come up?"></textarea>'+micBtn("archAsk")+'</div><button class="btn btn-ghost full" style="margin-top:8px" id="archAskBtn">Ask</button><div id="archAnswer"></div></div>';
   const mem=resurface();
-  if(mem){h+='<div class="card memory"><div class="label">Aura remembers</div><p class="small muted" style="margin-top:6px">On '+fmtDate(mem.ts)+''+(mem.moon?', during the '+esc(mem.moon):'')+', after '+esc(mem.ritualTitle)+', you wrote:</p><blockquote>"'+esc((mem.text||"").slice(0,220))+((mem.text||"").length>220?"...":"")+'"</blockquote><button class="btn btn-ghost" style="margin-top:12px" data-entry="'+esc(mem.id)+'">Open the entry</button></div>';}
+  if(mem){h+='<div class="card memory"><div class="label">What Aura brought back</div><p class="small muted" style="margin-top:6px">On '+fmtDate(mem.ts)+''+(mem.moon?', during the '+esc(mem.moon):'')+', after '+esc(mem.ritualTitle)+', you wrote:</p><blockquote>"'+esc((mem.text||"").slice(0,220))+((mem.text||"").length>220?"...":"")+'"</blockquote><button class="btn btn-ghost" style="margin-top:12px" data-entry="'+esc(mem.id)+'">Open the entry</button></div>';}
+  const th=threadsOf();
+  if(q&&th.some(x=>x[0]===q))h+=beforeAfterHTML(q);
+  if(th.length){const tis=th.slice(0,8).map(([k])=>threadInfo(k)).filter(Boolean).sort((a,b)=>b.last-a.last);
+    h+='<div class="card"><div class="label">What you\'ve been living through</div><p class="small muted" style="margin-top:4px">Aura keeps the thread, so you don\'t have to.</p>'+tis.map(x=>'<button class="threadrow" data-thread="'+esc(x.name)+'" aria-pressed="'+(q===x.name)+'"><b>'+esc(x.name)+'</b><span>'+(x.days>1?x.days+" days":"today")+' · '+x.talks+(x.talks===1?" conversation":" conversations")+' · '+esc(x.status)+'</span></button>').join("")+'</div>';
+    }
+  h+='<details class="more"><summary>See everything</summary>';
+  {const nt=noticings();if(nt.length)h+='<div class="card"><div class="label">What Aura has noticed</div><p class="small muted" style="margin-top:4px">Observations, not conclusions. You know your life best.</p>'+nt.map(n=>'<p style="margin-top:8px">'+esc(n)+'</p>').join("")+'</div>';}
+  h+=lettersArchiveHTML()+altarHTML();
   h+='<div class="stats"><div class="stat"><div class="v">'+n+'</div><div class="k">Rituals</div></div><div class="stat"><div class="v">'+resetDone().length+'/7</div><div class="k">Reset</div></div><div class="stat"><div class="v">'+(topG?esc(G[topG[0]].name):"")+'</div><div class="k">Most with</div></div></div>';
   if(topT.length){
     const [t,c]=topT[0];
     h+='<div class="card"><div class="label">Aura notices</div><p style="margin-top:6px">'+(c>=3?"You have come back to <b>"+esc(t)+"</b> "+c+" times this month. That's not a coincidence, it's a thread worth pulling.":"This month you've worked mostly with <b>"+esc(t)+"</b>.")+'</p><div class="chips" style="margin-top:10px">'+topT.slice(0,6).map(([k,v])=>'<span class="tag">'+esc(k)+' · '+v+'</span>').join("")+'</div></div>';
   }
-  h+='<div class="card"><div class="label">Ask your Archive</div><div class="composer" style="margin-top:8px"><label class="sr" for="archAsk">Ask your Archive</label><textarea id="archAsk" style="min-height:56px" placeholder="When did this first come up?"></textarea>'+micBtn("archAsk")+'</div><button class="btn btn-ghost full" style="margin-top:8px" id="archAskBtn">Ask</button><div id="archAnswer"></div></div>';
-  const th=threadsOf();
-  if(q&&th.some(x=>x[0]===q))h+=beforeAfterHTML(q);
-  if(th.length){const tis=th.slice(0,8).map(([k])=>threadInfo(k)).filter(Boolean).sort((a,b)=>b.last-a.last);
-    h+='<div class="card"><div class="label">What you\'ve been living through</div><p class="small muted" style="margin-top:4px">Aura keeps the thread, so you don\'t have to.</p>'+tis.map(x=>'<button class="threadrow" data-thread="'+esc(x.name)+'" aria-pressed="'+(q===x.name)+'"><b>'+esc(x.name)+'</b><span>'+(x.days>1?x.days+" days":"today")+' · '+x.talks+(x.talks===1?" conversation":" conversations")+' · '+esc(x.status)+'</span></button>').join("")+'</div>';
-    const nt=noticings();if(nt.length)h+='<div class="card"><div class="label">What Aura has noticed</div><p class="small muted" style="margin-top:4px">Observations, not conclusions. You know your life best.</p>'+nt.map(n=>'<p style="margin-top:8px">'+esc(n)+'</p>').join("")+'</div>';}
   const op=S.promises.slice(0,8);
   if(op.length)h+='<div class="card"><div class="label">Promises to myself</div>'+op.map(pr=>'<div class="li"><span>'+esc(pr.text)+'<br><span class="small muted">'+fmtDate(pr.ts)+' · '+(pr.status==="done"?"Done":pr.status==="let"?"Let go":"Open")+'</span></span>'+(pr.status==="open"?'<span class="row"><button class="chip" data-cal="'+pr.id+'" aria-label="Add to calendar">📅</button><button class="chip" data-promise="'+pr.id+':done">Done</button></span>':'')+'</div>').join("")+'</div>';
   h+=goToHTML()+myRitualsHTML()+spacesHTML();
@@ -3939,6 +3957,7 @@ function renderArchive(){
   h+=ledgerHTML();
   h+='<label class="sr" for="archSearch">Search your archive</label><input class="search" id="archSearch" type="search" placeholder="Search what you wrote" value="'+esc(q)+'"><div class="entries" id="entryList">'+entryList()+'</div>';
   h+=ownHTML();
+  h+='</details>';
   $("#v-archive").innerHTML=h;
 }
 function ledgerHTML(){
@@ -3985,12 +4004,13 @@ function endRitual(){stopEyes();stopVoice();clearInterval(tick);const el=$("#rit
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar">'+glyph(r.g)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><button class="close voice'+(voiceOn?" on":"")+'" id="voiceBtn" aria-pressed="'+voiceOn+'" aria-label="Guide me aloud">'+(voiceOn?"◉":"▶")+'</button><button class="close" id="eyesBtn" aria-label="Eyes-closed mode">◐</button><span class="sndbar"></span><button class="close" id="riteX" aria-label="Leave ritual">×</button></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar">'+glyph(r.g)+'<span class="t">'+esc(g.name)+' · '+esc(r.title)+'</span><span class="sndbar"></span><button class="close" id="riteX" aria-label="Leave ritual">×</button></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){ /* intro */ }
   if(i<total){
     const s=r.steps[i];
     el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal">'+ROMAN[i+1]+'</span><span>of '+ROMAN[total]+'</span></div><h2>'+esc(s.t)+'</h2>'+ORN+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
       (s.say?'<div class="say"><span class="sayl">Say it aloud</span>"'+esc(s.say)+'"</div>':"")+
+      '<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>'+
       (s.hold?'<div class="timer"><span class="clock" id="clock">'+mmss(s.hold)+'</span><button class="btn btn-ghost" id="holdBtn">Start timer</button></div>':"")+
       (i===total-1&&r.secret?'<p class="secret">'+esc(r.secret)+'</p>':"")+
       '</div><div class="foot">'+(i>0?'<button class="btn btn-ghost" id="prevBtn">Back</button>':"")+'<button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
@@ -4359,6 +4379,7 @@ document.addEventListener("click",async ev=>{
   if(d.plancal){const [id,i]=d.plancal.split(":");const pl=S.plans.find(z=>z.id===id);const st=pl.steps[+i];const dt=new Date();dt.setDate(dt.getDate()+1);dt.setHours(19,0,0,0);addToCalendar((st.title||"Next step")+" · "+pl.title,dt.getTime(),st.note||"");return;}
   if(d.taskyes){const e=S.entries.find(z=>z.id===d.taskyes);addPromise(e._task||taskGuess(e.text),1,e.id);t.closest(".ask").remove();toast("I'll check in tomorrow.");return;}
   if(t.id==="eyesBtn"){startEyes();return;}
+  if(t.id==="repeatBtn"){speakStep();return;}
   if(t.id==="cantThink"||t.id==="simpleGo"){openSimple();return;}
   if(t.id==="simpleDone"){closeSimple();toast("Good. That was enough.");return;}
   if(d.promise){const [id,act]=d.promise.split(":");const pr=S.promises.find(z=>z.id===id);if(pr){if(act==="done"){pr.status="done";pr.doneAt=Date.now();toast("That's the alchemy. Real life changed.");if(!S.entries.some(e=>e.id===pr.source&&e.private))updateLedger("She kept a promise to herself: "+pr.text);}else if(act==="later"){pr.due=Date.now()+3*864e5;delete pr.notified;toast("I'll ask again in three days.");}else{pr.status="let";toast("Let go. No guilt.");}persistAll();renderToday();if(!$("#v-archive").hidden)renderArchive();}return;}
@@ -4387,6 +4408,13 @@ document.addEventListener("click",async ev=>{
   if(d.thread!==undefined){q=q===d.thread?"":d.thread;renderArchive();return;}
   if(t.id==="archAskBtn"){const qq=($("#archAsk").value||"").trim();if(!qq)return;t.disabled=true;$("#archAnswer").innerHTML='<p class="small muted" style="margin-top:10px">Reading your Archive...</p>';const a=await askArchive(qq);t.disabled=false;$("#archAnswer").innerHTML='<p style="margin-top:12px;font-size:18px">'+esc(a.answer)+'</p>'+(a.cites.length?'<div class="entries" style="margin-top:8px">'+a.cites.map(id=>{const e=S.entries.find(z=>z.id===id);return e?'<button class="entry" data-entry="'+esc(id)+'">'+glyph(e.guardian)+'<span><div class="t">'+esc(e.ritualTitle)+'</div><div class="m">'+fmtDate(e.ts)+'</div>'+(e.text?'<div class="x">'+esc(e.text)+'</div>':'')+'</span></button>':"";}).join("")+'</div>':'');return;}
   if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
+  if(d.snd==="menu"){openSound();return;}
+  if(d.sndset){const v=d.sndset;
+    if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want)MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});else musicPlay(MUSIC.want);renderSnd();}}
+    if(v==="music-off")setMusic(false);
+    if(v==="vol-soft"||v==="vol-full"){S.prefMusicVol=v==="vol-soft"?"quiet":"normal";syncSnd();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),400);renderSnd();}
+    if(v==="voice-on")setVoice(true);if(v==="voice-off")setVoice(false);
+    track("music",{set:v});return;}
   if(d.snd){if(d.snd==="music"){
       /* If it says on but nothing is playing yet (phones block sound until a tap), this tap starts it instead of turning it off. */
       if(musicOn()&&!musicAudible()){MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});}else musicPlay(MUSIC.want);renderSnd();toast("Music on.");}
