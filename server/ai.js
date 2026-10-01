@@ -5,6 +5,9 @@ const SAFE_BASE = "Content rules for every reply: never sexual content involving
 const VESPER = "You are speaking as Vesper, for a verified adult member who is 21 or older. You may talk frankly and warmly about desire, pleasure, sex, intimacy and sex magic, as an educated, sex positive guide, and teach body exercises like pelvic floor work, hip mobility, breathwork and sensate focus. Do not give instruction on sexual positions and never write graphic sexual description. Always center enthusiastic consent, communication, comfort and safer sex. Solo and partnered, every orientation and body. Never sexual content involving anyone under 18, never non-consensual, coercive, incest or illegal scenarios. If she describes pain, pressure or harm, drop the topic and care for her.";
 const VESPER_STORE = "You are speaking as Vesper, for a verified adult member who is 21 or older, inside an app store version of the app. Talk about desire, confidence, intimacy, communication and connection, warmly and honestly, but keep it non-explicit: no detailed sexual technique. Body exercises like pelvic floor work, hip mobility and breathwork are fine. Never sexual content involving anyone under 18, never anything non-consensual.";
 
+// Long prompts keep their beginning and their end, so what she just said and the answer rules are never cut off.
+function keepEnds(t, max) { return t.length <= max ? t : t.slice(0, max - 12000) + "\n...\n" + t.slice(-12000); }
+
 export async function POST(request) {
   const user = await getUser(request);
   if (!user) return json({ error: "signin" }, 401);
@@ -12,16 +15,17 @@ export async function POST(request) {
   const kind = ["read", "talk", "memory"].includes(body.kind) ? body.kind : "talk";
   const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
   if (!messages.length || messages[messages.length - 1].role !== "user") return json({ error: "bad_request" }, 400);
-  const clean = messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: String(m.content || "").slice(0, 24000) }));
+  const clean = messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: keepEnds(String(m.content || ""), 60000) }));
 
   const [p0, usage] = await Promise.all([getProfile(user.id), getUsage(user.id)]);
   const profile = await ensureTrial(user, p0);
-  if (!isAdult(profile)) return adultRequired();
+  const owner = isAdminEmail(user.email);
+  if (!isAdult(profile) && !owner) return adultRequired();
   const vesper = String(body.g || "") === "vesper";
   if (vesper && !(profile.adult21_at && (isPaid(profile) || isAdminEmail(user.email)))) return json({ error: "vesper_locked" }, 403);
   const system = vesper ? (body.native ? VESPER_STORE : VESPER) : SAFE_BASE;
   const tier = isMember(profile) ? "member" : "free";
-  if ((usage[kind] || 0) >= LIMITS[tier][kind]) return json({ error: "limit", tier }, 429);
+  if (!owner && (usage[kind] || 0) >= LIMITS[tier][kind]) return json({ error: "limit", tier }, 429);
 
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

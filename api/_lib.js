@@ -80,7 +80,7 @@ export async function notifyAdmin(title, body) {
   } catch {}
 }
 export function isMember(profile) {
-  return isPaid(profile) || !!(profile && profile.trial_until && new Date(profile.trial_until) > new Date());
+  return isPaid(profile) || !!(profile && profile.is_admin) || !!(profile && profile.trial_until && new Date(profile.trial_until) > new Date());
 }
 export const TRIAL_DAYS = 7;
 export const GRACE_DAYS = 30; // after the trial, Aura keeps writing, sealed, for this long

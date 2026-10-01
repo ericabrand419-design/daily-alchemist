@@ -2,7 +2,7 @@
 // Ritual steps are the same for everyone, so their audio is made once and kept (public, by an
 // unguessable name). Anything personal (a guardian's reply, a reading) is spoken fresh and never stored.
 import crypto from "node:crypto";
-import { json, env, getUser, getProfile, ensureTrial, isMember, isAdult, adultRequired, getUsage, bumpUsage, LIMITS, CORS } from "../api/_lib.js";
+import { json, env, getUser, getProfile, ensureTrial, isMember, isAdult, adultRequired, getUsage, bumpUsage, LIMITS, CORS, isAdminEmail } from "../api/_lib.js";
 
 // Each guardian's voice from the ElevenLabs Voice Library: [full name, voice ID, library owner ID].
 // 13 women, 4 men and two voices that aren't clearly either (Lily and Vesper). Chosen with Erica, Sept 30 2026.
@@ -122,10 +122,11 @@ export async function POST(request) {
     if (h.ok) return json({ url: publicUrl });
   }
   const profile = await ensureTrial(user, await getProfile(user.id));
-  if (!isAdult(profile)) return adultRequired();
+  const owner = isAdminEmail(user.email);
+  if (!isAdult(profile) && !owner) return adultRequired();
   const usage = await getUsage(user.id);
   const tier = isMember(profile) ? "member" : "free";
-  if ((usage.voice || 0) + text.length > LIMITS[tier].voice) return json({ error: "limit", tier }, 429);
+  if (!owner && (usage.voice || 0) + text.length > LIMITS[tier].voice) return json({ error: "limit", tier }, 429);
   const r = await fetch(XI + "/v1/text-to-speech/" + voice + "?output_format=mp3_44100_64", {
     method: "POST",
     headers: { "xi-api-key": key(), "content-type": "application/json", accept: "audio/mpeg" },

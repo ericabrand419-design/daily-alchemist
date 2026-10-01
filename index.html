@@ -1749,6 +1749,7 @@ function migrateCircle(){
   }
 }
 migrateCircle();
+if(!S.prefMusicVol)S.prefMusicVol="quiet";
 if(S.profile.minor)setTimeout(()=>showMinor(),300);
 const cloud={db:null,uid:null,on:false};
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -1816,7 +1817,7 @@ if(S.pmV!==2){S.previewMember=null;S.pmV=2;}
 function trialEnds(){return accountsOn()?(ACCT.paid?0:(ACCT.trialUntil?Date.parse(ACCT.trialUntil):0)):S.profile.firstSeen+TRIAL_DAYS*864e5;}
 function inTrial(){if(!accountsOn()&&(S.previewMember!=null||S.previewFriend))return false;return trialEnds()>Date.now();}
 function trialDaysLeft(){return Math.max(1,Math.ceil((trialEnds()-Date.now())/864e5));}
-function isMember(){return accountsOn()?!!ACCT.member:(S.previewFriend?true:S.previewMember!=null?!!S.previewMember:inTrial());}
+function isMember(){return accountsOn()?!!(ACCT.member||ACCT.admin):(S.previewFriend?true:S.previewMember!=null?!!S.previewMember:inTrial());}
 const NATIVE=!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
 function vesperOK(){if(accountsOn())return !!(ACCT.adult21&&(ACCT.paid||ACCT.lifetime||ACCT.admin));return !!(S.profile.adult21&&isMember());}
 function allowedG(k){return k!=="vesper"||vesperOK();}
@@ -1835,7 +1836,7 @@ function needBirthday(){if(S.profile.minor)return false;if(!S.profile.bday)retur
 let bdayAfter=null;
 function openBirthday(reason,after){
   bdayAfter=after||null;if(document.querySelector("#bdaySheet"))return;
-  openSheet('<div class="stack auraPop" id="bdaySheet"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays(reason||"One quick thing before we go on. When's your birthday?","Aura · one small thing")+
+  openSheet('<div class="stack auraPop" id="bdaySheet"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays(reason||"The Daily Alchemist is for adults, so I need to confirm your age once. When's your birthday?","Aura · one small thing")+
    '<div class="field"><label for="bdayIn">Your birthday</label><input type="date" id="bdayIn" max="'+new Date().toISOString().slice(0,10)+'"></div><button class="btn btn-main full" id="bdayGo">Continue</button>'+
    '<p class="small muted">The Daily Alchemist is for adults. I keep your month and day for your sign and your birthday, never the year.</p></div>');
 }
@@ -1880,7 +1881,7 @@ async function submitDob(){
 }
 function usedToday(kind){const u=S.usage[dayKey(new Date())]||{};return u[kind]||0;}
 function bump(kind){const k=dayKey(new Date());const cur=S.usage[k]||{};S.usage={[k]:{...cur,[kind]:(cur[kind]||0)+1}};saveLocal();}
-function overLimit(kind){return usedToday(kind)>=LIMITS[isMember()?"member":"free"][kind];}
+function overLimit(kind){if(accountsOn()&&ACCT.admin)return false;return usedToday(kind)>=LIMITS[isMember()?"member":"free"][kind];}
 function synced(){return MODE==="artifact"?cloud.on:!!ACCT.user;}
 
 async function remotePut(kind,id,data){
@@ -2164,10 +2165,10 @@ function missingFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&known().includ
 function unknownFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
 function adapt(r){
   const miss=missingFor(r).map(n=>n[0]); if(!miss.length)return {...r,notes:[]};
-  const notes=miss.map(t=>"No "+NOUN[t].replace(/^an? /,"")+"? Use "+subFor(t)+".");
+  const notes=miss.map(t=>{const n=NOUN[t].replace(/^an? /,""),sb=subFor(t);return sb?"No "+n+"? Use "+sb+".":"No "+n+"? Skip that part. The ritual still works without it.";});
   const steps=r.steps.map(s=>{
     let d=s.d;const lo=d.toLowerCase();
-    for(const t of miss)if((KEYS[t]||[]).some(k=>lo.includes(k))&&!lo.includes("no "+NOUN[t].replace(/^an? /,"")))d+=" (No "+NOUN[t].replace(/^an? /,"")+"? Use "+subFor(t)+" instead.)";
+    for(const t of miss)if((KEYS[t]||[]).some(k=>lo.includes(k))&&!lo.includes("no "+NOUN[t].replace(/^an? /,""))){const sb=subFor(t);d+=sb?" (No "+NOUN[t].replace(/^an? /,"")+"? Use "+sb+" instead.)":" (No "+NOUN[t].replace(/^an? /,"")+"? Skip it. The step still works.)";}
     return {...s,d};
   });
   return {...r,steps,notes};
@@ -2249,8 +2250,14 @@ function ledgerItemHTML(k,i,it){const kept=keptSet().has(it);return '<div class=
 function forgetLedger(k,i){const L=ledger();if(L[k]){const gone=L[k].splice(i,1)[0];if(gone!=null&&S.ledgerKeep)S.ledgerKeep=S.ledgerKeep.filter(x=>x!==gone);saveLocal();remotePut("prefs");}}
 
 /* Continuity: more history for semantic matching by Aura */
-function historyText(){
-  return S.entries.filter(usable).slice(0,40).map(e=>"- id "+e.id+" | "+fmtDate(e.ts)+" | "+(G[e.guardian]||G.aura).name+" | "+(e.ritualTitle||"")+" | theme "+(e.theme||"")+" | carrying: "+(e.carrying||"").slice(0,110)+" | wrote: "+(e.text||"").slice(0,160)+(e.after?" | after: "+e.after:"")).join("\n")||"(no entries yet)";
+/* Only the most relevant history goes to Aura: what shares words with what she just said, then the most recent. */
+function historyText(q){
+  const words=new Set(String(q||"").toLowerCase().match(/[a-z']{4,}/g)||[]);
+  const all=S.entries.filter(usable);
+  const score=e=>{const t=((e.carrying||"")+" "+(e.text||"")+" "+(e.thread||"")).toLowerCase();let n=0;for(const w of words)if(t.includes(w))n++;return n;};
+  const rel=words.size?all.map(e=>[e,score(e)]).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]).slice(0,10).map(x=>x[0]):[];
+  const pick=[...rel,...all.filter(e=>!rel.includes(e)).slice(0,20-rel.length)].sort((a,b)=>b.ts-a.ts);
+  return pick.map(e=>"- id "+e.id+" | "+fmtDate(e.ts)+" | "+(G[e.guardian]||G.aura).name+" | "+(e.ritualTitle||"")+" | theme "+(e.theme||"")+" | carrying: "+(e.carrying||"").slice(0,110)+" | wrote: "+(e.text||"").slice(0,160)+(e.after?" | after: "+e.after:"")).join("\n")||"(no entries yet)";
 }
 function ritualsToday(){const k=dayKey(new Date());return S.entries.filter(e=>dayKey(new Date(e.ts))===k&&e.ritualId).length;}
 
@@ -2479,7 +2486,7 @@ function openSafety(kind){
     x.btns.map(b=>'<a class="btn '+(b[2]?'btn-main':'btn-ghost')+' full" href="'+b[0]+'">'+b[1]+'</a>').join("")+
     '<button class="btn btn-ghost full" data-begin="two-minute-settle">Breathe with me first</button>'+
     '<button class="btn btn-ghost full" id="popClose">I\'m safe right now</button>'+
-    '<p class="small muted" style="text-align:center">Outside the US, call your local emergency number. Nothing you shared here is ever sent to anyone.</p></div>');
+    '<p class="small muted" style="text-align:center">Outside the US, call your local emergency number. I won\'t contact anyone or send this to another person.</p></div>');
 }
 async function askAura(text,mins){
   const pre=localRoute(text);
@@ -2502,7 +2509,7 @@ async function askAura(text,mins){
 "WHAT AURA REMEMBERS:\n"+mem.text+"\n\n"+
 "AURA'S LEDGER (long-term memory of her life):\n"+ledgerText()+"\n\n"+
 "WHAT HAS WORKED FOR HER (from how she felt after each ritual):\n"+workedText()+"\n\n"+
-"HER LAST 40 ENTRIES (newest first). Match the most similar past moment by MEANING, not shared words. 'My sister keeps walking over me' and 'I'm tired of her ignoring my limits' are the same situation:\n"+(memOn()?historyText():"(memory is off)")+"\n\n"+
+"HER MOST RELEVANT AND MOST RECENT ENTRIES (newest first). Match the most similar past moment by MEANING, not shared words. 'My sister keeps walking over me' and 'I'm tired of her ignoring my limits' are the same situation:\n"+(memOn()?historyText(text):"(memory is off)")+"\n\n"+
 "WHAT SHE HAS TOLD AURA LATELY (newest first, with what came of it):\n"+(memOn()?asksText():"(memory is off)")+"\n\n"+
 "RITUALS SHE HAS ALREADY DONE TODAY: "+ritualsToday()+"\n"+
 "GUARDIANS SHE HAS BEEN WITH THIS WEEK: "+(Object.entries(S.entries.filter(e=>Date.now()-e.ts<7*864e5&&e.guardian).reduce((c,e)=>(c[e.guardian]=(c[e.guardian]||0)+1,c),{})).map(([g,n])=>(G[g]?G[g].name:g)+" "+n).join(", ")||"none")+". RELEASE RITUALS THIS WEEK: "+releaseThisWeek()+".\n"+
@@ -2700,7 +2707,7 @@ function threadsOf(){const c={};for(const e of S.entries)if(e.thread)c[e.thread]
    rituals and in their chats. It dips whenever someone speaks, and it can be turned off. */
 const MUSIC={a:null,b:null,cur:null,want:"aura",base:"aura",duck:false,started:false};
 function musicOn(){return S.prefMusic!=="off";}
-function musicVol(){const h=new Date().getHours();return (S.prefMusicVol==="quiet"?0.12:0.26)*(MUSIC.duck?0.25:1)*(h>=21||h<5?0.7:1);}
+function musicVol(){const h=new Date().getHours();return (S.prefMusicVol==="normal"?0.26:0.12)*(MUSIC.duck?0.25:1)*(h>=21||h<5?0.7:1);}
 function musicSrc(g){const u=window.DA_CONFIG&&window.DA_CONFIG.supabaseUrl;return u?u.replace(/\/$/,"")+"/storage/v1/object/public/music/"+g+".mp3":null;}
 function fadeTo(el,v,ms,done){if(!el)return;clearInterval(el._fade);const from=el.volume,t0=Date.now();el._fade=setInterval(()=>{const k=Math.min(1,(Date.now()-t0)/ms);try{el.volume=Math.max(0,Math.min(1,from+(v-from)*k));}catch(e){}if(k>=1){clearInterval(el._fade);done&&done();}},50);}
 function musicPlay(g){
@@ -2719,7 +2726,7 @@ function musicFor(g){musicPlay(g||MUSIC.base);}
 function musicBack(){musicPlay(MUSIC.base);}
 function musicDuck(on){MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
 /* Browsers only allow sound after a tap, so the music starts with the first one. */
-function musicStart(ev){if(MUSIC.started)return;if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-snd="music"]')){MUSIC.started=true;return;}MUSIC.started=true;musicPlay(MUSIC.want);}
+function musicStart(ev){return;if(ev&&ev.target&&ev.target.closest&&ev.target.closest('[data-snd="music"]')){MUSIC.started=true;return;}MUSIC.started=true;musicPlay(MUSIC.want);}
 document.addEventListener("pointerdown",musicStart,{capture:true});
 document.addEventListener("keydown",musicStart,{capture:true});
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(MUSIC.cur)try{MUSIC.cur.pause();}catch(e){}}else if(MUSIC.cur&&musicOn()){MUSIC.cur.play().catch(()=>{});}});
@@ -2762,6 +2769,7 @@ async function voiceURL(g,text,cache){
   const j=await res.json().catch(()=>({}));
   if(j.url)return j.url;
   if(j.error==="limit"&&!voiceNoted){voiceNoted=true;toast("That's today's time with the guardians' voices. I'll use your phone's voice for now.");}
+  else if(!voiceNoted){voiceNoted=true;toast("Guardian voice unavailable. Using your phone's voice for now.");track("voice_fail",{why:String(j.error||res.status).slice(0,40)});}
   return null;
 }
 async function speak(text,onend,g,cache){
@@ -2769,7 +2777,7 @@ async function speak(text,onend,g,cache){
   g=g||(run&&run.r.g)||"aura";stopAudio();musicDuck(true);
   const done0=onend;onend=()=>{musicDuck(false);done0&&done0();};
   if(naturalVoices()){
-    try{const url=await voiceURL(g,text,cache);if(url){audioEl=new Audio(url);audioEl.onended=()=>{audioEl=null;onend&&onend();};await audioEl.play();return;}}catch(e){}
+    try{const url=await voiceURL(g,text,cache);if(url){audioEl=new Audio(url);audioEl.onended=()=>{audioEl=null;onend&&onend();};await audioEl.play();return;}}catch(e){if(!voiceNoted){voiceNoted=true;toast("Guardian voice unavailable. Using your phone's voice for now.");}}
   }
   deviceSpeak(text,onend,g);
 }
@@ -2808,7 +2816,7 @@ function ownedNames(){
   return [...S.profile.have.map(t=>{const f=all.find(x=>x[0]===t);return f?f[1]:t;}),...S.profile.custom];
 }
 function subFor(tag){
-  const s=SUBS[tag]; if(!s)return "whatever is closest";
+  const s=SUBS[tag]; if(!s)return null;
   const own=s.alt.find(a=>S.profile.have.includes(a));
   if(own)return "your "+NOUN[own].replace(/^(an?|your) /,"");
   return s.text;
@@ -3271,7 +3279,7 @@ async function doShare(copyOnly){
 function isLifetime(){return accountsOn()?ACCT.lifetime:!!S.previewFriend;}
 function openAdultCheck(){
   if(S.profile.minor){showMinor();return;}
-  openBirthday("The Daily Alchemist is made for adults, so before we go on: when\'s your birthday?");return;
+  openBirthday("The Daily Alchemist is for adults, so I need to confirm your age once. When\'s your birthday?");return;
   if(document.querySelector("#adultSheet"))return;
   openSheet('<div class="stack auraPop" id="adultSheet"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("The Daily Alchemist is made for adults, so before we go on, I need you to tell me you're 18 or older.","Aura · one small thing")+
     '<label class="switch agecheck" for="age18b">I\'m 18 or older.<input type="checkbox" id="age18b"></label><button class="btn btn-main full" id="adultOk">Continue</button></div>');
@@ -3968,7 +3976,7 @@ const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","X
 const ORN='<svg class="orn" viewBox="0 0 220 20" aria-hidden="true"><path d="M4 10h78M138 10h78" stroke="#9A7414" stroke-width="1"/><path d="M82 10c8 0 12-6 18-6M138 10c-8 0-12-6-18-6M82 10c8 0 12 6 18 6M138 10c-8 0-12 6-18 6" fill="none" stroke="#9A7414" stroke-width="1"/><path d="M110 2l2.6 5.4L118 10l-5.4 2.6L110 18l-2.6-5.4L102 10l5.4-2.6z" fill="#BF1E73"/><circle cx="4" cy="10" r="1.6" fill="#9A7414"/><circle cx="216" cy="10" r="1.6" fill="#9A7414"/></svg>';
 function startRitual(r,ctx){
   closeSheet();
-  run={r:adapt(r),i:0,ctx:ctx||{},t0:Date.now()};track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
+  run={r:adapt(r),i:0,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
   const el=document.createElement("div");el.className="rite";el.id="rite";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",r.title);
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
@@ -4059,7 +4067,7 @@ if(!S.chats)S.chats={};
 let talkG=null, talkAbort=null;
 function openTalk(k){
   if(!allowedG(k)){closeSheet();vesperGate();return;}
-  track("chat_open",{g:k});setTimeout(saveUI,0);
+  track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
   closeSheet();talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
   el.innerHTML='<div class="hd">'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span><button class="iconbtn" id="talkX" aria-label="Close">×</button></div><div class="msgs" id="msgs"></div>'+
@@ -4163,7 +4171,7 @@ async function sendTalk(){
       if(e&&e.code==="cancelled")return;
       if(e&&e.code==="vesper_locked"){closeTalk();vesperGate();return;}
       if(e&&e.code==="signin"){list.pop();if(talkG===k){drawMsgs();$("#chatSend").disabled=false;$("#chatIn").value=text;}closeTalk();openSignIn();return;}
-      if(e&&e.code==="adult_confirmation_required"){list.pop();closeTalk();openBirthday("Before we talk, I need your birthday. I only ask once.","talk:"+k);return;}
+      if(e&&e.code==="adult_confirmation_required"){list.pop();closeTalk();openBirthday("I need to confirm you\'re an adult before we can talk. I only ask once. When\'s your birthday?","talk:"+k);return;}
       if(e&&e.code==="limit"){reply="That's today's messages. I'm still here tomorrow."+(isMember()?"":" Or join "+PLAN.name+" and we can keep going.");upsell=!isMember();}
       else reply=MODE==="web"?"I couldn't reach my words just now, and I won't fake it. Give it a moment and send that again.":"";
     }
@@ -4279,9 +4287,8 @@ function openAltar(first){
       ["gear","Settings","The gold wheel at the top. Change anything here, any time."]];
     h='<div class="stack welcome"><div class="popseal">'+glyph("aura",72)+'</div><div style="text-align:center"><div class="label">Welcome to The Daily Alchemist</div><h2>I\'m Aura.</h2></div>'+
       auraSays("I\'m the lead guardian here. Tell me what you\'re carrying, and I\'ll send you to the one guardian in the circle who can hold it, with a small ritual made from things you already have. You never have to explain it twice. I remember.")+
-      '<div><div class="label">What\'s here</div>'+tabs.map((x,i)=>'<div class="howpt"><span class="hn">'+["I","II","III","IV","V"][i]+'</span><span><b>'+x[1]+'</b><span class="small muted">'+x[2]+'</span></span></div>').join("")+'</div>'+
       auraSays("If you ever can\'t think, tap <b>Can\'t think</b> and I\'ll just breathe with you. And if you\'re ever in danger, tell me. I\'ll help you reach a real person.")+
-      '<div><div class="label">A few things about you</div><p class="small muted" style="margin-top:6px">Only your name matters today. I\'ll learn the rest as we go, and only ask once. For reflection and ritual, not medical or mental health care.</p></div>'+
+      '<div><div class="label">A few things about you</div><p class="small muted" style="margin-top:6px">Just three things. I\'ll learn the rest as we go, and you can change anything in Settings. For reflection and ritual, not medical or mental health care.</p></div>'+
       '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>'+
       (first?'<div class="card" id="memChoice"><div class="label">What I remember</div><p class="small" style="margin-top:6px">I can remember the people, goals, patterns and moments you share, so I can support you over time. You decide what I keep, and you can see it or make me forget it any time.</p><div class="chips" style="margin-top:8px"><button class="chip" data-mem="on" aria-pressed="'+memOn()+'">Remember what I share</button><button class="chip" data-mem="off" aria-pressed="'+!memOn()+'">Don\'t remember anything</button></div></div>':'')+
       (p.bday&&!needBirthday()?'':'<div class="field"><label for="age18">Your birthday</label><input type="date" id="age18" max="'+new Date().toISOString().slice(0,10)+'"><p class="small muted" style="margin-top:6px">The Daily Alchemist is for adults. I keep your month and day for your sign and your birthday, never the year.</p></div>');
@@ -4289,7 +4296,7 @@ function openAltar(first){
     h='<div class="stack"><div><div class="label">'+(first?"Before we begin":"Settings")+'</div><h2>'+(first?"Aura would like to know you.":"What Aura knows")+'</h2><p class="muted" style="margin-top:6px">So you never have to explain it twice.'+(first?' That\'s all Aura needs to start. She\'ll learn the rest as you go, and only ask once.':' Everything here shapes what Aura gives you.')+'</p>'+(first?'<p class="small muted" style="margin-top:8px">The Daily Alchemist is for reflection and ritual. It is not medical or mental health care. You must be 18 or older to use it.</p>':'')+'</div>'+
    '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>';
   }
-  if(first){
+  if(false){
     h+='<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
       '<details class="group"><summary>What you have at home</summary><p class="small muted">Tap what you own. I build rituals around it and rewrite steps for what you don\'t. You can skip this.</p><div class="lbl" style="margin-top:10px">Everyday things</div>'+chipset("pHave",HAVE)+'<div class="lbl" style="margin-top:14px">More advanced tools</div>'+chipset("pAdv",HAVE_ADV)+'</details>'+
       '<details class="group"><summary>How I speak to you</summary><div class="chips" id="pTone" style="margin-top:8px">'+[["grounded","Grounded and practical"],["balanced","Balanced"],["mystical","Full spell language"]].map(t=>'<button class="chip" data-tone="'+t[0]+'" aria-pressed="'+(p.tone===t[0])+'">'+t[1]+'</button>').join("")+'</div></details>';
@@ -4462,7 +4469,7 @@ document.addEventListener("click",async ev=>{
     $("#readingSlot").innerHTML='<div class="reading"><div class="thinking"><span class="orb"></span>Aura is reading the Archive...</div></div>';
     $("#readingSlot").scrollIntoView({behavior:"smooth",block:"start"});
     try{lastRead=await askAura(text,mins);const sk=safetyKind(text);if(sk){lastRead.care=true;setTimeout(()=>openSafety(sk),600);}track("reading",{feelings:feelSel.length,typed:!!typed});lastRead.carrying=text;lastRead.askId=logAsk(text,lastRead).id;lastRead.intro=introFor(lastRead.guardian);markMet(lastRead.guardian);saveUI();}catch(e){t.disabled=false;
-      if(e&&e.code==="needs_birthday"){$("#readingSlot").innerHTML="";openBirthday("Before I read this for you, I need your birthday. I only ask once.","ask");return;}
+      if(e&&e.code==="needs_birthday"){$("#readingSlot").innerHTML="";openBirthday("I need to confirm you\'re an adult before I can use this part of the app. I only ask once. When\'s your birthday?","ask");return;}
       if(e&&e.code==="ai_down"){$("#readingSlot").innerHTML='<div class="reading"><div class="handoff">'+glyph("aura")+'<p><span class="who2">Aura</span>I couldn\'t reach my full reading just now, and I won\'t guess. Give it a moment and tap Tell Aura again. Your words are still here.</p></div></div>';return;}
       return;}
     renderToday();$("#carry").value=typed;
@@ -4552,7 +4559,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="shareText"){shareVia("text");return;}
   if(t.id==="shareEmail"){shareVia("email");return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").value){toast("Add your birthday to begin.");$("#age18").focus();return;}
-  if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){const v=$("#age18").value,a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return;}if(a<18){setBirthday(v);return;}setBirthday(v);}
+  if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){const v=$("#age18").value,a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return;}if(a<18){setBirthday(v);return;}if(!(await setBirthday(v)))return;}
   if(t.id==="pSave"||t.id==="pSkip"){
     if(t.id==="pSave"){
       const p=S.profile;
