@@ -290,8 +290,8 @@ function readingHTML(x){
   const g=G[x.guardian]||G.aura, same=x.guardian==="aura";
   const ch=chamberNudge(x);
   return '<div class="reading" style="border-color:'+g.color+'55">'+
-   '<div class="handoff">'+glyph("aura")+'<p><span class="who2">Aura</span>'+esc(x.aura||("That's "+g.name+"'s work."))+(x.intro?' '+esc(x.intro):'')+'</p></div>'+
-   (same?'':'<div class="head">'+glyph(x.guardian)+'<div><div class="who" style="color:'+g.color+'">'+esc(g.title)+'</div><div class="name">'+esc(g.name)+'</div></div></div>')+
+   '<div class="handoff">'+guardianMark("aura")+'<p><span class="who2">Aura</span>'+esc(x.aura||("That's "+g.name+"'s work."))+(x.intro?' '+esc(x.intro):'')+'</p></div>'+
+   (same?'':'<div class="head">'+guardianMark(x.guardian)+'<div><div class="who" style="color:'+g.color+'">'+esc(g.title)+'</div><div class="name">'+esc(g.name)+'</div></div></div>')+
    '<div class="body"><p class="voice">'+(voiceEnabled()?'<button class="hear" data-hear="'+(x.guardian||"aura")+'" aria-label="Hear it">'+HEAR_ICON+'</button>':'')+esc(x.reading)+'</p>'+
    (x.memory?'<div class="recall" id="recall"><div class="label">From your archive · '+esc(x.memory.date)+(x.memory.moon?' · '+esc(x.memory.moon):'')+'</div><p class="small muted" style="margin-top:4px">After '+esc(x.memory.ritualTitle)+', you wrote:</p><blockquote>"'+esc(x.memory.quote)+'"</blockquote><p class="voice" style="font-size:18px;margin-top:6px">'+esc(x.memory.question)+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-fromhere="'+esc(x.memory.id)+'">Work from there</button><button class="btn btn-ghost" id="freshBtn">Start fresh</button></div></div>':'')+
    memStripHTML(x)+(x.tomorrow?'<p class="small" style="margin:8px 0 0"><b>Tomorrow</b> I\'ll ask you '+esc(x.tomorrow.replace(/^(I'll ask|ask)( you)? ?/i,""))+'</p>':'')+whyThis(x.why)+
