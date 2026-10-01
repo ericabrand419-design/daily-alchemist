@@ -153,7 +153,7 @@ textarea::placeholder{color:var(--glow-faint);font-style:italic}
 .card.link:hover{border-color:var(--line)}
 
 /* altar draw */
-.altar{display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:center}
+.altar{display:flex;flex-direction:column;align-items:center;gap:18px}.altar .tarot{width:150px;height:225px}.altar .tarot .front svg{width:60px;height:60px}.altar .tarot .cname{font-size:19px}.altar #drawText{width:100%;text-align:left}
 .tarot{perspective:900px;width:112px;height:168px;border:0;background:none;padding:0}
 .tarot .inner{position:relative;width:100%;height:100%;transition:transform .8s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
 .tarot.flipped .inner{transform:rotateY(180deg)}
@@ -505,6 +505,8 @@ body:has(#talk) .scrim{z-index:40}body:has(#gate) .scrim{z-index:60}
 .rhythm .speaker{display:flex;align-items:center;gap:10px}.rhythm .who{font-family:var(--f-ui);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.rhythm .q2{font-family:var(--f-display);font-size:20px}
 .gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}.threadrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid rgba(244,241,230,.1);padding:12px 2px;color:var(--glow);font:inherit;cursor:pointer}.threadrow b{display:block;font-family:var(--f-display);font-size:19px;font-weight:500}.threadrow span{font-family:var(--f-ui);font-size:14px;color:var(--glow-dim)}.threadrow[aria-pressed="true"] b{color:var(--gold)}
 .chip.sm{padding:5px 10px;font-size:13px;min-height:0}
+.tarot .cf{display:flex;flex-direction:column;align-items:center;gap:4px}.tarot .cnum{font-family:var(--f-display);font-size:13px;letter-spacing:.2em;color:#9A7414}.tarot .cname{font-family:var(--f-display);font-size:15px;line-height:1.15;font-weight:600}.tarot .front .n{font-size:13px!important;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.cardq{margin-top:12px;padding:10px 12px;border-left:2px solid var(--gold);background:rgba(231,196,90,.06);border-radius:0 12px 12px 0}
 details.whythis{margin-top:8px}details.whythis>summary{list-style:none;cursor:pointer;font-family:var(--f-ui);font-size:15px;color:var(--gold);display:inline-block}details.whythis>summary::-webkit-details-marker{display:none}
 .remember{margin-top:12px;padding:10px 12px;border-left:2px solid var(--gold);background:rgba(231,196,90,.06);border-radius:0 12px 12px 0}.remember p{font-family:var(--f-ui);font-size:15.5px;margin-top:4px;color:var(--glow)}
 .dotsrow{display:flex;gap:8px;justify-content:center;margin:20px 0 16px}.dotsrow i{width:8px;height:8px;border-radius:50%;background:rgba(244,241,230,.25)}.dotsrow i.on{background:var(--gold)}
@@ -2034,7 +2036,7 @@ function openPaywall(reason){
   openSheet('<div class="stack"><div><div class="label">'+esc(reason||"Go deeper")+'</div><h2>'+esc(PLAN.name)+'</h2></div>'+
    auraSays((nm?esc(nm)+", when":"When")+" you come to me, I help. In the Inner Circle, I keep you in mind between visits. Here is what that means.")+
    '<div class="card headline"><div class="hl">'+envelopeSVG()+'<span><b>I write to you every week</b><span class="small muted">I look back at what you carried, what helped, and where to go next. The first letter comes the day after you start.</span></span></div><div class="hl">'+glyph("thistle",40)+'<span><b>The guardians check in on you</b><span class="small muted">A few days after you work with one of them, they come find you, call you by name, and ask how it\'s going.</span></span></div>'+(sc?'<div class="hl">'+envelopeSVG(true)+'<span><b>Your sealed letters open</b><span class="small muted">'+(sc===1?"The letter I wrote you is":"All "+sc+" letters I wrote you are")+' waiting in your mailbox.</span></span></div>':'')+'</div>'+
-   '<div class="card"><p class="kv" style="font-family:var(--f-ui);font-size:16px;line-height:1.9">✦ Every chamber opens: '+n+' more rituals across all 19 guardians<br>✦ Six guided 7-day journeys<br>✦ More time with me and the guardians: up to '+LIMITS.member.talk+' messages and '+LIMITS.member.read+' readings a day<br>✦ Your Archive and chats on every device</p></div>'+
+   '<div class="card"><p class="kv" style="font-family:var(--f-ui);font-size:16px;line-height:1.9">✦ Every guardian\'s deeper chamber opens<br>✦ The guided journeys, for when one night isn\'t enough<br>✦ More time with me and the guardians, every day<br>✦ Your Archive and chats on every device</p></div>'+
    '<div class="chips" id="planPick" role="radiogroup" aria-label="Choose a plan"><button class="chip" data-plan="yearly" aria-pressed="'+(payPlan==="yearly")+'">Yearly '+PLAN.yearly+'</button><button class="chip" data-plan="monthly" aria-pressed="'+(payPlan==="monthly")+'">Monthly '+PLAN.monthly+'</button></div>'+
    '<p class="small muted" id="planNote">'+(payPlan==="yearly"?PLAN.yearNote:"Cancel anytime.")+'</p>'+
    (!accountsOn()
@@ -3718,14 +3720,45 @@ function chamberNudge(x){
   return '<div class="card"><div class="label">A deeper tool</div><p style="margin-top:6px">You keep returning to '+esc(x.theme)+'. '+esc(G[x.guardian].name)+'\'s chamber may help.</p><h3 style="margin-top:8px">'+esc(c.name)+'</h3><p class="small muted" style="margin-top:4px">'+esc(c.d)+'</p><button class="btn btn-ghost" style="margin-top:10px" data-chamber="'+x.guardian+'">Open the chamber</button></div>';
 }
 /* The altar draw: five face-down cards, a different spread each day. Pick one; flip it as often as you like. */
+const CARDS={
+ aura:["0","The Alchemist","Everything you need is already in your hands. Today isn't about getting more. It's about using what you have on purpose.","What do I already have that I keep overlooking?"],
+ onyx:["I","The Mirror","Something you won't look at is quietly running the room. The card asks for one honest look, not a full confession.","What am I pretending not to know?"],
+ sage:["II","The Flame","Your anger is information, not a flaw. Something crossed a line. Use the heat to protect what matters, not to burn yourself.","What line got crossed, and what do I want to do about it?"],
+ fern:["III","The Tide","The tide goes out so it can come back. Rest is the work today. Less doing, more letting.","What can I put down for the rest of today?"],
+ lily:["IV","The Breath","A clear head beats a busy one. Slow the mind first, then decide. One clear thought is enough.","What's the one thought that actually matters right now?"],
+ thistle:["V","The Root","No is a complete sentence. A boundary today will save you a week of resentment.","Where am I saying yes when I mean no?"],
+ marigold:["VI","The Sun","You're allowed to want more and to receive it. Love, joy and worth are asking to be let in.","What would I let myself have if I believed I deserved it?"],
+ juniper:["VII","The Threshold","You're standing in a doorway. Clear the space, close what's done, and step through lighter.","What do I need to leave on the other side of the door?"],
+ rue:["VIII","The Ward","Not everyone gets a key. Protect your energy, your name and your peace today.","Who or what has had too much access to me?"],
+ sol:["IX","The Oath","A wish with a date is a plan. Keep one small promise to yourself today and let it count.","What did I say I'd do, and what's the first step?"],
+ aurora:["X","The Dawn","Something is becoming clear. A fresh start is closer than it feels.","What's starting to make sense that didn't before?"],
+ rowan:["XI","The Path","Your body knows the way back. Move first and the feelings follow.","Where is my body holding today, and how can I move it?"],
+ ember:["XII","The Leap","This is the moment before the jump. Fear isn't a stop sign. It's a sign you care.","What would I do today if I were a little braver?"],
+ willow:["XIII","The Rain","Let it fall. Grief and softness aren't weakness. Something wants to be felt, not fixed.","What am I still carrying that I haven't let myself feel?"],
+ vesper:["XIV","The Evening Star","Desire is information. What you want more of is worth listening to, slowly and without shame.","What do I want more of, and have I said it out loud?"],
+ wren:["XV","The Messenger","Pay attention. The signs you keep seeing are asking to be written down.","What keeps showing up, and what might it be telling me?"],
+ lumen:["XVI","The Star","See it first. The future you want needs a clear picture before it gets a plan.","What does the life I want look like a year from now?"],
+ onora:["XVII","The Lineage","You come from people. Their strength is in you, and so is some of their weight.","What did I inherit that I want to keep, and what am I ready to set down?"],
+ poppy:["XVIII","The Spark","Your spark isn't gone, it's bored. Play is the way back in. Make something badly today.","What would I make if nobody ever saw it?"]
+};
+function cardOf(g){const c=CARDS[g]||CARDS.aura;return {num:c[0],name:c[1],meaning:c[2],question:c[3]};}
 function drawSpread(){
-  const pool=["aura",...ORDER].filter(k=>DECK[k]&&DECK[k].length), k=dayKey(today), out=[];
+  const pool=circleKeys().filter(k=>CARDS[k]), k=dayKey(today), out=[];
   let i=0;while(out.length<5&&i<60){const g=pool[hash(k+"s"+i)%pool.length];if(!out.includes(g))out.push(g);i++;}
   return out;
 }
 function drawPick(){const v=S.draws[dayKey(today)];return v==null?null:(typeof v==="object"?v.pick:0);}
-function todayDraw(){const sp=drawSpread(), pi=drawPick(), g=sp[pi==null?0:pi]||"aura";const line=DECK[g][hash(dayKey(today)+"l"+g)%DECK[g].length];return {g,line};}
-function drawHTML(d){return '<div class="label" style="color:'+G[d.g].color+'">'+esc(G[d.g].name)+' · '+esc(G[d.g].title)+'</div><h3 style="margin-top:6px">"'+esc(d.line)+'"</h3><button class="btn btn-ghost" style="margin-top:10px;padding:9px 14px" data-guardian="'+d.g+'">Meet '+esc(G[d.g].name)+'</button>';}
+function todayDraw(){const sp=drawSpread(), pi=drawPick(), g=sp[pi==null?0:pi]||"aura";const lines=(DECK[g]&&DECK[g].length?DECK[g]:G[g].phrases);const line=lines[hash(dayKey(today)+"l"+g)%lines.length];return {g,line,...cardOf(g)};}
+function cardFace(g){const c=cardOf(g);return '<div class="cf"><div class="cnum">'+esc(c.num)+'</div>'+glyph(g)+'<div class="cname">'+esc(c.name)+'</div><div class="n">'+esc(G[g].name)+'</div></div>';}
+function drawHTML(d){
+  const r=guardianDaily(d.g),hint=OUTSIDE_HINT[d.g];
+  return '<div class="label" style="color:'+G[d.g].color+'">'+esc(d.num)+' · '+esc(d.name)+'</div><h3 style="margin-top:6px">"'+esc(d.line)+'"</h3>'+
+   '<p style="margin-top:10px">'+esc(d.meaning)+'</p>'+
+   '<div class="cardq"><div class="label">Ask yourself</div><p class="voice" style="margin-top:4px">'+esc(d.question)+'</p></div>'+
+   (hint?'<p class="small" style="margin-top:10px"><b>Today\'s invitation:</b> '+esc(hint)+'.</p>':'')+
+   '<div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-main" data-cardask="'+d.g+'">What does this mean for me?</button>'+(r?'<button class="btn btn-ghost" data-begin="'+esc(r.id)+'">'+esc(r.title)+' · '+r.min+' min</button>':'')+'</div>'+
+   '<button class="linkish" style="margin-top:10px" data-guardian="'+d.g+'">Meet '+esc(G[d.g].name)+', '+esc(G[d.g].title)+'</button>';
+}
 function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><g fill="none" stroke="#E7C45A" stroke-opacity=".75" stroke-width="1"><circle cx="56" cy="84" r="26"/><circle cx="56" cy="84" r="34" stroke-dasharray="2 4"/><path d="M56 44v80M16 84h80M30 58l52 52M82 58l-52 52" stroke-opacity=".3"/><path d="M62 70a14 14 0 1 0 0 28a11 11 0 1 1 0-28z" fill="#E7C45A" fill-opacity=".85" stroke="none"/></g><text x="56" y="152" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="10" fill="#E7C45A" letter-spacing="2">ALTAR</text></svg>';}
 function resurface(){
   const old=S.entries.filter(e=>!e.private&&e.text&&(Date.now()-e.ts)>2*864e5);
@@ -3781,7 +3814,7 @@ function innerCircleHTML(compact){
   const n=R.filter(r=>r.member).length, mem=isMember();
   const ch=ALL.filter(k=>CHAMBERS[k]);
   let h='<div class="card icircle'+(mem?' open':'')+'"><div class="row between"><span class="label">'+esc(PLAN.name)+'</span>'+(mem?'<span class="badge gold">'+(isLifetime()?'Lifetime':inTrial()?'Your free week':'You\'re a member')+'</span>':'<span class="price">From '+PLAN.monthly+'/mo</span>')+'</div>'+
-    '<div style="margin-top:10px">'+auraSays(mem?(inTrial()?"This week everything is open. I\'ll write to you, and the guardians will come find you.":"You\'re in. I write to you every week, and the guardians check in on you by name."):"I\'d like to keep you in mind between visits. In the Inner Circle, I write to you every week, and the guardians check in on you by name.")+'</div><p class="small muted" style="margin-top:8px">Plus '+ch.length+' chambers · '+n+' members-only rituals · 6 guided journeys · more time with me</p>';
+    '<div style="margin-top:10px">'+auraSays(mem?(inTrial()?"This week everything is open. I\'ll write to you, and the guardians will come find you.":"You\'re in. I write to you every week, and the guardians check in on you by name."):"I\'d like to keep you in mind between visits. In the Inner Circle, I write to you every week, and the guardians check in on you by name.")+'</div><p class="small muted" style="margin-top:8px">Plus every guardian\'s deeper chamber, the guided journeys, and more time with me.</p>';
   if(!compact){
     h+='<div class="chgrid">'+ch.map(k=>'<button class="chc" data-chamber="'+k+'">'+glyph(k,30)+'<span class="cn">'+esc(CHAMBERS[k].name)+'</span><span class="cl">'+(mem?'Open':'🔒')+'</span></button>').join("")+'</div>';
     h+='<div class="label" style="margin-top:14px">Journeys</div>'+JOURNEYS.map(j=>'<button class="li jl" data-journey="'+j.id+'"><span>'+esc(j.name)+'<br><span class="small muted">7 days with '+esc(G[j.g].name)+'</span></span><span class="cl">'+(mem?'Start':'🔒')+'</span></button>').join("");
@@ -3799,10 +3832,10 @@ function renderCircle(){
   const pi=drawPick(), sp=drawSpread();
   let h;
   if(pi==null){
-    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">Pick a card.</h3><p class="muted" style="margin-top:4px">One of the guardians has something to say to you before you ask. Trust your hand.</p><div class="spread" id="spread">'+
-      sp.map((g,i)=>'<button class="tarot sp" data-pickcard="'+i+'" style="--i:'+(i-2)+'" aria-label="Card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front"><div>'+glyph(g)+'<div class="n">'+esc(G[g].name)+'</div></div></div></div></button>').join("")+'</div></div>';
+    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">Pick a card.</h3><p class="muted" style="margin-top:4px">Five cards, one for you today. Each guardian\'s card carries a message, a question and an invitation. Trust your hand.</p><div class="spread" id="spread">'+
+      sp.map((g,i)=>'<button class="tarot sp" data-pickcard="'+i+'" style="--i:'+(i-2)+'" aria-label="Card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div></div>';
   }else{
-    h='<div><div class="label">The altar draw</div><div class="altar" style="margin-top:10px"><button class="tarot flipped" id="tarot" aria-label="Flip the card"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front"><div>'+glyph(draw.g)+'<div class="n">'+esc(G[draw.g].name)+'</div></div></div></div></button><div id="drawText">'+drawHTML(draw)+'<p class="small muted" style="margin-top:8px">Tap the card to turn it over. A new spread waits tomorrow.</p></div></div></div>';
+    h='<div><div class="label">The altar draw</div><div class="altar" style="margin-top:10px"><button class="tarot flipped" id="tarot" aria-label="Flip the card"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(draw.g)+'</div></div></button><div id="drawText">'+drawHTML(draw)+'<p class="small muted" style="margin-top:10px">A new spread waits tomorrow.</p></div></div></div>';
   }
   const met=metList(), full=S.showAll||met.length>=3;
   if(!full){
@@ -3822,7 +3855,7 @@ function renderCircle(){
   h+='<div class="circle">'+ORDER.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+'</div>';
   h+='<div><div class="label">The wider circle</div><p class="muted" style="margin-top:6px">Nine more voices from the Archives. Talk to any of them any time.</p></div>';
   h+='<div class="circle">'+EXP.map(k=>'<button class="g" data-guardian="'+k+'">'+glyph(k)+'<span class="n">'+esc(G[k].name)+'</span><span class="e job">'+esc(JOB[k].split(".")[0])+'</span></button>').join("")+'</div>';
-  h+='<div class="card"><div class="label">Chambers</div><p style="margin-top:6px">Every guardian keeps a deeper chamber of rituals. '+(isMember()?'Yours are all open. Aura draws from them for you.':'All nineteen open with '+esc(PLAN.name)+', from '+PLAN.monthly+' a month.')+'</p>'+(isMember()?'':'<button class="btn btn-ghost" style="margin-top:12px" data-paywall="Every chamber">See membership</button>')+'</div>';
+  h+='<div class="card"><div class="label">Chambers</div><p style="margin-top:6px">Every guardian keeps a deeper chamber of rituals. '+(isMember()?'Yours are all open. Aura draws from them for you.':'They all open with '+esc(PLAN.name)+', from '+PLAN.monthly+' a month.')+'</p>'+(isMember()?'':'<button class="btn btn-ghost" style="margin-top:12px" data-paywall="Every chamber">See membership</button>')+'</div>';
   $("#v-circle").innerHTML=h;
 }
 function baseOf(k){return R.some(r=>r.g===k)?k:(KIN[k]||k);}
@@ -4450,6 +4483,7 @@ document.addEventListener("click",async ev=>{
     const i=+d.pickcard;S.draws[dayKey(today)]={pick:i};persist("draws");track("draw_pick",{g:drawSpread()[i]});
     const sp=$("#spread");if(sp)sp.classList.add("chosen");t.classList.add("picked","flipped");
     setTimeout(renderCircle,1100);return;}
+  if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.name+" from "+G[dr.g].name+" today. The card says: "+dr.line+" What does it mean for me right now?";sendTalk();}},350);return;}
   if(d.guardian){openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}
