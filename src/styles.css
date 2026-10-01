@@ -650,3 +650,8 @@ html[data-weather=clear-night] #wxLayer{background:radial-gradient(900px 500px a
   box-shadow:inset 0 0 0 1px rgba(154,116,20,.9),inset 0 0 0 5px #F3EAD3,inset 0 0 0 6px rgba(154,116,20,.55),0 9px 18px -12px rgba(0,0,0,.8)}
 .tarot.flipped .front{box-shadow:inset 0 0 0 1px rgba(154,116,20,.9),inset 0 0 0 5px #F3EAD3,inset 0 0 0 6px rgba(154,116,20,.55),0 12px 24px -10px rgba(0,0,0,.75)}
 @media (max-width:380px){.alch{grid-template-columns:52px 1fr;padding:12px}.alch .adate{font-size:20px}.sky svg{width:52px;height:52px}}
+
+.rite .wrap{border-left:3px solid color-mix(in srgb,var(--gcol,var(--gold)) 55%,transparent);box-shadow:0 22px 60px -38px rgba(0,0,0,.72)}
+.rite .count .seal{box-shadow:0 0 0 1px color-mix(in srgb,var(--gcol,var(--gold)) 55%,transparent),0 0 22px color-mix(in srgb,var(--gcol,var(--gold)) 18%,transparent)}
+.rite .say{border-color:color-mix(in srgb,var(--gcol,var(--gold)) 50%,#9A7414)}
+.page.ritualcard::after{content:"✦";position:absolute;right:16px;bottom:10px;font-family:var(--f-display);font-size:34px;color:rgba(154,116,20,.14);pointer-events:none}
