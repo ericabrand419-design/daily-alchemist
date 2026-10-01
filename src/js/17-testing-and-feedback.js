@@ -335,46 +335,8 @@ function chamberNudge(x){
   const c=CHAMBERS[x.guardian]; if(!c||t<2||isMember())return "";
   return '<div class="card"><div class="label">A deeper tool</div><p style="margin-top:6px">You keep returning to '+esc(x.theme)+'. '+esc(G[x.guardian].name)+'\'s chamber may help.</p><h3 style="margin-top:8px">'+esc(c.name)+'</h3><p class="small muted" style="margin-top:4px">'+esc(c.d)+'</p><button class="btn btn-ghost" style="margin-top:10px" data-chamber="'+x.guardian+'">Open the chamber</button></div>';
 }
-/* The altar draw: five face-down cards, a different spread each day. Pick one; flip it as often as you like. */
-const CARDS={
- aura:["0","The Alchemist","Everything you need is already in your hands. Today isn't about getting more. It's about using what you have on purpose.","What do I already have that I keep overlooking?"],
- onyx:["I","The Mirror","Something you won't look at is quietly running the room. The card asks for one honest look, not a full confession.","What am I pretending not to know?"],
- sage:["II","The Flame","Your anger is information, not a flaw. Something crossed a line. Use the heat to protect what matters, not to burn yourself.","What line got crossed, and what do I want to do about it?"],
- fern:["III","The Tide","The tide goes out so it can come back. Rest is the work today. Less doing, more letting.","What can I put down for the rest of today?"],
- lily:["IV","The Breath","A clear head beats a busy one. Slow the mind first, then decide. One clear thought is enough.","What's the one thought that actually matters right now?"],
- thistle:["V","The Root","No is a complete sentence. A boundary today will save you a week of resentment.","Where am I saying yes when I mean no?"],
- marigold:["VI","The Sun","You're allowed to want more and to receive it. Love, joy and worth are asking to be let in.","What would I let myself have if I believed I deserved it?"],
- juniper:["VII","The Threshold","You're standing in a doorway. Clear the space, close what's done, and step through lighter.","What do I need to leave on the other side of the door?"],
- rue:["VIII","The Ward","Not everyone gets a key. Protect your energy, your name and your peace today.","Who or what has had too much access to me?"],
- sol:["IX","The Oath","A wish with a date is a plan. Keep one small promise to yourself today and let it count.","What did I say I'd do, and what's the first step?"],
- aurora:["X","The Dawn","Something is becoming clear. A fresh start is closer than it feels.","What's starting to make sense that didn't before?"],
- rowan:["XI","The Path","Your body knows the way back. Move first and the feelings follow.","Where is my body holding today, and how can I move it?"],
- iris:["XII","The Pulse","Your body has a rhythm even when it is not perfectly regular. Track what happens, not what you think should happen.","What is my body asking me to notice today?"],
- willow:["XIII","The Rain","Let it fall. Grief and softness aren't weakness. Something wants to be felt, not fixed.","What am I still carrying that I haven't let myself feel?"],
- vesper:["XIV","The Evening Star","Desire is information. What you want more of is worth listening to, slowly and without shame.","What do I want more of, and have I said it out loud?"],
- wren:["XV","The Messenger","Pay attention. The signs you keep seeing are asking to be written down.","What keeps showing up, and what might it be telling me?"],
- lumen:["XVI","The Star","See it first. The future you want needs a clear picture before it gets a plan.","What does the life I want look like a year from now?"],
- onora:["XVII","The Lineage","You come from people. Their strength is in you, and so is some of their weight.","What did I inherit that I want to keep, and what am I ready to set down?"],
- poppy:["XVIII","The Spark","Your spark isn't gone, it's bored. Play is the way back in. Make something badly today.","What would I make if nobody ever saw it?"]
-};
-function cardOf(g){const c=CARDS[g]||CARDS.aura;return {num:c[0],name:c[1],meaning:c[2],question:c[3]};}
-function drawSpread(){
-  const pool=circleKeys().filter(k=>CARDS[k]), k=dayKey(today), out=[];
-  let i=0;while(out.length<5&&i<60){const g=pool[hash(k+"s"+i)%pool.length];if(!out.includes(g))out.push(g);i++;}
-  return out;
-}
+/* The altar draw lives in 17d-tarot.js. drawPick is shared. */
 function drawPick(){const v=S.draws[dayKey(today)];return v==null?null:(typeof v==="object"?v.pick:0);}
-function todayDraw(){const sp=drawSpread(), pi=drawPick(), g=sp[pi==null?0:pi]||"aura";const lines=(DECK[g]&&DECK[g].length?DECK[g]:G[g].phrases);const line=lines[hash(dayKey(today)+"l"+g)%lines.length];return {g,line,...cardOf(g),now:cardNow(g)};}
-function cardFace(g){const c=cardOf(g);return '<div class="cf"><div class="cnum">'+esc(c.num)+'</div>'+glyph(g)+'<div class="cname">'+esc(c.name)+'</div><div class="n">'+esc(G[g].name)+'</div></div>';}
-function drawHTML(d){
-  const r=guardianDaily(d.g),hint=OUTSIDE_HINT[d.g];
-  return '<div class="label" style="color:'+G[d.g].color+'">'+esc(d.num)+' · '+esc(d.name)+'</div><h3 style="margin-top:6px">"'+esc(d.line)+'"</h3>'+
-   '<p style="margin-top:10px">'+esc(d.meaning)+'</p>'+(d.now?'<p class="cardnow"><span class="label">Right now</span> '+esc(d.now)+'</p>':'')+
-   '<div class="cardq"><div class="label">Ask yourself</div><p class="voice" style="margin-top:4px">'+esc(d.question)+'</p></div>'+
-   (hint?'<p class="small" style="margin-top:10px"><b>Today\'s invitation:</b> '+esc(hint)+'.</p>':'')+
-   '<div class="row" style="margin-top:12px;flex-wrap:wrap;gap:8px"><button class="btn btn-main" data-cardask="'+d.g+'">What does this mean for me?</button>'+(r?'<button class="btn btn-ghost" data-begin="'+esc(r.id)+'">'+esc(r.title)+' · '+r.min+' min</button>':'')+'</div>'+
-   '<button class="linkish" style="margin-top:10px" data-guardian="'+d.g+'">Meet '+esc(G[d.g].name)+', '+esc(G[d.g].title)+'</button>';
-}
 function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><g fill="none" stroke="#E7C45A" stroke-opacity=".75" stroke-width="1"><circle cx="56" cy="84" r="26"/><circle cx="56" cy="84" r="34" stroke-dasharray="2 4"/><path d="M56 44v80M16 84h80M30 58l52 52M82 58l-52 52" stroke-opacity=".3"/><path d="M62 70a14 14 0 1 0 0 28a11 11 0 1 1 0-28z" fill="#E7C45A" fill-opacity=".85" stroke="none"/></g><text x="56" y="152" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="10" fill="#E7C45A" letter-spacing="2">ALTAR</text></svg>';}
 function resurface(){
   const old=S.entries.filter(e=>!e.private&&e.text&&(Date.now()-e.ts)>2*864e5);

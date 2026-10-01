@@ -193,7 +193,7 @@ document.addEventListener("click",async ev=>{
     const i=+d.pickcard;S.draws[dayKey(today)]={pick:i};persist("draws");track("draw_pick",{g:drawSpread()[i]});
     const sp=$("#spread");if(sp)sp.classList.add("chosen");t.classList.add("picked","flipped");
     setTimeout(renderCircle,1100);return;}
-  if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.name+" from "+G[dr.g].name+" today. The card says: "+dr.line+" What does it mean for me right now?";sendTalk();}},350);return;}
+  if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
   if(d.guardian){openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}

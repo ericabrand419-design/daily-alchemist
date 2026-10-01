@@ -242,30 +242,6 @@ function sinceLines(f){
 }
 function sinceHTML(f){const l=sinceLines(f);return l.length?'<div class="since"><span class="label">Since you were here</span>'+l.map(x=>'<p>'+esc(x)+'</p>').join("")+'</div>':"";}
 
-/* The one card, read differently as the day moves. Templates, no AI call. */
-const CARD_ARC={
- aura:["The Alchemist: use what you already have, on purpose, today.","The Alchemist is still with you. What did you already have that got you through the morning?","The Alchemist's question tonight: what did you make out of what you had?"],
- onyx:["The Mirror: take one honest look today, not a full confession.","The Mirror is still with you. What did you notice yourself avoiding?","The Mirror's question tonight: what do you know now that you pretended not to this morning?"],
- sage:["The Flame: let today's heat protect something instead of burning you.","The Flame is still with you. What lit you up, or set you off?","The Flame's question tonight: what needs to burn so you can sleep?"],
- fern:["The Tide: today, less doing and more letting.","The Tide is still with you. What could you put down for the rest of the day?","The Tide's question tonight: what can go out with the tide so tomorrow comes back clearer?"],
- lily:["The Breath: one clear thought is enough for today.","The Breath is still with you. Which thought kept getting louder than it deserved?","The Breath's question tonight: what can you stop thinking about until morning?"],
- thistle:["The Root: protect what you give away today.","The Root is still with you. Where did you overextend?","The Root's question tonight: what do you need to stop carrying into tomorrow?"],
- marigold:["The Sun: let something good in today, on purpose.","The Sun is still with you. What did you let yourself have, and what did you turn away?","The Sun's question tonight: what made you feel worth it today?"],
- juniper:["The Threshold: notice the doors you walk through today.","The Threshold is still with you. What part of the morning are you still carrying into the afternoon?","The Threshold's question tonight: what do you need to leave on the other side of the door?"],
- rue:["The Ward: not everyone gets a key today.","The Ward is still with you. Who or what got more of you than they should have?","The Ward's question tonight: what are you sending back where it came from?"],
- sol:["The Oath: keep one small promise to yourself today.","The Oath is still with you. Is the promise kept yet, or is it next?","The Oath's question tonight: did you keep your word to yourself, and what's the first step tomorrow?"],
- aurora:["The Dawn: something is becoming clear. Give it light today.","The Dawn is still with you. What became clearer since this morning?","The Dawn's question tonight: what do you want to wake up knowing?"],
- rowan:["The Path: move first today and let the feelings follow.","The Path is still with you. Has your body moved yet, or only your thoughts?","The Path's question tonight: where is your body still holding the day?"],
- iris:["The Pulse: notice what your body is telling you today, before you decide what it means.","The Pulse is still with you. What has your body asked for since this morning?","The Pulse's question tonight: what did your body need today that you didn't give it?"],
- willow:["The Rain: let something be felt today, not fixed.","The Rain is still with you. What did you feel and push past?","The Rain's question tonight: what are you still carrying that wants to fall?"],
- vesper:["The Evening Star: notice what you want today, slowly.","The Evening Star is still with you. What did you want and not say?","The Evening Star's question tonight: what do you want more of, and have you said it out loud?"],
- wren:["The Messenger: pay attention today. Write down what repeats.","The Messenger is still with you. What showed up twice?","The Messenger's question tonight: what was the sign today, and what might it mean?"],
- lumen:["The Star: picture the life you want before you plan it.","The Star is still with you. Did today move you toward it or away?","The Star's question tonight: what's one thing you saw today that belongs in your future?"],
- onora:["The Lineage: carry your people with you today.","The Lineage is still with you. Whose voice did you hear in yours today?","The Lineage's question tonight: what did you inherit that you want to set down?"],
- poppy:["The Spark: make something badly today.","The Spark is still with you. Did you make anything yet, even something small?","The Spark's question tonight: what did you make, and what wants to be made tomorrow?"]
-};
-function cardNow(g,d){const a=CARD_ARC[g]||CARD_ARC.aura,p=arcPart(daypart(d));return p==="m"?a[0]:p==="d"?a[1]:a[2];}
-
 /* Clicks for everything above. */
 function focusClick(t,d){
   if(t.id==="alchOpen"){openAlchemy();return true;}

@@ -23,10 +23,10 @@ function renderCircle(){
   const pi=drawPick(), sp=drawSpread();
   let h;
   if(pi==null){
-    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">Pick a card.</h3><p class="muted" style="margin-top:4px">Five cards, one for you today. Each guardian\'s card carries a message, a question and an invitation. Trust your hand.</p><div class="spread" id="spread">'+
+    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">Pick a card.</h3><p class="muted" style="margin-top:4px">Five cards from the full 78 card deck, one for you today. Trust your hand. Its question changes as your day moves.</p><div class="spread" id="spread">'+
       sp.map((g,i)=>'<button class="tarot sp" data-pickcard="'+i+'" style="--i:'+(i-2)+'" aria-label="Card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div></div>';
   }else{
-    h='<div><div class="label">The altar draw</div><div class="altar" style="margin-top:10px"><button class="tarot flipped" id="tarot" aria-label="Flip the card"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(draw.g)+'</div></div></button><div id="drawText">'+drawHTML(draw)+'<p class="small muted" style="margin-top:10px">A new spread waits tomorrow.</p></div></div></div>';
+    h='<div><div class="label">The altar draw</div><div class="altar" style="margin-top:10px"><button class="tarot flipped" id="tarot" aria-label="Flip the card"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(draw.id)+'</div></div></button><div id="drawText">'+drawHTML(draw)+'<p class="small muted" style="margin-top:10px">A new spread waits tomorrow.</p></div></div></div>';
   }
   const met=metList(), full=S.showAll||met.length>=3;
   if(!full){

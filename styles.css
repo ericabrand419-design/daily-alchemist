@@ -558,3 +558,8 @@ html[data-daypart=deepnight] .foil.shine{animation:none}
 .cinfo p{margin:2px 0}
 details.cyclog{margin-top:12px;border-top:1px solid rgba(244,241,230,.08);padding-top:10px}details.cyclog summary{cursor:pointer;font-family:var(--f-ui);font-size:15px;letter-spacing:.04em}
 details.cyclog input[type=date],details.cyclog input[type=text]{border-radius:12px;border:1px solid rgba(231,196,90,.35);background:rgba(22,19,42,.7);padding:9px 12px}
+/* Real tarot faces */
+.tarot .front{padding:0!important}
+.tarot .front svg.tcard,.altar .tarot .front svg.tcard,.spread .tarot .front svg.tcard{width:100%!important;height:100%!important;display:block}
+.tarot svg.tcard.rev{transform:rotate(180deg)}
+.altar .tarot{width:160px;height:256px}.spread .tarot.sp{height:154px}

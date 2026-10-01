@@ -1,6 +1,7 @@
 01-guardians.js
 02-rituals.js
 03-rituals-more.js
+03b-ritual-objects.js
 04-timing.js
 05-membership.js
 06-state.js
@@ -18,6 +19,7 @@
 17a-daily-context.js
 17b-plants-and-alchemy.js
 17c-iris.js
+17d-tarot.js
 18-journeys-view.js
 19-circle-view.js
 20-archive-view.js
