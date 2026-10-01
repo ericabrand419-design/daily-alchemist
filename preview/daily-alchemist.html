@@ -3349,6 +3349,7 @@ function graceActive(){
   const te=trialEnds();return te>0&&Date.now()>=te&&Date.now()<te+GRACE_DAYS*864e5;
 }
 function letterDue(){
+  if(contactPref().enabled!==true)return false;
   const l=lastLetter(),gap=contactDays()*864e5;
   if(!l)return false;
   if(Date.now()-l.ts<gap-6*36e5)return false;
@@ -3499,7 +3500,7 @@ function lastTouch(){
   return t;
 }
 function nudgeCandidate(){
-  if(!isMember())return null;
+  const cp=contactPref();if(!isMember()||cp.enabled!==true||cp.scope!=="circle")return null;
   const now=Date.now();
   if(S.nudges.some(n=>now-n.ts<20*36e5))return null;
   const t=lastTouch();let best=null;
@@ -3532,7 +3533,7 @@ async function makeNudge(){
 function nudgeHTML(){
   const nd=pendingNudge();if(!nd||!G[nd.g])return "";
   const g=G[nd.g];
-  return '<div class="card checkin nudge" style="border-color:'+g.color+'66"><div class="handoff" style="padding:0">'+glyph(nd.g)+'<p><span class="who2" style="color:'+g.color+'">'+esc(g.name)+' is checking in</span>'+esc(nd.text)+'</p></div><div class="row" style="margin-top:10px"><button class="btn btn-main" data-nudge="'+nd.id+':reply">Answer '+esc(g.name)+'</button><button class="btn btn-ghost" data-nudge="'+nd.id+':later">Not now</button></div></div>';
+  return '<div class="card checkin nudge" style="border-color:'+g.color+'66"><div class="handoff" style="padding:0">'+guardianMark(nd.g)+'<p><span class="who2" style="color:'+g.color+'">'+esc(g.name)+' is checking in</span>'+esc(nd.text)+'</p></div><div class="row" style="margin-top:10px"><button class="btn btn-main" data-nudge="'+nd.id+':reply">Answer '+esc(g.name)+'</button><button class="btn btn-ghost" data-nudge="'+nd.id+':later">Not now</button></div></div>';
 }
 function nudgeAction(id,act){
   const nd=S.nudges.find(n=>n.id===id);if(!nd)return;
