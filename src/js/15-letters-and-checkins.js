@@ -121,7 +121,7 @@ async function unsealLetter(L){
 }
 function sealedCount(){return S.letters.filter(l=>l.sealed).length;}
 function envelopeSVG(sealed){return '<svg viewBox="0 0 64 44" width="58" height="40" aria-hidden="true"><rect x="1.5" y="1.5" width="61" height="41" rx="4" fill="#F3EAD3" stroke="#9A7414"/><path d="M2 3l30 22L62 3" fill="none" stroke="#9A7414" stroke-width="1.5"/><circle cx="32" cy="25" r="7" fill="#BF1E73"/><path d="M29 25a3 3 0 1 0 6 0a4 4 0 0 1-6 0z" fill="#F4D778"/>'+(sealed?'<rect x="44" y="26" width="14" height="12" rx="2" fill="#16132A"/><path d="M47 26v-3a4 4 0 0 1 8 0v3" fill="none" stroke="#16132A" stroke-width="2"/><circle cx="51" cy="32" r="1.6" fill="#E7C45A"/>':'')+'</svg>';}
-function auraSays(html,label){return '<div class="handoff aurasays" style="padding:0">'+glyph("aura")+'<p><span class="who2">'+(label||"Aura")+'</span>'+html+'</p></div>';}
+function auraSays(html,label){return '<div class="handoff aurasays" style="padding:0">'+guardianMark("aura")+'<p><span class="who2">'+(label||"Aura")+'</span>'+html+'</p></div>';}
 function letterCardHTML(){
   if(lastRead)return "";
   const mem=isMember();
