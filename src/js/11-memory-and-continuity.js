@@ -26,6 +26,28 @@ const SUBS={
   tea:{alt:[],text:"hot water with a slice of lemon"}
 };
 const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"]};
+function ritualNeeds(r){
+  const out=[],keys=new Set();
+  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push(label);};
+  for(const n of (r.needs||[])){add(n[0],n[1]);}
+  const txt=(r.steps||[]).map(x=>[x.t,x.d,x.say].filter(Boolean).join(" ")).join(" ").toLowerCase();
+  const has=k=>(r.needs||[]).some(n=>n[0]===k);
+  if(/\b(write|writing|wrote|journal|record|list|letter|note|label|draw)\b/.test(txt)){add("paper","Paper");add("pen","A pen or pencil");}
+  if(/\bcold water\b/.test(txt))add("water","Cold water");
+  else if(/\bwarm water\b/.test(txt))add("water","Warm water");
+  else if(/\bhot water\b/.test(txt))add("water","Hot water");
+  else if(/\bwater\b/.test(txt)&&!has("bowl"))add("water","Water");
+  if(/\bbowl\b/.test(txt)&&!has("bowl"))add("bowl","A bowl");
+  if((/\b(light|burn|flame)\b/.test(txt)||has("candle"))&&!/phone.{0,12}flashlight/.test(txt))add("lighter","Matches or a lighter");
+  if(/\bscissors\b|\bcut\b/.test(txt))add("scissors","Scissors");
+  if(/\btowel\b/.test(txt))add("towel","A towel");
+  if(/\bchair\b/.test(txt))add("chair","A chair");
+  if(/\benvelope\b/.test(txt))add("envelope","An envelope");
+  if(/\bplate\b/.test(txt))add("plate","A plate");
+  if(/\bshower\b/.test(txt))add("shower","Access to a shower");
+  if(/\bbath\b/.test(txt)&&r.bath)add("bath","Access to a bath or basin");
+  return out;
+}
 function known(){return S.profile.known||(S.profile.known=[...S.profile.have]);}
 function missingFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
 function unknownFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
