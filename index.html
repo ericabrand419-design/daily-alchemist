@@ -504,6 +504,7 @@ body:has(#talk) .scrim{z-index:40}body:has(#gate) .scrim{z-index:60}
 .memline{margin-top:4px}
 .rhythm .speaker{display:flex;align-items:center;gap:10px}.rhythm .who{font-family:var(--f-ui);font-size:14px;font-weight:700;letter-spacing:.16em;text-transform:uppercase}.rhythm .q2{font-family:var(--f-display);font-size:20px}
 .gchips{display:flex;gap:6px;overflow-x:auto;margin-top:12px;padding-bottom:2px}.threadrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid rgba(244,241,230,.1);padding:12px 2px;color:var(--glow);font:inherit;cursor:pointer}.threadrow b{display:block;font-family:var(--f-display);font-size:19px;font-weight:500}.threadrow span{font-family:var(--f-ui);font-size:14px;color:var(--glow-dim)}.threadrow[aria-pressed="true"] b{color:var(--gold)}
+.chip.sm{padding:5px 10px;font-size:13px;min-height:0}
 details.whythis{margin-top:8px}details.whythis>summary{list-style:none;cursor:pointer;font-family:var(--f-ui);font-size:15px;color:var(--gold);display:inline-block}details.whythis>summary::-webkit-details-marker{display:none}
 .remember{margin-top:12px;padding:10px 12px;border-left:2px solid var(--gold);background:rgba(231,196,90,.06);border-radius:0 12px 12px 0}.remember p{font-family:var(--f-ui);font-size:15.5px;margin-top:4px;color:var(--glow)}
 .dotsrow{display:flex;gap:8px;justify-content:center;margin:20px 0 16px}.dotsrow i{width:8px;height:8px;border-radius:50%;background:rgba(244,241,230,.25)}.dotsrow i.on{background:var(--gold)}
@@ -2193,7 +2194,7 @@ function workedText(){
 }
 
 /* Aura's ledger: durable long-term memory, rewritten after each ritual and chat */
-const LEDGER_KEYS=[["people","People in her life"],["situations","Ongoing situations"],["boundaries","Boundaries she set"],["commitments","Things she said she'd do"],["intentions","Intentions and goals"],["helped","What helps her"],["didnt","What doesn't"],["threads","Unresolved threads"]];
+const LEDGER_KEYS=[["people","People in your life"],["situations","What you're going through"],["boundaries","Boundaries you set"],["commitments","Things you said you'd do"],["intentions","Your goals"],["helped","What helps you"],["didnt","What doesn't help"],["threads","Still unresolved"]];
 function ledger(){if(!S.ledger){S.ledger={};for(const [k] of LEDGER_KEYS)S.ledger[k]=[];}return S.ledger;}
 function ledgerText(){if(!memOn())return "(she turned memory off; do not refer to her past)";const L=ledger();let t=LEDGER_KEYS.filter(([k])=>(L[k]||[]).length).map(([k,l])=>l+": "+L[k].join(" | ")).join("\n");const n=(S.memNotes||[]).map(x=>x.text);if(n.length)t+=(t?"\n":"")+"Things she asked Aura to remember: "+n.join(" | ");return t||"(empty so far)";}
 /* MEMORY CONSENT. She decides what Aura keeps. Off means Aura keeps no long-term memory and
@@ -2214,8 +2215,10 @@ function openMemory(){
     '<div class="chips"><button class="chip" data-mem="on" aria-pressed="'+on+'">Remember what I share</button><button class="chip" data-mem="off" aria-pressed="'+!on+'">Don\'t remember anything</button></div>'+
     (on?'<div class="card"><div class="label">Tell me something to remember</div><div class="addrow"><label class="sr" for="memIn">Something to remember</label><input type="text" id="memIn" placeholder="My sister\'s name is Tasha."><button class="btn btn-ghost" id="memAdd">Remember this</button></div>'+
       ((S.memNotes||[]).length?'<div class="ledg">'+S.memNotes.map(n=>'<div class="li"><span>'+esc(n.text)+'</span><button class="x2" data-memnote="'+esc(n.id)+'" aria-label="Forget this">×</button></div>').join("")+'</div>':'')+'</div>':'')+
-    (on&&rows.length?'<div class="card"><div class="label">What I carry for you</div><p class="small muted" style="margin-top:4px">Tap × to make me forget something.</p>'+rows.map(([k,l])=>'<div class="ledg"><div class="lk">'+esc(l)+'</div>'+L[k].map((it,i)=>'<div class="li"><span>'+esc(it)+'</span><button class="x2" data-forget="'+k+':'+i+'" aria-label="Forget this">×</button></div>').join("")+'</div>').join("")+'</div>':'')+
+    (on&&rows.length?'<div class="card"><div class="label">What I carry for you</div><p class="small muted" style="margin-top:4px">Keep what matters, correct what I got wrong, or forget it.</p>'+rows.map(([k,l])=>'<div class="ledg"><div class="lk">'+esc(l)+'</div>'+L[k].map((it,i)=>ledgerItemHTML(k,i,it)).join("")+'</div>').join("")+'</div>':'')+
     (on&&th.length?'<div class="card"><div class="label">The threads I follow</div><p class="small muted" style="margin-top:4px">Forget a thread and I stop bringing it up. Your own entries stay in your Archive, marked private.</p>'+th.map(([t,n])=>'<div class="li"><span>'+esc(t)+' <span class="muted small">· '+n+'</span></span><button class="chip" data-forgetthread="'+esc(t)+'">Forget this thread</button></div>').join("")+'</div>':'')+
+    (on?'<div class="card"><div class="label">Your preferences</div><p class="small" style="margin-top:6px">You usually have '+S.profile.minutes+' minutes. You like language that is '+esc(S.profile.tone||"balanced")+'.'+(S.profile.person?' On your heart: your '+esc(S.profile.person.mode)+(S.profile.person.name?' '+esc(S.profile.person.name):'')+'.':'')+'</p><button class="linkish" id="openSettings2" style="margin-top:6px">Change in Settings</button></div>':'')+
+    (on&&resetProgress().done.length?'<div class="card"><div class="label">Active journeys</div><p class="small" style="margin-top:6px">The 7-Day Energy Reset · '+resetProgress().done.length+' of 7 done</p></div>':'')+
     (!on?'<p class="small muted">Memory is off. I won\'t keep anything new or bring up your past. Your Archive is still yours in the Archive tab.</p>':'')+'</div>');
 }
 let ledgerBusy=false;
@@ -2226,7 +2229,7 @@ async function updateLedger(material){
   try{
     const prompt="You maintain the long-term memory ledger for a ritual app user so she never has to explain herself twice.\n"+
       "Today is "+today.toDateString()+".\nCURRENT LEDGER (JSON):\n"+JSON.stringify(ledger())+"\n\nNEW MATERIAL:\n"+material+"\n\n"+
-      "Update the ledger with anything durable from the new material: people (name or role plus what's going on with them), ongoing situations, boundaries she set, things she said she would do, intentions and goals, what helps her, what doesn't, and unresolved threads. "+
+      (S.ledgerKeep&&S.ledgerKeep.length?"KEPT ITEMS (she asked you to keep these exactly; never remove or reword them): "+S.ledgerKeep.join(" | ")+"\n":"")+"Update the ledger with anything durable from the new material: people (name or role plus what's going on with them), ongoing situations, boundaries she set, things she said she would do, intentions and goals, what helps her, what doesn't, and unresolved threads. "+
       "Merge duplicates, keep the most recent detail, add a short date like 'Sep 29' to new items, remove threads that are clearly resolved. Max 8 items per key, each under 140 characters, plain words, no em dashes. Never store health diagnoses, sexual details, crime, or ID or financial numbers. Only record what she actually said or did.\n"+
       'Reply with ONLY JSON with exactly these keys, each an array of strings: {"people":[],"situations":[],"boundaries":[],"commitments":[],"intentions":[],"helped":[],"didnt":[],"threads":[]}';
     let out;
@@ -2236,6 +2239,8 @@ async function updateLedger(material){
   }catch(e){}
   ledgerBusy=false;
 }
+function keptSet(){return new Set(S.ledgerKeep||[]);}
+function ledgerItemHTML(k,i,it){const kept=keptSet().has(it);return '<div class="li" data-li="'+k+':'+i+'"><span>'+(kept?'<b style="color:var(--gold)">✦</b> ':'')+esc(it)+'</span><span class="row" style="gap:4px;flex-wrap:nowrap"><button class="chip sm" data-keep="'+k+':'+i+'" aria-pressed="'+kept+'">'+(kept?"Kept":"Keep")+'</button><button class="chip sm" data-correct="'+k+':'+i+'">Correct</button><button class="x2" data-forget="'+k+':'+i+'" aria-label="Forget this">×</button></span></div>';}
 function forgetLedger(k,i){const L=ledger();if(L[k]){L[k].splice(i,1);saveLocal();remotePut("prefs");}}
 
 /* Continuity: more history for semantic matching by Aura */
@@ -2494,7 +2499,9 @@ async function askAura(text,mins){
 "WHAT HAS WORKED FOR HER (from how she felt after each ritual):\n"+workedText()+"\n\n"+
 "HER LAST 40 ENTRIES (newest first). Match the most similar past moment by MEANING, not shared words. 'My sister keeps walking over me' and 'I'm tired of her ignoring my limits' are the same situation:\n"+(memOn()?historyText():"(memory is off)")+"\n\n"+
 "WHAT SHE HAS TOLD AURA LATELY (newest first, with what came of it):\n"+(memOn()?asksText():"(memory is off)")+"\n\n"+
-"RITUALS SHE HAS ALREADY DONE TODAY: "+ritualsToday()+"\n\n"+
+"RITUALS SHE HAS ALREADY DONE TODAY: "+ritualsToday()+"\n"+
+"GUARDIANS SHE HAS BEEN WITH THIS WEEK: "+(Object.entries(S.entries.filter(e=>Date.now()-e.ts<7*864e5&&e.guardian).reduce((c,e)=>(c[e.guardian]=(c[e.guardian]||0)+1,c),{})).map(([g,n])=>(G[g]?G[g].name:g)+" "+n).join(", ")||"none")+". RELEASE RITUALS THIS WEEK: "+releaseThisWeek()+".\n"+
+"MAKE IT PERSONAL: whenever she has any history, your aura line must include one sentence that could only be said to her, drawn from what she told you or did (for example: You said yesterday you were trying to stop carrying work into bed. Let's keep that promise tonight). If she has been with the same guardian twice or more this week, say what that tells you. If she has already done release work twice and the thread is still unresolved, do not prescribe more release: recommend a decision or an action and say why.\n\n"+
 "BE A CONTINUITY ENGINE, NOT A RECOMMENDER. Connect tonight to where she has been, what she tried and what helped. Example of the voice: This sounds like the same work situation you brought me twice last week. The first time Lily helped you calm down. The second time you wrote that calming down wasn't the real issue because you still hadn't said no. So I don't think we're doing Lily tonight. I'm taking you to Thistle. Prefer what has actually helped her. Avoid what didn't move it unless you say why this time is different.\n\n"+
 "Do not explain who the guardian is in your aura line. The app adds that introduction itself.\n"+"MEMORY IS THE POINT. She should never have to explain herself twice. Use what you remember out loud when it's relevant: count how often a theme has come up, quote her own past words, name the ritual and date. If a theme keeps repeating, give her something different from what she has already done and say so. If her usual pattern (for example reaching for release) is not what this moment needs, say it plainly, like: You usually reach for release when this happens. I don't think you need another release ritual tonight. I think this is a boundary. Only reference memories listed above. Never invent past entries, dates or quotes.\n\n"+
 "RITUAL LIBRARY (id | guardian | title | minutes | needs):\n"+catalog+"\n\n"+
@@ -3565,6 +3572,27 @@ function eveningPick(ins){
   const enough=ritualsToday()>=2||(lowTank()&&(h>=23||h<4))||(h>=0&&h<4&&ritualsToday()>=1);
   return {r,why,nothing:enough,nothingWhy:esc(cap(now.join(" and ")))+". "+(ritualsToday()?"You've already done "+ritualsToday()+(ritualsToday()===1?" ritual":" rituals")+" today. ":"")+(lowTank()?"You started with a low tank. ":"")+"Another ritual would be one more task, and you don't need one."};
 }
+function wroteSteps(r){return !!r&&r.steps.some(st=>/write|journal|list/i.test(st.d||""));}
+function weekWith(g){return S.entries.filter(e=>e.guardian===g&&Date.now()-e.ts<7*864e5).length;}
+function releaseThisWeek(){return S.entries.filter(e=>{const r=byId[e.ritualId];return Date.now()-e.ts<7*864e5&&r&&/release|let go|burn|cut|banish|dissolve/i.test(r.purpose+" "+r.title+" "+(r.tags||[]).join(" "));}).length;}
+function personalPick(pk){
+  if(!memOn())return pk;
+  const r0=pk.r,mine=[];
+  // writing made it worse last time: choose something without writing
+  const hurt=S.entries.find(e=>wroteSteps(byId[e.ritualId])&&["Stirred up","The same"].includes(e.after)&&Date.now()-e.ts<30*864e5);
+  if(hurt&&wroteSteps(r0)){const alt=R.filter(x=>canUse(x)&&!x.reset&&x.g===r0.g&&x.min<=15&&!x.bath&&!wroteSteps(x))[0]||R.filter(x=>canUse(x)&&!x.reset&&["juniper","lily","fern"].includes(x.g)&&x.min<=15&&!x.bath&&!wroteSteps(x))[0];if(alt){pk.r=alt;mine.push("Last time you were this wound up, writing made it harder. That's why I chose something without writing.");}}
+  else if(hurt)mine.push("Last time you were this wound up, writing made it harder, so tonight there's nothing to write.");
+  // release done twice on something still unresolved: stop prescribing release
+  const open=threadsOf().map(t=>threadInfo(t[0])).filter(x=>x&&x.status==="unresolved"&&Date.now()-x.last<10*864e5)[0];
+  if(open&&releaseThisWeek()>=2)pk.action={line:"I'm not sending you back to release work tonight. You've already done it twice this week and "+open.name.toLowerCase()+" is still unresolved. This may need action instead.",thread:open.name};
+  const wk=weekWith(pk.r.g);
+  if(wk>=2)mine.push("You've been with "+G[pk.r.g].name+" "+(wk===2?"twice":wk+" times")+" this week. That tells me you've needed "+({juniper:"closure",fern:"rest",willow:"comfort",lily:"quiet"}[pk.r.g]||"steadiness")+" more than insight lately.");
+  const rp=resetProgress();if(rp.done.length&&rp.done.length<7&&rp.last&&Date.now()-rp.last>2*864e5)mine.push("You haven't finished the Energy Reset, but I'm not pushing you back into it tonight.");
+  const pr=openPromises().find(p=>Date.now()-p.ts<4*864e5&&/bed|night|sleep|phone|work|screen|laptop/i.test(p.text));if(pr)mine.push("You said you'd "+pr.text.replace(/^i('ll| will)?\s*/i,"")+". Let's keep that promise tonight.");
+  if(heavyEvenings()>=3)mine.push("You've had a lot on your mind in the evenings this week. I'm not asking you to process any more tonight.");
+  pk.mine=mine[0]||"";if(mine.length>1)pk.why=esc(mine[1])+" "+pk.why;
+  return pk;
+}
 function rhythmHTML(){
   const part=partOfDay(),d=dayRec(),ins=rhythmInsight();
   const head=(g,t)=>'<div class="speaker">'+glyph(g,30)+'<span class="who" style="color:'+G[g].color+'">'+esc(G[g].name)+' · '+esc(t)+'</span></div>';
@@ -3581,9 +3609,10 @@ function rhythmHTML(){
     return ins?'<div class="card rhythm">'+head("aura","what I'm noticing")+'<p class="why" style="margin-top:8px">'+esc(ins)+'</p></div>':"";
   }
   const nk=nightKey();
-  if(!woundDown(nk)){const pk=eveningPick(ins);
+  if(!woundDown(nk)){const pk=personalPick(eveningPick(ins));
+    if(pk.action&&!pk.nothing)return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura, tonight</span></div><p style="margin-top:8px">'+esc(pk.action.line)+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-talk="'+(okG("thistle")&&/bound|work|family|people/i.test(pk.action.thread)?"thistle":"sol")+'">Decide the next step</button><button class="btn btn-ghost" data-wind="1">Just rest tonight</button></div></div>';
     if(pk.nothing)return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura, tonight</span></div><p style="margin-top:8px;font-family:var(--f-display);font-size:21px">Nothing tonight. Go to bed.</p><p style="margin-top:6px">You\'ve done enough today. I\'m not giving you another ritual. Go sleep. I\'ll hold this until tomorrow.</p>'+whyThis(pk.nothingWhy)+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-wind="1">Goodnight</button></div></div>';
-    return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura picked '+esc(G[pk.r.g].name)+' for tonight</span></div><p style="margin-top:8px">Let\'s close the day. <b>'+esc(pk.r.title)+'</b> · '+pk.r.min+' min</p>'+whyThis(pk.why)+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pk.r.id)+'">Wind down with '+esc(G[pk.r.g].name)+'</button><button class="btn btn-ghost" data-wind="1">Already did</button></div></div>';}
+    return '<div class="card rhythm"><div class="speaker">'+glyph("aura",30)+'<span class="who" style="color:var(--gold)">Aura picked '+esc(G[pk.r.g].name)+' for tonight</span></div><p style="margin-top:8px">'+(pk.mine?esc(pk.mine)+' ':'')+'Let\'s close the day. <b>'+esc(pk.r.title)+'</b> · '+pk.r.min+' min</p>'+whyThis(pk.why)+'<div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pk.r.id)+'">Wind down with '+esc(G[pk.r.g].name)+'</button><button class="btn btn-ghost" data-wind="1">Already did</button></div></div>';}
   if(woundDown(nk))return '<div class="card rhythm">'+head("juniper","tonight")+'<p style="margin-top:8px">You wound down. The day is done asking things of you. Sleep well.</p></div>';
   const pool=R.filter(r=>canUse(r)&&!r.reset&&["juniper","willow","fern","lily"].includes(r.g)&&r.min<=15&&!r.bath&&r.tags.some(t=>/rest|calm|slow|sleep|still|busy|overwhelm|stirred/.test(t)));
   const r=pickForNow(pool,new Date(),"wind")||byId["two-minute-settle"];
@@ -3607,8 +3636,8 @@ function renderToday(){
     '<h2 class="hline">'+esc(openingLine(known))+'</h2>'+
     (known&&b.observation?'<p class="obs">'+esc(b.observation)+'</p>':'')+'</div>';
   h+='<div class="aura" id="auraBox"><div class="speaker">'+glyph("aura")+'<span class="who">Aura is listening</span><button class="howbtn" id="howOpen" aria-label="How it works">?</button></div>'+
-     '<p class="q">What happened?</p>'+
-     '<label class="sr" for="carry">What happened</label><div class="composer"><textarea id="carry" placeholder="Say it or type it. Messy is fine."></textarea>'+micBtn("carry")+'</div><p class="small muted" id="carryHint" hidden style="margin-top:6px"></p>'+
+
+     '<label class="sr" for="carry">What happened</label><div class="composer"><textarea id="carry" placeholder="Tell me what happened. Messy is fine."></textarea>'+micBtn("carry")+'</div><p class="small muted" id="carryHint" hidden style="margin-top:6px"></p>'+
      '<details class="feelset"'+(feelSel.length?' open':'')+'><summary class="small">Not ready to talk? Tap how you feel.</summary><div class="chips" style="margin-top:8px" id="quick">'+QUICK.map(q=>'<button class="chip" data-q="'+esc(q[0])+'" aria-pressed="'+feelSel.includes(q[0])+'">'+esc(q[0])+'</button>').join("")+'<button class="chip calm" id="cantThink">Can\'t think</button></div></details>'+
      '<button class="btn btn-main full" id="askBtn" style="margin-top:14px">Tell Aura</button></div>';
   h+='<div id="readingSlot">'+(lastRead?readingHTML(lastRead):"")+'</div>';
@@ -3619,7 +3648,7 @@ function renderToday(){
     h+=yourCircleHTML();
     const dp=deeperHTML();
     h+='<details class="more"><summary>If you want more</summary>'+(fu?rh:'')+'<div class="trio">'+
-      '<div class="card hcard"><div class="label">Something else, if you want</div><h3 style="margin-top:6px">'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min'+(b.why?". "+esc(b.why):known?"":". A good place to start.")+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
+      '<div class="card hcard"><h3>'+esc(pick.title)+'</h3><p class="small muted" style="margin-top:4px">With '+esc(G[pick.g].name)+' · '+pick.min+' min'+(b.why?". "+esc(b.why):known?"":". A good place to start.")+'</p><div class="row" style="margin-top:10px"><button class="btn btn-main" data-begin="'+esc(pick.id)+'">Begin</button><button class="btn btn-ghost" data-peek="'+esc(pick.id)+'">See it first</button></div></div>'+
       (memOn()&&b.remembered?'<div class="card hcard"><div class="label">One thing I remember</div><p style="margin-top:6px">'+esc(b.remembered)+'</p><div class="row" style="margin-top:8px"><button class="linkish" id="memOpen">See everything I remember</button></div></div>':
         !memOn()?'<div class="card hcard"><div class="label">Memory is off</div><p class="small muted" style="margin-top:6px">I\'m not keeping anything, so every visit starts fresh.</p><button class="linkish" id="memOpen">Change</button></div>':'')+
       '<div class="card hcard"><div class="label">'+esc(dp.label)+'</div><p class="small" style="margin-top:6px">'+esc(dp.text)+'</p><div class="row" style="margin-top:10px">'+dp.btn+'</div></div>'+
@@ -3858,7 +3887,7 @@ function renderArchive(){
 function ledgerHTML(){
   const L=ledger(), rows=LEDGER_KEYS.filter(([k])=>(L[k]||[]).length);
   if(!rows.length)return '';
-  return '<div class="card"><div class="label">What Aura carries for you</div><p class="small muted" style="margin-top:4px">Aura\'s long-term memory, so you never explain it twice. Tap × to make her forget something.</p>'+rows.map(([k,l])=>'<div class="ledg"><div class="lk">'+esc(l)+'</div>'+L[k].map((it,i)=>'<div class="li"><span>'+esc(it)+'</span><button class="x2" data-forget="'+k+':'+i+'" aria-label="Forget this">×</button></div>').join("")+'</div>').join("")+'</div>';
+  return '<div class="card"><div class="label">What Aura carries for you</div><p class="small muted" style="margin-top:4px">Aura\'s long-term memory, so you never explain it twice. Tap × to make her forget something.</p>'+rows.map(([k,l])=>'<div class="ledg"><div class="lk">'+esc(l)+'</div>'+L[k].map((it,i)=>ledgerItemHTML(k,i,it)).join("")+'</div>').join("")+'</div>';
 }
 function ownHTML(empty){
   return '<div class="card own"><div class="label">Your data is yours</div><p class="small muted" style="margin-top:4px">Download everything you\'ve written, or delete it all for good.</p><div class="row" style="margin-top:10px">'+(empty?'':'<button class="btn btn-ghost" id="exportBtn">Export my Archive</button>')+'<button class="btn btn-ghost danger" id="deleteBtn">Delete my account and data</button></div></div>';
@@ -4297,6 +4326,9 @@ document.addEventListener("click",async ev=>{
   if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(voiceMuted())setVoice(true);if(!naturalVoices()&&!("speechSynthesis" in window)){voiceOn=false;toast("Spoken guidance isn't available on this device.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
   if(d.own){const [tg,yn]=d.own.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);refreshCards();toast(yn==="1"?"Got it. Aura will remember.":"Got it. Aura rewrote it around what you have.");return;}
   if(d.donthave){const el=document.querySelector('[data-dh="'+d.donthave+'"]');if(el)el.hidden=!el.hidden;return;}
+  if(d.keep){const [k,i]=d.keep.split(":"),it=(ledger()[k]||[])[+i];if(it){const ks=keptSet();ks.has(it)?ks.delete(it):ks.add(it);S.ledgerKeep=[...ks];saveLocal();remotePut("prefs");}const row=t.closest(".li");if(row&&it)row.outerHTML=ledgerItemHTML(k,+i,it);return;}
+  if(d.correct){const [k,i]=d.correct.split(":"),it=(ledger()[k]||[])[+i],row=t.closest(".li");if(row&&it!=null){row.innerHTML='<label class="sr" for="corr_'+k+i+'">Correct this</label><input type="text" id="corr_'+k+i+'" value="'+esc(it)+'" style="flex:1"><button class="chip sm" data-corrsave="'+k+':'+i+'">Save</button>';const inp=row.querySelector("input");if(inp)inp.focus();}return;}
+  if(d.corrsave){const [k,i]=d.corrsave.split(":"),L=ledger(),row=t.closest(".li"),v=((row&&row.querySelector("input"))||{}).value;if(L[k]&&v&&v.trim()){const old=L[k][+i];L[k][+i]=clean(v.trim()).slice(0,160);if(S.ledgerKeep&&S.ledgerKeep.includes(old))S.ledgerKeep=S.ledgerKeep.map(x=>x===old?L[k][+i]:x);saveLocal();remotePut("prefs");if(row)row.outerHTML=ledgerItemHTML(k,+i,L[k][+i]);toast("Corrected. Thank you.");}return;}
   if(d.forget){const [k,i]=d.forget.split(":");forgetLedger(k,+i);renderArchive();toast("Forgotten.");return;}
   if(t.id==="sheetDone"){closeSheet();return;}
   if(t.id==="restBtn"){lastRead=null;renderToday();toast("Rest well. Aura will be here.");return;}
@@ -4430,6 +4462,7 @@ document.addEventListener("click",async ev=>{
   if(t.id==="pnSave"){savePerson();return;}
   if(t.id==="pnClear"){S.profile.person=null;saveLocal();remotePut("prefs");closeSheet();if(talkG)drawMsgs();renderAll();toast("Just you for now.");return;}
   if(t.id==="memOpen"){openMemory();return;}
+  if(t.id==="openSettings2"){closeSheet();openAltar(false);return;}
   if(d.mem){const on=d.mem==="on";setMemory(on);t.parentElement.querySelectorAll("[data-mem]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));if($("#memIn")||!on||t.closest(".sheet .stack")&&!t.closest("#altarBody")){if(!$("#pName")){closeSheet();openMemory();}}toast(on?"I'll remember what you share. You can change this any time.":"Memory is off. I won't keep anything new.");renderToday();return;}
   if(t.id==="memAdd"){const v=($("#memIn").value||"").trim().slice(0,200);if(!v)return;S.memNotes.unshift({id:uid(),text:v,ts:Date.now()});persistAll();closeSheet();openMemory();toast("I'll remember that.");return;}
   if(d.memnote){S.memNotes=S.memNotes.filter(n=>n.id!==d.memnote);persistAll();closeSheet();openMemory();toast("Forgotten.");return;}
