@@ -34,8 +34,9 @@ const WX_WORD={clear:"clear",clouds:"cloudy",rain:"rain",storm:"storms",snow:"sn
 const WX_OPEN={clear:"Clear skies",clouds:"Gray skies",rain:"Rain",storm:"A storm",snow:"Snow",fog:"Fog",wind:"Wind",hot:"Heat",cold:"Cold"};
 function wxApply(){
   const w=wxNow(),root=document.documentElement;
-  if(!w){delete root.dataset.weather;const l=$("#wxLayer");if(l)l.remove();return;}
-  root.dataset.weather=w.kind+(w.kind==="clear"&&!w.isDay?"-night":"");
+  if(!w){delete root.dataset.weather;delete root.dataset.daylight;const l=$("#wxLayer");if(l)l.remove();return;}
+  root.dataset.weather=w.kind==="clear"?(w.isDay?"clear-day":"clear-night"):w.kind;
+  root.dataset.daylight=w.isDay?"1":"0";
   if(!$("#wxLayer")){const l=document.createElement("div");l.id="wxLayer";l.setAttribute("aria-hidden","true");document.body.insertBefore(l,document.body.firstChild);}
   if(typeof renderSky==="function"&&$("#sky"))renderSky();
   if(typeof renderToday==="function"&&$("#v-today")&&!lastRead&&!$("#rite")&&!document.activeElement?.matches?.("textarea,input")&&root.dataset.wxShown!==root.dataset.weather){root.dataset.wxShown=root.dataset.weather;renderToday();}
@@ -55,7 +56,7 @@ function wxOK(r){return wxPenalty(r)<3;}
 function wxClause(){const w=wxNow();return w?WX_OPEN[w.kind]+(w.kind==="clear"&&!w.isDay?" tonight":" outside"):"";}
 function wxAIText(){
   const w=wxNow();if(!w)return "";
-  return "WEATHER WHERE SHE IS: "+w.label+", "+wxTemp(w)+(w.isDay?"":" (dark out)")+(w.soon?", "+WX_WORD[w.soon]+" coming in the next few hours":"")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but it never outranks her life.\n";
+  return "WEATHER WHERE SHE IS: "+w.label+(w.isDay?" in daylight":" after dark")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but do not turn it into a forecast and never let it outrank her life.\n";
 }
 setTimeout(()=>wxRefresh(),1500);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")wxRefresh();});
