@@ -56,7 +56,10 @@ async function setBirthday(v,after){
     ACCT.adultAt=r.adult_confirmed_at;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;delete S.pendingDob;
   }
   S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;S.profile.ageVerified=true;saveLocal();remotePut("prefs");
-  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime)redeemFriend();
+  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime){
+    const claimed=await redeemFriend();
+    if(claimed===false&&S.friendCode)return false;
+  }
   return true;
 }
 function bdayErr(msg){
