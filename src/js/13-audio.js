@@ -54,7 +54,7 @@ function musicSuspend(){
 function musicResume(){
   const shouldResume=MUSIC.resume;
   MUSIC.suspended=false;MUSIC.resume=false;
-  if(shouldResume&&musicOn()&&MUSIC.started&&document.visibilityState!=="hidden")musicPlay(MUSIC.want);
+  if(shouldResume&&musicOn()&&MUSIC.started&&document.visibilityState!=="hidden")musicSyncContext();
 }
 /* Browsers require a user gesture for audio. Start only from a meaningful app action,
    never because she happened to tap a field, open settings or move around the shell. */
@@ -98,7 +98,7 @@ function renderSnd(){
 function syncSnd(){S.profile.snd={music:S.prefMusic||"on",vol:S.prefMusicVol||"normal",voiceOff:!!S.prefVoiceOff,voice:S.prefVoice||"natural"};saveLocal();try{remotePut("prefs");}catch(e){}}
 function applySnd(x){if(!x)return;S.prefMusic=x.music==="off"?"off":"on";S.prefMusicVol=x.vol==="quiet"?"quiet":"normal";S.prefVoiceOff=!!x.voiceOff;S.prefVoice=x.voice==="device"?"device":"natural";if(!musicOn())musicStop();if(voiceMuted())stopAudio();renderSnd();}
 function musicAudible(){return !!(MUSIC.cur&&!MUSIC.cur.paused);}
-function setMusic(on){S.prefMusic=on?"on":"off";syncSnd();if(on){MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}else musicStop();renderSnd();}
+function setMusic(on){S.prefMusic=on?"on":"off";syncSnd();if(on){MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}else musicStop();renderSnd();}
 function setVoice(on){S.prefVoiceOff=!on;syncSnd();if(!on){stopAudio();if(voiceOn){stopVoice();if(run)drawStep();}}renderSnd();}
 new MutationObserver(()=>{if(document.querySelector(".sndbar:empty"))renderSnd();}).observe(document.documentElement,{childList:true,subtree:true});
 
