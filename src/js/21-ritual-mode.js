@@ -5,7 +5,7 @@ let run=null, tick=null;
 const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"];
 const ORN='<svg class="orn" viewBox="0 0 220 20" aria-hidden="true"><path d="M4 10h78M138 10h78" stroke="#9A7414" stroke-width="1"/><path d="M82 10c8 0 12-6 18-6M138 10c-8 0-12-6-18-6M82 10c8 0 12 6 18 6M138 10c-8 0-12 6-18 6" fill="none" stroke="#9A7414" stroke-width="1"/><path d="M110 2l2.6 5.4L118 10l-5.4 2.6L110 18l-2.6-5.4L102 10l5.4-2.6z" fill="#BF1E73"/><circle cx="4" cy="10" r="1.6" fill="#9A7414"/><circle cx="216" cy="10" r="1.6" fill="#9A7414"/></svg>';
 function startRitual(r,ctx){
-  closeSheet();
+  closeSheet(true);
   run={base:r,r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
   const el=document.createElement("div");el.className="rite";el.id="rite";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",r.title);
   el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
