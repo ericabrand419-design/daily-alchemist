@@ -29,17 +29,20 @@ function openTalk(k){
   track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
   closeSheet();talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
-  el.innerHTML='<div class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button>'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span></div><div class="msgs" id="msgs"></div>'+
-    '<div class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Talk to '+esc(g.name)+'"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></div>';
+  el.style.setProperty("--talk-accent",g.color);
+  el.innerHTML='<header class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button><div class="talkportrait">'+glyph(k)+'</div><div class="who"><span class="talkeyebrow">Private conversation</span><div class="n">'+esc(g.name)+'</div><div class="t">'+esc(g.title)+'</div></div><span class="sndbar"></span></header><div class="msgs" id="msgs"></div>'+
+    '<footer class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Tell '+esc(g.name)+' what happened…"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></footer>';
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawMsgs();
 }
+
 function closeTalk(){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!run)musicBack();}
 function msgHTML(m,k){
-  if(m.role==="me")return '<div class="bub me">'+esc(m.text)+'</div>';
+  if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
-  return '<div class="bub them" style="border-color:'+G[k].color+'55">'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+(m.handoff&&G[m.handoff]?'<br><button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<br><button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<br><button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
+  return '<div class="bub them"><span class="msgwho">'+esc(G[k].name)+'</span><p>'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+'</p>'+(m.handoff&&G[m.handoff]?'<button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
 }
+
 function guardianDaily(k){
   const own=R.filter(r=>r.g===k&&!r.reset&&canUse(r)), pool=own.length?own:R.filter(r=>r.g===(KIN[k]||k)&&canUse(r));
   if(!pool.length)return byId.anchor;
@@ -79,7 +82,7 @@ function introHTML(k){
 function drawMsgs(){
   const k=talkG,list=S.chats[k]||[],box=$("#msgs");if(!box)return;
   const hi=(S.profile.name?S.profile.name+". ":"")+(GREET[k]||G[k].phrases[0]+" Tell me what's going on.");
-  box.innerHTML=introHTML(k)+'<div class="bub them" style="border-color:'+G[k].color+'55">'+esc(hi)+'</div>'+list.map(m=>msgHTML(m,k)).join("");
+  box.innerHTML=introHTML(k)+'<div class="bub them"><span class="msgwho">'+esc(G[k].name)+'</span><p>'+esc(hi)+'</p></div>'+list.map(m=>msgHTML(m,k)).join("");
   box.scrollTop=box.scrollHeight;
 }
 function talkPrompt(k){
