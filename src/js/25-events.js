@@ -197,7 +197,7 @@ document.addEventListener("click",async ev=>{
     if(!r)return;
     if(!canUse(r)){closeTalk();if(r.adult21&&!vesperOK())vesperGate();else openPaywall(G[r.g].name+"'s chamber");return;}
     const ctx=(d.ctx==="read"&&lastRead)?{theme:lastRead.theme,carrying:lastRead.carrying,thread:lastRead.thread||""}:{};
-    if(d.ctx==="talk"){const lm=(S.chats[talkG]||[]).filter(m=>m.role==="me").pop();ctx.carrying=lm?lm.text:"";closeTalk();}
+    if(d.ctx==="talk"){const lm=(S.chats[talkG]||[]).filter(m=>m.role==="me").pop();ctx.carrying=lm?lm.text:"";closeTalk(true);}
     startRitual(r,ctx);return;
   }
   if(d.reset){const rn=resetNext();startRitual(rn&&rn.base.id===d.reset?rn.r:byId[d.reset],{theme:"reset",reset:true});return;}
