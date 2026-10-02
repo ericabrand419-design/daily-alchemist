@@ -7,26 +7,46 @@
    setting localStorage "da.voiceDev" to "1". Speaking into the mic to type is separate and stays on. */
 const GUARDIAN_VOICE_ENABLED=!!(window.DA_CONFIG&&window.DA_CONFIG.guardianVoiceEnabled);
 function voiceEnabled(){if(GUARDIAN_VOICE_ENABLED)return true;try{return typeof ACCT!=="undefined"&&!!ACCT.admin&&localStorage.getItem("da.voiceDev")==="1";}catch(e){return false;}}
-const MUSIC={a:null,b:null,cur:null,want:"aura",base:"aura",duck:false,started:false};
+const MUSIC={cur:null,want:"aura",base:"aura",duck:false,started:false,all:new Set(),suspended:false,resume:false};
 function musicOn(){return S.prefMusic!=="off";}
 function musicVol(){const h=new Date().getHours();return (S.prefMusicVol==="normal"?0.26:0.12)*(MUSIC.duck?0.25:1)*(h>=21||h<5?0.7:1);}
 function musicSrc(g){const u=window.DA_CONFIG&&window.DA_CONFIG.supabaseUrl;return u?u.replace(/\/$/,"")+"/storage/v1/object/public/music/"+g+".mp3":null;}
 function fadeTo(el,v,ms,done){if(!el)return;clearInterval(el._fade);const from=el.volume,t0=Date.now();el._fade=setInterval(()=>{const k=Math.min(1,(Date.now()-t0)/ms);try{el.volume=Math.max(0,Math.min(1,from+(v-from)*k));}catch(e){}if(k>=1){clearInterval(el._fade);done&&done();}},50);}
+function pauseMusicEl(el){if(!el)return;clearInterval(el._fade);try{el.pause();}catch(e){}}
+function silenceOtherMusic(keep){for(const el of [...MUSIC.all])if(el!==keep){pauseMusicEl(el);MUSIC.all.delete(el);}}
 function musicPlay(g){
   MUSIC.want=g||MUSIC.base;
-  if(!musicOn()||!MUSIC.started||document.visibilityState==="hidden")return;
-  if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){fadeTo(MUSIC.cur,musicVol(),600);if(MUSIC.cur.paused)MUSIC.cur.play().catch(()=>{});return;}
+  if(!musicOn()||!MUSIC.started||MUSIC.suspended||document.visibilityState==="hidden")return;
+  if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){
+    silenceOtherMusic(MUSIC.cur);
+    fadeTo(MUSIC.cur,musicVol(),350);
+    if(MUSIC.cur.paused)MUSIC.cur.play().catch(()=>{});
+    return;
+  }
   const src=musicSrc(MUSIC.want);if(!src)return;
-  const old=MUSIC.cur,el=new Audio();el._g=MUSIC.want;el.loop=true;el.preload="auto";el.volume=0;el.src=src;
-  el.onerror=()=>{if(MUSIC.cur===el)MUSIC.cur=null;if(el._g!=="aura"&&MUSIC.want===el._g){MUSIC.want="aura";musicPlay("aura");}};
+  /* One guardian, one soundtrack. Never crossfade two guardians over each other. */
+  silenceOtherMusic(null);
+  const el=new Audio();el._g=MUSIC.want;el.loop=true;el.preload="auto";el.volume=0;el.src=src;MUSIC.all.add(el);
+  el.onerror=()=>{MUSIC.all.delete(el);if(MUSIC.cur===el)MUSIC.cur=null;if(el._g!=="aura"&&MUSIC.want===el._g){MUSIC.want="aura";musicPlay("aura");}};
   el.onplay=()=>renderSnd();el.onpause=()=>{if(MUSIC.cur===el)renderSnd();};
-  MUSIC.cur=el;el.play().then(()=>fadeTo(el,musicVol(),1800)).catch(()=>{});
-  if(old)fadeTo(old,0,1500,()=>{try{old.pause();}catch(e){}});
+  MUSIC.cur=el;el.play().then(()=>fadeTo(el,musicVol(),700)).catch(()=>{});
 }
-function musicStop(){const el=MUSIC.cur;MUSIC.cur=null;if(el)fadeTo(el,0,800,()=>{try{el.pause();}catch(e){}});}
+function musicStop(){for(const el of [...MUSIC.all])pauseMusicEl(el);MUSIC.all.clear();MUSIC.cur=null;MUSIC.resume=false;renderSnd();}
 function musicFor(g){musicPlay(g||MUSIC.base);}
 function musicBack(){musicPlay(MUSIC.base);}
-function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
+function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur&&!MUSIC.cur.paused)fadeTo(MUSIC.cur,musicVol(),on?250:500);}
+function musicSuspend(){
+  if(MUSIC.suspended)return;
+  MUSIC.resume=musicAudible();
+  MUSIC.suspended=true;
+  for(const el of MUSIC.all)pauseMusicEl(el);
+  renderSnd();
+}
+function musicResume(){
+  const shouldResume=MUSIC.resume;
+  MUSIC.suspended=false;MUSIC.resume=false;
+  if(shouldResume&&musicOn()&&MUSIC.started&&document.visibilityState!=="hidden")musicPlay(MUSIC.want);
+}
 /* Browsers require a user gesture for audio. Start only from a meaningful app action,
    never because she happened to tap a field, open settings or move around the shell. */
 const MUSIC_START_SEL='#askBtn,[data-begin],[data-talk],[data-talkread],[data-guardian],[data-pickcard],[data-cardask]';
@@ -38,7 +58,13 @@ function musicStart(ev){
 }
 document.addEventListener("pointerdown",musicStart,{capture:true});
 document.addEventListener("keydown",musicStart,{capture:true});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(MUSIC.cur)try{MUSIC.cur.pause();}catch(e){}}else if(MUSIC.cur&&musicOn()){MUSIC.cur.play().catch(()=>{});}});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")musicSuspend();else musicResume();});
+window.addEventListener("pagehide",musicSuspend);
+window.addEventListener("pageshow",()=>{if(document.visibilityState!=="hidden")musicResume();});
+window.addEventListener("blur",musicSuspend);
+window.addEventListener("focus",()=>{if(document.visibilityState!=="hidden")musicResume();});
+document.addEventListener("freeze",musicSuspend);
+document.addEventListener("resume",()=>{if(document.visibilityState!=="hidden")musicResume();});
 
 /* Sound controls on every page: music on or off, voices on or off, each separately. */
 const SND_MUSIC='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/></svg>';
