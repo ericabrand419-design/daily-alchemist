@@ -1310,7 +1310,7 @@ const ACCT = {sb:null,user:null,email:"",member:false,paid:false,lifetime:false,
 if(!S.usage)S.usage={};
 if(!S.chats)S.chats={};
 const TRIAL_DAYS=7;
-try{const fq=new URLSearchParams(location.search).get("friend");if(fq){S.friendCode=fq.slice(0,60);history.replaceState(null,"",location.pathname);}}catch(e){}
+try{const fq=new URLSearchParams(location.search).get("friend");if(fq){S.friendCode=fq.slice(0,60);saveLocal();history.replaceState(null,"",location.pathname);}}catch(e){}
 if(!S.profile.firstSeen)S.profile.firstSeen=Date.now();
 if(S.pmV!==2){S.previewMember=null;S.pmV=2;}
 function trialEnds(){return accountsOn()?(ACCT.paid?0:(ACCT.trialUntil?Date.parse(ACCT.trialUntil):0)):S.profile.firstSeen+TRIAL_DAYS*864e5;}
