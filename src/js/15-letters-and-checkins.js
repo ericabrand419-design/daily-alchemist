@@ -99,8 +99,15 @@ function createFirstReturnLetter(){
 }
 let returnLetterBusy=false;
 function maybeFirstReturnLetter(){
-  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded||!S.firstAwayAt)return false;
-  if(Date.now()-S.firstAwayAt<1000)return false;
+  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded)return false;
+  const now=Date.now(),first=firstActivity();
+  /* A return can be proven two ways: this device saw her leave, or her synced account
+     already contains activity from a previous calendar day. The latter matters after
+     sign-out, a new phone, reinstall or invitation/login flow, where firstAwayAt is local
+     and can be lost even though Aura still has yesterday's history. */
+  const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=1000;
+  const priorDay=!!first&&dayKey(new Date(first))!==dayKey(new Date(now));
+  if(!leftHere&&!priorDay)return false;
   if($("#gate")||$("#intro")||$("#rite"))return false;
   if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
