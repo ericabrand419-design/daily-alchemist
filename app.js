@@ -3079,7 +3079,8 @@ function plat(){if(isNative())return window.Capacitor.getPlatform();const u=navi
 function track(ev,meta){
   try{
     if(!monitorOn())return;
-    if(!shareScope().includes(EVCAT[ev]||"pages"))return;
+    const cat=EVCAT[ev];
+    if(!cat||!shareScope().includes(cat))return;
     evQ.push({ev,t:Date.now(),meta:{...(meta||{}),day:dayNum(),stage:typeof stage==="function"?stage():0,plat:plat()}});
     if(evQ.length>=40)flushEvents();else if(!evTimer)evTimer=setTimeout(flushEvents,8000);
   }catch(e){}
