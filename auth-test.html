@@ -1,0 +1,4 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="/config.js"></script></head><body><button id="run">Run auth delivery test</button><pre id="out">ready</pre><script>
+const C=window.DA_CONFIG||{}; const sb=window.supabase.createClient(C.supabaseUrl,C.supabaseAnonKey);
+document.getElementById("run").onclick=async()=>{document.getElementById("out").textContent="running";try{const r=await sb.auth.signInWithOtp({email:"delivered@resend.dev",options:{shouldCreateUser:true,emailRedirectTo:location.origin}});document.getElementById("out").textContent=JSON.stringify({error:r.error?{message:r.error.message,status:r.error.status,code:r.error.code}:null,data:!!r.data},null,2);}catch(e){document.getElementById("out").textContent=JSON.stringify({thrown:String(e&&e.message||e)},null,2);}};
+</script></body></html>
