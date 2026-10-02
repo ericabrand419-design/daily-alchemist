@@ -687,3 +687,265 @@ body::before{background:
 html[data-light=golden][data-weather=clear-day] #wxLayer{background:radial-gradient(900px 640px at 78% 4%,rgba(255,215,118,.32),transparent 58%),linear-gradient(180deg,rgba(255,174,122,.11),transparent 64%)}
 html[data-light=blue][data-weather=clear-night] #wxLayer{background:linear-gradient(180deg,rgba(74,108,158,.18),rgba(48,59,102,.12) 60%,transparent)}
 html[data-light=day-bright][data-sky=bright][data-weather=clear-day] #wxLayer{background:radial-gradient(900px 620px at 75% -8%,rgba(255,233,158,.30),transparent 58%),linear-gradient(180deg,rgba(134,212,218,.11),transparent 66%)}
+
+
+/* ---------- Responsive surface system ---------- */
+:root{
+  --surface-card:rgba(25,21,48,.95);--surface-card-2:rgba(33,28,59,.94);
+  --surface-aura-1:rgba(50,36,80,.97);--surface-aura-2:rgba(31,25,57,.97);
+  --surface-reading:rgba(30,25,57,.96);--surface-nav:rgba(33,28,59,.95);
+  --surface-sheet:#211C3B;--surface-input:rgba(22,19,42,.78);--surface-tile:rgba(27,23,52,.92);
+}
+html[data-light=day-bright]:not([data-theme]){--surface-card:rgba(48,35,72,.96);--surface-card-2:rgba(59,43,82,.95);--surface-aura-1:rgba(75,46,98,.97);--surface-aura-2:rgba(45,34,70,.98);--surface-reading:rgba(52,39,77,.97);--surface-nav:rgba(39,30,63,.96);--surface-sheet:#342747;--surface-input:rgba(28,21,48,.88);--surface-tile:rgba(49,36,73,.95)}
+html[data-light=day-low]:not([data-theme]){--surface-card:rgba(43,31,63,.96);--surface-card-2:rgba(57,39,72,.95);--surface-aura-1:rgba(82,45,86,.97);--surface-aura-2:rgba(47,31,62,.98);--surface-reading:rgba(55,37,68,.97);--surface-nav:rgba(39,28,57,.96);--surface-sheet:#34243F;--surface-input:rgba(30,20,43,.88);--surface-tile:rgba(51,34,64,.95)}
+html[data-light=golden]:not([data-theme]){--surface-card:rgba(50,28,50,.96);--surface-card-2:rgba(67,36,56,.95);--surface-aura-1:rgba(94,41,73,.97);--surface-aura-2:rgba(53,28,51,.98);--surface-reading:rgba(63,33,56,.97);--surface-nav:rgba(46,27,47,.96);--surface-sheet:#3D2639;--surface-input:rgba(35,19,35,.88);--surface-tile:rgba(58,31,50,.95)}
+html[data-light=blue]:not([data-theme]){--surface-card:rgba(22,29,57,.96);--surface-card-2:rgba(30,39,72,.95);--surface-aura-1:rgba(40,48,92,.97);--surface-aura-2:rgba(25,32,64,.98);--surface-reading:rgba(30,39,72,.97);--surface-nav:rgba(22,30,59,.96);--surface-sheet:#1E294B;--surface-input:rgba(14,20,43,.88);--surface-tile:rgba(26,36,68,.95)}
+.card{background:var(--surface-card)}
+.aura{background:linear-gradient(180deg,var(--surface-aura-1),var(--surface-aura-2))}
+.reading{background:var(--surface-reading)}
+.day,.g{background:var(--surface-tile)}
+.day.next{background:var(--surface-card-2)}
+.sheet{background:var(--surface-sheet)}
+nav.tabs .in{background:var(--surface-nav)}
+textarea,.field input[type=text],.search,.tracker select,.tracker input{background:var(--surface-input)}
+.card,.aura,.reading,.day,.g,.sheet,nav.tabs .in{transition:background .75s ease,border-color .75s ease,color .35s ease}
+
+/* Manual appearance always wins over the living-day palette. */
+html[data-theme=dark]{color-scheme:dark;--world-bg:#0E0A1C;--glow:#F4F1E6;--glow-dim:#E8E2F0;--glow-faint:#D9D0E5;--line:rgba(231,196,90,.28);--surface-card:rgba(24,20,47,.97);--surface-card-2:rgba(33,28,59,.97);--surface-aura-1:rgba(45,36,78,.98);--surface-aura-2:rgba(29,24,54,.98);--surface-reading:rgba(29,24,54,.98);--surface-nav:rgba(27,23,52,.97);--surface-sheet:#1B1732;--surface-input:rgba(15,12,31,.90);--surface-tile:rgba(28,24,54,.96)}
+html[data-theme=light]{color-scheme:light;--world-bg:#F0EAF1;--glow:#2A2130;--glow-dim:#4E4256;--glow-faint:#65576E;--line:rgba(102,74,103,.24);--gold:#9A7414;--surface-card:rgba(255,252,249,.93);--surface-card-2:rgba(246,239,244,.96);--surface-aura-1:rgba(255,247,250,.97);--surface-aura-2:rgba(242,232,244,.97);--surface-reading:rgba(255,252,249,.96);--surface-nav:rgba(255,252,249,.94);--surface-sheet:#FBF7F5;--surface-input:rgba(255,255,255,.80);--surface-tile:rgba(250,246,248,.95)}
+html[data-theme=light] body::after{opacity:.035}
+html[data-theme=light] .btn-ghost,html[data-theme=light] .navback{color:var(--glow)}
+html[data-theme=light] .chip{border-color:rgba(65,45,72,.18);background:rgba(65,45,72,.035);color:var(--glow-dim)}
+html[data-theme=light] .muted,html[data-theme=light] .small{color:var(--glow-dim)}
+html[data-theme=light] nav.tabs{background:linear-gradient(180deg,rgba(240,234,241,0),rgba(240,234,241,.97) 30%)}
+
+/* User-controlled text sizes. Standard is already larger than the original app. */
+html[data-font=large] body{font-size:22.5px}
+html[data-font=large] .small{font-size:19px}
+html[data-font=large] .label{font-size:17px}
+html[data-font=large] .chip{font-size:17px}
+html[data-font=large] .btn{font-size:19.5px}
+html[data-font=large] .muted,html[data-font=large] .why{font-size:18px}
+html[data-font=large] h2{font-size:35px}
+html[data-font=large] h3{font-size:28px}
+html[data-font=xlarge] body{font-size:24px}
+html[data-font=xlarge] .small{font-size:20.5px}
+html[data-font=xlarge] .label{font-size:18px}
+html[data-font=xlarge] .chip{font-size:18px;padding:8px 14px}
+html[data-font=xlarge] .btn{font-size:21px}
+html[data-font=xlarge] .muted,html[data-font=xlarge] .why{font-size:19.5px}
+html[data-font=xlarge] h2{font-size:38px}
+html[data-font=xlarge] h3{font-size:30px}
+html[data-font=xlarge] .app{max-width:520px}
+
+/* Lunar progress instead of generic habit dots. */
+.moontrail{display:grid;grid-template-columns:repeat(10,1fr);gap:6px 7px;margin-top:14px;align-items:center}
+.moonday{width:22px;height:22px;display:grid;place-items:center;color:var(--glow-faint);opacity:.42;border-radius:50%;padding:2px}
+.moonday svg{width:18px;height:18px;display:block}
+.moonday.on{color:var(--gold);opacity:1;box-shadow:0 0 0 1px rgba(231,196,90,.72),0 0 13px rgba(231,196,90,.24)}
+
+/* Journeys: guardian identity is an actual doorway. */
+.journeycard{display:grid;gap:8px}
+.journeyrow{align-items:center;flex-wrap:nowrap}
+.journeyopen,.journeybody,.journeyguardianname{border:0;background:none;color:inherit;text-align:left;padding:0}
+.journeyopen{flex:1;min-width:0}
+.journeybody{display:grid;gap:4px;width:100%;font-family:var(--f-ui);font-size:16.5px;color:var(--glow-dim)}
+.journeybody .progress{width:100%}
+.journeyguardianname .label{text-align:left}
+.journeyhead .gmark{filter:drop-shadow(0 5px 14px rgba(0,0,0,.3))}
+
+/* Ritual cards should feel like objects, not beige boxes. */
+.page.ritualcard{border-radius:18px;padding:22px 20px 20px;border:1px solid color-mix(in srgb,var(--gcol,var(--gold)) 48%,#9A7414);background:
+ radial-gradient(circle at 86% 9%,color-mix(in srgb,var(--gcol,var(--gold)) 17%,transparent),transparent 27%),
+ radial-gradient(circle at 9% 92%,rgba(154,116,20,.10),transparent 31%),
+ linear-gradient(145deg,#FFF8E8 0%,#F1E2BF 58%,#E4CFA4 100%);box-shadow:0 22px 48px -25px rgba(9,6,17,.8),inset 0 1px rgba(255,255,255,.65);overflow:hidden}
+.page.ritualcard::before{inset:8px;border-radius:12px;border:1px solid rgba(154,116,20,.48);box-shadow:none}
+.page.ritualcard::after{content:"☾";right:17px;bottom:5px;font-size:46px;color:color-mix(in srgb,var(--gcol,var(--gold)) 24%,transparent)}
+.ritualguardian{position:relative;z-index:1;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--gcol,var(--gold)) 10%,rgba(255,255,255,.42));border:1px solid color-mix(in srgb,var(--gcol,var(--gold)) 30%,transparent)}
+.page.ritualcard h3{font-size:31px;line-height:1.05;margin-top:14px;color:#2C2030}
+.page.ritualcard .facts{gap:7px;margin-top:12px}
+.page.ritualcard .facts span{padding:5px 8px;border-radius:999px;background:rgba(84,59,70,.07);border:1px solid rgba(84,59,70,.13)}
+.page.ritualcard .needs{margin-top:15px;padding-top:13px;border-top:1px solid rgba(154,116,20,.28)}
+.supplyhint{font-family:var(--f-ui);font-size:14px;line-height:1.35;color:#6A596A;margin-top:3px}
+.needchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.needchip{font-family:var(--f-ui);font-size:14.5px;line-height:1.25;padding:7px 10px;border-radius:999px;border:1px solid rgba(94,75,64,.23);background:rgba(255,255,255,.48);color:#443848;display:inline-flex;align-items:center;gap:6px}
+button.needchip{cursor:pointer}
+.needchip .needcheck{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:rgba(74,120,79,.12);font-weight:700}
+.needchip.missing{background:rgba(147,64,71,.08);border-color:rgba(147,64,71,.32);text-decoration:none}
+.needchip.missing .needcheck{background:rgba(147,64,71,.12);color:#8F3943}
+.supplyswap{margin-top:12px;padding:11px 12px;border-radius:12px;background:rgba(154,116,20,.08);border:1px solid rgba(154,116,20,.22);font-family:var(--f-ui);font-size:15px;color:#5F4C43}
+.supplyswap .label{display:block;color:#7C5D16;margin-bottom:3px}
+.gatherbox.attention{animation:supplyPulse .7s ease}
+@keyframes supplyPulse{50%{box-shadow:0 0 0 5px rgba(191,30,115,.13)}}
+.prepfoot{flex-wrap:wrap}
+.prepfoot .btn{min-width:180px}
+
+/* Tarot cards: the SVG is the card. Do not shrink a full card into a tiny icon inside another card. */
+.tarot{width:118px;height:189px;filter:drop-shadow(0 12px 15px rgba(0,0,0,.28))}
+.altar .tarot{width:168px;height:269px}
+.tarot .face{border-radius:12px}
+.tarot .front{padding:0;background:transparent;box-shadow:none}
+.tarot .front .tcard{width:100%!important;height:100%!important;display:block}
+.altar .tarot .front .tcard{width:100%!important;height:100%!important}
+.tarot .back{border-radius:12px;background:#16132A;box-shadow:0 18px 30px -18px rgba(0,0,0,.9)}
+.tarot.flipped .front{box-shadow:0 20px 34px -22px rgba(0,0,0,.88)}
+.spread .tarot{transform-origin:50% 100%}
+.three .tarot.mini{width:96px;height:154px}
+@media(max-width:390px){.altar .tarot{width:152px;height:243px}.three .tarot.mini{width:84px;height:134px}.moontrail{grid-template-columns:repeat(8,1fr)}}
+
+
+/* ================================================================
+   LUXURY EXPERIENCE PASS — Oct 2 2026
+   Restraint first: fewer boxes, stronger hierarchy, physical objects.
+   ================================================================ */
+:root{
+  --luxe-night:#161226;
+  --luxe-night-2:#211832;
+  --luxe-plum:#241936;
+  --luxe-paper:#F8F0DD;
+  --luxe-parch:#F0E3C5;
+  --luxe-gold:#C7A44A;
+}
+.label{letter-spacing:.12em}
+.card{box-shadow:none}
+nav.tabs .in{background:rgba(28,22,49,.94);border-color:rgba(199,164,74,.22);border-radius:18px;padding:5px}
+nav.tabs button{border-radius:12px;letter-spacing:.035em;color:rgba(244,239,232,.66);position:relative}
+nav.tabs button[aria-selected="true"]{background:transparent;color:#F4EFE8}
+nav.tabs button[aria-selected="true"]::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--luxe-gold);position:absolute;bottom:2px}
+nav.tabs button[aria-selected="true"] svg{color:var(--luxe-gold)}
+.top{padding-top:16px}.brand h1{font-size:30px}.brand .eyebrow{letter-spacing:.08em}
+#memBadge{border-radius:999px;background:transparent!important;border-color:rgba(199,164,74,.48)!important;color:#DEC36F!important}
+
+/* Today: editorial, not a pile of rounded cards */
+.home{padding:8px 0 2px}
+.home .greet{font-family:var(--f-ui);font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:rgba(244,239,232,.62)}
+.home .hline{font-size:35px;line-height:1.05;max-width:430px}
+.home .obs{margin-top:9px;font-family:var(--f-display);font-style:italic;font-size:20px;color:rgba(244,239,232,.78)}
+.aura{border-radius:0;border-width:1px 0;background:linear-gradient(90deg,transparent,rgba(36,25,54,.76) 14%,rgba(36,25,54,.76) 86%,transparent);box-shadow:none;padding:20px 4px}
+.aura .speaker{padding:0 8px}.aura .speaker .who{letter-spacing:.08em}
+.aura textarea{border-radius:16px;background:rgba(13,10,25,.46);border-color:rgba(199,164,74,.26)}
+.aura .btn-main{box-shadow:none;background:#3A294B;border:1px solid rgba(199,164,74,.56);color:#F8F0DD}
+details.more>summary{letter-spacing:.04em}
+
+/* Altar: a real deck, not a fan of floating clip-art cards */
+.altarstage{display:grid;gap:14px;padding:2px 0 8px}
+.altarhead{max-width:430px}
+.altarhead h2{font-size:34px;margin-top:5px}
+.altarpositions{display:grid;gap:5px;margin-top:13px;padding-left:12px;border-left:1px solid rgba(199,164,74,.42)}
+.altarpositions span{font-family:var(--f-ui);font-size:15px;color:rgba(244,239,232,.56)}
+.altarpositions span.next{color:#F4EFE8}.altarpositions span.done{color:#C7A44A}
+.altarhint{font-family:var(--f-display);font-size:19px;font-style:italic;color:rgba(244,239,232,.82);margin-top:12px}
+.decknote{font-family:var(--f-ui);font-size:14px;color:rgba(244,239,232,.54);text-align:center}
+.spread.seven{
+  width:calc(100% + 18px);margin-left:-9px;padding:12px 18px 18px;
+  display:flex;gap:14px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
+  justify-content:flex-start;scrollbar-width:none;
+}
+.spread.seven::-webkit-scrollbar{display:none}
+.spread.seven .tarot.sp{
+  flex:0 0 116px;width:116px;height:186px;margin:0!important;transform:none!important;scroll-snap-align:center;
+  filter:drop-shadow(0 14px 12px rgba(0,0,0,.30));transition:transform .25s ease,filter .25s ease;
+}
+.spread.seven .tarot.sp:hover,.spread.seven .tarot.sp:focus-visible{transform:translateY(-7px)!important}
+.spread.seven .tarot.sp.picked{transform:translateY(-10px)!important;filter:drop-shadow(0 18px 18px rgba(0,0,0,.45));z-index:2}
+.tarot .face{border-radius:7px}
+.tarot .back{
+  background:
+    radial-gradient(circle at 50% 44%,rgba(199,164,74,.10),transparent 34%),
+    linear-gradient(145deg,#2A1D3C,#171126 58%,#0F0B19);
+  box-shadow:inset 0 0 0 1px rgba(199,164,74,.8),inset 0 0 0 5px #181226,inset 0 0 0 6px rgba(199,164,74,.28);
+}
+.tarot .back svg{opacity:.72;filter:saturate(.78)}
+.tarot.flipped .front{box-shadow:0 20px 34px -24px rgba(0,0,0,.9)}
+.three{gap:14px;margin:18px 0}.three .pos{letter-spacing:.03em;text-transform:none;font-size:13px;line-height:1.3}
+.card.together{border-radius:4px;background:rgba(25,21,48,.62);border-color:rgba(199,164,74,.34);padding:18px}
+details.tread{padding:11px 0;border-color:rgba(244,241,230,.1)}
+
+/* Ritual: ceremonial folio with natural height, no giant beige void */
+.rite{display:block;overflow:auto;background:
+  radial-gradient(circle at 80% 0,rgba(199,164,74,.08),transparent 28%),
+  linear-gradient(180deg,#F8F0DD,#EADDBF);padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+.rite::before{display:none}
+.rite .wm{display:none}
+.rite .wrap{flex:none;overflow:visible;max-width:620px;min-height:0;margin:0 auto;padding:22px 24px 0;background:transparent!important;border:0!important;box-shadow:none!important;gap:14px}
+.rite .bar{min-height:54px;border-bottom:1px solid rgba(85,65,45,.16);padding-bottom:12px}
+.ritualwho{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.ritualwho .gmark{flex:none}.ritualwho>span{display:grid;min-width:0}
+.ritualwho b{font-family:var(--f-display);font-size:18px;font-weight:500;line-height:1.05;color:#2F2632}
+.ritualwho small{font-family:var(--f-ui);font-size:12px;letter-spacing:.04em;color:#786A72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rite .bar>.navback{background:transparent;border:0;padding:0 7px 0 0;color:#3D3340}
+.rite .pips{margin:3px 0 8px;gap:5px}.rite .pips i{height:2px;background:rgba(61,51,64,.13)}.rite .pips i.on{background:#9A7414}
+.ritualintro,.ritualstep,.ritualcomplete{display:grid;gap:16px;padding:10px 0 2px}
+.ritualkicker{font-family:var(--f-ui);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8D6F27}
+.rite h1{font-family:var(--f-display);font-size:clamp(38px,10vw,52px);font-weight:400;line-height:1.02;color:#2F2632;letter-spacing:-.015em}
+.rite .purpose{font-family:var(--f-display);font-style:italic;font-size:23px;line-height:1.35;color:#5B4B58}
+.ritualmeta{display:flex;flex-wrap:wrap;gap:6px 0;border-block:1px solid rgba(85,65,45,.16);padding:9px 0}
+.ritualmeta span{font-family:var(--f-ui);font-size:13px;color:#6B5D63;padding-right:12px;margin-right:12px;border-right:1px solid rgba(85,65,45,.16)}
+.ritualmeta span:last-child{border:0}
+.gatherbox.ritualtray{margin:0;border-radius:4px;border:1px solid rgba(154,116,20,.30);background:rgba(255,255,255,.28);padding:16px}
+.trayhead{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.trayhead .sayl{font-family:var(--f-display);font-size:21px;color:#332937}.trayhead .small{font-size:13px;color:#74666D}
+.needchips{gap:8px;margin-top:12px}.needchip{border-radius:6px;background:rgba(255,255,255,.42);border-color:rgba(85,65,45,.18);padding:9px 11px}
+.needchip .needcheck{border-radius:50%;background:rgba(72,105,70,.10)}.needchip.missing{background:rgba(132,74,70,.07)}
+.supplyhint{margin-top:11px;color:#786B70;font-size:13px}.prepnote{display:none}
+.supplyswap{border-radius:4px}
+.rite .text{font-family:var(--f-display);font-size:25px;line-height:1.48;color:#403441}
+.rite .say{margin:4px 0;padding:18px 16px;border:0;border-left:2px solid #9A7414;text-align:left;font-size:28px;color:#5A2842;background:rgba(255,255,255,.22)}
+.rite .say .sayl{display:block;font-family:var(--f-ui);font-style:normal;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8D6F27;margin-bottom:6px}
+.rite .foot{position:relative;max-width:620px;margin:16px auto 0;padding:0 24px 8px;display:flex;gap:10px}
+.rite .foot .btn{min-height:52px;border-radius:10px}
+.rite .btn-ink{background:#2C2331;color:#F8F0DD;box-shadow:none}
+.rite .btn-ghost{box-shadow:inset 0 0 0 1px rgba(61,51,64,.24);border-radius:10px}
+.ritualcomplete .finishq{font-family:var(--f-display);font-size:27px;color:#4A3B48}
+.afterfeel{gap:8px}.rite .afterfeel .chip{border-radius:8px;padding:10px 13px}
+.ritualnotes{margin-top:6px;border-top:1px solid rgba(85,65,45,.18);padding-top:14px}
+.ritualnotes summary{font-family:var(--f-ui);font-weight:700;color:#574A52;cursor:pointer;padding:7px 0}
+.ritualnotes textarea{min-height:120px;margin-top:10px;background:rgba(255,255,255,.42);border-radius:8px}
+.ritualnotes .field{margin-top:12px}.ritualnotes #outWhen{margin-top:8px}
+@media(max-width:390px){.rite .wrap,.rite .foot{padding-left:20px;padding-right:20px}.rite h1{font-size:42px}.trayhead{display:grid;gap:2px}}
+
+/* Mailbox: correspondence, not another generic dark card */
+.mailbox{border:0!important;border-radius:0!important;background:transparent!important;padding:2px 0 4px!important;box-shadow:none!important}
+.mailhead{padding-bottom:14px;border-bottom:1px solid rgba(199,164,74,.30)}.mailhead svg{width:48px;height:auto}
+.mailhead h3{font-size:28px}.mailintro{font-family:var(--f-display);font-style:italic;font-size:18px;color:rgba(244,239,232,.70);margin:12px 0}
+.mailstack{display:grid}
+.mailletter{width:100%;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:12px;align-items:start;text-align:left;border:0;border-bottom:1px solid rgba(244,239,232,.12);background:transparent;color:inherit;padding:16px 0}
+.mailletter .wax{width:7px;height:7px;border-radius:50%;background:rgba(199,164,74,.42);margin-top:8px}
+.mailletter.unread .wax{background:#C7A44A;box-shadow:0 0 0 4px rgba(199,164,74,.08)}
+.mailcopy{display:grid;gap:3px;min-width:0}.mailmeta,.maildate{font-family:var(--f-ui);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(244,239,232,.52)}
+.mailcopy strong{font-family:var(--f-display);font-size:22px;font-weight:500;color:#F4EFE8}
+.mailpreview{font-family:var(--f-display);font-size:16px;color:rgba(244,239,232,.68);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mailopen{font-family:var(--f-ui);font-size:13px;color:#C7A44A;padding-top:19px}
+.empty-mail{padding-top:8px!important}.empty-mail .aurasays{margin-top:14px}
+.sealednote{margin-top:16px}.page.letter{border-radius:2px;padding:30px 25px;background:#F8F0DD;box-shadow:0 20px 45px -30px rgba(0,0,0,.8)}
+.page.letter::before{inset:10px;border-color:rgba(154,116,20,.28);box-shadow:none}
+.letterbrand{font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:.16em;color:#8A6E2A}
+.lettermeta{font-family:var(--f-ui);font-size:12px;color:#796A70;margin-top:4px}
+.page.letter h2{font-size:37px;color:#2F2632;margin:20px 0 5px}.page.letter p{font-size:20px;line-height:1.68;color:#403441}
+.lettersign{font-family:var(--f-display);font-style:italic;font-size:28px;color:#5C4054;margin-top:24px}
+.letterstack{gap:12px}.letterback{text-align:center;padding:8px}
+
+/* Guardian conversation: typeset dialogue, not Messenger */
+.talk{background:
+  radial-gradient(circle at 15% 0,color-mix(in srgb,var(--talk-accent,#C7A44A) 11%,transparent),transparent 30%),
+  #141021}
+.talk .hd{max-width:620px;padding:12px 18px;border-color:rgba(199,164,74,.18)}
+.talkportrait{width:46px;height:46px;display:grid;place-items:center}.talkportrait svg{width:44px!important;height:44px!important}
+.talk .hd .who .n{font-size:24px}.talk .hd .who .t{font-size:12px;letter-spacing:.04em;text-transform:none;color:rgba(244,239,232,.60)!important}
+.talkeyebrow{display:block;font-family:var(--f-ui);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#C7A44A;margin-bottom:1px}
+.talk .msgs{max-width:620px;padding:20px 22px 24px;gap:18px}
+.talk .intro{border-radius:4px;background:rgba(33,24,50,.52);border-color:rgba(199,164,74,.18);padding:18px}
+.bub{max-width:100%;border-radius:0!important;padding:0!important;white-space:normal}
+.bub .msgwho{display:block;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin-bottom:5px}
+.bub p{white-space:pre-wrap}
+.bub.them{align-self:stretch;background:transparent!important;border:0!important;font-family:var(--f-display);font-size:23px;line-height:1.48;color:#F4EFE8;padding-left:14px!important;border-left:1px solid color-mix(in srgb,var(--talk-accent,#C7A44A) 48%,transparent)!important}
+.bub.them .msgwho{color:var(--talk-accent,#C7A44A)}
+.bub.me{align-self:stretch;margin-left:44px;background:rgba(244,239,232,.055)!important;border:0!important;border-radius:4px!important;padding:12px 14px!important;font-family:var(--f-book);font-size:18px;color:rgba(244,239,232,.84)}
+.bub.me .msgwho{color:rgba(244,239,232,.46)}
+.bub .btn{border-radius:8px;margin:12px 8px 0 0}
+.talk .ft{max-width:620px;padding:12px 18px 16px;border-color:rgba(199,164,74,.15);background:rgba(20,16,33,.96)}
+.talk .ft textarea{border-radius:12px;background:rgba(244,239,232,.055);border-color:rgba(199,164,74,.24);padding-left:14px}
+.talk .send,.talk .mic{box-shadow:none}.talk .send{background:#3A294B;border:1px solid rgba(199,164,74,.5);color:#F8F0DD}
+
+/* Keep surfaces restrained everywhere */
+.page.ritualcard{border-radius:4px}.page.ritualcard::after{display:none}
+.card.letterc{border-radius:4px;background:rgba(25,21,48,.72)}
