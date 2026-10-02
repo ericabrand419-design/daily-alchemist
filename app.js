@@ -4608,7 +4608,7 @@ function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.canc
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button><div class="ritualwho">'+guardianMark(r.g,38,true)+'<span><b>'+esc(g.name)+'</b><small>'+esc(g.title)+'</small></span></div><span class="sndbar"></span></div><div class="pips" aria-label="Ritual progress">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Exit ritual">× <span>Exit</span></button><div class="ritualwho">'+guardianMark(r.g,38,true)+'<span><b>'+esc(g.name)+'</b><small>'+esc(g.title)+'</small></span></div><span class="sndbar"></span></div><div class="pips" aria-label="Ritual progress">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){
     const base=run.base||r,items=ritualNeedItems(base),chips=items.length?items.map(n=>{const miss=known().includes(n[0])&&!S.profile.have.includes(n[0]);return '<button class="needchip'+(miss?' missing':'')+'" data-ritualneed="'+n[0]+':'+(miss?'1':'0')+'" aria-pressed="'+(!miss)+'"><span class="needcheck">'+(miss?'＋':'✓')+'</span>'+esc(n[1])+'</button>';}).join(""):'<span class="needchip static">Nothing but you</span>';
     el.innerHTML='<div class="wrap">'+bar+
@@ -4626,14 +4626,14 @@ function drawStep(){
       (!voiceEnabled()?'':'<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause guidance</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>')+
       (s.hold?'<div class="timer"><span class="clock" id="clock">'+mmss(s.hold)+'</span><button class="btn btn-ghost" id="holdBtn">Start timer</button></div>':"")+
       (i===total-1&&r.secret?'<p class="secret">'+esc(r.secret)+'</p>':"")+
-      '</main></div><div class="foot ritualnav">'+(i>0?'<button class="btn btn-ghost" id="prevBtn">Back</button>':"")+'<button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
+      '</main></div><div class="foot ritualnav"><button class="btn btn-ghost" id="prevBtn">Back</button><button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
   }else{
     const prompts=r.prompts||["What came up?"];
     el.innerHTML='<div class="wrap">'+bar+'<main class="ritualcomplete"><div class="ritualkicker">Ritual complete</div><h1>Done.</h1><p class="finishq">What changed, even a little?</p><div class="chips afterfeel" id="afterChips">'+["Lighter","Clearer","Stirred up","Tender","Powerful","The same"].map(a=>'<button class="chip" data-after="'+a+'" aria-pressed="false">'+a+'</button>').join("")+'</div>'+
       '<details class="ritualnotes"><summary>Write something, if you want</summary><p class="small muted">'+prompts.map(esc).join(" ")+'</p><label class="sr" for="refl">Your reflection</label><textarea id="refl" placeholder="A few honest lines is plenty."></textarea>'+
       '<div class="field"><label for="outside">What changes outside the ritual?</label><input type="text" id="outside" placeholder="'+esc(OUTSIDE_HINT[r.g]||"One real thing you'll do")+'"><div class="chips" id="outWhen"><button class="chip" data-outwhen="1" aria-pressed="false">Check in tomorrow</button><button class="chip" data-outwhen="7" aria-pressed="true">In a week</button></div></div>'+
       '<label class="switch" for="privateOnly">For my eyes only. Aura won\'t read this.<input type="checkbox" id="privateOnly"></label></details>'+
-      '</main></div><div class="foot ritualnav"><button class="btn btn-ghost" id="skipSave">Finish without writing</button><button class="btn btn-ink" id="saveBtn">Save to Archive</button></div>';
+      '</main></div><div class="foot ritualnav" style="flex-wrap:wrap"><button class="btn btn-ghost" id="prevBtn" style="flex-basis:100%">Back to last step</button><button class="btn btn-ghost" id="skipSave">Finish without writing</button><button class="btn btn-ink" id="saveBtn">Save to Archive</button></div>';
   }
   el.scrollTop=0; const w=el.querySelector(".wrap"); if(w)w.scrollTop=0;
   speakStep();
