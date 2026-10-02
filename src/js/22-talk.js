@@ -27,7 +27,7 @@ let talkG=null, talkAbort=null;
 function openTalk(k){
   if(!allowedG(k)){closeSheet();vesperGate();return;}
   track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
-  closeSheet();talkG=k;const g=G[k];musicFor(k);
+  closeSheet(true);talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
   el.style.setProperty("--talk-accent",g.color);
   el.innerHTML='<header class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button><div class="talkportrait">'+glyph(k)+'</div><div class="who"><span class="talkeyebrow">Private conversation</span><div class="n">'+esc(g.name)+'</div><div class="t">'+esc(g.title)+'</div></div><span class="sndbar"></span></header><div class="msgs" id="msgs"></div>'+
@@ -36,7 +36,7 @@ function openTalk(k){
   drawMsgs();
 }
 
-function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!run&&!keepMusic)musicBack();}
+function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic)musicSyncSoon();}
 function msgHTML(m,k){
   if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
