@@ -2712,8 +2712,11 @@ function createFirstReturnLetter(){
 }
 let returnLetterBusy=false;
 function maybeFirstReturnLetter(){
-  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded||!firstActivity()||!S.firstAwayAt)return false;
-  if(Date.now()-S.firstAwayAt<3000)return false;
+  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded)return false;
+  const now=Date.now(),first=firstActivity();
+  const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=3000;
+  const priorDay=!!first&&dayKey(new Date(first))!==dayKey(new Date(now));
+  if(!leftHere&&!priorDay)return false;
   if($("#gate")||$("#intro")||$("#rite"))return false;
   if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
