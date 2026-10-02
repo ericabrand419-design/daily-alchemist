@@ -23,10 +23,14 @@ function renderCircle(){
   const pi=drawPick(), sp=drawSpread();
   let h;
   if(pi==null){
-    const three=threeMode(),got=threePicks(),mid=(sp.length-1)/2;
-    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">'+(three?(got.length?"Pick "+(3-got.length)+" more.":"Pick three cards."):"Pick a card.")+'</h3><p class="muted" style="margin-top:4px">'+(three?"Seven cards from the full 78 card deck. The first is what you're carrying, the second what's asking for your attention, the third what will help. Aura reads them together.":"Five cards from the full 78 card deck, one for you today. Trust your hand. Its question changes as your day moves.")+'</p><div class="spread'+(three?' seven':'')+'" id="spread">'+
-      sp.map((g,i)=>'<button class="tarot sp'+(got.includes(i)?' picked flipped':'')+'" data-pickcard="'+i+'" style="--i:'+(i-mid)+'" aria-label="Card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div>'+
-      (three?'':'<p class="small muted" style="margin-top:6px">In the Inner Circle you draw three cards, and Aura reads them together. <button class="linkish" data-paywall="Three card readings">See membership</button></p>')+'</div>';
+    const three=threeMode(),got=threePicks();
+    const nextPos=three&&got.length<3?SPREAD_POS[got.length][0]:"Your card";
+    h='<section class="altarstage"><div class="altarhead"><div class="label">The Altar</div><h2>'+(three?"Your three-card reading":"Your card for today")+'</h2>'+
+      (three?'<div class="altarpositions"><span class="'+(got.length>0?'done':'next')+'">1 · What you\'re carrying</span><span class="'+(got.length>1?'done':got.length===1?'next':'')+'">2 · What wants your attention</span><span class="'+(got.length>2?'done':got.length===2?'next':'')+'">3 · What may help</span></div><p class="altarhint">'+(got.length?"Choose the next card for <b>"+esc(nextPos.toLowerCase())+"</b>.":"Choose slowly. Aura will read the three together.")+'</p>':'<p class="altarhint">Choose slowly. Trust your hand.</p>')+
+      '</div><div class="spread'+(three?' seven':'')+'" id="spread">'+
+      sp.map((g,i)=>'<button class="tarot sp'+(got.includes(i)?' picked flipped':'')+'" data-pickcard="'+i+'" aria-label="Choose card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div>'+
+      '<p class="decknote">'+(three?"Swipe the deck if you want. Three choices, then the rest falls away.":"One card today. Its question changes as your day moves.")+'</p>'+
+      (three?'':'<p class="small muted">Inner Circle opens the three-card reading. <button class="linkish" data-paywall="Three card readings">See membership</button></p>')+'</section>';
   }else if(threeMode()&&threeDone()){
     h=threeSpreadHTML();
   }else{
