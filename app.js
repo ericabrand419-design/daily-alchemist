@@ -1649,10 +1649,10 @@ const SUBS={
   tea:{alt:[],text:"hot water with a slice of lemon"}
 };
 const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"]};
-function ritualNeeds(r){
+function ritualNeedItems(r){
   const out=[],keys=new Set();
-  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push(label);};
-  for(const n of (r.needs||[])){add(n[0],n[1]);}
+  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push([k,label]);};
+  for(const n of (r.needs||[]))add(n[0],n[1]);
   const txt=(r.steps||[]).map(x=>[x.t,x.d,x.say].filter(Boolean).join(" ")).join(" ").toLowerCase();
   const has=k=>(r.needs||[]).some(n=>n[0]===k);
   if(/\b(write|writing|wrote|journal|record|list|letter|note|label|draw)\b/.test(txt)){add("paper","Paper");add("pen","A pen or pencil");}
@@ -1671,9 +1671,10 @@ function ritualNeeds(r){
   if(/\bbath\b/.test(txt)&&r.bath)add("bath","Access to a bath or basin");
   return out;
 }
+function ritualNeeds(r){return ritualNeedItems(r).map(n=>n[1]);}
 function known(){return S.profile.known||(S.profile.known=[...S.profile.have]);}
-function missingFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
-function unknownFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
+function missingFor(r){return ritualNeedItems(r).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
+function unknownFor(r){return ritualNeedItems(r).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
 function adapt(r){
   const miss=missingFor(r).map(n=>n[0]); if(!miss.length)return {...r,notes:[]};
   const notes=miss.map(t=>{const n=NOUN[t].replace(/^an? /,""),sb=subFor(t);return sb?"No "+n+"? Use "+sb+".":"No "+n+"? Skip that part. The ritual still works without it.";});
@@ -4915,6 +4916,8 @@ document.addEventListener("click",async ev=>{
   if(d.contactcad){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.cadence=d.contactcad;document.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
   if(d.contactscope){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.scope=d.contactscope;document.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
   if(t.id==="contactSave"){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};if(c.enabled==null){toast("Choose whether you want us to reach out.");return;}persist("profile");if(c.enabled){const ok=await enablePush();toast(ok?"Saved. We'll follow your rhythm.":"Saved. You'll still see letters and check-ins when you open the app.");}else toast("Saved. We won't reach out while you're away.");return;}
+  if(d.ritualneed&&run){const [tg,yn]=d.ritualneed.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);run.r=adapt(run.base||run.r);drawStep();toast(yn==="1"?"Added back.":"Aura adapted the ritual around it.");return;}
+  if(t.id==="missingBtn"){const g=document.querySelector("#rite .gatherbox");if(g){g.classList.add("attention");g.scrollIntoView({behavior:"smooth",block:"center"});}toast("Tap the item you are missing. Tap it again if you need to undo it.");return;}
   if(t.id==="pushOn"){await enablePush();return;}
   if(d.altar){openAltarItems(d.altar);return;}
   if(d.tend){const sp=S.spaces.find(z=>z.id===d.tend);const r=tendRitual(sp);startRitual(r,{space:sp.id,theme:"space",thread:"Home"});return;}
