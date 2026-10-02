@@ -22,6 +22,9 @@ ok(liveApp===expectedApp,"app.js is stale: run node build.mjs and commit generat
 
 const sourceCss=read("src/styles.css");
 ok(read("styles.css")===sourceCss,"styles.css is stale: run node build.mjs and commit generated output");
+ok(/body::before,body::after\{display:none!important\}/.test(sourceCss),"Full-screen haze/noise overlays are active again");
+ok(/#wxLayer\{opacity:0!important;background:none!important\}/.test(sourceCss),"Full-screen weather wash is active again");
+ok(/JEWEL-TONE WORLD PASS/.test(sourceCss),"Crisp jewel-tone auto background invariant is missing");
 
 const h=s=>createHash("sha256").update(s).digest("hex").slice(0,10);
 const expectedIndex=read("src/shell/web-head.html")+read("src/shell/head.html")+
