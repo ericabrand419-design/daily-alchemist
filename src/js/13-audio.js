@@ -33,13 +33,22 @@ function musicPlay(g){
 }
 function musicStop(){for(const el of [...MUSIC.all])pauseMusicEl(el);MUSIC.all.clear();MUSIC.cur=null;MUSIC.resume=false;renderSnd();}
 function musicFor(g){musicPlay(g||MUSIC.base);}
-function musicBack(){musicPlay(MUSIC.base);}
+function musicContextTarget(){
+  if(typeof run!=="undefined"&&run&&run.r&&run.r.g)return run.r.g;
+  if(typeof talkG!=="undefined"&&talkG)return talkG;
+  const s=document.getElementById("scrim");if(s&&s._musicG)return s._musicG;
+  return MUSIC.base;
+}
+function musicSyncContext(){musicPlay(musicContextTarget());}
+function musicSyncSoon(){clearTimeout(MUSIC.syncTimer);MUSIC.syncTimer=setTimeout(()=>musicSyncContext(),0);}
+function musicBack(){musicSyncSoon();}
 function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur&&!MUSIC.cur.paused)fadeTo(MUSIC.cur,musicVol(),on?250:500);}
 function musicSuspend(){
   if(MUSIC.suspended)return;
   MUSIC.resume=musicAudible();
   MUSIC.suspended=true;
   for(const el of MUSIC.all)pauseMusicEl(el);
+  try{stopAudio();}catch(e){}
   renderSnd();
 }
 function musicResume(){
