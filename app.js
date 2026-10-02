@@ -3327,7 +3327,7 @@ function chamberNudge(x){
 }
 /* The altar draw lives in 17d-tarot.js. drawPick is shared. */
 function drawPick(){const v=S.draws[dayKey(today)];if(v==null)return null;if(typeof v!=="object")return 0;if(Array.isArray(v.picks))return v.picks.length>=3?v.picks[1]:null;return v.pick==null?null:v.pick;}
-function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><g fill="none" stroke="#E7C45A" stroke-opacity=".75" stroke-width="1"><circle cx="56" cy="84" r="26"/><circle cx="56" cy="84" r="34" stroke-dasharray="2 4"/><path d="M56 44v80M16 84h80M30 58l52 52M82 58l-52 52" stroke-opacity=".3"/><path d="M62 70a14 14 0 1 0 0 28a11 11 0 1 1 0-28z" fill="#E7C45A" fill-opacity=".85" stroke="none"/></g><text x="56" y="152" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="10" fill="#E7C45A" letter-spacing="2">ALTAR</text></svg>';}
+function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><defs><radialGradient id="altarGlow" cx="50%" cy="42%" r="65%"><stop offset="0" stop-color="#4E3D7B"/><stop offset=".55" stop-color="#241A43"/><stop offset="1" stop-color="#100C20"/></radialGradient></defs><rect width="112" height="168" rx="12" fill="url(#altarGlow)"/><rect x="5" y="5" width="102" height="158" rx="9" fill="none" stroke="#E7C45A" stroke-opacity=".85"/><rect x="9" y="9" width="94" height="150" rx="7" fill="none" stroke="#E7C45A" stroke-opacity=".28"/><g fill="none" stroke="#E7C45A" stroke-linecap="round"><circle cx="56" cy="78" r="32" stroke-opacity=".62"/><circle cx="56" cy="78" r="24" stroke-dasharray="1.5 5" stroke-opacity=".52"/><path d="M56 36v84M14 78h84M27 49l58 58M85 49l-58 58" stroke-opacity=".16"/><path d="M63 61a18 18 0 1 0 0 34a14 14 0 1 1 0-34z" fill="#F4D778" fill-opacity=".92" stroke="none"/><path d="M56 26l2.5 5.8 5.8 2.5-5.8 2.5-2.5 5.8-2.5-5.8-5.8-2.5 5.8-2.5z" fill="#E7C45A" stroke="none"/></g><g fill="#E7C45A" opacity=".7"><circle cx="24" cy="30" r="1.2"/><circle cx="88" cy="38" r="1"/><circle cx="22" cy="119" r=".9"/><circle cx="91" cy="126" r="1.1"/></g><text x="56" y="147" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" fill="#F5E9B7" letter-spacing="2.4">THE ALTAR</text></svg>';}
 function resurface(){
   const old=S.entries.filter(e=>!e.private&&e.text&&(Date.now()-e.ts)>2*864e5);
   if(!old.length)return null;
@@ -4037,7 +4037,7 @@ function cardNow(id,rev,d){
 }
 
 /* Card faces: original art. Majors carry a sigil, minors carry their pips like a real deck. */
-const INK="#3A2A1A",GOLD="#9A7414";
+const INK="#F6E9C8",GOLD="#E7C45A";
 function suitMark(s,x,y,sz){
   const k=sz/10,st='stroke="'+INK+'" stroke-width="'+(1.1)+'" fill="none" stroke-linecap="round" stroke-linejoin="round"';
   const T=(p)=>'<g transform="translate('+x+' '+y+') scale('+k+')">'+p+'</g>';
@@ -4080,14 +4080,13 @@ function cardSVG(id,rev){
   if(c.major)art=SIGIL[c.i]||"";
   else if(c.rank<10)art=(PIPS[c.rank+1]||[]).map(([x,y])=>suitMark(c.suit,x,y,c.rank===0?22:10)).join("");
   else art=COURT[c.rank]+suitMark(c.suit,50,110,11);
-  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#B55A36",cups:"#4D7F91",swords:"#6B668C",pentacles:"#7C7040"}[c.suit]||GOLD);
-  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true">'+
-    '<rect x="0" y="0" width="100" height="160" rx="8" fill="#F7EDCF"/><circle cx="50" cy="73" r="31" fill="'+accent+'" fill-opacity=".055"/>'+
-    '<path d="M12 14h12M76 14h12M12 146h12M76 146h12" stroke="'+accent+'" stroke-opacity=".65" stroke-width="1.2"/>'+
-    '<circle cx="16" cy="18" r="1.4" fill="'+accent+'"/><circle cx="84" cy="18" r="1.4" fill="'+accent+'"/><circle cx="16" cy="142" r="1.4" fill="'+accent+'"/><circle cx="84" cy="142" r="1.4" fill="'+accent+'"/>'+
-    '<rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+accent+'" stroke-opacity=".5" stroke-width=".8"/>'+
-    '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" letter-spacing="1.5" fill="'+GOLD+'">'+esc(c.num)+'</text>'+art+
-    '<path d="M14 128h72" stroke="'+GOLD+'" stroke-opacity=".5" stroke-width=".6"/><text x="50" y="142" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6.4:nm.length>12?7.4:8.4)+'" font-weight="600" fill="'+INK+'">'+esc(nm.toUpperCase())+'</text></svg>';
+  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#E77C4A",cups:"#66B6C8",swords:"#AAA0F2",pentacles:"#C9B55D"}[c.suit]||GOLD),gid="cg_"+String(id).replace(/[^a-z0-9]/gi,"_");
+  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#241937"/><stop offset=".5" stop-color="#16132A"/><stop offset="1" stop-color="#0C0918"/></linearGradient><radialGradient id="'+gid+'_a" cx="50%" cy="42%" r="48%"><stop offset="0" stop-color="'+accent+'" stop-opacity=".28"/><stop offset="1" stop-color="'+accent+'" stop-opacity="0"/></radialGradient></defs>'+
+    '<rect x=".8" y=".8" width="98.4" height="158.4" rx="9.5" fill="url(#'+gid+')" stroke="'+GOLD+'" stroke-width="1.3"/><rect x="5" y="5" width="90" height="150" rx="7" fill="none" stroke="'+accent+'" stroke-opacity=".62" stroke-width=".8"/><rect x="8" y="8" width="84" height="144" rx="5" fill="none" stroke="'+GOLD+'" stroke-opacity=".26" stroke-width=".55"/>'+
+    '<ellipse cx="50" cy="75" rx="35" ry="45" fill="url(#'+gid+'_a)"/><path d="M20 30Q50 18 80 30M20 118Q50 130 80 118" fill="none" stroke="'+GOLD+'" stroke-opacity=".32" stroke-width=".65"/>'+
+    '<g fill="'+GOLD+'" opacity=".65"><circle cx="17" cy="19" r="1"/><circle cx="83" cy="19" r="1"/><circle cx="14" cy="73" r=".7"/><circle cx="86" cy="73" r=".7"/><circle cx="21" cy="121" r=".8"/><circle cx="79" cy="121" r=".8"/></g>'+
+    '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="8.5" letter-spacing="1.6" fill="'+GOLD+'">'+esc(c.num)+'</text><g transform="translate(0 1)">'+art+'</g>'+
+    '<path d="M16 128h68" stroke="'+accent+'" stroke-opacity=".55" stroke-width=".7"/><text x="50" y="143" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6:nm.length>12?6.9:7.8)+'" font-weight="600" letter-spacing=".45" fill="#F8EDCF">'+esc(nm.toUpperCase())+'</text><text x="50" y="151" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="3.7" letter-spacing=".9" fill="'+accent+'">'+esc(c.major?"MAJOR ARCANA":SUITS[c.suit].el.toUpperCase())+'</text></svg>';
 }
 function cardFace(id){return cardSVG(id,cardRev(id));}
 function drawHTML(d){
@@ -4157,6 +4156,7 @@ function threeSpreadHTML(){
   setTimeout(fetchThreeReading,50);
   return h;
 }
+
 /* ------------------------------------------------------------------
    WEATHER. Part of the natural rhythm (priority 7): it changes the
    light of the app and which rituals make sense, and it never outranks
@@ -4378,10 +4378,14 @@ function renderCircle(){
   const pi=drawPick(), sp=drawSpread();
   let h;
   if(pi==null){
-    const three=threeMode(),got=threePicks(),mid=(sp.length-1)/2;
-    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">'+(three?(got.length?"Pick "+(3-got.length)+" more.":"Pick three cards."):"Pick a card.")+'</h3><p class="muted" style="margin-top:4px">'+(three?"Seven cards from the full 78 card deck. The first is what you're carrying, the second what's asking for your attention, the third what will help. Aura reads them together.":"Five cards from the full 78 card deck, one for you today. Trust your hand. Its question changes as your day moves.")+'</p><div class="spread'+(three?' seven':'')+'" id="spread">'+
-      sp.map((g,i)=>'<button class="tarot sp'+(got.includes(i)?' picked flipped':'')+'" data-pickcard="'+i+'" style="--i:'+(i-mid)+'" aria-label="Card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div>'+
-      (three?'':'<p class="small muted" style="margin-top:6px">In the Inner Circle you draw three cards, and Aura reads them together. <button class="linkish" data-paywall="Three card readings">See membership</button></p>')+'</div>';
+    const three=threeMode(),got=threePicks();
+    const nextPos=three&&got.length<3?SPREAD_POS[got.length][0]:"Your card";
+    h='<section class="altarstage"><div class="altarhead"><div class="label">The Altar</div><h2>'+(three?"Your three-card reading":"Your card for today")+'</h2>'+
+      (three?'<div class="altarpositions"><span class="'+(got.length>0?'done':'next')+'">1 · What you\'re carrying</span><span class="'+(got.length>1?'done':got.length===1?'next':'')+'">2 · What wants your attention</span><span class="'+(got.length>2?'done':got.length===2?'next':'')+'">3 · What may help</span></div><p class="altarhint">'+(got.length?"Choose the next card for <b>"+esc(nextPos.toLowerCase())+"</b>.":"Choose slowly. Aura will read the three together.")+'</p>':'<p class="altarhint">Choose slowly. Trust your hand.</p>')+
+      '</div><div class="spread'+(three?' seven':'')+'" id="spread">'+
+      sp.map((g,i)=>'<button class="tarot sp'+(got.includes(i)?' picked flipped':'')+'" data-pickcard="'+i+'" aria-label="Choose card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div>'+
+      '<p class="decknote">'+(three?"Swipe the deck if you want. Three choices, then the rest falls away.":"One card today. Its question changes as your day moves.")+'</p>'+
+      (three?'':'<p class="small muted">Inner Circle opens the three-card reading. <button class="linkish" data-paywall="Three card readings">See membership</button></p>')+'</section>';
   }else if(threeMode()&&threeDone()){
     h=threeSpreadHTML();
   }else{
@@ -4429,13 +4433,14 @@ function openChamber(k){
 function openJourney(id){
   const j=JOURNEYS.find(x=>x.id===id); if(!j)return;
   const done=journeyDays(id), next=[1,2,3,4,5,6,7].find(n=>!done.includes(n));
-  let h='<div class="stack"><div class="lead">'+glyph(j.g)+'<div><div class="label">7 days with '+esc(G[j.g].name)+'</div><h2 style="margin:2px 0 0">'+esc(j.name)+'</h2></div></div><p>'+esc(j.d)+'</p><div class="days">';
+  let h='<div class="stack"><div class="lead journeyhead">'+guardianMark(j.g,64)+'<div><button class="journeyguardianname" data-guardian="'+j.g+'"><span class="label">7 days with '+esc(G[j.g].name)+'</span></button><h2 style="margin:2px 0 0">'+esc(j.name)+'</h2><span class="small muted">Tap '+esc(G[j.g].name)+' to open the chamber</span></div></div><p>'+esc(j.d)+'</p><div class="days">';
   let note="";
   j.days.forEach((d,i)=>{const n=i+1,isDone=done.includes(n),isNext=next===n,locked=!isMember()||(!isDone&&!isNext);let r=byId[d[0]];if(isNext&&isMember()){const a=journeyStep(j,n);r=a.r;note=a.note;window.__jsettle=!!a.settle;}
     h+='<button class="day'+(isDone?" done":"")+(isNext&&isMember()?" next":"")+'" '+(isMember()&&!locked?'data-jday="'+id+':'+n+'"':'')+(locked?" disabled":"")+'><span class="num">'+(isDone?"✓":n)+'</span><span><div class="t">'+esc(r.title)+'</div><div class="s">'+esc(d[1])+'</div></span><span class="st">'+(isDone?"Done":isNext&&isMember()?"Tonight":r.min+" min")+'</span></button>';});
   h+='</div>'+(note&&isMember()?'<p class="why">'+esc(note)+(window.__jsettle?' <button class="linkish" data-begin="two-minute-settle">Settle first</button>':'')+'</p>':'')+(isMember()?(next?'':'<p class="muted">Journey complete. You can start any day again from its guardian.</p>'):'<button class="btn btn-main full" data-paywall="'+esc(j.name)+'">Start with '+esc(PLAN.name)+'</button>')+'</div>';
   openSheet(h);
 }
+
 
 /* ------------------------------------------------------------------
    ARCHIVE
@@ -4514,7 +4519,7 @@ const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","X
 const ORN='<svg class="orn" viewBox="0 0 220 20" aria-hidden="true"><path d="M4 10h78M138 10h78" stroke="#9A7414" stroke-width="1"/><path d="M82 10c8 0 12-6 18-6M138 10c-8 0-12-6-18-6M82 10c8 0 12 6 18 6M138 10c-8 0-12 6-18 6" fill="none" stroke="#9A7414" stroke-width="1"/><path d="M110 2l2.6 5.4L118 10l-5.4 2.6L110 18l-2.6-5.4L102 10l5.4-2.6z" fill="#BF1E73"/><circle cx="4" cy="10" r="1.6" fill="#9A7414"/><circle cx="216" cy="10" r="1.6" fill="#9A7414"/></svg>';
 function startRitual(r,ctx){
   closeSheet();
-  run={r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
+  run={base:r,r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
   const el=document.createElement("div");el.className="rite";el.id="rite";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",r.title);
   el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
@@ -4523,38 +4528,37 @@ function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.canc
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32,true)+'<span class="t">· '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button><div class="ritualwho">'+guardianMark(r.g,38,true)+'<span><b>'+esc(g.name)+'</b><small>'+esc(g.title)+'</small></span></div><span class="sndbar"></span></div><div class="pips" aria-label="Ritual progress">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){
-    const needs=ritualNeeds(r);
-    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+
-      '<div class="ritualintro">'+
-      '<div class="count"><span class="seal">✦</span><span>Before you begin</span></div><h2>'+esc(r.title)+'</h2>'+ORN+
-      '<p class="purpose">'+esc(r.purpose||"")+'</p>'+
-      '<div class="gatherbox"><span class="sayl">Gather everything now</span><div class="needchips">'+(needs.length?needs.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
-      '<p class="prepnote">You should not discover a new supply halfway through. If something is missing, go back and tell Aura before you start.</p>'+
-      '</div></div><div class="foot"><button class="btn btn-ink" id="nextBtn">I have what I need</button></div>';
+    const base=run.base||r,items=ritualNeedItems(base),chips=items.length?items.map(n=>{const miss=known().includes(n[0])&&!S.profile.have.includes(n[0]);return '<button class="needchip'+(miss?' missing':'')+'" data-ritualneed="'+n[0]+':'+(miss?'1':'0')+'" aria-pressed="'+(!miss)+'"><span class="needcheck">'+(miss?'＋':'✓')+'</span>'+esc(n[1])+'</button>';}).join(""):'<span class="needchip static">Nothing but you</span>';
+    el.innerHTML='<div class="wrap">'+bar+
+      '<main class="ritualintro luxe"><div class="ritualkicker">Before you begin</div><h1>'+esc(r.title)+'</h1><p class="purpose">'+esc(r.purpose||"")+'</p>'+
+      '<div class="ritualmeta"><span>'+r.min+' minutes</span><span>'+esc(g.element)+'</span><span>'+total+' step'+(total===1?'':'s')+'</span></div>'+
+      '<section class="gatherbox ritualtray"><div class="trayhead"><span class="sayl">Gather what you\'ll use</span><span class="small">Tap anything you don\'t have.</span></div><div class="needchips">'+chips+'</div><p class="supplyhint">Aura adapts the ritual now, before you begin. Nothing new will appear halfway through.</p></section>'+
+      (r.notes&&r.notes.length?'<div class="supplyswap"><span class="sayl">Adapted for you</span><p>'+r.notes.map(esc).join(" ")+'</p></div>':'')+
+      '</main></div><div class="foot prepfoot"><button class="btn btn-ink" id="nextBtn">Begin the ritual</button></div>';
     el.scrollTop=0;return;
   }
   if(i<total){
     const s=r.steps[i];
-    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal">'+ROMAN[i+1]+'</span><span>of '+ROMAN[total]+'</span></div><h2>'+esc(s.t)+'</h2>'+ORN+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
-      (s.say?'<div class="say"><span class="sayl">Say it aloud</span>"'+esc(s.say)+'"</div>':"")+
-      (!voiceEnabled()?'':'<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>')+
+    el.innerHTML='<div class="wrap">'+bar+'<main class="ritualstep"><div class="ritualkicker">Step '+(i+1)+' of '+total+'</div><h1>'+esc(s.t)+'</h1>'+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
+      (s.say?'<blockquote class="say"><span class="sayl">Say it aloud</span>"'+esc(s.say)+'"</blockquote>':"")+
+      (!voiceEnabled()?'':'<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause guidance</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>')+
       (s.hold?'<div class="timer"><span class="clock" id="clock">'+mmss(s.hold)+'</span><button class="btn btn-ghost" id="holdBtn">Start timer</button></div>':"")+
       (i===total-1&&r.secret?'<p class="secret">'+esc(r.secret)+'</p>':"")+
-      '</div><div class="foot">'+(i>0?'<button class="btn btn-ghost" id="prevBtn">Back</button>':"")+'<button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
+      '</main></div><div class="foot ritualnav">'+(i>0?'<button class="btn btn-ghost" id="prevBtn">Back</button>':"")+'<button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
   }else{
     const prompts=r.prompts||["What came up?"];
-    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal done">✦</span><span>Ritual complete</span></div><h2>You did it. Write it down before it fades.</h2>'+ORN+'<p class="text">'+prompts.map(esc).join(" ")+'</p>'+
-      '<label class="sr" for="refl">Your reflection</label><textarea id="refl" style="min-height:160px" placeholder="A few honest lines is plenty."></textarea>'+
-      '<div class="field"><label for="outside" style="color:var(--ink-soft)">What changes outside the ritual?</label><input type="text" id="outside" placeholder="'+esc(OUTSIDE_HINT[r.g]||"One real thing you'll do")+'"><div class="chips" id="outWhen" style="margin-top:6px"><button class="chip" data-outwhen="1" aria-pressed="false">Check in tomorrow</button><button class="chip" data-outwhen="7" aria-pressed="true">In a week</button></div></div>'+
-      '<label class="switch" for="privateOnly" style="color:var(--ink)">For my eyes only. Aura won\'t read this.<input type="checkbox" id="privateOnly"></label>'+
-      '<div><div class="small" style="color:var(--ink-soft);margin-bottom:8px">Afterward I feel</div><div class="chips" id="afterChips">'+["Lighter","Clearer","Stirred up","Tender","Powerful","The same"].map(a=>'<button class="chip" data-after="'+a+'" aria-pressed="false">'+a+'</button>').join("")+'</div></div>'+
-      '</div><div class="foot"><button class="btn btn-ghost" id="skipSave">Skip writing</button><button class="btn btn-ink" id="saveBtn">Save to archive</button></div>';
+    el.innerHTML='<div class="wrap">'+bar+'<main class="ritualcomplete"><div class="ritualkicker">Ritual complete</div><h1>Done.</h1><p class="finishq">What changed, even a little?</p><div class="chips afterfeel" id="afterChips">'+["Lighter","Clearer","Stirred up","Tender","Powerful","The same"].map(a=>'<button class="chip" data-after="'+a+'" aria-pressed="false">'+a+'</button>').join("")+'</div>'+
+      '<details class="ritualnotes"><summary>Write something, if you want</summary><p class="small muted">'+prompts.map(esc).join(" ")+'</p><label class="sr" for="refl">Your reflection</label><textarea id="refl" placeholder="A few honest lines is plenty."></textarea>'+
+      '<div class="field"><label for="outside">What changes outside the ritual?</label><input type="text" id="outside" placeholder="'+esc(OUTSIDE_HINT[r.g]||"One real thing you'll do")+'"><div class="chips" id="outWhen"><button class="chip" data-outwhen="1" aria-pressed="false">Check in tomorrow</button><button class="chip" data-outwhen="7" aria-pressed="true">In a week</button></div></div>'+
+      '<label class="switch" for="privateOnly">For my eyes only. Aura won\'t read this.<input type="checkbox" id="privateOnly"></label></details>'+
+      '</main></div><div class="foot ritualnav"><button class="btn btn-ghost" id="skipSave">Finish without writing</button><button class="btn btn-ink" id="saveBtn">Save to Archive</button></div>';
   }
   el.scrollTop=0; const w=el.querySelector(".wrap"); if(w)w.scrollTop=0;
   speakStep();
 }
+
 const OUTSIDE_HINT={thistle:"Mute the thread tonight",rue:"Block the number",sage:"Say it to their face, or let it go",marigold:"Send the invoice",sol:"Put the first step on your calendar today",juniper:"Clear the entry table",fern:"In bed by 10",lily:"Close the laptop at 7",onyx:"Tell one person the truth",willow:"Call the person who remembers them too",vesper:"Say one want out loud to your person",iris:"Log how today actually felt",rowan:"Walk around the block after dinner",lumen:"Book the first appointment",aurora:"Phone stays off until after coffee",wren:"Write down the next sign",onora:"Ask about the family story"};
 function mmss(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
 function saveEntry(text,after,extra){
@@ -4588,6 +4592,7 @@ function afterLoop0(e,r){
   if(a==="Tender"){openSheet('<div class="stack"><div class="handoff" style="padding:0">'+glyph("aura")+'<p><span class="who2">Aura</span>Tender means it reached something real. Be gentle with yourself tonight. Willow is here if you want to talk.</p></div><button class="btn btn-main full" data-talk="willow">Talk to Willow</button><button class="btn btn-ghost full" id="sheetDone">I just want to rest</button></div>');return;}
 }
 
+
 /* ------------------------------------------------------------------
    TALK: a real conversation with any guardian
 ------------------------------------------------------------------ */
@@ -4619,17 +4624,20 @@ function openTalk(k){
   track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
   closeSheet();talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
-  el.innerHTML='<div class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button>'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span></div><div class="msgs" id="msgs"></div>'+
-    '<div class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Talk to '+esc(g.name)+'"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></div>';
+  el.style.setProperty("--talk-accent",g.color);
+  el.innerHTML='<header class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button><div class="talkportrait">'+glyph(k)+'</div><div class="who"><span class="talkeyebrow">Private conversation</span><div class="n">'+esc(g.name)+'</div><div class="t">'+esc(g.title)+'</div></div><span class="sndbar"></span></header><div class="msgs" id="msgs"></div>'+
+    '<footer class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Tell '+esc(g.name)+' what happened…"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></footer>';
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawMsgs();
 }
+
 function closeTalk(){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!run)musicBack();}
 function msgHTML(m,k){
-  if(m.role==="me")return '<div class="bub me">'+esc(m.text)+'</div>';
+  if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
-  return '<div class="bub them" style="border-color:'+G[k].color+'55">'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+(m.handoff&&G[m.handoff]?'<br><button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<br><button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<br><button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
+  return '<div class="bub them"><span class="msgwho">'+esc(G[k].name)+'</span><p>'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+'</p>'+(m.handoff&&G[m.handoff]?'<button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
 }
+
 function guardianDaily(k){
   const own=R.filter(r=>r.g===k&&!r.reset&&canUse(r)), pool=own.length?own:R.filter(r=>r.g===(KIN[k]||k)&&canUse(r));
   if(!pool.length)return byId.anchor;
@@ -4669,7 +4677,7 @@ function introHTML(k){
 function drawMsgs(){
   const k=talkG,list=S.chats[k]||[],box=$("#msgs");if(!box)return;
   const hi=(S.profile.name?S.profile.name+". ":"")+(GREET[k]||G[k].phrases[0]+" Tell me what's going on.");
-  box.innerHTML=introHTML(k)+'<div class="bub them" style="border-color:'+G[k].color+'55">'+esc(hi)+'</div>'+list.map(m=>msgHTML(m,k)).join("");
+  box.innerHTML=introHTML(k)+'<div class="bub them"><span class="msgwho">'+esc(G[k].name)+'</span><p>'+esc(hi)+'</p></div>'+list.map(m=>msgHTML(m,k)).join("");
   box.scrollTop=box.scrollHeight;
 }
 function talkPrompt(k){
@@ -4744,6 +4752,7 @@ async function sendTalk(){
   saveLocal();remotePut("chat",k,{kind:"chat",msgs:list});
   if(talkG===k){drawMsgs();$("#chatSend").disabled=false;}
 }
+
 
 /* Voice: tap the mic, speak, and it transcribes into the field */
 let rec=null,recBtn=null;
