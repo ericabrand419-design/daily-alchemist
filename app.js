@@ -1358,7 +1358,10 @@ async function setBirthday(v,after){
     ACCT.adultAt=r.adult_confirmed_at;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;delete S.pendingDob;
   }
   S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;S.profile.ageVerified=true;saveLocal();remotePut("prefs");
-  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime)redeemFriend();
+  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime){
+    const claimed=await redeemFriend();
+    if(claimed===false&&S.friendCode)return false;
+  }
   return true;
 }
 function bdayErr(msg){
@@ -1537,7 +1540,7 @@ function openPaywall(reason){
   const sc=sealedCount(), nm=firstName();
   openSheet('<div class="stack"><div><div class="label">'+esc(reason||"Go deeper")+'</div><h2>'+esc(PLAN.name)+'</h2></div>'+
    auraSays((nm?esc(nm)+", when":"When")+" you come to me, I help. In the Inner Circle, I keep you in mind between visits. Here is what that means.")+
-   '<div class="card headline"><div class="hl">'+envelopeSVG()+'<span><b>I write to you every week</b><span class="small muted">I look back at what you carried, what helped, and where to go next. The first letter comes the day after you start.</span></span></div><div class="hl">'+glyph("thistle",40)+'<span><b>The guardians check in on you</b><span class="small muted">A few days after you work with one of them, they come find you, call you by name, and ask how it\'s going.</span></span></div>'+(sc?'<div class="hl">'+envelopeSVG(true)+'<span><b>Your sealed letters open</b><span class="small muted">'+(sc===1?"The letter I wrote you is":"All "+sc+" letters I wrote you are")+' waiting in your mailbox.</span></span></div>':'')+'</div>'+
+   '<div class="card headline"><div class="hl">'+envelopeSVG()+'<span><b>I write to you every week</b><span class="small muted">I look back at what you carried, what helped, and where to go next. Your first letter comes when you return after your first visit.</span></span></div><div class="hl">'+glyph("thistle",40)+'<span><b>The guardians check in on you</b><span class="small muted">A few days after you work with one of them, they come find you, call you by name, and ask how it\'s going.</span></span></div>'+(sc?'<div class="hl">'+envelopeSVG(true)+'<span><b>Your sealed letters open</b><span class="small muted">'+(sc===1?"The letter I wrote you is":"All "+sc+" letters I wrote you are")+' waiting in your mailbox.</span></span></div>':'')+'</div>'+
    '<div class="card"><p class="kv" style="font-family:var(--f-ui);font-size:16px;line-height:1.9">✦ Every guardian\'s deeper chamber opens<br>✦ The guided journeys, for when one night isn\'t enough<br>✦ More time with me and the guardians, every day<br>✦ Your Archive and chats on every device</p></div>'+
    '<div class="chips" id="planPick" role="radiogroup" aria-label="Choose a plan"><button class="chip" data-plan="yearly" aria-pressed="'+(payPlan==="yearly")+'">Yearly '+PLAN.yearly+'</button><button class="chip" data-plan="monthly" aria-pressed="'+(payPlan==="monthly")+'">Monthly '+PLAN.monthly+'</button></div>'+
    '<p class="small muted" id="planNote">'+(payPlan==="yearly"?PLAN.yearNote:"Cancel anytime.")+'</p>'+
@@ -2949,8 +2952,8 @@ function shareHTML(){
     (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share invitation</button><button class="btn btn-ghost" id="shareCopy">Copy link</button></div>':'<p class="small" style="margin-top:8px">Your '+(one?'invitation has':'3 invitations have')+' been used. Thank you for growing the circle.</p>')
       :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Generate my invitation link</button>')+'</details>';
 }
-async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
-const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist will email you a secure sign-in link. No password and no text messages from the app. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing which buttons you tap and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist emails you a secure sign-in link. No password and no text messages from the app. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing which buttons you tap, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
+async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error==="adult_confirmation_required"){openBirthday("Before I can make an invitation link, I need to confirm you're an adult. What's your birthday?");}else if(r&&r.error)toast("I couldn't get your link just now. Try again in a minute.");return r;}
+const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist will email you an 8-digit sign-in code. No password and no text messages from the app. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing basic usage activity, like which parts you use and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist emails you an 8-digit sign-in code. No password and no text messages from the app. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing basic usage activity, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
 function inviteText(){return SHARE&&SHARE.open?"Hi! "+INV_ERICA:"Hey! "+INV_FRIEND;}
 async function doShare(copyOnly){
   if(!SHARE)await loadShare();if(!SHARE)return;
@@ -2975,10 +2978,16 @@ async function confirmAdultNow(){
   else toast("I couldn't save that just now. Try again in a moment.");
 }
 async function redeemFriend(){
+  if(!S.friendCode||ACCT.lifetime)return true;
   const r=await api("/api/friend",{code:S.friendCode});
-  if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();}
-  else if(r&&r.error==="adult_confirmation_required"){return;}
-  else if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");}
+  if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();return true;}
+  if(r&&r.error==="adult_confirmation_required"){
+    if(S.profile.onboarded&&!$("#scrim"))openBirthday("Before I can finish claiming your invitation, I need to confirm you're an adult. What's your birthday?");
+    return false;
+  }
+  if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");return false;}
+  if(r&&r.error){toast("I couldn't finish claiming your invitation. Your link is still saved. Try again in a moment.");return false;}
+  return false;
 }
 /* Friends Week sharing, by category. Nothing is on unless they tick it. Words are never shared. */
 const SHARE_OPTS=[
@@ -3003,7 +3012,7 @@ function openConsent(){
   S.seenPop=S.seenPop||{};S.seenPop.consent=Date.now();saveLocal();
   const o=esc(ownerName());
   openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Before we begin, one promise. <b>Everything you write, say, or tell me and the guardians is private.</b> It stays between you and your guardians. "+o+", who made me, never sees it. Not now, not ever.","Aura · your privacy")+
-    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only <b>what you tap and when</b>. Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
+    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only basic usage activity: what you open or tap, how long a visit lasts, and how far you get in a ritual. <b>Never your words.</b> Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
     '<button class="btn btn-main full" id="consentSave">Share what I ticked</button><button class="btn btn-ghost full" data-consent="0">Don\'t share anything</button>'+
     '<p class="small muted" style="text-align:center">You can change this any time this week in Settings. It ends by itself after 7 days. Either way, everything stays open to you, for life.</p></div>');
 }
@@ -3012,15 +3021,15 @@ async function setConsent(yes,scope){
   closeSheet();
   if(!accountsOn()){S.previewMonitorAnswer=yes?"yes":"no";S.previewMonitor=yes?(S.previewMonitor&&S.previewMonitor>Date.now()?S.previewMonitor:Date.now()+7*864e5):0;S.previewScope=scope;saveLocal();}
   else{const r=await api("/api/monitor",{consent:!!yes,scope});if(r&&!r.error){ACCT.monitorAnswer=r.monitor_answer;ACCT.monitorUntil=r.monitor_until;ACCT.monitorScope=r.monitor_scope||scope;}}
-  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the taps you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
+  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the usage categories you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
   renderAll();setTimeout(auraPopup,600);
 }
 function sharingHTML(){
   if(inFriendsWeek()){const on=monitorOn(),sel=on?shareScope():[];
-    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only what you tap and when'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
+    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only the usage activity you chose to share'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
   if(!monitorOn())return "";
   const until=accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor;
-  return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see what you tap and when. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
+  return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see the usage activity you chose to share. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
 }
 function auraPopup(){
   if($("#phoneOnly")||!S.profile.onboarded||$("#scrim")||$("#rite")||$("#talk"))return;
@@ -5062,8 +5071,6 @@ document.addEventListener("click",async ev=>{
   if(d.previewMember){S.previewMember=!isMember();saveLocal();closeSheet();renderAll();toast(isMember()?"Previewing as a member.":"Previewing as free.");return;}
   if(d.legal){openSheet('<div class="stack legal">'+LEGAL[d.legal]+'</div>');return;}
   if(t.id==="siOpen"){openSignIn();return;}
-  if(t.id==="siSwitch"){const f=$("#siForm");if(f)f.outerHTML=signInForm(t.dataset.gate==="1",f.dataset.by==="phone");return;}
-  if(t.id==="siSend"&&$("#siPhone")){const ph=normPhone($("#siPhone").value);if(!ph){$("#siMsg").textContent="Check that number. Include the area code.";return;}t.disabled=true;const {error}=await ACCT.sb.auth.signInWithOtp({phone:ph,options:{shouldCreateUser:true}});t.disabled=false;if(error){$("#siMsg").textContent="Couldn't text the code. Check the number, or use email instead.";return;}ACCT.pendingPhone=ph;ACCT.pendingEmail=null;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;t.hidden=true;$("#siMsg").textContent="Code texted to "+ph+". It can take a minute.";$("#siCode").focus();return;}
   if(t.id==="siSend"){const em=($("#siEmail").value||"").trim();if(!/^\S+@\S+\.\S+$/.test(em)){$("#siMsg").textContent="Check that email address.";return;}t.disabled=true;t.textContent="Sending...";let out=null;try{out=await ACCT.sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});}catch(e){out={error:e};}t.disabled=false;t.textContent="Email my code";if(!out||out.error){const msg=out&&out.error&&out.error.message?String(out.error.message):"";if(/rate|limit|too many/i.test(msg))$("#siMsg").textContent="Too many codes were requested for this email. Try again in a few minutes.";else if(msg)$("#siMsg").textContent="I couldn't send the code: "+msg;else $("#siMsg").textContent="I couldn't send the code. Please try again.";return;}ACCT.pendingEmail=em;t.hidden=true;$("#siEmailRow").hidden=true;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;$("#siMsg").innerHTML="Code sent to <b>"+esc(em)+"</b>.<br>Enter the 8-digit code from the email below.<br><br><button class=\"linkish\" id=\"siAgain\">Use a different email</button>";$("#siCode").focus();return;}
   if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");if(!ACCT.pendingEmail){$("#siMsg").textContent="Send a code first.";return;}if(code.length!==8){$("#siMsg").textContent="Enter all 8 digits from the email.";$("#siCode").focus();return;}t.disabled=true;t.textContent="Signing in...";let out=null;try{out=await ACCT.sb.auth.verifyOtp({email:ACCT.pendingEmail,token:code,type:"email"});}catch(e){out={error:e};}t.disabled=false;t.textContent=$("#gate")?"Come in":"Sign in";if(!out||out.error){const msg=out&&out.error&&out.error.message?String(out.error.message):"";$("#siMsg").textContent=/expired/i.test(msg)?"That code expired. Use a different email or reopen this screen to request a fresh one.":"That code didn't work. Check all 8 digits and try again.";return;}toast("Signed in.");if(out.data&&out.data.session)await onSignedIn(out.data.session);return;}
   if(t.id==="siAgain"){ACCT.pendingEmail=null;const f=$("#siForm");if(f)f.outerHTML=signInForm(!!$("#gate"));return;}
