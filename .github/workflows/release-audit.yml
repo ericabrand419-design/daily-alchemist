@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: 22
       - name: Syntax check
-        run: node --check app.js
+        run: |
+          node --check app.js
+          find api server -name '*.js' -print0 | xargs -0 -n1 node --check
       - name: Release audit
         run: node scripts/release-audit.mjs
       - name: Rebuild and require clean generated output
