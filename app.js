@@ -2784,8 +2784,7 @@ function maybeFirstReturnLetter(){
   const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=1000;
   const priorDay=!!first&&dayKey(new Date(first))!==dayKey(new Date(now));
   if(!leftHere&&!priorDay)return false;
-  if($("#gate")||$("#intro")||$("#rite"))return false;
-  if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
+  if($("#gate")||$("#intro")||$("#rite")||$("#talk")||$("#scrim"))return false;
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
 }
 function noteAppAway(){
@@ -4605,7 +4604,7 @@ function startRitual(r,ctx){
   el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
 }
-function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;musicSyncSoon();}
+function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
@@ -4711,7 +4710,7 @@ function openTalk(k){
   drawMsgs();
 }
 
-function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic)musicSyncSoon();}
+function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic){musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}}
 function msgHTML(m,k){
   if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
@@ -4907,7 +4906,7 @@ function openSheet(html,musicG){
   const x=s.querySelector("#sheetX");x.focus({preventScroll:true});
   if(musicG){MUSIC.started=true;musicFor(musicG);}else musicSyncSoon();
 }
-function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(!keepMusic)musicSyncSoon();}}
+function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(!keepMusic){musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}}}
 function accountHTML(){
   if(!accountsOn())return '<div class="card"><div class="label">Membership preview</div><p class="small muted" style="margin-top:6px">You are seeing the app as a '+(isMember()?"member":"free user")+'. Real accounts and checkout run on DailyAlchemist.com.</p><button class="btn btn-ghost full" style="margin-top:10px" data-preview-member="1">'+(isMember()?"Preview as free":"Preview as a member")+'</button><button class="btn btn-ghost full" style="margin-top:8px" data-previewfriend="1">See what friends see</button>'+(S.previewFriend?'<button class="btn btn-ghost full" style="margin-top:8px" id="endFriendPreview">Stop friends preview</button>':'')+'</div>';
   if(!ACCT.sb)return '';
