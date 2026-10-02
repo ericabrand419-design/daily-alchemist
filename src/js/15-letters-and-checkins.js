@@ -108,8 +108,7 @@ function maybeFirstReturnLetter(){
   const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=1000;
   const priorDay=!!first&&dayKey(new Date(first))!==dayKey(new Date(now));
   if(!leftHere&&!priorDay)return false;
-  if($("#gate")||$("#intro")||$("#rite"))return false;
-  if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
+  if($("#gate")||$("#intro")||$("#rite")||$("#talk")||$("#scrim"))return false;
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
 }
 function noteAppAway(){
