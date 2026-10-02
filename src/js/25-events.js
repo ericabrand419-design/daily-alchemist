@@ -269,8 +269,6 @@ document.addEventListener("click",async ev=>{
   if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";await loadShare();return;}
   if(t.id==="shareGo"){doShare(false);return;}
   if(t.id==="shareCopy"){doShare(true);return;}
-  if(t.id==="shareText"){shareVia("text");return;}
-  if(t.id==="shareEmail"){shareVia("email");return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").value){toast("Add your birthday to begin.");$("#age18").focus();return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){const v=$("#age18").value,a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return;}if(a<18){setBirthday(v);return;}if(!(await setBirthday(v)))return;}
   if(t.id==="pSave"||t.id==="pSkip"){

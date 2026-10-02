@@ -20,15 +20,20 @@ export async function POST(request) {
   if (!inv) return json({ error: "bad_code" }, 400);
   await sb("invite_uses", { method: "POST", prefer: "resolution=ignore-duplicates", body: { code, user_id: user.id } });
   const shared = !!inv.owner;
-  await sb("profiles?id=eq." + user.id, { method: "PATCH", body: { lifetime: true, cohort: shared ? "shared" : "friends", invited_by: inv.owner || null } });
+  let cohort = "friends";
+  if (shared) {
+    const inviter = await getProfile(inv.owner);
+    cohort = inviter && inviter.cohort === "friends" ? "shared" : "shared2";
+  }
+  await sb("profiles?id=eq." + user.id, { method: "PATCH", body: { lifetime: true, cohort, invited_by: inv.owner || null } });
   let who = (user.email || (user.phone ? "+" + String(user.phone).replace(/^\+/, "") : "")) || "Someone";
   if (shared) {
-    const left = Math.max(0, (inv.max_uses || 3) - (inv.uses || 0));
+    const left = Math.max(0, (inv.max_uses || 1) - (inv.uses || 0));
     await notifyAdmin("Someone joined through a friend", who + " joined through " + (inv.label || "a friend's share link").replace(/^Shared by /, "") + "'s link. " + left + " left on that link.");
   } else {
     await notifyAdmin("A friend joined", (inv.label || who) + " joined with their invitation. Lifetime access is on.");
   }
-  return json({ ok: true, lifetime: true, cohort: shared ? "shared" : "friends" });
+  return json({ ok: true, lifetime: true, cohort });
 }
 
 export { preflight as OPTIONS } from "../api/_lib.js";
