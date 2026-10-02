@@ -80,14 +80,14 @@ document.addEventListener("click",async ev=>{
   if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk(true);const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
   if(d.snd==="menu"){openSound();return;}
   if(d.sndset){const v=d.sndset;
-    if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want)MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});else musicPlay(MUSIC.want);renderSnd();}}
+    if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);renderSnd();}}
     if(v==="music-off")setMusic(false);
     if(v==="vol-soft"||v==="vol-full"){S.prefMusicVol=v==="vol-soft"?"quiet":"normal";syncSnd();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),400);renderSnd();}
     if(v==="voice-on")setVoice(true);if(v==="voice-off")setVoice(false);
     track("music",{set:v});return;}
   if(d.snd){if(d.snd==="music"){
       /* If it says on but nothing is playing yet (phones block sound until a tap), this tap starts it instead of turning it off. */
-      if(musicOn()&&!musicAudible()){MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});}else musicPlay(MUSIC.want);renderSnd();toast("Music on.");}
+      if(musicOn()&&!musicAudible()){MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);renderSnd();toast("Music on.");}
       else{const on=!musicOn();setMusic(on);toast(on?"Music on.":"Music off. Tap the note to bring it back.");}}else{const on=voiceMuted();setVoice(on);toast(on?"Voices on.":"Voices off. Tap the speaker to hear them again.");}track("music",{set:d.snd+(d.snd==="music"?(musicOn()?"_on":"_off"):(voiceMuted()?"_off":"_on"))});return;}
   if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(voiceMuted())setVoice(true);if(!naturalVoices()){voiceOn=false;toast("Guided voice needs you signed in on the live app. The steps are all here to read.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
   if(d.own){const [tg,yn]=d.own.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);refreshCards();toast(yn==="1"?"Got it. Aura will remember.":"Got it. Aura rewrote it around what you have.");return;}
@@ -150,7 +150,7 @@ document.addEventListener("click",async ev=>{
     saveLocal();remotePut("chat",k,{kind:"chat",msgs:l});openTalk(k);return;}
   if(t.id==="popClose"){closeSheet();return;}
   if(d.hear){const holder=t.closest(".bub,.voice");if(t.classList.contains("on")){stopAudio();return;}const txt=holder?[...holder.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join(" ").trim():"";if(txt){stopAudio();t.classList.add("on");speak(txt,()=>t.classList.remove("on"),d.hear,false);track("hear",{g:d.hear});}return;}
-  if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});syncSnd();if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}renderSnd();return;}
+  if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});syncSnd();if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}renderSnd();return;}
   if(d.pvoice){if(d.pvoice==="off")setVoice(false);else{S.prefVoice=d.pvoice;setVoice(true);}t.parentElement.querySelectorAll("[data-pvoice]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="toConsent"){openConsent();return;}
   if(t.id==="consentSave"){const sc=checkedScope();setConsent(sc.length>0,sc);return;}
