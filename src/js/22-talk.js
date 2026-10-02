@@ -36,7 +36,7 @@ function openTalk(k){
   drawMsgs();
 }
 
-function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic)musicSyncSoon();}
+function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic){musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}}
 function msgHTML(m,k){
   if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
