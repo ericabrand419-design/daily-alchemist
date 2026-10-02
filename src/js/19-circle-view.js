@@ -59,7 +59,6 @@ function renderCircle(){
 }
 function baseOf(k){return R.some(r=>r.g===k)?k:(KIN[k]||k);}
 function openGuardian(k){
-  setTimeout(()=>{const s=$("#scrim");if(s){s._music=true;}musicFor(k);},0);
   const g=G[k], rs=R.filter(r=>r.g===k&&!r.reset).sort((a,b)=>(a.member?1:0)-(b.member?1:0)), c=CHAMBERS[k], usedN=S.entries.filter(e=>e.guardian===k).length;
   let h='<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+' · '+esc(g.element)+'</div><h2 style="margin:2px 0 0">'+esc(g.name)+'</h2></div></div>'+
    '<p><b>'+esc(g.name)+'\'s job:</b> '+esc(JOB[k]||g.domain)+'</p><p class="small muted">'+esc(g.domain)+' '+esc(g.voice)+(usedN?" You have walked with "+esc(g.name)+" "+usedN+" time"+(usedN>1?"s":"")+".":"")+'</p>'+
@@ -68,12 +67,12 @@ function openGuardian(k){
   if(k==="iris")setTimeout(()=>cycleSync().then(rerenderIris),0);
   if(rs.length)h+='<div class="label">'+esc(g.name)+'\'s rituals</div>'+rs.map(r=>ritualCard(r)).join("");
   if(c)h+='<div class="card"><div class="row between"><h3>'+esc(c.name)+'</h3>'+(isMember()?'':'<span class="badge">Members</span>')+'</div><p class="small muted" style="margin-top:6px">'+esc(c.d)+'</p><button class="btn btn-ghost full" style="margin-top:12px" data-chamber="'+k+'">Open the chamber</button></div>';
-  openSheet(h+'</div>');
+  openSheet(h+'</div>',k);
 }
 function openChamber(k){
   const c=CHAMBERS[k], rs=R.filter(r=>r.g===k&&r.member);
   openSheet('<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label">'+esc(G[k].name)+'\'s chamber</div><h2 style="margin:2px 0 0">'+esc(c.name)+'</h2></div></div><p>'+esc(c.d)+'</p><p class="small muted">'+(isMember()?'Open. Aura also draws from this chamber when what you bring calls for '+esc(G[k].name)+'.':'Included with '+esc(PLAN.name)+'. Once you join, Aura starts pulling from it for you.')+'</p>'+
-   rs.map(r=>ritualCard(r)).join("")+(isMember()?'':'<button class="btn btn-main full" data-paywall="'+esc(c.name)+'">Join '+esc(PLAN.name)+'</button>')+'</div>');
+   rs.map(r=>ritualCard(r)).join("")+(isMember()?'':'<button class="btn btn-main full" data-paywall="'+esc(c.name)+'">Join '+esc(PLAN.name)+'</button>')+'</div>',k);
 }
 function openJourney(id){
   const j=JOURNEYS.find(x=>x.id===id); if(!j)return;
@@ -83,6 +82,6 @@ function openJourney(id){
   j.days.forEach((d,i)=>{const n=i+1,isDone=done.includes(n),isNext=next===n,locked=!isMember()||(!isDone&&!isNext);let r=byId[d[0]];if(isNext&&isMember()){const a=journeyStep(j,n);r=a.r;note=a.note;window.__jsettle=!!a.settle;}
     h+='<button class="day'+(isDone?" done":"")+(isNext&&isMember()?" next":"")+'" '+(isMember()&&!locked?'data-jday="'+id+':'+n+'"':'')+(locked?" disabled":"")+'><span class="num">'+(isDone?"✓":n)+'</span><span><div class="t">'+esc(r.title)+'</div><div class="s">'+esc(d[1])+'</div></span><span class="st">'+(isDone?"Done":isNext&&isMember()?"Tonight":r.min+" min")+'</span></button>';});
   h+='</div>'+(note&&isMember()?'<p class="why">'+esc(note)+(window.__jsettle?' <button class="linkish" data-begin="two-minute-settle">Settle first</button>':'')+'</p>':'')+(isMember()?(next?'':'<p class="muted">Journey complete. You can start any day again from its guardian.</p>'):'<button class="btn btn-main full" data-paywall="'+esc(j.name)+'">Start with '+esc(PLAN.name)+'</button>')+'</div>';
-  openSheet(h);
+  openSheet(h,j.g);
 }
 
