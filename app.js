@@ -2277,13 +2277,22 @@ function musicPlay(g){
 }
 function musicStop(){for(const el of [...MUSIC.all])pauseMusicEl(el);MUSIC.all.clear();MUSIC.cur=null;MUSIC.resume=false;renderSnd();}
 function musicFor(g){musicPlay(g||MUSIC.base);}
-function musicBack(){musicPlay(MUSIC.base);}
+function musicContextTarget(){
+  if(typeof run!=="undefined"&&run&&run.r&&run.r.g)return run.r.g;
+  if(typeof talkG!=="undefined"&&talkG)return talkG;
+  const s=document.getElementById("scrim");if(s&&s._musicG)return s._musicG;
+  return MUSIC.base;
+}
+function musicSyncContext(){musicPlay(musicContextTarget());}
+function musicSyncSoon(){clearTimeout(MUSIC.syncTimer);MUSIC.syncTimer=setTimeout(()=>musicSyncContext(),0);}
+function musicBack(){musicSyncSoon();}
 function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur&&!MUSIC.cur.paused)fadeTo(MUSIC.cur,musicVol(),on?250:500);}
 function musicSuspend(){
   if(MUSIC.suspended)return;
   MUSIC.resume=musicAudible();
   MUSIC.suspended=true;
   for(const el of MUSIC.all)pauseMusicEl(el);
+  try{stopAudio();}catch(e){}
   renderSnd();
 }
 function musicResume(){
@@ -3771,7 +3780,7 @@ function openAlchemy(){
    (dr?'<details class="group"><summary>Today\'s card · '+esc(dr.name)+'</summary><p>'+esc(dr.now)+'</p></details>':'')+
    (cyc&&cyc.day!=null?'<details class="group"><summary>Iris</summary><p>Cycle day '+cyc.day+'. '+esc(cycleEstimate(now).line)+'</p>'+(cyc.pattern?'<p class="small muted">'+esc(cyc.pattern)+'</p>':'')+'</details>':'')+
    '<button class="btn btn-ghost full" id="sheetDone">Close</button></div>';
-  openSheet(h);
+  openSheet(h,j.g);
 }
 /* ------------------------------------------------------------------
    IRIS, THE CYCLE KEEPER. Opt in only. Context, not dismissal.
@@ -4446,7 +4455,6 @@ function renderCircle(){
 }
 function baseOf(k){return R.some(r=>r.g===k)?k:(KIN[k]||k);}
 function openGuardian(k){
-  setTimeout(()=>{const s=$("#scrim");if(s){s._music=true;}musicFor(k);},0);
   const g=G[k], rs=R.filter(r=>r.g===k&&!r.reset).sort((a,b)=>(a.member?1:0)-(b.member?1:0)), c=CHAMBERS[k], usedN=S.entries.filter(e=>e.guardian===k).length;
   let h='<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+' · '+esc(g.element)+'</div><h2 style="margin:2px 0 0">'+esc(g.name)+'</h2></div></div>'+
    '<p><b>'+esc(g.name)+'\'s job:</b> '+esc(JOB[k]||g.domain)+'</p><p class="small muted">'+esc(g.domain)+' '+esc(g.voice)+(usedN?" You have walked with "+esc(g.name)+" "+usedN+" time"+(usedN>1?"s":"")+".":"")+'</p>'+
@@ -4455,12 +4463,12 @@ function openGuardian(k){
   if(k==="iris")setTimeout(()=>cycleSync().then(rerenderIris),0);
   if(rs.length)h+='<div class="label">'+esc(g.name)+'\'s rituals</div>'+rs.map(r=>ritualCard(r)).join("");
   if(c)h+='<div class="card"><div class="row between"><h3>'+esc(c.name)+'</h3>'+(isMember()?'':'<span class="badge">Members</span>')+'</div><p class="small muted" style="margin-top:6px">'+esc(c.d)+'</p><button class="btn btn-ghost full" style="margin-top:12px" data-chamber="'+k+'">Open the chamber</button></div>';
-  openSheet(h+'</div>');
+  openSheet(h+'</div>',k);
 }
 function openChamber(k){
   const c=CHAMBERS[k], rs=R.filter(r=>r.g===k&&r.member);
   openSheet('<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label">'+esc(G[k].name)+'\'s chamber</div><h2 style="margin:2px 0 0">'+esc(c.name)+'</h2></div></div><p>'+esc(c.d)+'</p><p class="small muted">'+(isMember()?'Open. Aura also draws from this chamber when what you bring calls for '+esc(G[k].name)+'.':'Included with '+esc(PLAN.name)+'. Once you join, Aura starts pulling from it for you.')+'</p>'+
-   rs.map(r=>ritualCard(r)).join("")+(isMember()?'':'<button class="btn btn-main full" data-paywall="'+esc(c.name)+'">Join '+esc(PLAN.name)+'</button>')+'</div>');
+   rs.map(r=>ritualCard(r)).join("")+(isMember()?'':'<button class="btn btn-main full" data-paywall="'+esc(c.name)+'">Join '+esc(PLAN.name)+'</button>')+'</div>',k);
 }
 function openJourney(id){
   const j=JOURNEYS.find(x=>x.id===id); if(!j)return;
@@ -4556,7 +4564,7 @@ function startRitual(r,ctx){
   el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
 }
-function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;if(talkG)musicFor(talkG);else musicBack();}
+function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;musicSyncSoon();}
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
@@ -4654,7 +4662,7 @@ let talkG=null, talkAbort=null;
 function openTalk(k){
   if(!allowedG(k)){closeSheet();vesperGate();return;}
   track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
-  closeSheet();talkG=k;const g=G[k];musicFor(k);
+  closeSheet(true);talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
   el.style.setProperty("--talk-accent",g.color);
   el.innerHTML='<header class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button><div class="talkportrait">'+glyph(k)+'</div><div class="who"><span class="talkeyebrow">Private conversation</span><div class="n">'+esc(g.name)+'</div><div class="t">'+esc(g.title)+'</div></div><span class="sndbar"></span></header><div class="msgs" id="msgs"></div>'+
@@ -4663,7 +4671,7 @@ function openTalk(k){
   drawMsgs();
 }
 
-function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!run&&!keepMusic)musicBack();}
+function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic)musicSyncSoon();}
 function msgHTML(m,k){
   if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
@@ -4850,15 +4858,17 @@ function toggleMic(btn){
 /* ------------------------------------------------------------------
    SHEETS + SETTINGS
 ------------------------------------------------------------------ */
-function openSheet(html){
-  closeSheet();
+function openSheet(html,musicG){
+  closeSheet(true);
   const s=document.createElement("div");s.className="scrim";s.id="scrim";
+  s._musicG=musicG||null;
   s.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><div class="sheetnav"><button class="navback" id="sheetX" aria-label="Back">← <span>Back</span></button></div><div class="grab"></div>'+html+'</div>';
   $("#layer").appendChild(s);
   s.addEventListener("click",ev=>{if(ev.target===s)closeSheet();});
   const x=s.querySelector("#sheetX");x.focus({preventScroll:true});
+  if(musicG){MUSIC.started=true;musicFor(musicG);}else musicSyncSoon();
 }
-function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(s._music){s._music=false;if(!keepMusic)musicBack();}}}
+function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(!keepMusic)musicSyncSoon();}}
 function accountHTML(){
   if(!accountsOn())return '<div class="card"><div class="label">Membership preview</div><p class="small muted" style="margin-top:6px">You are seeing the app as a '+(isMember()?"member":"free user")+'. Real accounts and checkout run on DailyAlchemist.com.</p><button class="btn btn-ghost full" style="margin-top:10px" data-preview-member="1">'+(isMember()?"Preview as free":"Preview as a member")+'</button><button class="btn btn-ghost full" style="margin-top:8px" data-previewfriend="1">See what friends see</button>'+(S.previewFriend?'<button class="btn btn-ghost full" style="margin-top:8px" id="endFriendPreview">Stop friends preview</button>':'')+'</div>';
   if(!ACCT.sb)return '';
@@ -4985,7 +4995,7 @@ document.addEventListener("click",async ev=>{
   if(d.cartdel){S.cart=S.cart.filter(c=>c.tag!==d.cartdel);persistAll();closeSheet();openAltar(false);return;}
   if(d.thread!==undefined){q=q===d.thread?"":d.thread;renderArchive();return;}
   if(t.id==="archAskBtn"){const qq=($("#archAsk").value||"").trim();if(!qq)return;t.disabled=true;$("#archAnswer").innerHTML='<p class="small muted" style="margin-top:10px">Reading your Archive...</p>';const a=await askArchive(qq);t.disabled=false;$("#archAnswer").innerHTML='<p style="margin-top:12px;font-size:18px">'+esc(a.answer)+'</p>'+(a.cites.length?'<div class="entries" style="margin-top:8px">'+a.cites.map(id=>{const e=S.entries.find(z=>z.id===id);return e?'<button class="entry" data-entry="'+esc(id)+'">'+glyph(e.guardian)+'<span><div class="t">'+esc(e.ritualTitle)+'</div><div class="m">'+fmtDate(e.ts)+'</div>'+(e.text?'<div class="x">'+esc(e.text)+'</div>':'')+'</span></button>':"";}).join("")+'</div>':'');return;}
-  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
+  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk(true);const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
   if(d.snd==="menu"){openSound();return;}
   if(d.sndset){const v=d.sndset;
     if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want)MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});else musicPlay(MUSIC.want);renderSnd();}}
@@ -5114,7 +5124,7 @@ document.addEventListener("click",async ev=>{
     setTimeout(renderCircle,1100);return;}
   if(d.cardask&&threeMode()&&threeDone()){const cs=drawnCards();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="My three cards today: "+cs.map(x=>SPREAD_POS[x.pos][1]+", "+x.title).join("; ")+". Help me understand what they mean for me right now.";sendTalk();}},350);return;}
   if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
-  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk();openGuardian(d.guardian);return;}
+  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk(true);openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}
   if(d.entry){openEntry(d.entry);return;}
