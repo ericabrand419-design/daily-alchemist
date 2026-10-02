@@ -51,6 +51,12 @@ ok(/visibilitychange[\s\S]{0,220}musicSuspend/.test(source),"Music is not suspen
 ok(/pagehide[\s\S]{0,120}musicSuspend/.test(source),"Music is not suspended on pagehide");
 ok(/window\.addEventListener\("blur",musicSuspend\)/.test(source),"Music is not suspended on window blur");
 ok(/function\s+startRitual[\s\S]{0,180}closeSheet\(true\)/.test(source),"Ritual start can flash base/Aura music during guardian handoff");
+ok(/S\.friendCode=fq\.slice\(0,60\);saveLocal\(\);history\.replaceState/.test(source),"Invitation code is not persisted before it is removed from the URL");
+ok(/verifyOtp[\s\S]{0,700}!ACCT\.user\|\|ACCT\.user\.id!==out\.data\.session\.user\.id/.test(source),"OTP completion can run account sync twice");
+ok(/function\s+shareLimit\([\s\S]{0,260}cohort===["']friends["']\?3:[\s\S]{0,120}cohort===["']shared["']\?1:0/.test(source),"Invitation sharing generations are not enforced as friends=3, shared=1, shared2=0");
+const friendServer=read("server/friend.js");
+ok(/invite_uses\?code=eq\./.test(friendServer)&&/function\s+grantClaim/.test(friendServer),"Invitation claims are not retry-safe");
+
 
 const buttonIds=new Set([...source.matchAll(/<button[^>]*\sid=["']([A-Za-z][\w:-]*)["']/g)].map(m=>m[1]).filter(x=>!x.includes("+")));
 for(const id of buttonIds){
