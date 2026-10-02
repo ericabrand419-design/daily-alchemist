@@ -18,8 +18,8 @@ function shareHTML(){
     (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share invitation</button><button class="btn btn-ghost" id="shareCopy">Copy link</button></div>':'<p class="small" style="margin-top:8px">Your '+(one?'invitation has':'3 invitations have')+' been used. Thank you for growing the circle.</p>')
       :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Generate my invitation link</button>')+'</details>';
 }
-async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
-const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist will email you a secure sign-in link. No password and no text messages from the app. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing which buttons you tap and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist emails you a secure sign-in link. No password and no text messages from the app. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing which buttons you tap, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
+async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error==="adult_confirmation_required"){openBirthday("Before I can make an invitation link, I need to confirm you're an adult. What's your birthday?");}else if(r&&r.error)toast("I couldn't get your link just now. Try again in a minute.");return r;}
+const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist will email you an 8-digit sign-in code. No password and no text messages from the app. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing basic usage activity, like which parts you use and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist emails you an 8-digit sign-in code. No password and no text messages from the app. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing basic usage activity, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
 function inviteText(){return SHARE&&SHARE.open?"Hi! "+INV_ERICA:"Hey! "+INV_FRIEND;}
 async function doShare(copyOnly){
   if(!SHARE)await loadShare();if(!SHARE)return;
@@ -44,10 +44,16 @@ async function confirmAdultNow(){
   else toast("I couldn't save that just now. Try again in a moment.");
 }
 async function redeemFriend(){
+  if(!S.friendCode||ACCT.lifetime)return true;
   const r=await api("/api/friend",{code:S.friendCode});
-  if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();}
-  else if(r&&r.error==="adult_confirmation_required"){return;}
-  else if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");}
+  if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();return true;}
+  if(r&&r.error==="adult_confirmation_required"){
+    if(S.profile.onboarded&&!$("#scrim"))openBirthday("Before I can finish claiming your invitation, I need to confirm you're an adult. What's your birthday?");
+    return false;
+  }
+  if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");return false;}
+  if(r&&r.error){toast("I couldn't finish claiming your invitation. Your link is still saved. Try again in a moment.");return false;}
+  return false;
 }
 /* Friends Week sharing, by category. Nothing is on unless they tick it. Words are never shared. */
 const SHARE_OPTS=[
@@ -72,7 +78,7 @@ function openConsent(){
   S.seenPop=S.seenPop||{};S.seenPop.consent=Date.now();saveLocal();
   const o=esc(ownerName());
   openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Before we begin, one promise. <b>Everything you write, say, or tell me and the guardians is private.</b> It stays between you and your guardians. "+o+", who made me, never sees it. Not now, not ever.","Aura · your privacy")+
-    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only <b>what you tap and when</b>. Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
+    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only basic usage activity: what you open or tap, how long a visit lasts, and how far you get in a ritual. <b>Never your words.</b> Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
     '<button class="btn btn-main full" id="consentSave">Share what I ticked</button><button class="btn btn-ghost full" data-consent="0">Don\'t share anything</button>'+
     '<p class="small muted" style="text-align:center">You can change this any time this week in Settings. It ends by itself after 7 days. Either way, everything stays open to you, for life.</p></div>');
 }
@@ -81,15 +87,15 @@ async function setConsent(yes,scope){
   closeSheet();
   if(!accountsOn()){S.previewMonitorAnswer=yes?"yes":"no";S.previewMonitor=yes?(S.previewMonitor&&S.previewMonitor>Date.now()?S.previewMonitor:Date.now()+7*864e5):0;S.previewScope=scope;saveLocal();}
   else{const r=await api("/api/monitor",{consent:!!yes,scope});if(r&&!r.error){ACCT.monitorAnswer=r.monitor_answer;ACCT.monitorUntil=r.monitor_until;ACCT.monitorScope=r.monitor_scope||scope;}}
-  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the taps you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
+  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the usage categories you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
   renderAll();setTimeout(auraPopup,600);
 }
 function sharingHTML(){
   if(inFriendsWeek()){const on=monitorOn(),sel=on?shareScope():[];
-    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only what you tap and when'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
+    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only the usage activity you chose to share'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
   if(!monitorOn())return "";
   const until=accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor;
-  return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see what you tap and when. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
+  return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see the usage activity you chose to share. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
 }
 function auraPopup(){
   if($("#phoneOnly")||!S.profile.onboarded||$("#scrim")||$("#rite")||$("#talk"))return;
