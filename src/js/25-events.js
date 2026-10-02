@@ -77,7 +77,7 @@ document.addEventListener("click",async ev=>{
   if(d.cartdel){S.cart=S.cart.filter(c=>c.tag!==d.cartdel);persistAll();closeSheet();openAltar(false);return;}
   if(d.thread!==undefined){q=q===d.thread?"":d.thread;renderArchive();return;}
   if(t.id==="archAskBtn"){const qq=($("#archAsk").value||"").trim();if(!qq)return;t.disabled=true;$("#archAnswer").innerHTML='<p class="small muted" style="margin-top:10px">Reading your Archive...</p>';const a=await askArchive(qq);t.disabled=false;$("#archAnswer").innerHTML='<p style="margin-top:12px;font-size:18px">'+esc(a.answer)+'</p>'+(a.cites.length?'<div class="entries" style="margin-top:8px">'+a.cites.map(id=>{const e=S.entries.find(z=>z.id===id);return e?'<button class="entry" data-entry="'+esc(id)+'">'+glyph(e.guardian)+'<span><div class="t">'+esc(e.ritualTitle)+'</div><div class="m">'+fmtDate(e.ts)+'</div>'+(e.text?'<div class="x">'+esc(e.text)+'</div>':'')+'</span></button>':"";}).join("")+'</div>':'');return;}
-  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
+  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk(true);const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
   if(d.snd==="menu"){openSound();return;}
   if(d.sndset){const v=d.sndset;
     if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want)MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});else musicPlay(MUSIC.want);renderSnd();}}
@@ -214,7 +214,7 @@ document.addEventListener("click",async ev=>{
     setTimeout(renderCircle,1100);return;}
   if(d.cardask&&threeMode()&&threeDone()){const cs=drawnCards();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="My three cards today: "+cs.map(x=>SPREAD_POS[x.pos][1]+", "+x.title).join("; ")+". Help me understand what they mean for me right now.";sendTalk();}},350);return;}
   if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
-  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk();openGuardian(d.guardian);return;}
+  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk(true);openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}
   if(d.entry){openEntry(d.entry);return;}
