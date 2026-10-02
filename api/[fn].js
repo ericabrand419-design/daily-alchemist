@@ -10,7 +10,6 @@ const ROUTES = {
   "checkout": () => import("../server/checkout.js"),
   "cron-reminders": () => import("../server/cron-reminders.js"),
   "delete": () => import("../server/delete.js"),
-  "email-code": () => import("../server/email-code.js"),
   "feedback": () => import("../server/feedback.js"),
   "friend": () => import("../server/friend.js"),
   "invites": () => import("../server/invites.js"),
