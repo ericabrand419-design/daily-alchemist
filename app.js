@@ -1227,7 +1227,7 @@ function season(d){
    mirrored on this device so the app works offline and instantly.
 ------------------------------------------------------------------ */
 const KEY="dailyAlchemist.v1";
-let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false},entries:[],draws:{}};
+let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",appearance:"auto",fontSize:"standard",onboarded:false},entries:[],draws:{}};
 try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S={...S,...p,profile:{...S.profile,...(p.profile||{})}};}}catch(e){}
 const RENAMED={moss:"juniper",cypress:"sol",ember:"sage"};
 function migrateCircle(){
@@ -1243,6 +1243,14 @@ if(!S.prefMusicVol)S.prefMusicVol="quiet";
 if(S.profile.minor)setTimeout(()=>showMinor(),300);
 const cloud={db:null,uid:null,on:false};
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function applyDisplayPrefs(){
+  const p=S.profile||{},root=document.documentElement;
+  const appearance=["auto","light","dark"].includes(p.appearance)?p.appearance:"auto";
+  const font=["standard","large","xlarge"].includes(p.fontSize)?p.fontSize:"standard";
+  root.dataset.appearance=appearance;root.dataset.font=font;
+  if(appearance==="auto")delete root.dataset.theme;else root.dataset.theme=appearance;
+}
+applyDisplayPrefs();
 function col(){return cloud.db.collection("data/users/"+cloud.uid);}
 async function cloudPut(id,data){if(!cloud.on)return;try{await col().doc(id).set(JSON.parse(JSON.stringify(data)));}catch(e){cloud.on=false;renderArchive();}}
 function mergeExtras(x){
@@ -1494,7 +1502,7 @@ async function onSignedIn(session){
     for(const row of (e.data||[])){remote.add(row.id);if(!have.has(row.id)&&row.data)S.entries.push(row.data);}
     for(const x of S.entries)if(!remote.has(x.id))remotePut("entry",x.id,x);
     for(const row of (c.data||[])){const loc=S.chats[row.guardian]||[];S.chats[row.guardian]=(row.msgs||[]).length>=loc.length?row.msgs:loc;}
-    if(p.data&&p.data.data){S.profile={...S.profile,...(p.data.data.profile||{})};if(S.profile.snd)applySnd(S.profile.snd);S.draws={...S.draws,...(p.data.data.draws||{})};if(p.data.data.ledger)S.ledger=p.data.data.ledger;if(p.data.data.extras)mergeExtras(p.data.data.extras);}
+    if(p.data&&p.data.data){S.profile={...S.profile,...(p.data.data.profile||{})};applyDisplayPrefs();if(S.profile.snd)applySnd(S.profile.snd);S.draws={...S.draws,...(p.data.data.draws||{})};if(p.data.data.ledger)S.ledger=p.data.data.ledger;if(p.data.data.extras)mergeExtras(p.data.data.extras);}
     else if(S.profile.onboarded)remotePut("prefs");
     migrateCircle();S.entries.sort((a,b)=>b.ts-a.ts);saveLocal();
   }catch(err){}
@@ -1627,8 +1635,8 @@ function recentThemes(days){const cut=Date.now()-days*864e5,c={};for(const e of 
 /* ------------------------------------------------------------------
    CONTINUITY: what worked, what she owns, what Aura carries long-term.
 ------------------------------------------------------------------ */
-const NOUN={candle:"a candle",salt:"salt",broom:"a broom",bowl:"a bowl",thread:"thread",jar:"a jar",mirror:"a mirror",honey:"honey",rosemary:"rosemary",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil",stone:"a stone",tea:"tea"};
-const ASKN={candle:"candles",salt:"salt",broom:"a broom",bowl:"bowls",thread:"thread or string",jar:"a jar with a lid",mirror:"a mirror",honey:"honey",rosemary:"rosemary or any fresh herb",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil or lotion",stone:"a stone",tea:"tea"};
+const NOUN={candle:"a candle",salt:"salt",broom:"a broom",bowl:"a bowl",thread:"thread",jar:"a jar",mirror:"a mirror",honey:"honey",rosemary:"rosemary",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil",stone:"a stone",tea:"tea",paper:"paper",pen:"a pen or pencil",water:"water",lighter:"matches or a lighter",scissors:"scissors",towel:"a towel",chair:"a chair",envelope:"an envelope",plate:"a plate",shower:"a shower",bath:"a bath or basin"};
+const ASKN={candle:"candles",salt:"salt",broom:"a broom",bowl:"bowls",thread:"thread or string",jar:"a jar with a lid",mirror:"a mirror",honey:"honey",rosemary:"rosemary or any fresh herb",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil or lotion",stone:"a stone",tea:"tea",paper:"paper",pen:"a pen or pencil",water:"water",lighter:"matches or a lighter",scissors:"scissors",towel:"a towel",chair:"a chair",envelope:"an envelope",plate:"a plate",shower:"a shower",bath:"a bath or basin"};
 const SUBS={
   candle:{alt:[],text:"a lamp or your phone's flashlight"},
   salt:{alt:[],text:"a pinch of sugar or baking soda"},
@@ -1646,9 +1654,20 @@ const SUBS={
   soil:{alt:[],text:"a damp paper towel folded into a cup"},
   oil:{alt:[],text:"any lotion, or a little olive oil"},
   stone:{alt:[],text:"a coin or any small, heavy object"},
-  tea:{alt:[],text:"hot water with a slice of lemon"}
+  tea:{alt:[],text:"hot water with a slice of lemon"},
+  paper:{alt:[],text:"a note in your phone"},
+  pen:{alt:[],text:"your phone keyboard"},
+  water:{alt:[],text:"any drinkable water you have"},
+  lighter:{alt:[],text:"a lamp or your phone flashlight when the ritual does not require burning"},
+  scissors:{alt:[],text:"tear it carefully by hand"},
+  towel:{alt:[],text:"any clean cloth"},
+  chair:{alt:[],text:"the edge of a bed or a firm cushion"},
+  envelope:{alt:[],text:"fold the paper inward and keep it somewhere private"},
+  plate:{alt:["bowl"],text:"a bowl, saucer or clean flat surface"},
+  shower:{alt:[],text:"a sink wash or warm cloth"},
+  bath:{alt:[],text:"a basin or foot soak"}
 };
-const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"]};
+const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"],paper:["paper","page","write","journal","letter","note"],pen:["pen","pencil","write"],water:["water"],lighter:["matches","lighter","light it","flame"],scissors:["scissors","cut"],towel:["towel","cloth"],chair:["chair","seat"],envelope:["envelope"],plate:["plate"],shower:["shower"],bath:["bath","basin"]};
 function ritualNeedItems(r){
   const out=[],keys=new Set();
   const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push([k,label]);};
@@ -2640,18 +2659,17 @@ function ritualCard(r,opts){
   if(!canUse(r)){
     return '<article class="page locked"><div class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+'</div><h3>'+esc(r.title)+'</h3><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(CHAMBERS[r.g]?CHAMBERS[r.g].name:"Chamber")+'</span></div><p class="needs">'+esc(r.purpose)+'</p><div class="actions"><button class="btn btn-ink" data-paywall="'+esc(G[r.g].name)+'\'s chamber">Unlock with '+esc(PLAN.name)+'</button></div></article>';
   }
-  const a=adapt(r), unk=unknownFor(r)[0];
-  const needList=ritualNeeds(r),needs=needList.length?needList.map(esc).join(" · "):"Nothing but you.";
-  const ownable=r.needs.filter(n=>SUBS[n[0]]&&S.profile.have.includes(n[0]));
-  return '<article class="page ritualcard" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
+  const a=adapt(r), needItems=ritualNeedItems(r);
+  const supplyButtons=needItems.length?needItems.map(n=>{const miss=known().includes(n[0])&&!S.profile.have.includes(n[0]);return '<button class="needchip'+(miss?' missing':'')+'" data-own="'+n[0]+':'+(miss?'1':'0')+'" aria-pressed="'+(!miss)+'"><span class="needcheck">'+(miss?'＋':'✓')+'</span>'+esc(n[1])+'</button>';}).join(""):'<span class="needchip static">Nothing but you</span>';
+  return '<article class="page ritualcard" style="--gcol:'+esc(G[r.g].color)+'" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
    '<button class="ritualguardian" data-guardian="'+esc(r.g)+'">'+glyph(r.g,42)+'<span><span class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+(r.reset?" · Reset day "+r.reset:"")+(r.composed?" · Written for you":"")+'</span><span class="small">Open '+esc(G[r.g].name)+"'s chamber</span></span></button>"+
    '<h3>'+esc(r.title)+'</h3><p class="ritualpurpose">'+esc(r.purpose||"")+'</p><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(r.moon==="Any"?"Any moon":r.moon+" moon")+'</span><span>'+r.steps.length+' steps</span></div>'+
-   '<div class="needs"><b>Gather before you begin</b><div class="needchips">'+(needList.length?needList.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
+   '<div class="needs supplycheck"><b>Gather before you begin</b><p class="supplyhint">Tap anything you are missing. Tap it again to add it back.</p><div class="needchips">'+supplyButtons+'</div></div>'+
    (a.notes.length?'<p class="adj">'+a.notes.map(esc).join(" ")+' The steps already say so.</p>':"")+
-   cartOffer(r)+(unk?'<div class="ask"><span>Do you usually have '+esc(ASKN[unk[0]])+'?</span><button class="chip" data-own="'+unk[0]+':1">Yes</button><button class="chip" data-own="'+unk[0]+':0">No</button></div>':"")+
+   cartOffer(r)+
+   (a.notes.length?'<div class="supplyswap"><span class="label">Aura adapted it</span><p>'+a.notes.map(esc).join(" ")+'</p></div>':"")+
    whyNow(r,opts&&opts.why)+
-   '<div class="actions"><button class="btn btn-ink" data-begin="'+esc(r.id)+'"'+(opts&&opts.ctx?' data-ctx="'+opts.ctx+'"':"")+'>Begin the ritual</button>'+(ownable.length?'<button class="linkish dark" data-donthave="'+esc(r.id)+'">I don\'t have that</button>':'')+'</div>'+
-   (ownable.length?'<div class="dh" hidden data-dh="'+esc(r.id)+'"><span class="small">Tap what you don\'t have. Aura will rewrite the steps.</span><div class="chips">'+ownable.map(n=>'<button class="chip" data-own="'+n[0]+':0">'+esc(NOUN[n[0]])+'</button>').join("")+'</div></div>':'')+'</article>';
+   '<div class="actions"><button class="btn btn-ink" data-begin="'+esc(r.id)+'"'+(opts&&opts.ctx?' data-ctx="'+opts.ctx+'"':"")+'>Begin the ritual</button></div></article>';
 }
 /* ------------------------------------------------------------------
    INNER CIRCLE HEADLINERS
@@ -2668,15 +2686,20 @@ function weekChats(since,until){until=until||Infinity;const out=[];for(const k o
 function lastLetter(){return S.letters.slice().sort((a,b)=>b.ts-a.ts)[0]||null;}
 function letterSince(){const l=lastLetter();return l?l.ts:Date.now()-WEEK;}
 function firstActivity(){let f=Infinity;for(const e of S.entries)if(e.ts<f)f=e.ts;for(const a of (S.asks||[]))if(a.ts&&a.ts<f)f=a.ts;for(const k of ALL)for(const m of (S.chats[k]||[]))if(m.role==="me"&&m.ts&&m.ts<f)f=m.ts;return f===Infinity?0:f;}
-function contactPref(){return S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};}
-function contactDays(){return {daily:1,"3days":3,weekly:7}[contactPref().cadence]||7;}
-function contactSettingsHTML(){
-  const c=contactPref(),on=c.enabled===true,off=c.enabled===false;
-  return '<details class="group contactprefs"><summary>Letters and check-ins</summary><p class="small muted">Choose whether Aura reaches out between visits, how often, and whether guardians can check in too. You can change this any time.</p>'+
-    '<div class="label" style="margin-top:10px">Reach out to me?</div><div class="chips"><button class="chip" data-contacton="1" aria-pressed="'+on+'">Yes</button><button class="chip" data-contacton="0" aria-pressed="'+off+'">No</button></div>'+
-    '<div class="label" style="margin-top:12px">How often?</div><div class="chips"><button class="chip" data-contactcad="daily" aria-pressed="'+(c.cadence==="daily")+'">Daily</button><button class="chip" data-contactcad="3days" aria-pressed="'+(c.cadence==="3days")+'">Every 3 days</button><button class="chip" data-contactcad="weekly" aria-pressed="'+(c.cadence==="weekly")+'">Weekly</button></div>'+
-    '<div class="label" style="margin-top:12px">Who can reach out?</div><div class="chips"><button class="chip" data-contactscope="aura" aria-pressed="'+(c.scope==="aura")+'">Aura only</button><button class="chip" data-contactscope="circle" aria-pressed="'+(c.scope==="circle")+'">Aura + guardians</button></div>'+
-    '<button class="btn btn-main full" id="contactSave" style="margin-top:12px">Save contact preferences</button></details>';
+function contactPref(){
+  const raw=S.profile.contact||{},cad=raw.enabled===false?"never":(raw.cadence||null);
+  return {enabled:cad!=="never"&&raw.enabled!==false,cadence:cad,scope:raw.scope||"circle",notify:raw.notify==null?(S.profile.push===true?true:null):raw.notify};
+}
+function contactDays(){return {"3xday":1/3,daily:1,"3days":3,weekly:7,monthly:30}[contactPref().cadence]||Infinity;}
+function contactSettingsHTML(open){
+  const c=contactPref(),cad=c.cadence||"",notify=c.notify;
+  const opts=[["3xday","Three times a day"],["daily","Every day"],["3days","Every 3 days"],["weekly","Every week"],["monthly","Every month"],["never","Never again"]];
+  return '<details class="group contactprefs"'+(open?' open':'')+'><summary>Letters and check-ins</summary><p class="small muted">Choose the rhythm. Letters can wait inside the app even if notifications are off.</p>'+
+    '<div class="label" style="margin-top:10px">How often should we write?</div><div class="chips">'+opts.map(o=>'<button class="chip" data-contactcad="'+o[0]+'" aria-pressed="'+(cad===o[0])+'">'+o[1]+'</button>').join("")+'</div>'+
+    '<div class="label" style="margin-top:12px">Notify me when one arrives?</div><div class="chips"><button class="chip" data-contactnotify="1" aria-pressed="'+(notify===true)+'">Yes, notify me</button><button class="chip" data-contactnotify="0" aria-pressed="'+(notify===false)+'">No notifications</button></div>'+
+    '<div class="label" style="margin-top:12px">Who can write?</div><div class="chips"><button class="chip" data-contactscope="aura" aria-pressed="'+(c.scope==="aura")+'">Aura only</button><button class="chip" data-contactscope="circle" aria-pressed="'+(c.scope==="circle")+'">Aura + relevant guardians</button></div>'+
+    '<p class="small muted" style="margin-top:7px">Relevant guardians means the ones you have actually worked with or whose work connects to what you have been carrying. You do not have to manage a list of nineteen people.</p>'+
+    '<button class="btn btn-main full" id="contactSave" style="margin-top:12px">Save my letter rhythm</button></details>';
 }
 function firstReturnLetter(){return (S.letters||[]).find(l=>l.kind==="first-return")||null;}
 /* Is she in the 30 days after her free week, when Aura still writes but the letters stay sealed? */
@@ -2686,7 +2709,7 @@ function graceActive(){
   const te=trialEnds();return te>0&&Date.now()>=te&&Date.now()<te+GRACE_DAYS*864e5;
 }
 function letterDue(){
-  if(contactPref().enabled!==true)return false;
+  if(contactPref().cadence==="never"||!Number.isFinite(contactDays()))return false;
   const l=lastLetter(),gap=contactDays()*864e5;
   if(!l)return false;
   if(Date.now()-l.ts<gap-6*36e5)return false;
@@ -2705,8 +2728,9 @@ function letterMaterial(since,until){
     "PAST LETTERS (do not repeat them): "+(S.letters.filter(l=>!l.sealed).slice(0,2).map(l=>l.title).join("; ")||"none")};
 }
 function namesList(ks){const nm=ks.map(g=>G[g].name);return nm.length>1?nm.slice(0,-1).join(", ")+" and "+nm[nm.length-1]:(nm[0]||"");}
-function localLetter(m){
-  const n=firstName(), es=m.es;
+function letterSender(m){if(contactPref().scope!=="circle")return "aura";const gs=[...m.es.map(e=>e.guardian),...m.ch.map(c=>c.g)].filter(g=>g&&g!=="aura"&&G[g]);return gs.length?gs[gs.length-1]:"aura";}
+function localLetter(m,sender){
+  const n=firstName(), es=m.es,voice=G[sender]||G.aura;
   const gs=[...new Set(es.map(e=>e.guardian).filter(g=>g&&g!=="aura"))];
   const good=es.filter(e=>GOOD.includes(e.after));
   const carried=es.map(e=>e.carrying).filter(Boolean);
@@ -2718,39 +2742,43 @@ function localLetter(m){
   t+="Before I write again, I'd like you to go back to "+G[next].name+". Not to fix anything. Just to keep the thread going.\n\nI'll be here.\nAura";
   return {title:"What I noticed",letter:t,next_guardian:next,intention:"Keep the thread going."};
 }
-async function composeLetter(m){
+async function composeLetter(m,sender){
   let out=null;
   try{
-    out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist, a ritual and reflection app. Warm, perceptive, grounded, a little mystical, never preachy. You write each member personal letters at the cadence she chose: daily, every three days or weekly. Look back only over the time since the last letter.\n\n"+m.text+"\n\n"+
+    const voice=G[sender]||G.aura;out=await aiJSON("You are "+voice.name+", "+voice.title+", writing a personal letter from The Daily Alchemist. Your domain: "+voice.domain+" Your voice: "+voice.voice+" Stay warm, perceptive and grounded. The member chose her own letter cadence. Look back only over the time since the last letter.\n\n"+m.text+"\n\n"+
       "Write a personal letter looking back since the last letter. 170 to 260 words. Address her by first name if you have it. Be specific: name what she actually carried, what she did, what helped and what didn't, using her own words where you can. Point out one pattern or shift you noticed. Suggest one guardian to spend time with before the next letter and why, and close with one simple intention until then. Sign it Aura. Plain words, short paragraphs, no em dashes, no bullet points, no diagnosing, no therapy language. Only use what is in the material.\n"+
       'Reply with ONLY JSON: {"title":"a short, warm title for the letter, under 7 words","letter":"the full letter with \\n\\n between paragraphs","next_guardian":"one key from: '+ALL.filter(k=>k!=="aura").join(", ")+'","intention":"one short line"}',null,{tier:"deep"});
   }catch(e){out=null;}
-  if(!out||!out.letter)out=localLetter(m);
+  if(!out||!out.letter)out=localLetter(m,sender);
   return {title:clean(String(out.title||"From Aura")).slice(0,80),text:clean(String(out.letter)),next:G[out.next_guardian]&&out.next_guardian!=="aura"?out.next_guardian:null,intention:clean(String(out.intention||"")).slice(0,160)};
 }
 async function writeLetter(){
-  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
-  const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),...(await composeLetter(letterMaterial(since)))};
+  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5),m=letterMaterial(since),sender=letterSender(m);
+  const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),sender,...(await composeLetter(m,sender))};
   S.letters.unshift(L);S.letters=S.letters.slice(0,60);saveLocal();remotePut("prefs");
   return L;
 }
 function firstReturnText(){
   const n=firstName(),a=(S.asks||[]).find(x=>!x.noMem&&x.text),e=S.entries.find(usable),bits=[];
-  if(a&&a.thread)bits.push("I remember you left me holding "+a.thread.toLowerCase()+".");
+  if(a&&a.thread)bits.push("I still have the thread you left with me around "+a.thread.toLowerCase()+".");
   else if(e&&e.ritualTitle)bits.push("I remember you spent time with "+(G[e.guardian]||G.aura).name+" and "+e.ritualTitle+".");
-  else bits.push("I remember that you showed up and gave me something real to hold.");
-  return (n?n+",\n\n":"")+"You came back. Good. That is how this place becomes yours instead of just another app. "+bits.join(" ")+" I don't need you to start over.\n\nBefore I keep reaching for you between visits, I want you to decide how much of that you actually want. Daily, every few days, weekly, Aura only, or the whole Circle. You can change it whenever you want.\n\nI'll keep the thread either way.\n\nAura";
+  else bits.push("You do not have to prove anything before this place can remember you.");
+  return (n?n+",\n\n":"")+"You're back. I kept your place. "+bits.join(" ")+" I am not going to make a thing out of how long you were gone. The point is that you should never have to come back and start from zero.\n\nThis is also where you get to decide how the Circle keeps in touch. You can ask for a wrap-up three times a day, daily, every three days, weekly, monthly or never. Notifications are a separate choice. And if you want the wider Circle involved, the guardians who actually touch your story can write too.\n\nYou choose the rhythm. I keep the thread.\n\nAura";
 }
 function createFirstReturnLetter(){
   if(firstReturnLetter())return firstReturnLetter();
-  const L={id:"let_"+Date.now(),kind:"first-return",ts:Date.now(),since:firstActivity(),until:Date.now(),sealed:false,title:"You came back",text:firstReturnText(),intention:"Choose how you want us to reach you.",read:false};
+  const since=firstActivity()||S.firstAwayAt||Date.now(),L={id:"let_"+Date.now(),kind:"first-return",sender:"aura",ts:Date.now(),since,until:Date.now(),sealed:false,title:"I kept your place",text:firstReturnText(),intention:"Choose the rhythm that feels useful, not demanding.",read:false};
   S.letters.unshift(L);saveLocal();remotePut("prefs");return L;
 }
 let returnLetterBusy=false;
 function maybeFirstReturnLetter(){
   if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded)return false;
   const now=Date.now(),first=firstActivity();
-  const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=3000;
+  /* A return can be proven two ways: this device saw her leave, or her synced account
+     already contains activity from a previous calendar day. The latter matters after
+     sign-out, a new phone, reinstall or invitation/login flow, where firstAwayAt is local
+     and can be lost even though Aura still has yesterday's history. */
+  const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=1000;
   const priorDay=!!first&&dayKey(new Date(first))!==dayKey(new Date(now));
   if(!leftHere&&!priorDay)return false;
   if($("#gate")||$("#intro")||$("#rite"))return false;
@@ -2758,11 +2786,11 @@ function maybeFirstReturnLetter(){
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
 }
 function noteAppAway(){
-  if(!firstReturnLetter()&&firstActivity()){S.firstAwayAt=Date.now();saveLocal();}
+  if(!firstReturnLetter()&&S.profile.onboarded){S.firstAwayAt=Date.now();saveLocal();}
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")noteAppAway();else if(document.visibilityState==="visible")setTimeout(maybeFirstReturnLetter,250);});
 window.addEventListener("pagehide",noteAppAway);
-setTimeout(maybeFirstReturnLetter,1800);
+setTimeout(maybeFirstReturnLetter,1200);
 /* During the 30 days after the free week: Aura still writes, but the letter stays sealed.
    Only the envelope is stored now. The words are written from that week's Archive when she joins and opens it. */
 function sealLetter(){
@@ -2775,7 +2803,7 @@ function sealLetter(){
 function sealedAbout(L){return L.gs&&L.gs.length?"I wrote about what you've been carrying, and your time with "+namesList(L.gs.slice(0,3))+".":"I wrote about what you've been carrying.";}
 async function unsealLetter(L){
   toast("Opening your letter...");
-  Object.assign(L,await composeLetter(letterMaterial(L.since,L.until)),{sealed:false});
+  const m=letterMaterial(L.since,L.until),sender=letterSender(m);Object.assign(L,{sender},await composeLetter(m,sender),{sealed:false});
   saveLocal();remotePut("prefs");
   return L;
 }
@@ -2922,7 +2950,7 @@ function shareHTML(){
       :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Generate my invitation link</button>')+'</details>';
 }
 async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
-const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and sign in with your email. You'll get a code, no password. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing which buttons you tap and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and sign in with your email. It sends you a code, no password. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing which buttons you tap, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
+const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist will email you a secure sign-in link. No password and no text messages from the app. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing which buttons you tap and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist emails you a secure sign-in link. No password and no text messages from the app. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing which buttons you tap, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
 function inviteText(){return SHARE&&SHARE.open?"Hi! "+INV_ERICA:"Hey! "+INV_FRIEND;}
 async function doShare(copyOnly){
   if(!SHARE)await loadShare();if(!SHARE)return;
@@ -3780,7 +3808,7 @@ function openAlchemy(){
    (dr?'<details class="group"><summary>Today\'s card · '+esc(dr.name)+'</summary><p>'+esc(dr.now)+'</p></details>':'')+
    (cyc&&cyc.day!=null?'<details class="group"><summary>Iris</summary><p>Cycle day '+cyc.day+'. '+esc(cycleEstimate(now).line)+'</p>'+(cyc.pattern?'<p class="small muted">'+esc(cyc.pattern)+'</p>':'')+'</details>':'')+
    '<button class="btn btn-ghost full" id="sheetDone">Close</button></div>';
-  openSheet(h,j.g);
+  openSheet(h);
 }
 /* ------------------------------------------------------------------
    IRIS, THE CYCLE KEEPER. Opt in only. Context, not dismissal.
@@ -4197,7 +4225,6 @@ function threeSpreadHTML(){
   setTimeout(fetchThreeReading,50);
   return h;
 }
-
 /* ------------------------------------------------------------------
    WEATHER. Part of the natural rhythm (priority 7): it changes the
    light of the app and which rituals make sense, and it never outranks
@@ -4365,17 +4392,22 @@ function resetNext(){
   const a=done.length?adaptAll(lastReset&&lastReset.after,next,lastReset?Math.max(0,daysSince(lastReset.ts)-1):0,next.reset):{r:next,note:""};
   return {base:next,...a,started:done.length>0};
 }
+function moonTrailMark(d,on){
+  const m=moon(d),r=8,k=Math.cos(2*Math.PI*m.f),rx=Math.max(.35,Math.abs(k)*r),outer=m.waxing?1:0,inner=m.waxing?(k>0?0:1):(k>0?1:0);
+  const p="M8,0 A"+r+","+r+" 0 0,"+outer+" 8,16 A"+rx+","+r+" 0 0,"+inner+" 8,0 Z";
+  return '<span class="moonday'+(on?' on':'')+'" title="'+esc(d.toDateString()+" · "+m.name)+'"><svg viewBox="-1 -1 18 18" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor" opacity=".14"/><path d="'+p+'" fill="currentColor"/></svg></span>';
+}
 function addUpHTML(){
   const es=S.entries.filter(e=>e.ritualId||e.ritualTitle);
   const mins=es.reduce((a,e)=>a+((byId[e.ritualId]&&byId[e.ritualId].min)||e.min||5),0);
   const shown=new Set(es.map(e=>dayKey(new Date(e.ts))));for(const k of Object.keys(S.days||{}))if(Object.keys(S.days[k]).length)shown.add(k);
   const now=new Date(),tm=es.filter(e=>{const d=new Date(e.ts);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
   const lmD=new Date(now.getFullYear(),now.getMonth()-1,1),lm=es.filter(e=>{const d=new Date(e.ts);return d.getMonth()===lmD.getMonth()&&d.getFullYear()===lmD.getFullYear();}).length;
-  let dots="";for(let i=55;i>=0;i--){const d=new Date(now.getTime()-i*864e5);dots+='<i'+(shown.has(dayKey(d))?' class="on"':'')+' title="'+esc(d.toDateString())+'"></i>';}
+  let moons="";for(let i=28;i>=0;i--){const d=new Date(now.getTime()-i*864e5);moons+=moonTrailMark(d,shown.has(dayKey(d)));}
   const ins=rhythmInsight();
   return '<div class="card addup"><div class="label">Adding up</div>'+auraSays("Small rituals, kept daily, become who you are.","Aura")+
     '<div class="addnums"><div><b>'+es.length+'</b><span>rituals</span></div><div><b>'+(mins>=120?Math.round(mins/60)+" hr":mins+" min")+'</b><span>given to yourself</span></div><div><b>'+shown.size+'</b><span>days you showed up</span></div></div>'+
-    '<div class="dots" aria-label="The last eight weeks">'+dots+'</div><p class="small muted" style="margin-top:6px">The last eight weeks. Every lit day counts. Nothing resets.</p>'+
+    '<div class="moontrail" aria-label="The last lunar cycle">'+moons+'</div><p class="small muted" style="margin-top:6px">The last lunar cycle. A gold ring marks every day you showed up. Nothing resets.</p>'+
     (es.length?'<p class="small" style="margin-top:8px">This month: '+tm+(tm===1?" ritual":" rituals")+'. Last month: '+lm+'.</p>':'')+(ins?'<p class="why" style="margin-top:10px">'+esc(ins)+'</p>':'')+'</div>';
 }
 function renderJourneys(){
@@ -4389,7 +4421,7 @@ function renderJourneys(){
   }
   h+='</div>';
   h+='<div><div class="row between"><span class="label">Guided journeys</span>'+(isMember()?'':'<span class="badge">'+esc(PLAN.name)+'</span>')+'</div><h2 style="margin-top:4px">When one night isn\'t enough</h2><p class="muted" style="margin-top:6px">Seven days each, one ritual a night, in the voice of the guardian who leads it.</p></div><div class="entries">';
-  for(const j of JOURNEYS){const dn=journeyDays(j.id).length;h+='<button class="card link" data-journey="'+j.id+'"><div class="row">'+glyph(j.g,34)+'<div style="flex:1;min-width:0"><h3>'+(isMember()?'':'🔒 ')+esc(j.name)+'</h3><p class="small muted" style="margin-top:2px">With '+esc(G[j.g].name)+' · 7 days'+(dn?' · '+dn+' done':'')+'</p></div></div><p style="margin-top:8px;color:var(--glow-dim);font-size:15.5px">'+esc(j.d)+'</p>'+(dn?'<div class="progress" style="margin-top:10px"><i style="width:'+(dn/7*100)+'%"></i></div>':'')+'</button>';}
+  for(const j of JOURNEYS){const dn=journeyDays(j.id).length;h+='<div class="card journeycard"><div class="row journeyrow">'+guardianMark(j.g,42)+'<button class="journeyopen" data-journey="'+j.id+'"><h3>'+(isMember()?'':'🔒 ')+esc(j.name)+'</h3><p class="small muted">With '+esc(G[j.g].name)+' · 7 days'+(dn?' · '+dn+' done':'')+'</p></button></div><button class="journeybody" data-journey="'+j.id+'"><span>'+esc(j.d)+'</span>'+(dn?'<span class="progress" style="margin-top:10px"><i style="width:'+(dn/7*100)+'%"></i></span>':'')+'</button></div>';}
   h+='</div>';
   $("#v-journeys").innerHTML=h;
 }
@@ -4478,9 +4510,8 @@ function openJourney(id){
   j.days.forEach((d,i)=>{const n=i+1,isDone=done.includes(n),isNext=next===n,locked=!isMember()||(!isDone&&!isNext);let r=byId[d[0]];if(isNext&&isMember()){const a=journeyStep(j,n);r=a.r;note=a.note;window.__jsettle=!!a.settle;}
     h+='<button class="day'+(isDone?" done":"")+(isNext&&isMember()?" next":"")+'" '+(isMember()&&!locked?'data-jday="'+id+':'+n+'"':'')+(locked?" disabled":"")+'><span class="num">'+(isDone?"✓":n)+'</span><span><div class="t">'+esc(r.title)+'</div><div class="s">'+esc(d[1])+'</div></span><span class="st">'+(isDone?"Done":isNext&&isMember()?"Tonight":r.min+" min")+'</span></button>';});
   h+='</div>'+(note&&isMember()?'<p class="why">'+esc(note)+(window.__jsettle?' <button class="linkish" data-begin="two-minute-settle">Settle first</button>':'')+'</p>':'')+(isMember()?(next?'':'<p class="muted">Journey complete. You can start any day again from its guardian.</p>'):'<button class="btn btn-main full" data-paywall="'+esc(j.name)+'">Start with '+esc(PLAN.name)+'</button>')+'</div>';
-  openSheet(h);
+  openSheet(h,j.g);
 }
-
 
 /* ------------------------------------------------------------------
    ARCHIVE
@@ -4631,7 +4662,6 @@ function afterLoop0(e,r){
   if(a==="Stirred up"){openSheet('<div class="stack"><div class="handoff" style="padding:0">'+glyph("aura")+'<p><span class="who2">Aura</span>Something moved. Let\'s settle your body before you go. Two minutes with Lily.</p></div><button class="btn btn-main full" data-begin="two-minute-settle">Settle for two minutes</button><button class="btn btn-ghost full" id="sheetDone">I\'m okay</button></div>');return;}
   if(a==="Tender"){openSheet('<div class="stack"><div class="handoff" style="padding:0">'+glyph("aura")+'<p><span class="who2">Aura</span>Tender means it reached something real. Be gentle with yourself tonight. Willow is here if you want to talk.</p></div><button class="btn btn-main full" data-talk="willow">Talk to Willow</button><button class="btn btn-ghost full" id="sheetDone">I just want to rest</button></div>');return;}
 }
-
 
 /* ------------------------------------------------------------------
    TALK: a real conversation with any guardian
@@ -4793,7 +4823,6 @@ async function sendTalk(){
   if(talkG===k){drawMsgs();$("#chatSend").disabled=false;}
 }
 
-
 /* Voice: tap the mic, speak, and it transcribes into the field */
 let rec=null,recBtn=null;
 function stopMic(){if(rec){try{rec.stop();}catch(e){}}}
@@ -4899,7 +4928,8 @@ function openAltar(first){
   }
   if(!first){
     h+=ACCT.user?'<div class="card accountquick"><div class="row between"><span><span class="label">Signed in</span><br><span class="small">'+esc(ACCT.email||"Your account")+'</span></span><button class="btn btn-ghost" id="signOutTop">Log out</button></div><p class="small muted" style="margin-top:8px">Log out only when you want to switch accounts. Otherwise, this device keeps you signed in.</p></div>':'';
-    h+='<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
+    h+='<details class="group" open><summary>Appearance and text</summary><p class="small muted">Auto follows the real light outside. Light and Dark stay where you put them until you change them.</p><div class="label" style="margin-top:10px">Appearance</div><div class="chips">'+[["auto","Auto"],["light","Light"],["dark","Dark"]].map(o=>'<button class="chip" data-appearance="'+o[0]+'" aria-pressed="'+((p.appearance||"auto")===o[0])+'">'+o[1]+'</button>').join("")+'</div><div class="label" style="margin-top:12px">Text size</div><div class="chips">'+[["standard","Standard"],["large","Large"],["xlarge","Extra large"]].map(o=>'<button class="chip" data-font="'+o[0]+'" aria-pressed="'+((p.fontSize||"standard")===o[0])+'">'+o[1]+'</button>').join("")+'</div></details>'+
+      '<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
      '<details class="group" open><summary>What you have</summary><p class="small muted">Tap what you own. Aura builds rituals around it and rewrites steps for what you don\'t.</p><div class="lbl" style="margin-top:10px">Everyday things</div>'+chipset("pHave",HAVE)+'<div class="lbl" style="margin-top:14px">More advanced tools</div>'+chipset("pAdv",HAVE_ADV)+'<div class="lbl" style="margin-top:14px">Your own</div>'+custom+'</details>'+
      ''+sharingHTML()+shareHTML()+(ACCT.admin?'<a class="btn btn-main full" href="/admin" style="margin:6px 0">Open your dashboard</a>':'')+'<details class="group"><summary>Share feedback</summary><p class="small muted">Tell me what confused you, what you loved, or what\'s missing. It goes straight to the person who made this app.</p><button class="btn btn-ghost full" id="fbOpen">Share a thought</button></details><details class="group"><summary>Dates that matter</summary><p class="small muted">Birthdays, move-in days, anniversaries, losses, fresh starts. Aura will remember and mark them with you.</p>'+S.dates.map(d=>'<div class="li"><span>'+esc(d.name)+'<br><span class="small muted">'+new Date(2000,d.month-1,d.day).toLocaleDateString(undefined,{month:"long",day:"numeric"})+(d.year?", "+d.year:"")+'</span></span><button class="x2" data-deldate="'+d.id+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="dateName">What happened</label><input type="text" id="dateName" placeholder="Moved into the house"><label class="sr" for="dateWhen">Date</label><input type="date" id="dateWhen"><button class="btn btn-ghost" id="dateAdd">Add</button></div></details>'+
      '<details class="group"><summary>What things mean to you</summary><p class="small muted">Aura uses your meanings over the traditional ones. If your grandmother grew lavender, lavender is hers.</p>'+S.corr.map((c,i)=>'<div class="li"><span><b style="font-weight:500">'+esc(c.symbol)+'</b> · '+esc(c.meaning)+'</span><button class="x2" data-delcorr="'+i+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="corrSym">Symbol</label><input type="text" id="corrSym" placeholder="Lavender"><label class="sr" for="corrMean">What it means to you</label><input type="text" id="corrMean" placeholder="My grandmother\'s garden"><button class="btn btn-ghost" id="corrAdd">Add</button></div></details>'+
@@ -4952,8 +4982,6 @@ document.addEventListener("click",async ev=>{
   if(d.contactcad){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.cadence=d.contactcad;document.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
   if(d.contactscope){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.scope=d.contactscope;document.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
   if(t.id==="contactSave"){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};if(c.enabled==null){toast("Choose whether you want us to reach out.");return;}persist("profile");if(c.enabled){const ok=await enablePush();toast(ok?"Saved. We'll follow your rhythm.":"Saved. You'll still see letters and check-ins when you open the app.");}else toast("Saved. We won't reach out while you're away.");return;}
-  if(d.ritualneed&&run){const [tg,yn]=d.ritualneed.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);run.r=adapt(run.base||run.r);drawStep();toast(yn==="1"?"Added back.":"Aura adapted the ritual around it.");return;}
-  if(t.id==="missingBtn"){const g=document.querySelector("#rite .gatherbox");if(g){g.classList.add("attention");g.scrollIntoView({behavior:"smooth",block:"center"});}toast("Tap the item you are missing. Tap it again if you need to undo it.");return;}
   if(t.id==="pushOn"){await enablePush();return;}
   if(d.altar){openAltarItems(d.altar);return;}
   if(d.tend){const sp=S.spaces.find(z=>z.id===d.tend);const r=tendRitual(sp);startRitual(r,{space:sp.id,theme:"space",thread:"Home"});return;}
@@ -5005,7 +5033,7 @@ document.addEventListener("click",async ev=>{
     track("music",{set:v});return;}
   if(d.snd){if(d.snd==="music"){
       /* If it says on but nothing is playing yet (phones block sound until a tap), this tap starts it instead of turning it off. */
-      if(musicOn()&&!musicAudible()){MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);renderSnd();toast("Music on.");
+      if(musicOn()&&!musicAudible()){MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);renderSnd();toast("Music on.");}
       else{const on=!musicOn();setMusic(on);toast(on?"Music on.":"Music off. Tap the note to bring it back.");}}else{const on=voiceMuted();setVoice(on);toast(on?"Voices on.":"Voices off. Tap the speaker to hear them again.");}track("music",{set:d.snd+(d.snd==="music"?(musicOn()?"_on":"_off"):(voiceMuted()?"_off":"_on"))});return;}
   if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(voiceMuted())setVoice(true);if(!naturalVoices()){voiceOn=false;toast("Guided voice needs you signed in on the live app. The steps are all here to read.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
   if(d.own){const [tg,yn]=d.own.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);refreshCards();toast(yn==="1"?"Got it. Aura will remember.":"Got it. Aura rewrote it around what you have.");return;}
@@ -5042,6 +5070,14 @@ document.addEventListener("click",async ev=>{
   if(t.id==="checkoutBtn"){track("checkout",{plan:payPlan});if(!ACCT.user){openSignIn();return;}t.disabled=true;t.textContent="Opening checkout...";const r=await api("/api/checkout",{plan:payPlan});if(r.url){openExternal(r.url);}else{t.disabled=false;t.textContent="Join "+PLAN.name;toast("Checkout isn't available right now. Try again soon.");}return;}
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
   if(t.id==="signOut"||t.id==="signOutTop"){if(ACCT.sb)await ACCT.sb.auth.signOut();try{localStorage.removeItem(KEY);}catch(e){}location.reload();return;}
+  if(d.appearance){S.profile.appearance=d.appearance;applyDisplayPrefs();persist("profile");t.parentElement.querySelectorAll("[data-appearance]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.font){S.profile.fontSize=d.font;applyDisplayPrefs();persist("profile");t.parentElement.querySelectorAll("[data-font]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactcad){S.profile.contact={...contactPref(),cadence:d.contactcad,enabled:d.contactcad!=="never"};t.parentElement.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactscope){S.profile.contact={...contactPref(),scope:d.contactscope};t.parentElement.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactnotify!=null){S.profile.contact={...contactPref(),notify:d.contactnotify==="1"};t.parentElement.querySelectorAll("[data-contactnotify]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(t.id==="contactSave"){const c=contactPref();persist("profile");if(c.notify===true&&!S.profile.push)await enablePush();toast(c.cadence==="never"?"Letters are off. You can turn them back on anytime.":"Your letter rhythm is saved.");return;}
+  if(d.ritualneed&&run){const [tg,yn]=d.ritualneed.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);run.r=adapt(run.base||run.r);drawStep();toast(yn==="1"?"Added back.":"Aura adapted the ritual around it.");return;}
+  if(t.id==="missingBtn"){const g=document.querySelector("#rite .gatherbox");if(g){g.classList.add("attention");g.scrollIntoView({behavior:"smooth",block:"center"});}toast("Tap the item you are missing. Tap it again if you need to undo it.");return;}
   if(d.talk){openTalk(d.talk);return;}
   if(d.gocircle){const b=document.querySelector('[data-tab="circle"]');if(b)b.click();window.scrollTo(0,0);return;}
   if(d.sleep||d.energy||d.moved!=null&&t.closest(".rhythm")||d.wind){
