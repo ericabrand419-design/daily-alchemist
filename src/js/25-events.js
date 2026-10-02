@@ -265,7 +265,7 @@ document.addEventListener("click",async ev=>{
   if(d.fusave){const card=t.closest("#fuCard"),a=card&&S.asks.find(z=>z.id===card.dataset.fuid);if(a)saveFollow(a,d.fusave==="carry");return;}
   if(d.tabgo){tab(d.tabgo);return;}
   if(d.peek){const r=byId[d.peek];if(r)openSheet('<div class="stack">'+ritualCard(r,{why:true})+'</div>');return;}
-  if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";await loadShare();return;}
+  if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";const r=await loadShare();if(!r||!r.code){t.disabled=false;t.textContent="Generate my invitation link";}return;}
   if(t.id==="shareGo"){doShare(false);return;}
   if(t.id==="shareCopy"){doShare(true);return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").value){toast("Add your birthday to begin.");$("#age18").focus();return;}
