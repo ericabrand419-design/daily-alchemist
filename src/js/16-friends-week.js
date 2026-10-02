@@ -67,7 +67,7 @@ const SHARE_OPTS=[
   ["membership","When I look at the membership page"]];
 const EVCAT={open:"time",session:"time",tab:"pages",settings_open:"pages",how_open:"pages",cant_think:"pages",share:"pages",feedback:"pages",
   ritual_start:"rituals",ritual_step:"rituals",ritual_exit:"rituals",ritual:"rituals",reading:"readings",draw_pick:"readings",
-  chat_open:"chats",chat_send:"chats",letter_open:"letters",nudge_reply:"letters",nudge_later:"letters",hear:"sound",music:"sound",cycle_feature_used:"pages",bday_save_failed:"pages",focus_settle:"pages",paywall:"membership",checkout:"membership"};
+  chat_open:"chats",chat_send:"chats",letter_open:"letters",nudge_reply:"letters",nudge_later:"letters",hear:"sound",music:"sound",paywall:"membership",checkout:"membership"};
 function shareScope(){if(!accountsOn())return S.previewScope||SHARE_OPTS.map(o=>o[0]);return Array.isArray(ACCT.monitorScope)?ACCT.monitorScope:SHARE_OPTS.map(o=>o[0]);}
 function inFriendsWeek(){return (isFriend()||isShared())&&(!accountsOn()||!ACCT.trialUntil||Date.parse(ACCT.trialUntil)>Date.now());}
 function shareChecklist(sel){return '<div class="stack" id="shareList" style="gap:4px">'+SHARE_OPTS.map(o=>'<label class="switch" for="sc_'+o[0]+'"><span>'+esc(o[1])+'</span><input type="checkbox" id="sc_'+o[0]+'" data-scope="'+o[0]+'"'+(sel.includes(o[0])?" checked":"")+'></label>').join("")+'</div>';}
