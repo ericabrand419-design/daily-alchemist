@@ -949,3 +949,148 @@ details.tread{padding:11px 0;border-color:rgba(244,241,230,.1)}
 /* Keep surfaces restrained everywhere */
 .page.ritualcard{border-radius:4px}.page.ritualcard::after{display:none}
 .card.letterc{border-radius:4px;background:rgba(25,21,48,.72)}
+
+
+/* ================================================================
+   PREMIUM EDITORIAL PASS · OCT 2026
+   One visual language: restrained, physical, mystical, not decorative.
+================================================================ */
+
+/* Restraint */
+.label{letter-spacing:.13em}
+.card{box-shadow:none;border-color:rgba(244,241,230,.16);background:rgba(20,17,40,.78)}
+.card::before,.card::after{box-shadow:none}
+nav.tabs .in{border-radius:18px;background:rgba(22,18,43,.94);padding:4px;border-color:rgba(231,196,90,.18)}
+nav.tabs button{border-radius:12px;letter-spacing:.035em;padding:8px 0 7px}
+nav.tabs button[aria-selected="true"]{background:rgba(231,196,90,.07);color:var(--glow)}
+nav.tabs button[aria-selected="true"]::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:1px}
+
+/* Today feels like an almanac page, not a stack of cards */
+.sky{border:0!important;border-top:1px solid rgba(231,196,90,.32)!important;border-bottom:1px solid rgba(231,196,90,.22)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:15px 2px 17px!important}
+.sky .phase{font-family:var(--f-display);font-size:22px!important}
+.sky .meta{letter-spacing:.02em!important}
+.home{padding-top:8px}
+.home .hline{font-family:var(--f-display);font-weight:400;line-height:1.08}
+.home .obs{max-width:34ch}
+.rhythm,.quiet{background:transparent;border-left:0;border-right:0;border-radius:0;border-color:rgba(244,241,230,.12)}
+
+/* ---------------- THE ALTAR ---------------- */
+.altarstage{padding:8px 0 18px}
+.altarhead{max-width:36rem}
+.altarhead>.label{color:var(--gold);margin-bottom:5px}
+.altarhead h2{font-weight:400;font-size:clamp(32px,8vw,43px);line-height:1.04;margin:0}
+.altarpositions{display:grid;gap:5px;margin:18px 0 10px;padding:13px 0;border-top:1px solid rgba(231,196,90,.22);border-bottom:1px solid rgba(231,196,90,.16)}
+.altarpositions span{font-family:var(--f-ui);font-size:14px;color:var(--glow-faint);letter-spacing:.025em}
+.altarpositions span.next{color:var(--gold)}
+.altarpositions span.done{color:var(--glow-dim)}
+.altarpositions span.done::after{content:"  ✓";color:var(--gold)}
+.altarhint,.decknote{font-family:var(--f-display);font-size:19px;line-height:1.45;color:var(--glow-dim);margin:8px 0 0}
+.decknote{font-family:var(--f-ui);font-size:14px;letter-spacing:.01em;text-align:center;margin-top:12px;color:var(--glow-faint)}
+
+/* No fan. A physical deck rail. */
+.spread,.spread.seven{position:relative;height:auto;margin:18px -2px 0;padding:12px 8px 18px;display:flex;align-items:flex-end;gap:0;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.spread::-webkit-scrollbar{display:none}
+.spread .tarot.sp,.spread.seven .tarot.sp{position:relative!important;left:auto!important;top:auto!important;flex:0 0 108px;width:108px!important;height:173px!important;margin:0 0 0 -23px!important;transform:none!important;filter:drop-shadow(0 12px 15px rgba(0,0,0,.38));scroll-snap-align:center;z-index:1;transition:transform .35s ease,filter .35s ease,opacity .35s ease}
+.spread .tarot.sp:first-child,.spread.seven .tarot.sp:first-child{margin-left:0!important}
+.spread .tarot.sp:nth-child(odd){transform:translateY(4px)!important}
+.spread .tarot.sp:hover,.spread .tarot.sp:focus-visible,.spread.seven .tarot.sp:hover,.spread.seven .tarot.sp:focus-visible{transform:translateY(-9px)!important;z-index:5;filter:drop-shadow(0 18px 22px rgba(0,0,0,.5))}
+.spread .tarot.sp.picked,.spread.seven .tarot.sp.picked{transform:translateY(-13px)!important;z-index:6;filter:drop-shadow(0 20px 24px rgba(0,0,0,.55))}
+.spread .tarot.sp.picked .inner{transform:rotateY(180deg)}
+.spread .tarot.sp.picked~.tarot.sp{opacity:.9}
+.tarot .face{border-radius:9px}
+.tarot .back{background:#161226;box-shadow:0 0 0 1px rgba(231,196,90,.72),inset 0 0 0 5px #161226,inset 0 0 0 6px rgba(231,196,90,.25)}
+.tarot .front{background:#161226;box-shadow:0 0 0 1px rgba(231,196,90,.72)}
+.tarot .inner{transition:transform .62s cubic-bezier(.2,.72,.2,1)}
+.three{gap:12px;margin:20px 0 18px}
+.three .tarot.mini{max-width:118px}
+.three .pos{text-transform:none;letter-spacing:.01em;font-size:13px;line-height:1.35;color:var(--glow-dim)}
+details.tread{padding:12px 0;border-color:rgba(244,241,230,.1)}
+.card.together{background:transparent;border-left:1px solid rgba(231,196,90,.45);border-right:0;border-top:0;border-bottom:0;border-radius:0;padding:4px 0 4px 16px}
+
+/* ---------------- RITUAL FOLIO ---------------- */
+.rite{background:
+ radial-gradient(900px 500px at 50% -150px,rgba(255,255,255,.52),transparent 62%),
+ linear-gradient(180deg,#F3E8CD 0%,#EBDDba 100%);color:#2C2431}
+.rite::before{display:none}
+.rite .wrap{max-width:600px;padding:22px 26px 12px;gap:18px}
+.rite .bar{padding-bottom:12px;border-bottom:1px solid rgba(112,83,31,.2)}
+.rite .bar>.navback{background:transparent;border-radius:0;padding:0;color:#3B3140;box-shadow:none}
+.ritualwho{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.ritualwho>svg{width:36px!important;height:36px!important}
+.ritualwho span{display:grid;line-height:1.05}
+.ritualwho b{font-family:var(--f-ui);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6A532A}
+.ritualwho small{font-family:var(--f-ui);font-size:12px;color:#756B74;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rite .pips{gap:4px;margin-top:-8px}
+.rite .pips i{height:2px;background:rgba(70,55,67,.11)}
+.rite .pips i.on{background:#A7863D}
+.ritualintro,.ritualstep,.ritualcomplete{display:flex;flex-direction:column;gap:14px;max-width:520px;width:100%;margin:0 auto}
+.ritualkicker{font-family:var(--f-ui);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#8A6A28;margin-top:8px}
+.rite h1,.ritualintro h1,.ritualstep h1,.ritualcomplete h1{font-family:var(--f-display);font-weight:400;font-size:clamp(39px,9vw,54px);line-height:1.02;color:#2D2532;margin:0;text-wrap:balance}
+.ritualintro .purpose,.ritualstep .purpose{font-family:var(--f-display);font-style:italic;font-size:22px;line-height:1.4;color:#6E6170;margin:0}
+.ritualmeta{display:flex;flex-wrap:wrap;gap:0;margin:2px 0 5px;color:#655A65;font:14px var(--f-ui)}
+.ritualmeta span+span::before{content:"·";color:#A7863D;margin:0 9px}
+.ritualtray{margin-top:8px;padding:18px 0 8px;border:0;border-top:1px solid rgba(112,83,31,.25);border-bottom:1px solid rgba(112,83,31,.18);background:transparent;border-radius:0}
+.trayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.trayhead .sayl{font:700 13px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:#6B5326}
+.trayhead .small{color:#776E76}
+.ritualtray .needchips{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 8px}
+.rite .needchip{border:1px solid rgba(112,83,31,.28);background:rgba(255,252,243,.54);color:#352D38;border-radius:999px;padding:9px 13px;min-height:42px;font:16px var(--f-ui);box-shadow:none}
+.rite .needchip .needcheck{color:#8E6E2C;margin-right:6px}
+.rite .needchip.missing{border-style:dashed;opacity:.7}
+.ritualtray .supplyhint{font:14px/1.45 var(--f-ui);color:#766C75;margin:8px 0 2px;max-width:46ch}
+.supplyswap{background:rgba(255,252,243,.5);border-left:2px solid #A7863D;border-radius:0;padding:10px 13px}
+.rite .foot{max-width:600px;padding:10px 26px calc(18px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,rgba(235,221,186,0),rgba(235,221,186,.98) 35%)}
+.rite .foot .btn{min-height:52px;border-radius:999px}
+.rite .btn-ink{background:#282031;color:#FBF2DB;box-shadow:none}
+.rite .btn-ink:hover,.rite .btn-ink:focus-visible{background:#1E1826}
+.rite .btn-ghost{background:transparent;box-shadow:inset 0 0 0 1px rgba(54,43,57,.24);color:#3B313F}
+.ritualstep .text{font-family:var(--f-display);font-size:25px;line-height:1.48;color:#403642;margin:4px 0}
+.ritualstep .say{border:0;border-left:1px solid #A7863D;padding:5px 0 5px 18px;text-align:left;color:#4A394A;font-size:25px;background:transparent}
+.ritualstep .say .sayl{display:block;font:700 12px var(--f-ui);font-style:normal;letter-spacing:.15em;text-transform:uppercase;color:#8B6B29;margin-bottom:7px}
+.ritualcomplete{padding-top:18px}
+.ritualcomplete .finishq{font:italic 25px/1.35 var(--f-display);color:#645765}
+.afterfeel{gap:8px}
+.rite .afterfeel .chip{border-radius:999px;background:rgba(255,252,243,.48)}
+.ritualnotes{margin-top:8px;border-top:1px solid rgba(112,83,31,.2);padding-top:12px}
+.ritualnotes summary{font:700 14px var(--f-ui);color:#6A532A;cursor:pointer}
+.ritualnotes textarea{min-height:120px}
+
+/* ---------------- MAILBOX ---------------- */
+.mailbox{background:transparent!important;border:0!important;padding:0!important}
+.mailhead{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid rgba(231,196,90,.2)}
+.mailhead svg{filter:drop-shadow(0 8px 12px rgba(0,0,0,.2))}
+.mailbox .li{padding:15px 2px;border-color:rgba(244,241,230,.1)}
+.mailbox .li>span:first-child{font-family:var(--f-display);font-size:20px;line-height:1.3}
+.letterc{background:#F3E8CD!important;color:#2D2532!important;border:1px solid rgba(199,164,74,.5)!important;border-radius:7px!important;box-shadow:0 12px 28px -18px rgba(0,0,0,.7)!important}
+.letterc .label,.letterc .small{color:#7D6228!important}
+.letterc .lt{font-family:var(--f-display);font-size:23px}
+.page.letter{background:#F4E8CB;border-radius:4px;color:#302734;padding:24px 22px;box-shadow:0 20px 45px -30px #000}
+.page.letter .kicker{color:#846727}
+.page.letter h3{font-size:36px;font-weight:400}
+.page.letter p{font-family:var(--f-display);font-size:20px;line-height:1.55}
+
+/* ---------------- GUARDIAN DIALOGUE ---------------- */
+.talk .hd{border-bottom:1px solid rgba(231,196,90,.15);padding-top:14px;padding-bottom:14px}
+.talk .hd .who .n{font-size:28px;font-weight:400}
+.talk .hd .who .t{letter-spacing:.08em;font-size:13px}
+.talk .msgs{gap:18px;padding:18px 18px 24px}
+.intro{background:transparent;border:0;border-bottom:1px solid rgba(244,241,230,.1);border-radius:0;padding:4px 0 18px}
+.intro .kv{display:none}
+.intro .top2{grid-template-columns:48px 1fr}
+.intro .top2 svg{width:48px;height:48px}
+.bub{max-width:92%}
+.bub.them{align-self:stretch;max-width:none;background:transparent!important;border:0!important;border-left:1px solid rgba(231,196,90,.32)!important;border-radius:0!important;padding:5px 8px 5px 16px;font-family:var(--f-display);font-size:22px;line-height:1.48}
+.bub.me{align-self:flex-end;max-width:84%;background:rgba(244,241,230,.075);border:1px solid rgba(244,241,230,.12);border-radius:15px 15px 4px 15px;padding:10px 13px;font-size:18px}
+.bub.them .hear{float:right;margin-left:8px}
+.talk .ft{border-top:1px solid rgba(244,241,230,.08);padding-top:12px}
+.talk .ft textarea{border-radius:17px;background:rgba(244,241,230,.055);border-color:rgba(244,241,230,.14)}
+.send{background:var(--gold);color:#171326;box-shadow:none}
+
+/* Mobile polish */
+@media (max-width:420px){
+  .spread .tarot.sp,.spread.seven .tarot.sp{flex-basis:102px;width:102px!important;height:163px!important;margin-left:-28px!important}
+  .rite .wrap{padding-left:22px;padding-right:22px}
+  .rite .foot{padding-left:22px;padding-right:22px}
+  .ritualwho small{max-width:170px}
+  .altarpositions span{font-size:13px}
+}
