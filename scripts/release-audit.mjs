@@ -63,7 +63,21 @@ ok(/invite_uses\?code=eq\./.test(friendServer)&&/function\s+grantClaim/.test(fri
 const actionAttrs=new Set([...source.matchAll(/<button\b[^>]*\bdata-([a-z][a-z0-9-]*)=/g)].map(m=>m[1]));
 const camel=s=>s.replace(/-([a-z])/g,(_,x)=>x.toUpperCase());
 for(const a of actionAttrs){
-  const k=camel(a), esc=a.replace(/[.*+?^$()|[\]\\]/g,"\\const buttonIds=new Set([...source.matchAll(/<button[^>]*\sid=["']([A-Za-z][\w:-]*)["']/g)].map(m=>m[1]).filter(x=>!x.includes("+")));");
+  const k=camel(a);
+  const handled=source.includes("d."+k)||
+    source.includes("dataset."+k)||
+    source.includes('dataset["'+a+'"]')||
+    source.includes("dataset['"+a+"']")||
+    source.includes('getAttribute("data-'+a+'")')||
+    source.includes("getAttribute('data-"+a+"')");
+  ok(handled,"Rendered button data-"+a+" has no event handler");
+}
+
+ok(/ACCT\.sb\.auth\.signInWithOtp/.test(source)&&/ACCT\.sb\.auth\.verifyOtp/.test(source),"Live email sign-in must use Supabase OTP");
+ok(/code\.length!==8/.test(source)&&/8-digit code/.test(source),"Email sign-in code length and UI promise are not both 8 digits");
+ok(!existsSync("server/email-code.js"),"Obsolete custom email-code server implementation still exists");
+
+const buttonIds=new Set([...source.matchAll(/<button[^>]*\sid=["']([A-Za-z][\w:-]*)["']/g)].map(m=>m[1]).filter(x=>!x.includes("+")));");
   const handled=new RegExp('(?:dataset\\.'+k+'\\b|\\bd\\.'+k+'\\b|dataset\\[["\\\']'+esc+'["\\\']\\]|getAttribute\\(["\\\']data-'+esc+'["\\\']\\))').test(source);
   ok(handled,"Rendered button data-"+a+" has no event handler");
 }
