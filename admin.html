@@ -67,9 +67,7 @@ a.btn{text-decoration:none;display:inline-block}
     <h1>Friends Week</h1>
     <p class="sub">Sign in with your own email to see who joined and how they're using the app.</p>
     <input type="email" id="email" placeholder="you@example.com" autocomplete="email">
-    <button class="btn" id="send">Send my code</button>
-    <input type="text" id="code" inputmode="numeric" autocomplete="one-time-code" placeholder="6-digit code" hidden>
-    <button class="btn" id="verify" hidden>Sign in</button>
+    <button class="btn" id="send">Email my sign-in link</button>
     <p class="muted" id="msg"></p>
   </div>
 
@@ -82,8 +80,8 @@ a.btn{text-decoration:none;display:inline-block}
 
     <h2>Invitations</h2>
     <div class="card">
-      <p style="margin:0">Make one link per friend. Each link works once, for one account, and expires after 30 days. Send it to that friend only.</p>
-      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap"><input type="text" id="invName" placeholder="Friend's name, for your list" style="flex:1 1 220px"><button class="btn" id="invMake">Create invitation link</button></div>
+      <p style="margin:0">Enter the friend's name and email. Daily Alchemist will make one secure 30-day entry link. Your email app opens with the invitation ready to send. No auth text and no second sign-in email.</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:8px;margin-top:12px;align-items:end"><input type="text" id="invName" placeholder="Friend's name"><input type="email" id="invEmail" placeholder="friend@example.com" autocomplete="email"><button class="btn" id="invMake">Create email invitation</button></div>
       <div id="invNew" hidden style="margin-top:12px"></div>
       <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(244,241,230,.12)"><p style="margin:0">Or use your <b>open link</b>: one link, no limit, for as many people as you like. Everyone who joins with it gets lifetime access and their own link for 3 more.</p><button class="btn ghost" id="openLink" style="margin-top:10px">Get my open link</button><div id="openBox" hidden style="margin-top:12px"></div></div>
       <div class="tablewrap" style="margin-top:14px"><table id="invites" style="min-width:640px"></table></div>
@@ -242,6 +240,8 @@ const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd 
 const invText=(c,name)=>(name?"Hi "+name.split(/\s+/)[0]+"! ":"Hi! ")+INV_ERICA+"\n\n"+invLink(c);
 const smsHref=(c,name)=>"sms:?&body="+encodeURIComponent(invText(c,name));
 const mailHref=(c,name)=>"mailto:?subject="+encodeURIComponent((name?name.split(/\s+/)[0]+", ":"")+"an invitation from Erica to The Daily Alchemist")+"&body="+encodeURIComponent(invText(c,name));
+function directInviteText(url,name){const first=name?name.split(/\s+/)[0]:"";return (first?"Hi "+first+"! ":"Hi! ")+"It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This invitation gives you lifetime access, free.\n\nOpen this secure invitation on your phone. It signs you in and brings you straight into Daily Alchemist, so there is no password, no code and no second email to wait for.\n\n"+url+"\n\nOnce you're in, tell Aura what's going on in your day and explore. During your first week the app will ask whether you're okay with me seeing which buttons you tap and when so I can improve it. That's completely optional, and I never see what you write or say.\n\nI'm really proud of this. Thank you for helping me make it better.";}
+function directMailHref(email,url,name){return "mailto:"+encodeURIComponent(email)+"?subject="+encodeURIComponent((name?name.split(/\s+/)[0]+", ":"")+"your Daily Alchemist invitation")+"&body="+encodeURIComponent(directInviteText(url,name));}
 function textBtns(c,name,small){const n=esc(name||"");return '<a class="btn'+(small?' ghost small':'')+'" href="'+esc(smsHref(c,name))+'">Text it</a> <a class="btn ghost'+(small?' small':'')+'" href="'+esc(mailHref(c,name))+'">Email it</a> <button class="btn ghost'+(small?' small':'')+'" data-share="'+esc(c)+'" data-name="'+n+'">Share</button>';}
 async function shareInv(c,name){const text=invText(c,name);if(navigator.share){try{await navigator.share({title:"The Daily Alchemist",text});return;}catch(e){if(e&&e.name==="AbortError")return;}}copyLink(c);}
 async function invites(action,extra){
@@ -265,8 +265,9 @@ function renderInvites(){
   $("#invites").innerHTML='<thead><tr><th>Friend</th><th>Created</th><th>Status</th><th></th></tr></thead><tbody>'+(INV1.length?INV1.map(v=>{const open=((v.max_uses||1)>1||!v.used_by)&&!v.revoked&&!(v.expires_at&&new Date(v.expires_at)<new Date());return '<tr><td>'+esc(v.label||"(no name)")+'</td><td>'+fmt(v.created_at)+'</td><td>'+invStatus(v)+'</td><td style="white-space:nowrap">'+(open?textBtns(v.code,v.label,true)+' <button class="btn ghost small" data-copy="'+esc(v.code)+'">Copy link</button> <button class="btn ghost small" data-revoke="'+esc(v.code)+'">Revoke</button>':'')+'</td></tr>';}).join(""):'<tr><td colspan="4" class="muted">No invitations yet.</td></tr>')+'</tbody>';
 }
 async function copyLink(c,btn){try{await navigator.clipboard.writeText(invLink(c));if(btn){const t=btn.textContent;btn.textContent="Copied";setTimeout(()=>btn.textContent=t,1500);}}catch(e){prompt("Copy this link:",invLink(c));}}
-$("#invMake").onclick=async()=>{const b=$("#invMake");b.disabled=true;const before=new Set(INV.map(v=>v.code));await invites("create",{label:$("#invName").value});b.disabled=false;const nw=INV.find(v=>!before.has(v.code));
-  if(nw){$("#invName").value="";$("#invNew").hidden=false;$("#invNew").innerHTML='<div class="linkbox"><code>'+esc(invLink(nw.code))+'</code><button class="btn small" data-copy="'+esc(nw.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(nw.code,nw.label,false)+'</div><p class="note">Send this to '+esc(nw.label||"your friend")+' only. It stops working once they use it.</p>';}};
+$("#invMake").onclick=async()=>{const b=$("#invMake"),name=$("#invName").value.trim(),email=$("#invEmail").value.trim();if(!name){$("#invName").focus();return;}if(!/^\S+@\S+\.\S+$/.test(email)){$("#invEmail").focus();return;}b.disabled=true;b.textContent="Making invitation...";const before=new Set(INV.map(v=>v.code));const d=await invites("create",{label:name,email});b.disabled=false;b.textContent="Create email invitation";const nw=INV.find(v=>!before.has(v.code));
+  if(d.error){$("#invNew").hidden=false;$("#invNew").textContent=d.error==="invalid_email"?"Check the email address.":"Couldn't make the invitation. Try again.";return;}
+  if(nw&&d.claim_url){$("#invName").value="";$("#invEmail").value="";$("#invNew").hidden=false;$("#invNew").innerHTML='<p style="margin:0 0 10px"><b>Ready for '+esc(nw.label||email)+'.</b> The secure entry link lasts 30 days and is for '+esc(email)+' only.</p><a class="btn" href="'+esc(directMailHref(email,d.claim_url,nw.label))+'">Open email and send it</a> <button class="btn ghost" id="copyDirect">Copy secure link</button><p class="note">This email contains the sign-in link itself. They do not need to wait for another Daily Alchemist email.</p>';const cp=$("#copyDirect");if(cp)cp.onclick=async()=>{try{await navigator.clipboard.writeText(d.claim_url);cp.textContent="Copied";}catch(e){prompt("Copy this secure link:",d.claim_url);}};location.href=directMailHref(email,d.claim_url,nw.label);}};
 $("#openLink").onclick=async()=>{const res=await fetch(API+"/api/share",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+(await token())},body:"{}"});const d=await res.json().catch(()=>({}));if(!d.code){$("#openBox").hidden=false;$("#openBox").textContent="Couldn't get your link. Try again in a minute.";return;}
   $("#openBox").hidden=false;$("#openBox").innerHTML='<div class="linkbox"><code>'+esc(invLink(d.code))+'</code><button class="btn small" data-copy="'+esc(d.code)+'">Copy link</button></div><div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">'+textBtns(d.code,"",false)+'</div><p class="note">'+(d.uses||0)+' people have joined with it so far. You can turn it off below any time.</p>';await invites("list");};
 document.addEventListener("click",e=>{const sh=e.target.closest("[data-share]");if(sh){shareInv(sh.dataset.share,sh.dataset.name);return;}const c=e.target.closest("[data-copy]");if(c)copyLink(c.dataset.copy,c);const r=e.target.closest("[data-revoke]");if(r&&confirm("Revoke this invitation? The link will stop working."))invites("revoke",{code:r.dataset.revoke});});
@@ -300,8 +301,7 @@ function csv(){
 }
 document.addEventListener("click",e=>{const r=e.target.closest("tr.row");if(r)showPerson(r.dataset.id);});
 $("#refresh").onclick=load;$("#csv").onclick=()=>DATA&&csv();
-$("#send").onclick=async()=>{const em=$("#email").value.trim();if(!em)return;msg("Sending...");const {error}=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});if(error){msg("Couldn't send a code ("+(error.message||"unknown error")+"). Try again in a minute.");return;}msg("Check your email for a 6-digit code.");$("#code").hidden=false;$("#verify").hidden=false;$("#code").focus();};
-$("#verify").onclick=async()=>{const {error}=await sb.auth.verifyOtp({email:$("#email").value.trim(),token:$("#code").value.trim(),type:"email"});if(error){msg("That code didn't work. Try again.");return;}start();};
+$("#send").onclick=async()=>{const em=$("#email").value.trim();if(!em)return;msg("Sending...");const {error}=await sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true,emailRedirectTo:location.origin+"/admin"}});if(error){msg("Couldn't send the sign-in link ("+(error.message||"unknown error")+").");return;}msg("Check your email and tap Confirm email address. It will bring you back here signed in.");};
 
 /* ---------- Claude vs OpenAI comparison ---------- */
 let CMP=null,cmpBusy=false,cmpRows=[];
