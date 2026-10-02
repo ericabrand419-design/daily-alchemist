@@ -1103,3 +1103,15 @@ details.tread{padding:12px 0;border-color:rgba(244,241,230,.1)}
 body::before,body::after{display:none!important}
 #wxLayer{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 html[data-weather=fog] #wxLayer{background:linear-gradient(180deg,rgba(200,195,215,.025),rgba(200,195,215,.04) 70%,rgba(200,195,215,.015))!important}
+
+
+/* ================================================================
+   JEWEL-TONE WORLD PASS · OCT 2026
+   Auto appearance must stay rich and crisp around surfaces.
+================================================================ */
+html[data-light=day-bright]:not([data-theme]){--world-bg:#3A3055}
+html[data-light=day-low]:not([data-theme]){--world-bg:#332943}
+html[data-light=golden]:not([data-theme]){--world-bg:#3A263D}
+html[data-light=blue]:not([data-theme]){--world-bg:#222A46}
+html[data-light=night]:not([data-theme]){--world-bg:#0C0918}
+#wxLayer{opacity:0!important;background:none!important}
