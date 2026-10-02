@@ -1094,3 +1094,12 @@ details.tread{padding:12px 0;border-color:rgba(244,241,230,.1)}
   .ritualwho small{max-width:170px}
   .altarpositions span{font-size:13px}
 }
+
+
+/* ================================================================
+   CRISP BACKGROUND PASS · OCT 2026
+   Keep the living palette and stars, remove full-screen haze and grain.
+================================================================ */
+body::before,body::after{display:none!important}
+#wxLayer{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html[data-weather=fog] #wxLayer{background:linear-gradient(180deg,rgba(200,195,215,.025),rgba(200,195,215,.04) 70%,rgba(200,195,215,.015))!important}
