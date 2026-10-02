@@ -1470,7 +1470,7 @@ function showGate(){
   if(!S.seenIntro&&!S.profile.onboarded){showIntro();return;}
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays(S.friendCode?"I\'m Aura, your guide here. Erica invited you in. Enter your email to claim your invitation and I\'ll email you an 8-digit sign-in code. No password and no text messages from us.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
+    auraSays(S.friendCode?"I\'m Aura, your guide here. You were invited in. Enter your email to claim your invitation and I\'ll email you an 8-digit sign-in code. No password and no text messages from us.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
     signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }
