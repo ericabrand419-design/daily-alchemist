@@ -1,15 +1,17 @@
 /* ------------------------------------------------------------------
    SHEETS + SETTINGS
 ------------------------------------------------------------------ */
-function openSheet(html){
-  closeSheet();
+function openSheet(html,musicG){
+  closeSheet(true);
   const s=document.createElement("div");s.className="scrim";s.id="scrim";
+  s._musicG=musicG||null;
   s.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><div class="sheetnav"><button class="navback" id="sheetX" aria-label="Back">← <span>Back</span></button></div><div class="grab"></div>'+html+'</div>';
   $("#layer").appendChild(s);
   s.addEventListener("click",ev=>{if(ev.target===s)closeSheet();});
   const x=s.querySelector("#sheetX");x.focus({preventScroll:true});
+  if(musicG){MUSIC.started=true;musicFor(musicG);}else musicSyncSoon();
 }
-function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(s._music){s._music=false;if(!keepMusic)musicBack();}}}
+function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(!keepMusic)musicSyncSoon();}}
 function accountHTML(){
   if(!accountsOn())return '<div class="card"><div class="label">Membership preview</div><p class="small muted" style="margin-top:6px">You are seeing the app as a '+(isMember()?"member":"free user")+'. Real accounts and checkout run on DailyAlchemist.com.</p><button class="btn btn-ghost full" style="margin-top:10px" data-preview-member="1">'+(isMember()?"Preview as free":"Preview as a member")+'</button><button class="btn btn-ghost full" style="margin-top:8px" data-previewfriend="1">See what friends see</button>'+(S.previewFriend?'<button class="btn btn-ghost full" style="margin-top:8px" id="endFriendPreview">Stop friends preview</button>':'')+'</div>';
   if(!ACCT.sb)return '';
