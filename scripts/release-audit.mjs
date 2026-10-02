@@ -79,9 +79,13 @@ for(const a of actionAttrs){
   ok(handled,"Rendered button data-"+a+" has no event handler");
 }
 
-ok(/ACCT\.sb\.auth\.signInWithOtp/.test(source)&&/ACCT\.sb\.auth\.verifyOtp/.test(source),"Live email sign-in must use Supabase OTP");
+ok(/api\(["\']\/api\/auth-code["\']/.test(source)&&/ACCT\.sb\.auth\.verifyOtp/.test(source),"Live email sign-in must use server-delivered Supabase OTP");
 ok(/code\.length!==8/.test(source)&&/8-digit code/.test(source),"Email sign-in code length and UI promise are not both 8 digits");
-ok(!existsSync("server/email-code.js"),"Obsolete custom email-code server implementation still exists");
+ok(existsSync("server/auth-code.js"),"Server auth-code delivery endpoint is missing");
+const authCodeServer=read("server/auth-code.js");
+ok(/admin\/generate_link/.test(authCodeServer)&&/email_otp/.test(authCodeServer),"Auth-code endpoint must generate the OTP through Supabase");
+ok(/api\.resend\.com\/emails/.test(authCodeServer)&&/RESEND_API_KEY/.test(authCodeServer),"Auth-code endpoint must deliver through Resend");
+ok(/!res\.ok\|\|!sent\.id/.test(authCodeServer),"Auth-code endpoint must not report success unless the mail provider accepts delivery");
 
 const buttonIds=new Set([...source.matchAll(/<button[^>]*\sid=["']([A-Za-z][\w:-]*)["']/g)].map(m=>m[1]).filter(x=>!x.includes("+")));
 for(const id of buttonIds){

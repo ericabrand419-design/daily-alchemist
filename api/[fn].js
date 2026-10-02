@@ -6,6 +6,7 @@ export const maxDuration = 60; // making a guardian's music takes about 10 to 20
 
 const ROUTES = {
   "admin": () => import("../server/admin.js"),
+  "auth-code": () => import("../server/auth-code.js"),
   "ai": () => import("../server/ai.js"),
   "checkout": () => import("../server/checkout.js"),
   "cron-reminders": () => import("../server/cron-reminders.js"),
