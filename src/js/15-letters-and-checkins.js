@@ -156,13 +156,15 @@ function letterCardHTML(){
 }
 function showLetter(L){
   track("letter_open");L.read=true;saveLocal();renderToday();renderArchive();
-  openSheet('<div class="stack"><div class="page letter"><div class="kicker">A letter from '+esc((G[L.sender]||G.aura).name)+' · '+esc(fmtDate(L.ts))+'</div><h3>'+esc(L.title)+'</h3>'+
+  const who=(G[L.sender]||G.aura).name;
+  openSheet('<div class="stack letterstack"><article class="page letter"><div class="letterbrand">THE DAILY ALCHEMIST</div><div class="lettermeta">A letter from '+esc(who)+' · '+esc(fmtDate(L.ts))+'</div><h2>'+esc(L.title)+'</h2>'+
     L.text.split(/\n{2,}/).map(p=>'<p>'+esc(p).replace(/\n/g,"<br>")+'</p>').join("")+
-    (L.intention?'<div class="intent"><b>'+esc(L.kind==="first-return"?"From here":"This time")+'</b>'+esc(L.intention)+'</div>':"")+'</div>'+
+    (L.intention?'<div class="intent"><b>'+esc(L.kind==="first-return"?"From here":"This time")+'</b>'+esc(L.intention)+'</div>':"")+'<div class="lettersign">'+esc(who)+'</div></article>'+
     (L.kind==="first-return"?contactSettingsHTML(true):"")+
     (L.next?'<button class="btn btn-main full" data-talk="'+L.next+'">Go to '+esc(G[L.next].name)+'</button>':"")+
-    '<button class="btn btn-ghost full" data-talk="aura">Write back to Aura</button><button class="btn btn-ghost full" data-tabgo="archive">Open my mailbox</button><p class="small muted" style="text-align:center">Every letter is kept in your mailbox, in the Archive.</p></div>');
+    '<button class="btn btn-ghost full" data-talk="aura">Write back to Aura</button><button class="linkish letterback" data-tabgo="archive">Return to my mailbox</button></div>');
 }
+
 async function openLetter(id){
   const L=S.letters.find(x=>x.id===id);if(!L)return;
   if(L.sealed){
@@ -176,15 +178,18 @@ async function openLetterFlow(btn){
   const L=await writeLetter();
   showLetter(L);
 }
-function letterRow(l){const who=(G[l.sender]||G.aura).name;return '<button class="li" data-letter="'+l.id+'"><span>'+(l.sealed?"🔒 ":"")+esc(l.sealed?"Sealed letter":l.title)+'<br><span class="small muted">'+esc(who)+" · "+esc(fmtDate(l.ts))+(l.sealed?" · "+esc(sealedAbout(l)):"")+'</span></span><span class="small muted">'+(l.sealed?(isMember()?"Open":"Sealed"):"Read")+'</span></button>';}
+function letterRow(l){
+  const who=(G[l.sender]||G.aura).name,preview=(l.sealed?sealedAbout(l):(l.text||"").replace(/\s+/g," ").slice(0,96));
+  return '<button class="mailletter'+(!l.read?' unread':'')+'" data-letter="'+l.id+'"><span class="wax" aria-hidden="true"></span><span class="mailcopy"><span class="mailmeta">'+esc(l.sealed?"Sealed letter":"A letter from "+who)+'</span><strong>'+esc(l.sealed?"Waiting for you":l.title)+'</strong><span class="mailpreview">'+esc(preview)+(preview.length>=96?'…':'')+'</span><span class="maildate">'+esc(fmtDate(l.ts))+'</span></span><span class="mailopen">'+(l.sealed&&!isMember()?"Sealed":"Open")+' →</span></button>';
+}
 function lettersArchiveHTML(){
   const mem=isMember(), sc=sealedCount(),unread=S.letters.filter(l=>!l.read).length;
   if(!S.letters.length){
-    if(!mem)return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("In the Inner Circle, I write to you at the rhythm you choose about what you carried, what helped and where to go next. Every letter stays here.")+'<button class="btn btn-ghost" style="margin-top:10px" data-paywall="Letters from Aura">See the Inner Circle</button></div>';
-    return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("My first letter comes when you return after your first visit. After that, you choose the rhythm. Every one I write stays here.")+'</div>';
+    if(!mem)return '<section class="mailbox empty-mail"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>Private correspondence</h3></div></div>'+auraSays("When there is something worth bringing back to you, I\'ll write. Every letter stays here.")+'<button class="btn btn-ghost" data-paywall="Letters from Aura">See the Inner Circle</button></section>';
+    return '<section class="mailbox empty-mail"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>Private correspondence</h3></div></div>'+auraSays("When there is something worth bringing back to you, I\'ll write. Your letters stay here.")+'</section>';
   }
-  return '<div class="card mailbox"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>'+S.letters.length+' letter'+(S.letters.length===1?"":"s")+(unread?" · "+unread+" unread":"")+'</h3></div></div><p class="small muted" style="margin:6px 0 10px">Everything the Circle writes you stays here. Tap any letter to open it.</p>'+S.letters.slice(0,30).map(letterRow).join("")+
-    (!mem&&sc?'<div style="margin-top:10px">'+auraSays(sc===1?"One of these is sealed. It opens the moment you join.":sc+" of these are sealed. They all open the moment you join.")+'</div><button class="btn btn-main full" style="margin-top:10px" data-paywall="Open your letters">Open my letters</button>':"")+'</div>';
+  return '<section class="mailbox"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>'+S.letters.length+' letter'+(S.letters.length===1?"":"s")+(unread?" · "+unread+" unread":"")+'</h3></div></div><p class="mailintro">Private correspondence from Aura and the Circle. Newest first.</p><div class="mailstack">'+S.letters.slice(0,30).map(letterRow).join("")+'</div>'+
+    (!mem&&sc?'<div class="sealednote">'+auraSays(sc===1?"One letter is sealed. It opens the moment you join.":sc+" letters are sealed. They open the moment you join.")+'<button class="btn btn-main full" data-paywall="Open your letters">Open my letters</button></div>':"")+'</section>';
 }
 
 /* Guardian check-ins: 1.5 to 6 days after you worked with a guardian, they come back and ask how it went. */
