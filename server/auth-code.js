@@ -11,19 +11,19 @@ function rateKey(request,email){
   const ip=(request.headers.get("x-forwarded-for")||request.headers.get("x-real-ip")||"").split(",")[0].trim();
   return (ip||"unknown")+"|"+email;
 }
-function takeSlot(key){
+function recentlySent(key){
   const now=Date.now(),prev=recent.get(key)||0;
-  if(now-prev<60000)return false;
-  recent.set(key,now);
   if(recent.size>500){for(const [k,t] of recent)if(now-t>3600000)recent.delete(k);}
-  return true;
+  return !!prev&&now-prev<60000;
 }
+function markSent(key){recent.set(key,Date.now());}
 
 export async function POST(request){
   let body={};try{body=await request.json();}catch{}
   const email=cleanEmail(body.email);
   if(!email)return json({error:"bad_email"},400);
-  if(!takeSlot(rateKey(request,email)))return json({error:"rate_limited"},429);
+  const key=rateKey(request,email);
+  if(recentlySent(key))return json({error:"rate_limited",sent:true},429);
 
   const supabaseUrl=env("SUPABASE_URL");
   const serviceKey=env("SUPABASE_SERVICE_ROLE_KEY");
@@ -80,6 +80,7 @@ export async function POST(request){
     console.error("auth-code: Resend exception",String(err&&err.message||err));
     return json({error:"mail_unavailable"},503);
   }
+  markSent(key);
   return json({ok:true});
 }
 
