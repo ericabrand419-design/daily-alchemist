@@ -37,6 +37,5 @@
       ]
     }
   ],
-  "cleanUrls": true,
-  "buildCommand": "node build.mjs"
+  "cleanUrls": true
 }
