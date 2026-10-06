@@ -48,7 +48,7 @@ export async function GET(request) {
     if (!notify || contact.enabled === false || contact.cadence === "never") continue;
     const sentRows=((await sb("push_sent?user_id=eq." + userId + "&select=key,sent_at&order=sent_at.desc")) || []);
     const already = new Set(sentRows.map((r) => r.key));
-    const cadenceDays=contact&&contact.cadence==="3xday"?1/3:contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
+    const cadenceDays=contact&&(contact.cadence==="3xday"||contact.cadence==="daily")?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
     const lastContact=sentRows[0]&&Date.parse(sentRows[0].sent_at);
     // Her chosen rhythm paces letters and guardian check-ins. Things she asked for (a promise, "bring this
     // back later", a date) and an unresolved situation are never held back by it.
@@ -56,15 +56,15 @@ export async function GET(request) {
     const due = [];
     for (const p of x.promises || []) if (p.status === "open" && p.due <= now) {
       const key = "promise:" + p.id + ":" + p.due;
-      if (!already.has(key)) due.push({ key, title: "Aura, checking back", body: "You said: \"" + p.text + "\". Did you?" });
+      if (!already.has(key)) due.push({ key, title: "Aura, checking back", body: "You asked me to check back on something. Did you?" });
     }
     for (const l of x.later || []) if (!l.done && l.due <= now) {
       const key = "later:" + l.id + ":" + l.due;
-      if (!already.has(key)) due.push({ key, title: "You asked me to bring this back", body: String(l.label || "").slice(0, 140) });
+      if (!already.has(key)) due.push({ key, title: "You asked me to bring this back", body: "It's waiting for you in the app." });
     }
     for (const d of x.dates || []) if (d.month === tomorrow.getUTCMonth() + 1 && d.day === tomorrow.getUTCDate()) {
       const key = "date:" + d.id + ":" + tomorrow.getUTCFullYear();
-      if (!already.has(key)) due.push({ key, title: "Aura", body: "Tomorrow is " + d.name + ". Want me to help you mark it?" });
+      if (!already.has(key)) due.push({ key, title: "Aura", body: "A date that matters to you is tomorrow. Want me to help you mark it?" });
     }
 
     // Inner Circle: guardian check-ins, letters from Aura, and the end of the free week.
@@ -91,7 +91,7 @@ export async function GET(request) {
       const lastL = (x.letters || []).reduce((m, l) => Math.max(m, l.ts || 0), 0);
       const firstEver = (await sb("entries?user_id=eq." + userId + "&select=created_at&order=created_at.asc&limit=1")) || [];
       const startedBeforeToday = firstEver[0] && Date.parse(firstEver[0].created_at) < now - 12 * 36e5;
-      const cadence=contact&&contact.cadence==="3xday"?1/3:contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
+      const cadence=contact&&(contact.cadence==="3xday"||contact.cadence==="daily")?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
       const letterDue = lastL ? now - lastL > (cadence-.25) * 864e5 && recent.length : false;
       if (letterDue && rhythmOK) {
         const key = "letter:" + et.y + "-" + et.m + "-" + et.d;

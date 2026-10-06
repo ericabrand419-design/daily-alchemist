@@ -1,6 +1,6 @@
 // Your dashboard's invitations: create one link per friend, see which are used, revoke any.
 // Email invitations use a signed 30-day claim link. No Supabase/Resend email is sent.
-// When the friend clicks, we mint a fresh Supabase magic link and redirect them into the app.
+// When the friend clicks, the app opens with the invitation saved, and she signs in with an emailed code.
 import crypto from "node:crypto";
 import { json, sb, getUser, isAdminEmail, env, siteUrl } from "../api/_lib.js";
 
@@ -58,27 +58,9 @@ export async function GET(request) {
     return new Response("This invitation has already been used or is no longer available.", { status: 410, headers: { "content-type": "text/plain; charset=utf-8" } });
   }
 
-  const r = await fetch(env("SUPABASE_URL") + "/auth/v1/admin/generate_link", {
-    method: "POST",
-    headers: {
-      apikey: secret(),
-      authorization: "Bearer " + secret(),
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      type: "magiclink",
-      email: t.email,
-      redirect_to: siteUrl(request).replace(/\/$/,"") + "/?friend=" + encodeURIComponent(t.code)
-    })
-  });
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) {
-    console.error("invite magic link failed", r.status, JSON.stringify(data));
-    return new Response("I couldn't open this invitation. Please ask Erica to send a fresh one.", { status: 502, headers: { "content-type": "text/plain; charset=utf-8" } });
-  }
-  const link = data.action_link || (data.properties && data.properties.action_link);
-  if (!link) return new Response("I couldn't open this invitation. Please ask Erica to send a fresh one.", { status: 502, headers: { "content-type": "text/plain; charset=utf-8" } });
-  return Response.redirect(link, 302);
+  // The link only carries the invitation. She still signs in with a code sent to her own email,
+  // so a forwarded invitation can't open her account for someone else.
+  return Response.redirect(siteUrl(request).replace(/\/$/,"") + "/?friend=" + encodeURIComponent(t.code), 302);
 }
 
 export { preflight as OPTIONS } from "../api/_lib.js";

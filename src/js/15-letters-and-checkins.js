@@ -14,13 +14,13 @@ function lastLetter(){return S.letters.slice().sort((a,b)=>b.ts-a.ts)[0]||null;}
 function letterSince(){const l=lastLetter();return l?l.ts:Date.now()-WEEK;}
 function firstActivity(){let f=Infinity;for(const e of S.entries)if(e.ts<f)f=e.ts;for(const a of (S.asks||[]))if(a.ts&&a.ts<f)f=a.ts;for(const k of ALL)for(const m of (S.chats[k]||[]))if(m.role==="me"&&m.ts&&m.ts<f)f=m.ts;return f===Infinity?0:f;}
 function contactPref(){
-  const raw=S.profile.contact||{},cad=raw.enabled===false?"never":(raw.cadence||null);
+  const raw=S.profile.contact||{},cad=raw.enabled===false?"never":(raw.cadence==="3xday"?"daily":(raw.cadence||null));
   return {enabled:cad!=="never"&&raw.enabled!==false,cadence:cad,scope:raw.scope||"circle",notify:raw.notify==null?(S.profile.push===true?true:null):raw.notify};
 }
 function contactDays(){return {"3xday":1/3,daily:1,"3days":3,weekly:7,monthly:30}[contactPref().cadence]||Infinity;}
 function contactSettingsHTML(open){
   const c=contactPref(),cad=c.cadence||"",notify=c.notify;
-  const opts=[["3xday","Three times a day"],["daily","Every day"],["3days","Every 3 days"],["weekly","Every week"],["monthly","Every month"],["never","Never again"]];
+  const opts=[["daily","Every day"],["3days","Every 3 days"],["weekly","Every week"],["monthly","Every month"],["never","Never again"]];
   return '<details class="group contactprefs"'+(open?' open':'')+'><summary>Letters and check-ins</summary><p class="small muted">Choose the rhythm. Letters can wait inside the app even if notifications are off.</p>'+
     '<div class="label" style="margin-top:10px">How often should we write?</div><div class="chips">'+opts.map(o=>'<button class="chip" data-contactcad="'+o[0]+'" aria-pressed="'+(cad===o[0])+'">'+o[1]+'</button>').join("")+'</div>'+
     '<div class="label" style="margin-top:12px">Notify me when one arrives?</div><div class="chips"><button class="chip" data-contactnotify="1" aria-pressed="'+(notify===true)+'">Yes, notify me</button><button class="chip" data-contactnotify="0" aria-pressed="'+(notify===false)+'">No notifications</button></div>'+
