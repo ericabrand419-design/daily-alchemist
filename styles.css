@@ -1114,4 +1114,4 @@ html[data-light=day-low]:not([data-theme]){--world-bg:#332943}
 html[data-light=golden]:not([data-theme]){--world-bg:#3A263D}
 html[data-light=blue]:not([data-theme]){--world-bg:#222A46}
 html[data-light=night]:not([data-theme]){--world-bg:#0C0918}
-#wxLayer{opacity:0!important;background:none!important}
+html[data-weather] #wxLayer{opacity:.55}
