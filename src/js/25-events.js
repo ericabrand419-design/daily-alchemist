@@ -32,10 +32,6 @@ document.addEventListener("click",async ev=>{
   if(d.delcorr!==undefined){S.corr.splice(+d.delcorr,1);persistAll();closeSheet();openAltar(false);return;}
   if(t.id==="seasonSet"){const nm=($("#seasonName").value||"").trim();if(!nm)return;S.pseason={name:nm,start:Date.now()};persistAll();renderSky();closeSheet();openAltar(false);toast("Your season is named.");return;}
   if(t.id==="seasonEnd"){S.pseason=null;persistAll();renderSky();closeSheet();openAltar(false);return;}
-  if(d.contacton!==undefined){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.enabled=d.contacton==="1";document.querySelectorAll("[data-contacton]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
-  if(d.contactcad){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.cadence=d.contactcad;document.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
-  if(d.contactscope){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};c.scope=d.contactscope;document.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));saveLocal();return;}
-  if(t.id==="contactSave"){const c=S.profile.contact=S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};if(c.enabled==null){toast("Choose whether you want us to reach out.");return;}persist("profile");if(c.enabled){const ok=await enablePush();toast(ok?"Saved. We'll follow your rhythm.":"Saved. You'll still see letters and check-ins when you open the app.");}else toast("Saved. We won't reach out while you're away.");return;}
   if(t.id==="pushOn"){await enablePush();return;}
   if(d.altar){openAltarItems(d.altar);return;}
   if(d.tend){const sp=S.spaces.find(z=>z.id===d.tend);const r=tendRitual(sp);startRitual(r,{space:sp.id,theme:"space",thread:"Home"});return;}

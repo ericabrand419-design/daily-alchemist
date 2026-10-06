@@ -41,13 +41,18 @@ export async function GET(request) {
   for (const [userId, list] of Object.entries(byUser)) {
     const rows = await sb("prefs?user_id=eq." + userId + "&select=data");
     const data = rows && rows[0] && rows[0].data; if (!data) continue;
-    const x = data.extras || {}, name = firstName(data.profile), contact=(data.profile&&data.profile.contact)||null;
-    if(!contact||contact.notify!==true)continue;
+    const x = data.extras || {}, name = firstName(data.profile), up = data.profile || {};
+    // Same defaults as the app's contactPref(): turning on "Let Aura reach me" in Settings counts as yes.
+    const contact = { scope: "circle", ...(up.contact || {}) };
+    const notify = contact.notify != null ? contact.notify === true : up.push === true;
+    if (!notify || contact.enabled === false || contact.cadence === "never") continue;
     const sentRows=((await sb("push_sent?user_id=eq." + userId + "&select=key,sent_at&order=sent_at.desc")) || []);
     const already = new Set(sentRows.map((r) => r.key));
     const cadenceDays=contact&&contact.cadence==="3xday"?1/3:contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
     const lastContact=sentRows[0]&&Date.parse(sentRows[0].sent_at);
-    if(contact&&contact.enabled===true&&lastContact&&now-lastContact<(cadenceDays*864e5-6*36e5))continue;
+    // Her chosen rhythm paces letters and guardian check-ins. Things she asked for (a promise, "bring this
+    // back later", a date) and an unresolved situation are never held back by it.
+    const rhythmOK = !(lastContact && now - lastContact < (cadenceDays * 864e5 - 6 * 36e5));
     const due = [];
     for (const p of x.promises || []) if (p.status === "open" && p.due <= now) {
       const key = "promise:" + p.id + ":" + p.due;
@@ -72,7 +77,7 @@ export async function GET(request) {
     const hi = name ? name + ", " : "";
     if (member || inGrace) {
       const recent = (await sb("entries?user_id=eq." + userId + "&created_at=gte." + new Date(now - 7 * 864e5).toISOString() + "&select=id,data&order=created_at.desc&limit=30")) || [];
-      if (member && contact && contact.scope==="circle") {
+      if (member && rhythmOK && contact.scope === "circle") {
         const withG = recent.map((r) => ({ id: r.id, ...(r.data || {}) })).filter((e) => !e.private && GNAME[e.guardian] && e.ts);
         const latest = {};
         for (const e of withG) if (!latest[e.guardian] || e.ts > latest[e.guardian].ts) latest[e.guardian] = e;
@@ -88,7 +93,7 @@ export async function GET(request) {
       const startedBeforeToday = firstEver[0] && Date.parse(firstEver[0].created_at) < now - 12 * 36e5;
       const cadence=contact&&contact.cadence==="3xday"?1/3:contact&&contact.cadence==="daily"?1:contact&&contact.cadence==="3days"?3:contact&&contact.cadence==="monthly"?30:7;
       const letterDue = lastL ? now - lastL > (cadence-.25) * 864e5 && recent.length : false;
-      if (letterDue) {
+      if (letterDue && rhythmOK) {
         const key = "letter:" + et.y + "-" + et.m + "-" + et.d;
         const body = member
           ? (lastL ? hi + "I wrote you a letter. I looked back at your week." : hi + "I wrote you my first letter. It's waiting for you.")
