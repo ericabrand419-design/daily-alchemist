@@ -28,9 +28,32 @@ export async function POST(request){
   const supabaseUrl=env("SUPABASE_URL");
   const serviceKey=env("SUPABASE_SERVICE_ROLE_KEY");
   const resendKey=env("RESEND_API_KEY");
-  if(!supabaseUrl||!serviceKey||!resendKey){
-    console.error("auth-code: required mail configuration missing");
+  if(!supabaseUrl||!serviceKey){
+    console.error("auth-code: Supabase configuration missing");
     return json({error:"mail_unavailable"},503);
+  }
+  // No RESEND_API_KEY yet: let Supabase send the code with its own mailer, so sign-in still works.
+  // Supabase's built-in mailer only reaches the project's own team and allows a few emails an hour,
+  // so friends need RESEND_API_KEY (and the dailyalchemist.com domain verified in Resend).
+  if(!resendKey){
+    console.warn("auth-code: RESEND_API_KEY not set, using Supabase's built-in mailer");
+    try{
+      const res=await fetch(supabaseUrl.replace(/\/$/,"")+"/auth/v1/otp",{
+        method:"POST",
+        headers:{apikey:serviceKey,authorization:"Bearer "+serviceKey,"content-type":"application/json"},
+        body:JSON.stringify({email,create_user:true})
+      });
+      if(!res.ok){
+        const raw=await res.text();
+        console.error("auth-code: Supabase mailer refused",res.status,String(raw||"").slice(0,300));
+        return json({error:res.status===429?"supabase_rate_limited":"mail_unavailable"},503);
+      }
+    }catch(err){
+      console.error("auth-code: Supabase mailer exception",String(err&&err.message||err));
+      return json({error:"mail_unavailable"},503);
+    }
+    markSent(key);
+    return json({ok:true,via:"supabase"});
   }
 
   let generated={};
@@ -52,7 +75,7 @@ export async function POST(request){
   }
 
   const code=String(generated.email_otp||"").replace(/\D/g,"");
-  if(code.length!==8){
+  if(code.length<6||code.length>10){
     console.error("auth-code: OTP length mismatch",code.length);
     return json({error:"otp_config"},503);
   }
@@ -66,8 +89,8 @@ export async function POST(request){
         from,
         to:[email],
         subject:code+" is your Daily Alchemist sign-in code",
-        text:"Your Daily Alchemist sign-in code is "+code+".\n\nEnter this 8-digit code in the app. It expires shortly. If you did not request it, you can ignore this email.",
-        html:'<div style="font-family:Georgia,serif;background:#171328;color:#f4efe8;padding:32px"><div style="max-width:520px;margin:auto"><p style="color:#d6b650;letter-spacing:.12em;text-transform:uppercase;font:600 13px Arial,sans-serif">The Daily Alchemist</p><h1 style="font-size:28px;font-weight:400">Your sign-in code</h1><div style="font:700 34px/1.2 Arial,sans-serif;letter-spacing:.18em;color:#f1ce63;margin:28px 0">'+code+'</div><p style="font-size:17px;line-height:1.5">Enter this 8-digit code in the app. It expires shortly.</p><p style="font:14px/1.5 Arial,sans-serif;color:#aaa3b4;margin-top:28px">If you did not request this, you can ignore this email.</p></div></div>'
+        text:"Your Daily Alchemist sign-in code is "+code+".\n\nEnter this code in the app. It expires shortly. If you did not request it, you can ignore this email.",
+        html:'<div style="font-family:Georgia,serif;background:#171328;color:#f4efe8;padding:32px"><div style="max-width:520px;margin:auto"><p style="color:#d6b650;letter-spacing:.12em;text-transform:uppercase;font:600 13px Arial,sans-serif">The Daily Alchemist</p><h1 style="font-size:28px;font-weight:400">Your sign-in code</h1><div style="font:700 34px/1.2 Arial,sans-serif;letter-spacing:.18em;color:#f1ce63;margin:28px 0">'+code+'</div><p style="font-size:17px;line-height:1.5">Enter this code in the app. It expires shortly.</p><p style="font:14px/1.5 Arial,sans-serif;color:#aaa3b4;margin-top:28px">If you did not request this, you can ignore this email.</p></div></div>'
       })
     });
     const raw=await res.text();

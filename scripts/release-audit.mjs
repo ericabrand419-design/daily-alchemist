@@ -80,11 +80,12 @@ for(const a of actionAttrs){
 }
 
 ok(/api\(["\']\/api\/auth-code["\']/.test(source)&&/ACCT\.sb\.auth\.verifyOtp/.test(source),"Live email sign-in must use server-delivered Supabase OTP");
-ok(/code\.length!==8/.test(source)&&/8-digit code/.test(source),"Email sign-in code length and UI promise are not both 8 digits");
+ok(/code\.length<6\|\|code\.length>10/.test(source)&&!/8-digit/.test(source),"Email sign-in must accept the project's code length (6 to 10 digits) and never promise a fixed length");
 ok(existsSync("server/auth-code.js"),"Server auth-code delivery endpoint is missing");
 const authCodeServer=read("server/auth-code.js");
 ok(/admin\/generate_link/.test(authCodeServer)&&/email_otp/.test(authCodeServer),"Auth-code endpoint must generate the OTP through Supabase");
 ok(/api\.resend\.com\/emails/.test(authCodeServer)&&/RESEND_API_KEY/.test(authCodeServer),"Auth-code endpoint must deliver through Resend");
+ok(/auth\/v1\/otp/.test(authCodeServer),"Auth-code endpoint must fall back to Supabase's mailer when RESEND_API_KEY is missing");
 ok(/!res\.ok\|\|!sent\.id/.test(authCodeServer),"Auth-code endpoint must not report success unless the mail provider accepts delivery");
 
 const buttonIds=new Set([...source.matchAll(/<button[^>]*\sid=["']([A-Za-z][\w:-]*)["']/g)].map(m=>m[1]).filter(x=>!x.includes("+")));

@@ -46,9 +46,9 @@ function signInForm(gate,byEmail){
   return '<div id="siForm" data-by="email">'+
     '<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
     '<button class="btn btn-main full" id="siSend" style="margin-top:12px">Email my code</button>'+
-    '<div class="field" id="siCodeRow" hidden style="margin-top:14px"><label for="siCode">8-digit code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" id="siCode" placeholder="12345678"></div>'+
+    '<div class="field" id="siCodeRow" hidden style="margin-top:14px"><label for="siCode">The code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" id="siCode" placeholder="Your code"></div>'+
     '<button class="btn btn-main full" id="siVerify" hidden style="margin-top:12px">'+(gate?"Come in":"Sign in")+'</button>'+
-    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(invite?"Your invitation came by link. Enter your email and we\'ll email you an 8-digit sign-in code. No password and no text messages from us.":"Enter your email and we\'ll email you an 8-digit sign-in code. No password.")+'</p>'+
+    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(invite?"Your invitation came by link. Enter your email and we\'ll email you a sign-in code. No password and no text messages from us.":"Enter your email and we\'ll email you a sign-in code. No password.")+'</p>'+
     '</div>';
 }
 /* On the live app everyone signs in or makes a free account first, so Aura can give her
@@ -58,7 +58,7 @@ function showGate(){
   if(!S.seenIntro&&!S.profile.onboarded){showIntro();return;}
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays(S.friendCode?"I\'m Aura, your guide here. You were invited in. Enter your email to claim your invitation and I\'ll email you an 8-digit sign-in code. No password and no text messages from us.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
+    auraSays(S.friendCode?"I\'m Aura, your guide here. You were invited in. Enter your email to claim your invitation and I\'ll email you a sign-in code. No password and no text messages from us.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
     signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }

@@ -669,6 +669,458 @@ html[data-weather=clear-night] #wxLayer{background:radial-gradient(900px 500px a
 .gmarkname{font-family:var(--f-ui);font-size:15.5px;font-weight:700;letter-spacing:.035em;color:inherit;white-space:nowrap}
 .rite .gmark.labeled{color:var(--ink-soft);background:rgba(42,33,48,.045);padding-right:8px}
 .rite .gmarkname{color:var(--ink-soft)}
+
+
+/* ---------- Light engine v2: real sky first, emotional tone second ---------- */
+:root{--mood-wash:rgba(0,0,0,0)}
+html[data-light=day-bright]{--world-bg:#777092;--dp-a:rgba(247,178,211,.34);--dp-b:rgba(113,202,197,.34);--dp-c:rgba(255,221,132,.30);--dp-wash:rgba(252,239,211,.035)}
+html[data-light=day-low]{--world-bg:#69617F;--dp-a:rgba(233,137,190,.34);--dp-b:rgba(95,181,181,.30);--dp-c:rgba(250,196,91,.34);--dp-wash:rgba(104,72,105,.035)}
+html[data-light=golden]{--world-bg:#5A405E;--dp-a:rgba(230,84,151,.44);--dp-b:rgba(242,139,70,.35);--dp-c:rgba(255,194,79,.40);--dp-wash:rgba(74,38,68,.04)}
+html[data-light=blue]{--world-bg:#303858;--dp-a:rgba(128,84,164,.28);--dp-b:rgba(62,139,160,.30);--dp-c:rgba(129,143,201,.18);--dp-wash:rgba(27,31,63,.08)}
+html[data-light=night]{--world-bg:#0C0918;--dp-a:rgba(120,30,90,.14);--dp-b:rgba(40,80,90,.08);--dp-c:rgba(0,0,0,0);--dp-wash:rgba(8,6,18,.30)}
+html[data-sky=bright][data-light=day-bright]{--world-bg:#817A9D;--dp-b:rgba(120,215,209,.38);--dp-c:rgba(255,229,146,.34)}
+html[data-sky=soft][data-light=day-bright]{--world-bg:#6C6886}
+html[data-sky=dim][data-light=day-bright]{--world-bg:#5E5D77;--dp-a:rgba(175,158,190,.22);--dp-b:rgba(145,165,180,.20);--dp-c:rgba(225,205,160,.12)}
+html[data-atmosphere=held]{--mood-wash:rgba(20,16,42,.085)}
+html[data-atmosphere=gentle]{--mood-wash:rgba(92,76,126,.055)}
+html[data-atmosphere=lifted]{--mood-wash:rgba(255,215,115,.035)}
+body::before{background:
+  radial-gradient(1200px 500px at 110% -10%,var(--dp-a),transparent 60%),
+  radial-gradient(900px 520px at -20% 30%,var(--dp-b),transparent 60%),
+  radial-gradient(1100px 420px at 50% 112%,var(--dp-c),transparent 65%),
+  linear-gradient(var(--mood-wash),var(--mood-wash)),
+  linear-gradient(var(--dp-wash),var(--dp-wash))}
+html[data-light=golden][data-weather=clear-day] #wxLayer{background:radial-gradient(900px 640px at 78% 4%,rgba(255,215,118,.32),transparent 58%),linear-gradient(180deg,rgba(255,174,122,.11),transparent 64%)}
+html[data-light=blue][data-weather=clear-night] #wxLayer{background:linear-gradient(180deg,rgba(74,108,158,.18),rgba(48,59,102,.12) 60%,transparent)}
+html[data-light=day-bright][data-sky=bright][data-weather=clear-day] #wxLayer{background:radial-gradient(900px 620px at 75% -8%,rgba(255,233,158,.30),transparent 58%),linear-gradient(180deg,rgba(134,212,218,.11),transparent 66%)}
+
+
+/* ---------- Responsive surface system ---------- */
+:root{
+  --surface-card:rgba(25,21,48,.95);--surface-card-2:rgba(33,28,59,.94);
+  --surface-aura-1:rgba(50,36,80,.97);--surface-aura-2:rgba(31,25,57,.97);
+  --surface-reading:rgba(30,25,57,.96);--surface-nav:rgba(33,28,59,.95);
+  --surface-sheet:#211C3B;--surface-input:rgba(22,19,42,.78);--surface-tile:rgba(27,23,52,.92);
+}
+html[data-light=day-bright]:not([data-theme]){--surface-card:rgba(48,35,72,.96);--surface-card-2:rgba(59,43,82,.95);--surface-aura-1:rgba(75,46,98,.97);--surface-aura-2:rgba(45,34,70,.98);--surface-reading:rgba(52,39,77,.97);--surface-nav:rgba(39,30,63,.96);--surface-sheet:#342747;--surface-input:rgba(28,21,48,.88);--surface-tile:rgba(49,36,73,.95)}
+html[data-light=day-low]:not([data-theme]){--surface-card:rgba(43,31,63,.96);--surface-card-2:rgba(57,39,72,.95);--surface-aura-1:rgba(82,45,86,.97);--surface-aura-2:rgba(47,31,62,.98);--surface-reading:rgba(55,37,68,.97);--surface-nav:rgba(39,28,57,.96);--surface-sheet:#34243F;--surface-input:rgba(30,20,43,.88);--surface-tile:rgba(51,34,64,.95)}
+html[data-light=golden]:not([data-theme]){--surface-card:rgba(50,28,50,.96);--surface-card-2:rgba(67,36,56,.95);--surface-aura-1:rgba(94,41,73,.97);--surface-aura-2:rgba(53,28,51,.98);--surface-reading:rgba(63,33,56,.97);--surface-nav:rgba(46,27,47,.96);--surface-sheet:#3D2639;--surface-input:rgba(35,19,35,.88);--surface-tile:rgba(58,31,50,.95)}
+html[data-light=blue]:not([data-theme]){--surface-card:rgba(22,29,57,.96);--surface-card-2:rgba(30,39,72,.95);--surface-aura-1:rgba(40,48,92,.97);--surface-aura-2:rgba(25,32,64,.98);--surface-reading:rgba(30,39,72,.97);--surface-nav:rgba(22,30,59,.96);--surface-sheet:#1E294B;--surface-input:rgba(14,20,43,.88);--surface-tile:rgba(26,36,68,.95)}
+.card{background:var(--surface-card)}
+.aura{background:linear-gradient(180deg,var(--surface-aura-1),var(--surface-aura-2))}
+.reading{background:var(--surface-reading)}
+.day,.g{background:var(--surface-tile)}
+.day.next{background:var(--surface-card-2)}
+.sheet{background:var(--surface-sheet)}
+nav.tabs .in{background:var(--surface-nav)}
+textarea,.field input[type=text],.search,.tracker select,.tracker input{background:var(--surface-input)}
+.card,.aura,.reading,.day,.g,.sheet,nav.tabs .in{transition:background .75s ease,border-color .75s ease,color .35s ease}
+
+/* Manual appearance always wins over the living-day palette. */
+html[data-theme=dark]{color-scheme:dark;--world-bg:#0E0A1C;--glow:#F4F1E6;--glow-dim:#E8E2F0;--glow-faint:#D9D0E5;--line:rgba(231,196,90,.28);--surface-card:rgba(24,20,47,.97);--surface-card-2:rgba(33,28,59,.97);--surface-aura-1:rgba(45,36,78,.98);--surface-aura-2:rgba(29,24,54,.98);--surface-reading:rgba(29,24,54,.98);--surface-nav:rgba(27,23,52,.97);--surface-sheet:#1B1732;--surface-input:rgba(15,12,31,.90);--surface-tile:rgba(28,24,54,.96)}
+html[data-theme=light]{color-scheme:light;--world-bg:#F0EAF1;--glow:#2A2130;--glow-dim:#4E4256;--glow-faint:#65576E;--line:rgba(102,74,103,.24);--gold:#9A7414;--surface-card:rgba(255,252,249,.93);--surface-card-2:rgba(246,239,244,.96);--surface-aura-1:rgba(255,247,250,.97);--surface-aura-2:rgba(242,232,244,.97);--surface-reading:rgba(255,252,249,.96);--surface-nav:rgba(255,252,249,.94);--surface-sheet:#FBF7F5;--surface-input:rgba(255,255,255,.80);--surface-tile:rgba(250,246,248,.95)}
+html[data-theme=light] body::after{opacity:.035}
+html[data-theme=light] .btn-ghost,html[data-theme=light] .navback{color:var(--glow)}
+html[data-theme=light] .chip{border-color:rgba(65,45,72,.18);background:rgba(65,45,72,.035);color:var(--glow-dim)}
+html[data-theme=light] .muted,html[data-theme=light] .small{color:var(--glow-dim)}
+html[data-theme=light] nav.tabs{background:linear-gradient(180deg,rgba(240,234,241,0),rgba(240,234,241,.97) 30%)}
+
+/* User-controlled text sizes. Standard is already larger than the original app. */
+html[data-font=large] body{font-size:22.5px}
+html[data-font=large] .small{font-size:19px}
+html[data-font=large] .label{font-size:17px}
+html[data-font=large] .chip{font-size:17px}
+html[data-font=large] .btn{font-size:19.5px}
+html[data-font=large] .muted,html[data-font=large] .why{font-size:18px}
+html[data-font=large] h2{font-size:35px}
+html[data-font=large] h3{font-size:28px}
+html[data-font=xlarge] body{font-size:24px}
+html[data-font=xlarge] .small{font-size:20.5px}
+html[data-font=xlarge] .label{font-size:18px}
+html[data-font=xlarge] .chip{font-size:18px;padding:8px 14px}
+html[data-font=xlarge] .btn{font-size:21px}
+html[data-font=xlarge] .muted,html[data-font=xlarge] .why{font-size:19.5px}
+html[data-font=xlarge] h2{font-size:38px}
+html[data-font=xlarge] h3{font-size:30px}
+html[data-font=xlarge] .app{max-width:520px}
+
+/* Lunar progress instead of generic habit dots. */
+.moontrail{display:grid;grid-template-columns:repeat(10,1fr);gap:6px 7px;margin-top:14px;align-items:center}
+.moonday{width:22px;height:22px;display:grid;place-items:center;color:var(--glow-faint);opacity:.42;border-radius:50%;padding:2px}
+.moonday svg{width:18px;height:18px;display:block}
+.moonday.on{color:var(--gold);opacity:1;box-shadow:0 0 0 1px rgba(231,196,90,.72),0 0 13px rgba(231,196,90,.24)}
+
+/* Journeys: guardian identity is an actual doorway. */
+.journeycard{display:grid;gap:8px}
+.journeyrow{align-items:center;flex-wrap:nowrap}
+.journeyopen,.journeybody,.journeyguardianname{border:0;background:none;color:inherit;text-align:left;padding:0}
+.journeyopen{flex:1;min-width:0}
+.journeybody{display:grid;gap:4px;width:100%;font-family:var(--f-ui);font-size:16.5px;color:var(--glow-dim)}
+.journeybody .progress{width:100%}
+.journeyguardianname .label{text-align:left}
+.journeyhead .gmark{filter:drop-shadow(0 5px 14px rgba(0,0,0,.3))}
+
+/* Ritual cards should feel like objects, not beige boxes. */
+.page.ritualcard{border-radius:18px;padding:22px 20px 20px;border:1px solid color-mix(in srgb,var(--gcol,var(--gold)) 48%,#9A7414);background:
+ radial-gradient(circle at 86% 9%,color-mix(in srgb,var(--gcol,var(--gold)) 17%,transparent),transparent 27%),
+ radial-gradient(circle at 9% 92%,rgba(154,116,20,.10),transparent 31%),
+ linear-gradient(145deg,#FFF8E8 0%,#F1E2BF 58%,#E4CFA4 100%);box-shadow:0 22px 48px -25px rgba(9,6,17,.8),inset 0 1px rgba(255,255,255,.65);overflow:hidden}
+.page.ritualcard::before{inset:8px;border-radius:12px;border:1px solid rgba(154,116,20,.48);box-shadow:none}
+.page.ritualcard::after{content:"☾";right:17px;bottom:5px;font-size:46px;color:color-mix(in srgb,var(--gcol,var(--gold)) 24%,transparent)}
+.ritualguardian{position:relative;z-index:1;padding:8px 10px;border-radius:14px;background:color-mix(in srgb,var(--gcol,var(--gold)) 10%,rgba(255,255,255,.42));border:1px solid color-mix(in srgb,var(--gcol,var(--gold)) 30%,transparent)}
+.page.ritualcard h3{font-size:31px;line-height:1.05;margin-top:14px;color:#2C2030}
+.page.ritualcard .facts{gap:7px;margin-top:12px}
+.page.ritualcard .facts span{padding:5px 8px;border-radius:999px;background:rgba(84,59,70,.07);border:1px solid rgba(84,59,70,.13)}
+.page.ritualcard .needs{margin-top:15px;padding-top:13px;border-top:1px solid rgba(154,116,20,.28)}
+.supplyhint{font-family:var(--f-ui);font-size:14px;line-height:1.35;color:#6A596A;margin-top:3px}
+.needchips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.needchip{font-family:var(--f-ui);font-size:14.5px;line-height:1.25;padding:7px 10px;border-radius:999px;border:1px solid rgba(94,75,64,.23);background:rgba(255,255,255,.48);color:#443848;display:inline-flex;align-items:center;gap:6px}
+button.needchip{cursor:pointer}
+.needchip .needcheck{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;background:rgba(74,120,79,.12);font-weight:700}
+.needchip.missing{background:rgba(147,64,71,.08);border-color:rgba(147,64,71,.32);text-decoration:none}
+.needchip.missing .needcheck{background:rgba(147,64,71,.12);color:#8F3943}
+.supplyswap{margin-top:12px;padding:11px 12px;border-radius:12px;background:rgba(154,116,20,.08);border:1px solid rgba(154,116,20,.22);font-family:var(--f-ui);font-size:15px;color:#5F4C43}
+.supplyswap .label{display:block;color:#7C5D16;margin-bottom:3px}
+.gatherbox.attention{animation:supplyPulse .7s ease}
+@keyframes supplyPulse{50%{box-shadow:0 0 0 5px rgba(191,30,115,.13)}}
+.prepfoot{flex-wrap:wrap}
+.prepfoot .btn{min-width:180px}
+
+/* Tarot cards: the SVG is the card. Do not shrink a full card into a tiny icon inside another card. */
+.tarot{width:118px;height:189px;filter:drop-shadow(0 12px 15px rgba(0,0,0,.28))}
+.altar .tarot{width:168px;height:269px}
+.tarot .face{border-radius:12px}
+.tarot .front{padding:0;background:transparent;box-shadow:none}
+.tarot .front .tcard{width:100%!important;height:100%!important;display:block}
+.altar .tarot .front .tcard{width:100%!important;height:100%!important}
+.tarot .back{border-radius:12px;background:#16132A;box-shadow:0 18px 30px -18px rgba(0,0,0,.9)}
+.tarot.flipped .front{box-shadow:0 20px 34px -22px rgba(0,0,0,.88)}
+.spread .tarot{transform-origin:50% 100%}
+.three .tarot.mini{width:96px;height:154px}
+@media(max-width:390px){.altar .tarot{width:152px;height:243px}.three .tarot.mini{width:84px;height:134px}.moontrail{grid-template-columns:repeat(8,1fr)}}
+
+
+/* ================================================================
+   LUXURY EXPERIENCE PASS — Oct 2 2026
+   Restraint first: fewer boxes, stronger hierarchy, physical objects.
+   ================================================================ */
+:root{
+  --luxe-night:#161226;
+  --luxe-night-2:#211832;
+  --luxe-plum:#241936;
+  --luxe-paper:#F8F0DD;
+  --luxe-parch:#F0E3C5;
+  --luxe-gold:#C7A44A;
+}
+.label{letter-spacing:.12em}
+.card{box-shadow:none}
+nav.tabs .in{background:rgba(28,22,49,.94);border-color:rgba(199,164,74,.22);border-radius:18px;padding:5px}
+nav.tabs button{border-radius:12px;letter-spacing:.035em;color:rgba(244,239,232,.66);position:relative}
+nav.tabs button[aria-selected="true"]{background:transparent;color:#F4EFE8}
+nav.tabs button[aria-selected="true"]::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--luxe-gold);position:absolute;bottom:2px}
+nav.tabs button[aria-selected="true"] svg{color:var(--luxe-gold)}
+.top{padding-top:16px}.brand h1{font-size:30px}.brand .eyebrow{letter-spacing:.08em}
+#memBadge{border-radius:999px;background:transparent!important;border-color:rgba(199,164,74,.48)!important;color:#DEC36F!important}
+
+/* Today: editorial, not a pile of rounded cards */
+.home{padding:8px 0 2px}
+.home .greet{font-family:var(--f-ui);font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:rgba(244,239,232,.62)}
+.home .hline{font-size:35px;line-height:1.05;max-width:430px}
+.home .obs{margin-top:9px;font-family:var(--f-display);font-style:italic;font-size:20px;color:rgba(244,239,232,.78)}
+.aura{border-radius:0;border-width:1px 0;background:linear-gradient(90deg,transparent,rgba(36,25,54,.76) 14%,rgba(36,25,54,.76) 86%,transparent);box-shadow:none;padding:20px 4px}
+.aura .speaker{padding:0 8px}.aura .speaker .who{letter-spacing:.08em}
+.aura textarea{border-radius:16px;background:rgba(13,10,25,.46);border-color:rgba(199,164,74,.26)}
+.aura .btn-main{box-shadow:none;background:#3A294B;border:1px solid rgba(199,164,74,.56);color:#F8F0DD}
+details.more>summary{letter-spacing:.04em}
+
+/* Altar: a real deck, not a fan of floating clip-art cards */
+.altarstage{display:grid;gap:14px;padding:2px 0 8px}
+.altarhead{max-width:430px}
+.altarhead h2{font-size:34px;margin-top:5px}
+.altarpositions{display:grid;gap:5px;margin-top:13px;padding-left:12px;border-left:1px solid rgba(199,164,74,.42)}
+.altarpositions span{font-family:var(--f-ui);font-size:15px;color:rgba(244,239,232,.56)}
+.altarpositions span.next{color:#F4EFE8}.altarpositions span.done{color:#C7A44A}
+.altarhint{font-family:var(--f-display);font-size:19px;font-style:italic;color:rgba(244,239,232,.82);margin-top:12px}
+.decknote{font-family:var(--f-ui);font-size:14px;color:rgba(244,239,232,.54);text-align:center}
+.spread.seven{
+  width:calc(100% + 18px);margin-left:-9px;padding:12px 18px 18px;
+  display:flex;gap:14px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;
+  justify-content:flex-start;scrollbar-width:none;
+}
+.spread.seven::-webkit-scrollbar{display:none}
+.spread.seven .tarot.sp{
+  flex:0 0 116px;width:116px;height:186px;margin:0!important;transform:none!important;scroll-snap-align:center;
+  filter:drop-shadow(0 14px 12px rgba(0,0,0,.30));transition:transform .25s ease,filter .25s ease;
+}
+.spread.seven .tarot.sp:hover,.spread.seven .tarot.sp:focus-visible{transform:translateY(-7px)!important}
+.spread.seven .tarot.sp.picked{transform:translateY(-10px)!important;filter:drop-shadow(0 18px 18px rgba(0,0,0,.45));z-index:2}
+.tarot .face{border-radius:7px}
+.tarot .back{
+  background:
+    radial-gradient(circle at 50% 44%,rgba(199,164,74,.10),transparent 34%),
+    linear-gradient(145deg,#2A1D3C,#171126 58%,#0F0B19);
+  box-shadow:inset 0 0 0 1px rgba(199,164,74,.8),inset 0 0 0 5px #181226,inset 0 0 0 6px rgba(199,164,74,.28);
+}
+.tarot .back svg{opacity:.72;filter:saturate(.78)}
+.tarot.flipped .front{box-shadow:0 20px 34px -24px rgba(0,0,0,.9)}
+.three{gap:14px;margin:18px 0}.three .pos{letter-spacing:.03em;text-transform:none;font-size:13px;line-height:1.3}
+.card.together{border-radius:4px;background:rgba(25,21,48,.62);border-color:rgba(199,164,74,.34);padding:18px}
+details.tread{padding:11px 0;border-color:rgba(244,241,230,.1)}
+
+/* Ritual: ceremonial folio with natural height, no giant beige void */
+.rite{display:block;overflow:auto;background:
+  radial-gradient(circle at 80% 0,rgba(199,164,74,.08),transparent 28%),
+  linear-gradient(180deg,#F8F0DD,#EADDBF);padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+.rite::before{display:none}
+.rite .wm{display:none}
+.rite .wrap{flex:none;overflow:visible;max-width:620px;min-height:0;margin:0 auto;padding:22px 24px 0;background:transparent!important;border:0!important;box-shadow:none!important;gap:14px}
+.rite .bar{min-height:54px;border-bottom:1px solid rgba(85,65,45,.16);padding-bottom:12px}
+.ritualwho{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.ritualwho .gmark{flex:none}.ritualwho>span{display:grid;min-width:0}
+.ritualwho b{font-family:var(--f-display);font-size:18px;font-weight:500;line-height:1.05;color:#2F2632}
+.ritualwho small{font-family:var(--f-ui);font-size:12px;letter-spacing:.04em;color:#786A72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rite .bar>.navback{background:transparent;border:0;padding:0 7px 0 0;color:#3D3340}
+.rite .pips{margin:3px 0 8px;gap:5px}.rite .pips i{height:2px;background:rgba(61,51,64,.13)}.rite .pips i.on{background:#9A7414}
+.ritualintro,.ritualstep,.ritualcomplete{display:grid;gap:16px;padding:10px 0 2px}
+.ritualkicker{font-family:var(--f-ui);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#8D6F27}
+.rite h1{font-family:var(--f-display);font-size:clamp(38px,10vw,52px);font-weight:400;line-height:1.02;color:#2F2632;letter-spacing:-.015em}
+.rite .purpose{font-family:var(--f-display);font-style:italic;font-size:23px;line-height:1.35;color:#5B4B58}
+.ritualmeta{display:flex;flex-wrap:wrap;gap:6px 0;border-block:1px solid rgba(85,65,45,.16);padding:9px 0}
+.ritualmeta span{font-family:var(--f-ui);font-size:13px;color:#6B5D63;padding-right:12px;margin-right:12px;border-right:1px solid rgba(85,65,45,.16)}
+.ritualmeta span:last-child{border:0}
+.gatherbox.ritualtray{margin:0;border-radius:4px;border:1px solid rgba(154,116,20,.30);background:rgba(255,255,255,.28);padding:16px}
+.trayhead{display:flex;justify-content:space-between;gap:12px;align-items:baseline}.trayhead .sayl{font-family:var(--f-display);font-size:21px;color:#332937}.trayhead .small{font-size:13px;color:#74666D}
+.needchips{gap:8px;margin-top:12px}.needchip{border-radius:6px;background:rgba(255,255,255,.42);border-color:rgba(85,65,45,.18);padding:9px 11px}
+.needchip .needcheck{border-radius:50%;background:rgba(72,105,70,.10)}.needchip.missing{background:rgba(132,74,70,.07)}
+.supplyhint{margin-top:11px;color:#786B70;font-size:13px}.prepnote{display:none}
+.supplyswap{border-radius:4px}
+.rite .text{font-family:var(--f-display);font-size:25px;line-height:1.48;color:#403441}
+.rite .say{margin:4px 0;padding:18px 16px;border:0;border-left:2px solid #9A7414;text-align:left;font-size:28px;color:#5A2842;background:rgba(255,255,255,.22)}
+.rite .say .sayl{display:block;font-family:var(--f-ui);font-style:normal;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#8D6F27;margin-bottom:6px}
+.rite .foot{position:relative;max-width:620px;margin:16px auto 0;padding:0 24px 8px;display:flex;gap:10px}
+.rite .foot .btn{min-height:52px;border-radius:10px}
+.rite .btn-ink{background:#2C2331;color:#F8F0DD;box-shadow:none}
+.rite .btn-ghost{box-shadow:inset 0 0 0 1px rgba(61,51,64,.24);border-radius:10px}
+.ritualcomplete .finishq{font-family:var(--f-display);font-size:27px;color:#4A3B48}
+.afterfeel{gap:8px}.rite .afterfeel .chip{border-radius:8px;padding:10px 13px}
+.ritualnotes{margin-top:6px;border-top:1px solid rgba(85,65,45,.18);padding-top:14px}
+.ritualnotes summary{font-family:var(--f-ui);font-weight:700;color:#574A52;cursor:pointer;padding:7px 0}
+.ritualnotes textarea{min-height:120px;margin-top:10px;background:rgba(255,255,255,.42);border-radius:8px}
+.ritualnotes .field{margin-top:12px}.ritualnotes #outWhen{margin-top:8px}
+@media(max-width:390px){.rite .wrap,.rite .foot{padding-left:20px;padding-right:20px}.rite h1{font-size:42px}.trayhead{display:grid;gap:2px}}
+
+/* Mailbox: correspondence, not another generic dark card */
+.mailbox{border:0!important;border-radius:0!important;background:transparent!important;padding:2px 0 4px!important;box-shadow:none!important}
+.mailhead{padding-bottom:14px;border-bottom:1px solid rgba(199,164,74,.30)}.mailhead svg{width:48px;height:auto}
+.mailhead h3{font-size:28px}.mailintro{font-family:var(--f-display);font-style:italic;font-size:18px;color:rgba(244,239,232,.70);margin:12px 0}
+.mailstack{display:grid}
+.mailletter{width:100%;display:grid;grid-template-columns:12px minmax(0,1fr) auto;gap:12px;align-items:start;text-align:left;border:0;border-bottom:1px solid rgba(244,239,232,.12);background:transparent;color:inherit;padding:16px 0}
+.mailletter .wax{width:7px;height:7px;border-radius:50%;background:rgba(199,164,74,.42);margin-top:8px}
+.mailletter.unread .wax{background:#C7A44A;box-shadow:0 0 0 4px rgba(199,164,74,.08)}
+.mailcopy{display:grid;gap:3px;min-width:0}.mailmeta,.maildate{font-family:var(--f-ui);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:rgba(244,239,232,.52)}
+.mailcopy strong{font-family:var(--f-display);font-size:22px;font-weight:500;color:#F4EFE8}
+.mailpreview{font-family:var(--f-display);font-size:16px;color:rgba(244,239,232,.68);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mailopen{font-family:var(--f-ui);font-size:13px;color:#C7A44A;padding-top:19px}
+.empty-mail{padding-top:8px!important}.empty-mail .aurasays{margin-top:14px}
+.sealednote{margin-top:16px}.page.letter{border-radius:2px;padding:30px 25px;background:#F8F0DD;box-shadow:0 20px 45px -30px rgba(0,0,0,.8)}
+.page.letter::before{inset:10px;border-color:rgba(154,116,20,.28);box-shadow:none}
+.letterbrand{font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:.16em;color:#8A6E2A}
+.lettermeta{font-family:var(--f-ui);font-size:12px;color:#796A70;margin-top:4px}
+.page.letter h2{font-size:37px;color:#2F2632;margin:20px 0 5px}.page.letter p{font-size:20px;line-height:1.68;color:#403441}
+.lettersign{font-family:var(--f-display);font-style:italic;font-size:28px;color:#5C4054;margin-top:24px}
+.letterstack{gap:12px}.letterback{text-align:center;padding:8px}
+
+/* Guardian conversation: typeset dialogue, not Messenger */
+.talk{background:
+  radial-gradient(circle at 15% 0,color-mix(in srgb,var(--talk-accent,#C7A44A) 11%,transparent),transparent 30%),
+  #141021}
+.talk .hd{max-width:620px;padding:12px 18px;border-color:rgba(199,164,74,.18)}
+.talkportrait{width:46px;height:46px;display:grid;place-items:center}.talkportrait svg{width:44px!important;height:44px!important}
+.talk .hd .who .n{font-size:24px}.talk .hd .who .t{font-size:12px;letter-spacing:.04em;text-transform:none;color:rgba(244,239,232,.60)!important}
+.talkeyebrow{display:block;font-family:var(--f-ui);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#C7A44A;margin-bottom:1px}
+.talk .msgs{max-width:620px;padding:20px 22px 24px;gap:18px}
+.talk .intro{border-radius:4px;background:rgba(33,24,50,.52);border-color:rgba(199,164,74,.18);padding:18px}
+.bub{max-width:100%;border-radius:0!important;padding:0!important;white-space:normal}
+.bub .msgwho{display:block;font-family:var(--f-ui);font-size:11px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;margin-bottom:5px}
+.bub p{white-space:pre-wrap}
+.bub.them{align-self:stretch;background:transparent!important;border:0!important;font-family:var(--f-display);font-size:23px;line-height:1.48;color:#F4EFE8;padding-left:14px!important;border-left:1px solid color-mix(in srgb,var(--talk-accent,#C7A44A) 48%,transparent)!important}
+.bub.them .msgwho{color:var(--talk-accent,#C7A44A)}
+.bub.me{align-self:stretch;margin-left:44px;background:rgba(244,239,232,.055)!important;border:0!important;border-radius:4px!important;padding:12px 14px!important;font-family:var(--f-book);font-size:18px;color:rgba(244,239,232,.84)}
+.bub.me .msgwho{color:rgba(244,239,232,.46)}
+.bub .btn{border-radius:8px;margin:12px 8px 0 0}
+.talk .ft{max-width:620px;padding:12px 18px 16px;border-color:rgba(199,164,74,.15);background:rgba(20,16,33,.96)}
+.talk .ft textarea{border-radius:12px;background:rgba(244,239,232,.055);border-color:rgba(199,164,74,.24);padding-left:14px}
+.talk .send,.talk .mic{box-shadow:none}.talk .send{background:#3A294B;border:1px solid rgba(199,164,74,.5);color:#F8F0DD}
+
+/* Keep surfaces restrained everywhere */
+.page.ritualcard{border-radius:4px}.page.ritualcard::after{display:none}
+.card.letterc{border-radius:4px;background:rgba(25,21,48,.72)}
+
+
+/* ================================================================
+   PREMIUM EDITORIAL PASS · OCT 2026
+   One visual language: restrained, physical, mystical, not decorative.
+================================================================ */
+
+/* Restraint */
+.label{letter-spacing:.13em}
+.card{box-shadow:none;border-color:rgba(244,241,230,.16);background:rgba(20,17,40,.78)}
+.card::before,.card::after{box-shadow:none}
+nav.tabs .in{border-radius:18px;background:rgba(22,18,43,.94);padding:4px;border-color:rgba(231,196,90,.18)}
+nav.tabs button{border-radius:12px;letter-spacing:.035em;padding:8px 0 7px}
+nav.tabs button[aria-selected="true"]{background:rgba(231,196,90,.07);color:var(--glow)}
+nav.tabs button[aria-selected="true"]::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--gold);margin-top:1px}
+
+/* Today feels like an almanac page, not a stack of cards */
+.sky{border:0!important;border-top:1px solid rgba(231,196,90,.32)!important;border-bottom:1px solid rgba(231,196,90,.22)!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;padding:15px 2px 17px!important}
+.sky .phase{font-family:var(--f-display);font-size:22px!important}
+.sky .meta{letter-spacing:.02em!important}
+.home{padding-top:8px}
+.home .hline{font-family:var(--f-display);font-weight:400;line-height:1.08}
+.home .obs{max-width:34ch}
+.rhythm,.quiet{background:transparent;border-left:0;border-right:0;border-radius:0;border-color:rgba(244,241,230,.12)}
+
+/* ---------------- THE ALTAR ---------------- */
+.altarstage{padding:8px 0 18px}
+.altarhead{max-width:36rem}
+.altarhead>.label{color:var(--gold);margin-bottom:5px}
+.altarhead h2{font-weight:400;font-size:clamp(32px,8vw,43px);line-height:1.04;margin:0}
+.altarpositions{display:grid;gap:5px;margin:18px 0 10px;padding:13px 0;border-top:1px solid rgba(231,196,90,.22);border-bottom:1px solid rgba(231,196,90,.16)}
+.altarpositions span{font-family:var(--f-ui);font-size:14px;color:var(--glow-faint);letter-spacing:.025em}
+.altarpositions span.next{color:var(--gold)}
+.altarpositions span.done{color:var(--glow-dim)}
+.altarpositions span.done::after{content:"  ✓";color:var(--gold)}
+.altarhint,.decknote{font-family:var(--f-display);font-size:19px;line-height:1.45;color:var(--glow-dim);margin:8px 0 0}
+.decknote{font-family:var(--f-ui);font-size:14px;letter-spacing:.01em;text-align:center;margin-top:12px;color:var(--glow-faint)}
+
+/* No fan. A physical deck rail. */
+.spread,.spread.seven{position:relative;height:auto;margin:18px -2px 0;padding:12px 8px 18px;display:flex;align-items:flex-end;gap:0;overflow-x:auto;overflow-y:visible;scroll-snap-type:x proximity;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.spread::-webkit-scrollbar{display:none}
+.spread .tarot.sp,.spread.seven .tarot.sp{position:relative!important;left:auto!important;top:auto!important;flex:0 0 108px;width:108px!important;height:173px!important;margin:0 0 0 -23px!important;transform:none!important;filter:drop-shadow(0 12px 15px rgba(0,0,0,.38));scroll-snap-align:center;z-index:1;transition:transform .35s ease,filter .35s ease,opacity .35s ease}
+.spread .tarot.sp:first-child,.spread.seven .tarot.sp:first-child{margin-left:0!important}
+.spread .tarot.sp:nth-child(odd){transform:translateY(4px)!important}
+.spread .tarot.sp:hover,.spread .tarot.sp:focus-visible,.spread.seven .tarot.sp:hover,.spread.seven .tarot.sp:focus-visible{transform:translateY(-9px)!important;z-index:5;filter:drop-shadow(0 18px 22px rgba(0,0,0,.5))}
+.spread .tarot.sp.picked,.spread.seven .tarot.sp.picked{transform:translateY(-13px)!important;z-index:6;filter:drop-shadow(0 20px 24px rgba(0,0,0,.55))}
+.spread .tarot.sp.picked .inner{transform:rotateY(180deg)}
+.spread .tarot.sp.picked~.tarot.sp{opacity:.9}
+.tarot .face{border-radius:9px}
+.tarot .back{background:#161226;box-shadow:0 0 0 1px rgba(231,196,90,.72),inset 0 0 0 5px #161226,inset 0 0 0 6px rgba(231,196,90,.25)}
+.tarot .front{background:#161226;box-shadow:0 0 0 1px rgba(231,196,90,.72)}
+.tarot .inner{transition:transform .62s cubic-bezier(.2,.72,.2,1)}
+.three{gap:12px;margin:20px 0 18px}
+.three .tarot.mini{max-width:118px}
+.three .pos{text-transform:none;letter-spacing:.01em;font-size:13px;line-height:1.35;color:var(--glow-dim)}
+details.tread{padding:12px 0;border-color:rgba(244,241,230,.1)}
+.card.together{background:transparent;border-left:1px solid rgba(231,196,90,.45);border-right:0;border-top:0;border-bottom:0;border-radius:0;padding:4px 0 4px 16px}
+
+/* ---------------- RITUAL FOLIO ---------------- */
+.rite{background:
+ radial-gradient(900px 500px at 50% -150px,rgba(255,255,255,.52),transparent 62%),
+ linear-gradient(180deg,#F3E8CD 0%,#EBDDba 100%);color:#2C2431}
+.rite::before{display:none}
+.rite .wrap{max-width:600px;padding:22px 26px 12px;gap:18px}
+.rite .bar{padding-bottom:12px;border-bottom:1px solid rgba(112,83,31,.2)}
+.rite .bar>.navback{background:transparent;border-radius:0;padding:0;color:#3B3140;box-shadow:none}
+.ritualwho{display:flex;align-items:center;gap:9px;min-width:0;flex:1}
+.ritualwho>svg{width:36px!important;height:36px!important}
+.ritualwho span{display:grid;line-height:1.05}
+.ritualwho b{font-family:var(--f-ui);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#6A532A}
+.ritualwho small{font-family:var(--f-ui);font-size:12px;color:#756B74;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rite .pips{gap:4px;margin-top:-8px}
+.rite .pips i{height:2px;background:rgba(70,55,67,.11)}
+.rite .pips i.on{background:#A7863D}
+.ritualintro,.ritualstep,.ritualcomplete{display:flex;flex-direction:column;gap:14px;max-width:520px;width:100%;margin:0 auto}
+.ritualkicker{font-family:var(--f-ui);font-weight:700;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:#8A6A28;margin-top:8px}
+.rite h1,.ritualintro h1,.ritualstep h1,.ritualcomplete h1{font-family:var(--f-display);font-weight:400;font-size:clamp(39px,9vw,54px);line-height:1.02;color:#2D2532;margin:0;text-wrap:balance}
+.ritualintro .purpose,.ritualstep .purpose{font-family:var(--f-display);font-style:italic;font-size:22px;line-height:1.4;color:#6E6170;margin:0}
+.ritualmeta{display:flex;flex-wrap:wrap;gap:0;margin:2px 0 5px;color:#655A65;font:14px var(--f-ui)}
+.ritualmeta span+span::before{content:"·";color:#A7863D;margin:0 9px}
+.ritualtray{margin-top:8px;padding:18px 0 8px;border:0;border-top:1px solid rgba(112,83,31,.25);border-bottom:1px solid rgba(112,83,31,.18);background:transparent;border-radius:0}
+.trayhead{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.trayhead .sayl{font:700 13px var(--f-ui);letter-spacing:.14em;text-transform:uppercase;color:#6B5326}
+.trayhead .small{color:#776E76}
+.ritualtray .needchips{display:flex;flex-wrap:wrap;gap:9px;margin:14px 0 8px}
+.rite .needchip{border:1px solid rgba(112,83,31,.28);background:rgba(255,252,243,.54);color:#352D38;border-radius:999px;padding:9px 13px;min-height:42px;font:16px var(--f-ui);box-shadow:none}
+.rite .needchip .needcheck{color:#8E6E2C;margin-right:6px}
+.rite .needchip.missing{border-style:dashed;opacity:.7}
+.ritualtray .supplyhint{font:14px/1.45 var(--f-ui);color:#766C75;margin:8px 0 2px;max-width:46ch}
+.supplyswap{background:rgba(255,252,243,.5);border-left:2px solid #A7863D;border-radius:0;padding:10px 13px}
+.rite .foot{max-width:600px;padding:10px 26px calc(18px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,rgba(235,221,186,0),rgba(235,221,186,.98) 35%)}
+.rite .foot .btn{min-height:52px;border-radius:999px}
+.rite .btn-ink{background:#282031;color:#FBF2DB;box-shadow:none}
+.rite .btn-ink:hover,.rite .btn-ink:focus-visible{background:#1E1826}
+.rite .btn-ghost{background:transparent;box-shadow:inset 0 0 0 1px rgba(54,43,57,.24);color:#3B313F}
+.ritualstep .text{font-family:var(--f-display);font-size:25px;line-height:1.48;color:#403642;margin:4px 0}
+.ritualstep .say{border:0;border-left:1px solid #A7863D;padding:5px 0 5px 18px;text-align:left;color:#4A394A;font-size:25px;background:transparent}
+.ritualstep .say .sayl{display:block;font:700 12px var(--f-ui);font-style:normal;letter-spacing:.15em;text-transform:uppercase;color:#8B6B29;margin-bottom:7px}
+.ritualcomplete{padding-top:18px}
+.ritualcomplete .finishq{font:italic 25px/1.35 var(--f-display);color:#645765}
+.afterfeel{gap:8px}
+.rite .afterfeel .chip{border-radius:999px;background:rgba(255,252,243,.48)}
+.ritualnotes{margin-top:8px;border-top:1px solid rgba(112,83,31,.2);padding-top:12px}
+.ritualnotes summary{font:700 14px var(--f-ui);color:#6A532A;cursor:pointer}
+.ritualnotes textarea{min-height:120px}
+
+/* ---------------- MAILBOX ---------------- */
+.mailbox{background:transparent!important;border:0!important;padding:0!important}
+.mailhead{display:flex;align-items:center;gap:14px;padding-bottom:14px;border-bottom:1px solid rgba(231,196,90,.2)}
+.mailhead svg{filter:drop-shadow(0 8px 12px rgba(0,0,0,.2))}
+.mailbox .li{padding:15px 2px;border-color:rgba(244,241,230,.1)}
+.mailbox .li>span:first-child{font-family:var(--f-display);font-size:20px;line-height:1.3}
+.letterc{background:#F3E8CD!important;color:#2D2532!important;border:1px solid rgba(199,164,74,.5)!important;border-radius:7px!important;box-shadow:0 12px 28px -18px rgba(0,0,0,.7)!important}
+.letterc .label,.letterc .small{color:#7D6228!important}
+.letterc .lt{font-family:var(--f-display);font-size:23px}
+.page.letter{background:#F4E8CB;border-radius:4px;color:#302734;padding:24px 22px;box-shadow:0 20px 45px -30px #000}
+.page.letter .kicker{color:#846727}
+.page.letter h3{font-size:36px;font-weight:400}
+.page.letter p{font-family:var(--f-display);font-size:20px;line-height:1.55}
+
+/* ---------------- GUARDIAN DIALOGUE ---------------- */
+.talk .hd{border-bottom:1px solid rgba(231,196,90,.15);padding-top:14px;padding-bottom:14px}
+.talk .hd .who .n{font-size:28px;font-weight:400}
+.talk .hd .who .t{letter-spacing:.08em;font-size:13px}
+.talk .msgs{gap:18px;padding:18px 18px 24px}
+.intro{background:transparent;border:0;border-bottom:1px solid rgba(244,241,230,.1);border-radius:0;padding:4px 0 18px}
+.intro .kv{display:none}
+.intro .top2{grid-template-columns:48px 1fr}
+.intro .top2 svg{width:48px;height:48px}
+.bub{max-width:92%}
+.bub.them{align-self:stretch;max-width:none;background:transparent!important;border:0!important;border-left:1px solid rgba(231,196,90,.32)!important;border-radius:0!important;padding:5px 8px 5px 16px;font-family:var(--f-display);font-size:22px;line-height:1.48}
+.bub.me{align-self:flex-end;max-width:84%;background:rgba(244,241,230,.075);border:1px solid rgba(244,241,230,.12);border-radius:15px 15px 4px 15px;padding:10px 13px;font-size:18px}
+.bub.them .hear{float:right;margin-left:8px}
+.talk .ft{border-top:1px solid rgba(244,241,230,.08);padding-top:12px}
+.talk .ft textarea{border-radius:17px;background:rgba(244,241,230,.055);border-color:rgba(244,241,230,.14)}
+.send{background:var(--gold);color:#171326;box-shadow:none}
+
+/* Mobile polish */
+@media (max-width:420px){
+  .spread .tarot.sp,.spread.seven .tarot.sp{flex-basis:102px;width:102px!important;height:163px!important;margin-left:-28px!important}
+  .rite .wrap{padding-left:22px;padding-right:22px}
+  .rite .foot{padding-left:22px;padding-right:22px}
+  .ritualwho small{max-width:170px}
+  .altarpositions span{font-size:13px}
+}
+
+
+/* ================================================================
+   CRISP BACKGROUND PASS · OCT 2026
+   Keep the living palette and stars, remove full-screen haze and grain.
+================================================================ */
+body::before,body::after{display:none!important}
+#wxLayer{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+html[data-weather=fog] #wxLayer{background:linear-gradient(180deg,rgba(200,195,215,.025),rgba(200,195,215,.04) 70%,rgba(200,195,215,.015))!important}
+
+
+/* ================================================================
+   JEWEL-TONE WORLD PASS · OCT 2026
+   Auto appearance must stay rich and crisp around surfaces.
+================================================================ */
+html[data-light=day-bright]:not([data-theme]){--world-bg:#3A3055}
+html[data-light=day-low]:not([data-theme]){--world-bg:#332943}
+html[data-light=golden]:not([data-theme]){--world-bg:#3A263D}
+html[data-light=blue]:not([data-theme]){--world-bg:#222A46}
+html[data-light=night]:not([data-theme]){--world-bg:#0C0918}
+#wxLayer{opacity:0!important;background:none!important}
 </style>
 
 <div class="app" id="app">
@@ -1933,7 +2385,7 @@ function season(d){
    mirrored on this device so the app works offline and instantly.
 ------------------------------------------------------------------ */
 const KEY="dailyAlchemist.v1";
-let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",onboarded:false},entries:[],draws:{}};
+let S = {profile:{name:"",minutes:10,have:[],known:[],tone:"balanced",appearance:"auto",fontSize:"standard",onboarded:false},entries:[],draws:{}};
 try{const raw=localStorage.getItem(KEY);if(raw){const p=JSON.parse(raw);S={...S,...p,profile:{...S.profile,...(p.profile||{})}};}}catch(e){}
 const RENAMED={moss:"juniper",cypress:"sol",ember:"sage"};
 function migrateCircle(){
@@ -1949,6 +2401,14 @@ if(!S.prefMusicVol)S.prefMusicVol="quiet";
 if(S.profile.minor)setTimeout(()=>showMinor(),300);
 const cloud={db:null,uid:null,on:false};
 function saveLocal(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function applyDisplayPrefs(){
+  const p=S.profile||{},root=document.documentElement;
+  const appearance=["auto","light","dark"].includes(p.appearance)?p.appearance:"auto";
+  const font=["standard","large","xlarge"].includes(p.fontSize)?p.fontSize:"standard";
+  root.dataset.appearance=appearance;root.dataset.font=font;
+  if(appearance==="auto")delete root.dataset.theme;else root.dataset.theme=appearance;
+}
+applyDisplayPrefs();
 function col(){return cloud.db.collection("data/users/"+cloud.uid);}
 async function cloudPut(id,data){if(!cloud.on)return;try{await col().doc(id).set(JSON.parse(JSON.stringify(data)));}catch(e){cloud.on=false;renderArchive();}}
 function mergeExtras(x){
@@ -2008,7 +2468,7 @@ const ACCT = {sb:null,user:null,email:"",member:false,paid:false,lifetime:false,
 if(!S.usage)S.usage={};
 if(!S.chats)S.chats={};
 const TRIAL_DAYS=7;
-try{const fq=new URLSearchParams(location.search).get("friend");if(fq){S.friendCode=fq.slice(0,60);history.replaceState(null,"",location.pathname);}}catch(e){}
+try{const fq=new URLSearchParams(location.search).get("friend");if(fq){S.friendCode=fq.slice(0,60);saveLocal();history.replaceState(null,"",location.pathname);}}catch(e){}
 if(!S.profile.firstSeen)S.profile.firstSeen=Date.now();
 if(S.pmV!==2){S.previewMember=null;S.pmV=2;}
 function trialEnds(){return accountsOn()?(ACCT.paid?0:(ACCT.trialUntil?Date.parse(ACCT.trialUntil):0)):S.profile.firstSeen+TRIAL_DAYS*864e5;}
@@ -2056,7 +2516,10 @@ async function setBirthday(v,after){
     ACCT.adultAt=r.adult_confirmed_at;ACCT.adult21=!!r.adult21_at;ACCT.under21=!!r.under21_at;delete S.pendingDob;
   }
   S.profile.bday=v.slice(5,10);S.profile.adult21=a>=21;S.profile.under21=a<21;S.profile.adult=true;S.profile.ageVerified=true;saveLocal();remotePut("prefs");
-  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime)redeemFriend();
+  if(accountsOn()&&ACCT.user&&S.friendCode&&!ACCT.lifetime){
+    const claimed=await redeemFriend();
+    if(claimed===false&&S.friendCode)return false;
+  }
   return true;
 }
 function bdayErr(msg){
@@ -2144,20 +2607,19 @@ async function initWeb(){
   const qs=new URLSearchParams(location.search);
   if(qs.get("checkout")==="success"){history.replaceState(null,"",location.pathname);toast("Welcome to "+PLAN.name+".");setTimeout(refreshMe,2500);}
 }
-/* Sign in with a code by text (when texting is set up) or by email. New and returning people
-   do the same thing. */
-function phoneOn(){return !!(window.DA_CONFIG&&window.DA_CONFIG.phoneSignIn);}
+/* Authentication is email-only. Invitations can be shared by text, but Daily Alchemist
+   never sends an SMS sign-in code, so opening a texted invitation cannot create SMS cost. */
+function phoneOn(){return false;}
 function normPhone(v){let d=String(v||"").replace(/[^\d+]/g,"");if(d.startsWith("+"))return /^\+\d{8,15}$/.test(d)?d:null;d=d.replace(/\D/g,"");if(d.length===10)return "+1"+d;if(d.length===11&&d[0]==="1")return "+"+d;return null;}
 function signInForm(gate,byEmail){
-  const phone=phoneOn()&&!byEmail;
-  return '<div id="siForm" data-by="'+(phone?"phone":"email")+'">'+(phone
-    ?'<div class="field" id="siEmailRow"><label for="siPhone">Your mobile number</label><input type="tel" inputmode="tel" autocomplete="tel" id="siPhone" placeholder="(555) 123 4567"></div>'
-    :'<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>')+
-    '<button class="btn btn-main full" id="siSend" style="margin-top:12px">'+(phone?"Text me a code":"Send my code")+'</button>'+
-    '<div class="field" id="siCodeRow" hidden style="margin-top:12px"><label for="siCode">'+(phone?"Code from your texts":"Code from your email")+'</label><input type="text" inputmode="numeric" autocomplete="one-time-code" id="siCode" placeholder="123456"></div>'+
+  const invite=!!S.friendCode;
+  return '<div id="siForm" data-by="email">'+
+    '<div class="field" id="siEmailRow"><label for="siEmail">Your email</label><input type="text" inputmode="email" autocomplete="email" id="siEmail" placeholder="you@example.com"></div>'+
+    '<button class="btn btn-main full" id="siSend" style="margin-top:12px">Email my code</button>'+
+    '<div class="field" id="siCodeRow" hidden style="margin-top:14px"><label for="siCode">The code from your email</label><input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="10" id="siCode" placeholder="Your code"></div>'+
     '<button class="btn btn-main full" id="siVerify" hidden style="margin-top:12px">'+(gate?"Come in":"Sign in")+'</button>'+
-    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(phone?"New here or coming back, it\'s the same: we text you a 6-digit code. No password.":"New here or coming back, it\'s the same: we email you a 6-digit code. No password.")+'</p>'+
-    (phoneOn()?'<p class="small" style="text-align:center"><button class="linkish" id="siSwitch" data-gate="'+(gate?1:0)+'">'+(phone?"Use email instead":"Use my phone number instead")+'</button></p>':'')+'</div>';
+    '<p class="small muted" id="siMsg" style="text-align:center;margin-top:10px">'+(invite?"Your invitation came by link. Enter your email and we\'ll email you a sign-in code. No password and no text messages from us.":"Enter your email and we\'ll email you a sign-in code. No password.")+'</p>'+
+    '</div>';
 }
 /* On the live app everyone signs in or makes a free account first, so Aura can give her
    full reading from the very first question. */
@@ -2166,7 +2628,7 @@ function showGate(){
   if(!S.seenIntro&&!S.profile.onboarded){showIntro();return;}
   const g=document.createElement("div");g.className="gate";g.id="gate";g.setAttribute("role","dialog");g.setAttribute("aria-modal","true");g.setAttribute("aria-label","Sign in");
   g.innerHTML='<div class="sndbar gatesnd"></div><div class="in auraPop"><div class="popseal">'+glyph("aura",72)+'</div><h1 class="foil shine">The Daily Alchemist</h1>'+
-    auraSays(S.friendCode?"I\'m Aura, your guide here. You came in on an invitation, so make your account and everything opens for you, for life.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
+    auraSays(S.friendCode?"I\'m Aura, your guide here. You were invited in. Enter your email to claim your invitation and I\'ll email you a sign-in code. No password and no text messages from us.":"I\'m Aura, your guide here. Tell me what happened in your day and I\'ll bring you the guardian and the small ritual that fits. Sign in, or make your free account, so I can remember it for you.","Aura · welcome")+
     signInForm(true)+legalLine()+'</div>';
   document.body.appendChild(g);document.body.style.overflow="hidden";
 }
@@ -2201,7 +2663,7 @@ async function onSignedIn(session){
     for(const row of (e.data||[])){remote.add(row.id);if(!have.has(row.id)&&row.data)S.entries.push(row.data);}
     for(const x of S.entries)if(!remote.has(x.id))remotePut("entry",x.id,x);
     for(const row of (c.data||[])){const loc=S.chats[row.guardian]||[];S.chats[row.guardian]=(row.msgs||[]).length>=loc.length?row.msgs:loc;}
-    if(p.data&&p.data.data){S.profile={...S.profile,...(p.data.data.profile||{})};if(S.profile.snd)applySnd(S.profile.snd);S.draws={...S.draws,...(p.data.data.draws||{})};if(p.data.data.ledger)S.ledger=p.data.data.ledger;if(p.data.data.extras)mergeExtras(p.data.data.extras);}
+    if(p.data&&p.data.data){S.profile={...S.profile,...(p.data.data.profile||{})};applyDisplayPrefs();if(S.profile.snd)applySnd(S.profile.snd);S.draws={...S.draws,...(p.data.data.draws||{})};if(p.data.data.ledger)S.ledger=p.data.data.ledger;if(p.data.data.extras)mergeExtras(p.data.data.extras);}
     else if(S.profile.onboarded)remotePut("prefs");
     migrateCircle();S.entries.sort((a,b)=>b.ts-a.ts);saveLocal();
   }catch(err){}
@@ -2236,7 +2698,7 @@ function openPaywall(reason){
   const sc=sealedCount(), nm=firstName();
   openSheet('<div class="stack"><div><div class="label">'+esc(reason||"Go deeper")+'</div><h2>'+esc(PLAN.name)+'</h2></div>'+
    auraSays((nm?esc(nm)+", when":"When")+" you come to me, I help. In the Inner Circle, I keep you in mind between visits. Here is what that means.")+
-   '<div class="card headline"><div class="hl">'+envelopeSVG()+'<span><b>I write to you every week</b><span class="small muted">I look back at what you carried, what helped, and where to go next. The first letter comes the day after you start.</span></span></div><div class="hl">'+glyph("thistle",40)+'<span><b>The guardians check in on you</b><span class="small muted">A few days after you work with one of them, they come find you, call you by name, and ask how it\'s going.</span></span></div>'+(sc?'<div class="hl">'+envelopeSVG(true)+'<span><b>Your sealed letters open</b><span class="small muted">'+(sc===1?"The letter I wrote you is":"All "+sc+" letters I wrote you are")+' waiting in your mailbox.</span></span></div>':'')+'</div>'+
+   '<div class="card headline"><div class="hl">'+envelopeSVG()+'<span><b>I write to you every week</b><span class="small muted">I look back at what you carried, what helped, and where to go next. Your first letter comes when you return after your first visit.</span></span></div><div class="hl">'+glyph("thistle",40)+'<span><b>The guardians check in on you</b><span class="small muted">A few days after you work with one of them, they come find you, call you by name, and ask how it\'s going.</span></span></div>'+(sc?'<div class="hl">'+envelopeSVG(true)+'<span><b>Your sealed letters open</b><span class="small muted">'+(sc===1?"The letter I wrote you is":"All "+sc+" letters I wrote you are")+' waiting in your mailbox.</span></span></div>':'')+'</div>'+
    '<div class="card"><p class="kv" style="font-family:var(--f-ui);font-size:16px;line-height:1.9">✦ Every guardian\'s deeper chamber opens<br>✦ The guided journeys, for when one night isn\'t enough<br>✦ More time with me and the guardians, every day<br>✦ Your Archive and chats on every device</p></div>'+
    '<div class="chips" id="planPick" role="radiogroup" aria-label="Choose a plan"><button class="chip" data-plan="yearly" aria-pressed="'+(payPlan==="yearly")+'">Yearly '+PLAN.yearly+'</button><button class="chip" data-plan="monthly" aria-pressed="'+(payPlan==="monthly")+'">Monthly '+PLAN.monthly+'</button></div>'+
    '<p class="small muted" id="planNote">'+(payPlan==="yearly"?PLAN.yearNote:"Cancel anytime.")+'</p>'+
@@ -2334,8 +2796,8 @@ function recentThemes(days){const cut=Date.now()-days*864e5,c={};for(const e of 
 /* ------------------------------------------------------------------
    CONTINUITY: what worked, what she owns, what Aura carries long-term.
 ------------------------------------------------------------------ */
-const NOUN={candle:"a candle",salt:"salt",broom:"a broom",bowl:"a bowl",thread:"thread",jar:"a jar",mirror:"a mirror",honey:"honey",rosemary:"rosemary",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil",stone:"a stone",tea:"tea"};
-const ASKN={candle:"candles",salt:"salt",broom:"a broom",bowl:"bowls",thread:"thread or string",jar:"a jar with a lid",mirror:"a mirror",honey:"honey",rosemary:"rosemary or any fresh herb",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil or lotion",stone:"a stone",tea:"tea"};
+const NOUN={candle:"a candle",salt:"salt",broom:"a broom",bowl:"a bowl",thread:"thread",jar:"a jar",mirror:"a mirror",honey:"honey",rosemary:"rosemary",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil",stone:"a stone",tea:"tea",paper:"paper",pen:"a pen or pencil",water:"water",lighter:"matches or a lighter",scissors:"scissors",towel:"a towel",chair:"a chair",envelope:"an envelope",plate:"a plate",shower:"a shower",bath:"a bath or basin"};
+const ASKN={candle:"candles",salt:"salt",broom:"a broom",bowl:"bowls",thread:"thread or string",jar:"a jar with a lid",mirror:"a mirror",honey:"honey",rosemary:"rosemary or any fresh herb",pepper:"black pepper",vinegar:"vinegar",eggs:"eggs",milk:"milk or ink",soil:"seeds or soil",oil:"body oil or lotion",stone:"a stone",tea:"tea",paper:"paper",pen:"a pen or pencil",water:"water",lighter:"matches or a lighter",scissors:"scissors",towel:"a towel",chair:"a chair",envelope:"an envelope",plate:"a plate",shower:"a shower",bath:"a bath or basin"};
 const SUBS={
   candle:{alt:[],text:"a lamp or your phone's flashlight"},
   salt:{alt:[],text:"a pinch of sugar or baking soda"},
@@ -2353,13 +2815,24 @@ const SUBS={
   soil:{alt:[],text:"a damp paper towel folded into a cup"},
   oil:{alt:[],text:"any lotion, or a little olive oil"},
   stone:{alt:[],text:"a coin or any small, heavy object"},
-  tea:{alt:[],text:"hot water with a slice of lemon"}
+  tea:{alt:[],text:"hot water with a slice of lemon"},
+  paper:{alt:[],text:"a note in your phone"},
+  pen:{alt:[],text:"your phone keyboard"},
+  water:{alt:[],text:"any drinkable water you have"},
+  lighter:{alt:[],text:"a lamp or your phone flashlight when the ritual does not require burning"},
+  scissors:{alt:[],text:"tear it carefully by hand"},
+  towel:{alt:[],text:"any clean cloth"},
+  chair:{alt:[],text:"the edge of a bed or a firm cushion"},
+  envelope:{alt:[],text:"fold the paper inward and keep it somewhere private"},
+  plate:{alt:["bowl"],text:"a bowl, saucer or clean flat surface"},
+  shower:{alt:[],text:"a sink wash or warm cloth"},
+  bath:{alt:[],text:"a basin or foot soak"}
 };
-const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"]};
-function ritualNeeds(r){
+const KEYS={candle:["candle","tea light","light it","light a"],salt:["salt"],broom:["broom"],bowl:["bowl"],thread:["thread","string"],jar:["jar"],mirror:["mirror"],honey:["honey"],rosemary:["rosemary","herb"],pepper:["pepper"],vinegar:["vinegar"],eggs:["eggshell"],milk:["milk","ink"],soil:["soil","seed"],oil:["oil","lotion"],stone:["stone"],tea:["tea"],paper:["paper","page","write","journal","letter","note"],pen:["pen","pencil","write"],water:["water"],lighter:["matches","lighter","light it","flame"],scissors:["scissors","cut"],towel:["towel","cloth"],chair:["chair","seat"],envelope:["envelope"],plate:["plate"],shower:["shower"],bath:["bath","basin"]};
+function ritualNeedItems(r){
   const out=[],keys=new Set();
-  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push(label);};
-  for(const n of (r.needs||[])){add(n[0],n[1]);}
+  const add=(k,label)=>{const sig=(k||label).toLowerCase();if(keys.has(sig))return;keys.add(sig);out.push([k,label]);};
+  for(const n of (r.needs||[]))add(n[0],n[1]);
   const txt=(r.steps||[]).map(x=>[x.t,x.d,x.say].filter(Boolean).join(" ")).join(" ").toLowerCase();
   const has=k=>(r.needs||[]).some(n=>n[0]===k);
   if(/\b(write|writing|wrote|journal|record|list|letter|note|label|draw)\b/.test(txt)){add("paper","Paper");add("pen","A pen or pencil");}
@@ -2378,9 +2851,10 @@ function ritualNeeds(r){
   if(/\bbath\b/.test(txt)&&r.bath)add("bath","Access to a bath or basin");
   return out;
 }
+function ritualNeeds(r){return ritualNeedItems(r).map(n=>n[1]);}
 function known(){return S.profile.known||(S.profile.known=[...S.profile.have]);}
-function missingFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
-function unknownFor(r){return (r.needs||[]).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
+function missingFor(r){return ritualNeedItems(r).filter(n=>SUBS[n[0]]&&known().includes(n[0])&&!S.profile.have.includes(n[0]));}
+function unknownFor(r){return ritualNeedItems(r).filter(n=>SUBS[n[0]]&&!known().includes(n[0])&&!S.profile.have.includes(n[0]));}
 function adapt(r){
   const miss=missingFor(r).map(n=>n[0]); if(!miss.length)return {...r,notes:[]};
   const notes=miss.map(t=>{const n=NOUN[t].replace(/^an? /,""),sb=subFor(t);return sb?"No "+n+"? Use "+sb+".":"No "+n+"? Skip that part. The ritual still works without it.";});
@@ -2957,26 +3431,55 @@ function threadsOf(){const c={};for(const e of S.entries)if(e.thread)c[e.thread]
    setting localStorage "da.voiceDev" to "1". Speaking into the mic to type is separate and stays on. */
 const GUARDIAN_VOICE_ENABLED=!!(window.DA_CONFIG&&window.DA_CONFIG.guardianVoiceEnabled);
 function voiceEnabled(){if(GUARDIAN_VOICE_ENABLED)return true;try{return typeof ACCT!=="undefined"&&!!ACCT.admin&&localStorage.getItem("da.voiceDev")==="1";}catch(e){return false;}}
-const MUSIC={a:null,b:null,cur:null,want:"aura",base:"aura",duck:false,started:false};
+const MUSIC={cur:null,want:"aura",base:"aura",duck:false,started:false,all:new Set(),suspended:false,resume:false};
 function musicOn(){return S.prefMusic!=="off";}
 function musicVol(){const h=new Date().getHours();return (S.prefMusicVol==="normal"?0.26:0.12)*(MUSIC.duck?0.25:1)*(h>=21||h<5?0.7:1);}
 function musicSrc(g){const u=window.DA_CONFIG&&window.DA_CONFIG.supabaseUrl;return u?u.replace(/\/$/,"")+"/storage/v1/object/public/music/"+g+".mp3":null;}
 function fadeTo(el,v,ms,done){if(!el)return;clearInterval(el._fade);const from=el.volume,t0=Date.now();el._fade=setInterval(()=>{const k=Math.min(1,(Date.now()-t0)/ms);try{el.volume=Math.max(0,Math.min(1,from+(v-from)*k));}catch(e){}if(k>=1){clearInterval(el._fade);done&&done();}},50);}
+function pauseMusicEl(el){if(!el)return;clearInterval(el._fade);try{el.pause();}catch(e){}}
+function silenceOtherMusic(keep){for(const el of [...MUSIC.all])if(el!==keep){pauseMusicEl(el);MUSIC.all.delete(el);}}
 function musicPlay(g){
   MUSIC.want=g||MUSIC.base;
-  if(!musicOn()||!MUSIC.started||document.visibilityState==="hidden")return;
-  if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){fadeTo(MUSIC.cur,musicVol(),600);if(MUSIC.cur.paused)MUSIC.cur.play().catch(()=>{});return;}
+  if(!musicOn()||!MUSIC.started||MUSIC.suspended||document.visibilityState==="hidden")return;
+  if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){
+    silenceOtherMusic(MUSIC.cur);
+    fadeTo(MUSIC.cur,musicVol(),350);
+    if(MUSIC.cur.paused)MUSIC.cur.play().catch(()=>{});
+    return;
+  }
   const src=musicSrc(MUSIC.want);if(!src)return;
-  const old=MUSIC.cur,el=new Audio();el._g=MUSIC.want;el.loop=true;el.preload="auto";el.volume=0;el.src=src;
-  el.onerror=()=>{if(MUSIC.cur===el)MUSIC.cur=null;if(el._g!=="aura"&&MUSIC.want===el._g){MUSIC.want="aura";musicPlay("aura");}};
+  /* One guardian, one soundtrack. Never crossfade two guardians over each other. */
+  silenceOtherMusic(null);
+  const el=new Audio();el._g=MUSIC.want;el.loop=true;el.preload="auto";el.volume=0;el.src=src;MUSIC.all.add(el);
+  el.onerror=()=>{MUSIC.all.delete(el);if(MUSIC.cur===el)MUSIC.cur=null;if(el._g!=="aura"&&MUSIC.want===el._g){MUSIC.want="aura";musicPlay("aura");}};
   el.onplay=()=>renderSnd();el.onpause=()=>{if(MUSIC.cur===el)renderSnd();};
-  MUSIC.cur=el;el.play().then(()=>fadeTo(el,musicVol(),1800)).catch(()=>{});
-  if(old)fadeTo(old,0,1500,()=>{try{old.pause();}catch(e){}});
+  MUSIC.cur=el;el.play().then(()=>fadeTo(el,musicVol(),700)).catch(()=>{});
 }
-function musicStop(){const el=MUSIC.cur;MUSIC.cur=null;if(el)fadeTo(el,0,800,()=>{try{el.pause();}catch(e){}});}
+function musicStop(){for(const el of [...MUSIC.all])pauseMusicEl(el);MUSIC.all.clear();MUSIC.cur=null;MUSIC.resume=false;renderSnd();}
 function musicFor(g){musicPlay(g||MUSIC.base);}
-function musicBack(){musicPlay(MUSIC.base);}
-function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),on?350:1200);}
+function musicContextTarget(){
+  if(typeof run!=="undefined"&&run&&run.r&&run.r.g)return run.r.g;
+  if(typeof talkG!=="undefined"&&talkG)return talkG;
+  const s=document.getElementById("scrim");if(s&&s._musicG)return s._musicG;
+  return MUSIC.base;
+}
+function musicSyncContext(){musicPlay(musicContextTarget());}
+function musicSyncSoon(){clearTimeout(MUSIC.syncTimer);MUSIC.syncTimer=setTimeout(()=>musicSyncContext(),0);}
+function musicBack(){musicSyncSoon();}
+function musicDuck(on){if(on&&!voiceEnabled())on=false;MUSIC.duck=!!on;if(MUSIC.cur&&!MUSIC.cur.paused)fadeTo(MUSIC.cur,musicVol(),on?250:500);}
+function musicSuspend(){
+  if(MUSIC.suspended)return;
+  MUSIC.resume=musicAudible();
+  MUSIC.suspended=true;
+  for(const el of MUSIC.all)pauseMusicEl(el);
+  try{stopAudio();}catch(e){}
+  renderSnd();
+}
+function musicResume(){
+  const shouldResume=MUSIC.resume;
+  MUSIC.suspended=false;MUSIC.resume=false;
+  if(shouldResume&&musicOn()&&MUSIC.started&&document.visibilityState!=="hidden")musicSyncContext();
+}
 /* Browsers require a user gesture for audio. Start only from a meaningful app action,
    never because she happened to tap a field, open settings or move around the shell. */
 const MUSIC_START_SEL='#askBtn,[data-begin],[data-talk],[data-talkread],[data-guardian],[data-pickcard],[data-cardask]';
@@ -2988,7 +3491,13 @@ function musicStart(ev){
 }
 document.addEventListener("pointerdown",musicStart,{capture:true});
 document.addEventListener("keydown",musicStart,{capture:true});
-document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){if(MUSIC.cur)try{MUSIC.cur.pause();}catch(e){}}else if(MUSIC.cur&&musicOn()){MUSIC.cur.play().catch(()=>{});}});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")musicSuspend();else musicResume();});
+window.addEventListener("pagehide",musicSuspend);
+window.addEventListener("pageshow",()=>{if(document.visibilityState!=="hidden")musicResume();});
+window.addEventListener("blur",musicSuspend);
+window.addEventListener("focus",()=>{if(document.visibilityState!=="hidden")musicResume();});
+document.addEventListener("freeze",musicSuspend);
+document.addEventListener("resume",()=>{if(document.visibilityState!=="hidden")musicResume();});
 
 /* Sound controls on every page: music on or off, voices on or off, each separately. */
 const SND_MUSIC='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="16.5" cy="16" r="2.5" fill="currentColor"/></svg>';
@@ -3013,7 +3522,7 @@ function renderSnd(){
 function syncSnd(){S.profile.snd={music:S.prefMusic||"on",vol:S.prefMusicVol||"normal",voiceOff:!!S.prefVoiceOff,voice:S.prefVoice||"natural"};saveLocal();try{remotePut("prefs");}catch(e){}}
 function applySnd(x){if(!x)return;S.prefMusic=x.music==="off"?"off":"on";S.prefMusicVol=x.vol==="quiet"?"quiet":"normal";S.prefVoiceOff=!!x.voiceOff;S.prefVoice=x.voice==="device"?"device":"natural";if(!musicOn())musicStop();if(voiceMuted())stopAudio();renderSnd();}
 function musicAudible(){return !!(MUSIC.cur&&!MUSIC.cur.paused);}
-function setMusic(on){S.prefMusic=on?"on":"off";syncSnd();if(on){MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}else musicStop();renderSnd();}
+function setMusic(on){S.prefMusic=on?"on":"off";syncSnd();if(on){MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}else musicStop();renderSnd();}
 function setVoice(on){S.prefVoiceOff=!on;syncSnd();if(!on){stopAudio();if(voiceOn){stopVoice();if(run)drawStep();}}renderSnd();}
 new MutationObserver(()=>{if(document.querySelector(".sndbar:empty"))renderSnd();}).observe(document.documentElement,{childList:true,subtree:true});
 
@@ -3311,18 +3820,17 @@ function ritualCard(r,opts){
   if(!canUse(r)){
     return '<article class="page locked"><div class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+'</div><h3>'+esc(r.title)+'</h3><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(CHAMBERS[r.g]?CHAMBERS[r.g].name:"Chamber")+'</span></div><p class="needs">'+esc(r.purpose)+'</p><div class="actions"><button class="btn btn-ink" data-paywall="'+esc(G[r.g].name)+'\'s chamber">Unlock with '+esc(PLAN.name)+'</button></div></article>';
   }
-  const a=adapt(r), unk=unknownFor(r)[0];
-  const needList=ritualNeeds(r),needs=needList.length?needList.map(esc).join(" · "):"Nothing but you.";
-  const ownable=r.needs.filter(n=>SUBS[n[0]]&&S.profile.have.includes(n[0]));
-  return '<article class="page ritualcard" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
+  const a=adapt(r), needItems=ritualNeedItems(r);
+  const supplyButtons=needItems.length?needItems.map(n=>{const miss=known().includes(n[0])&&!S.profile.have.includes(n[0]);return '<button class="needchip'+(miss?' missing':'')+'" data-own="'+n[0]+':'+(miss?'1':'0')+'" aria-pressed="'+(!miss)+'"><span class="needcheck">'+(miss?'＋':'✓')+'</span>'+esc(n[1])+'</button>';}).join(""):'<span class="needchip static">Nothing but you</span>';
+  return '<article class="page ritualcard" style="--gcol:'+esc(G[r.g].color)+'" data-rid="'+esc(r.id)+'" data-opts="'+esc(JSON.stringify(opts||{}))+'">'+
    '<button class="ritualguardian" data-guardian="'+esc(r.g)+'">'+glyph(r.g,42)+'<span><span class="kicker">'+esc(G[r.g].name)+"'s practice · "+esc(r.el)+(r.reset?" · Reset day "+r.reset:"")+(r.composed?" · Written for you":"")+'</span><span class="small">Open '+esc(G[r.g].name)+"'s chamber</span></span></button>"+
    '<h3>'+esc(r.title)+'</h3><p class="ritualpurpose">'+esc(r.purpose||"")+'</p><div class="facts"><span>'+r.min+' minutes</span><span>'+esc(r.moon==="Any"?"Any moon":r.moon+" moon")+'</span><span>'+r.steps.length+' steps</span></div>'+
-   '<div class="needs"><b>Gather before you begin</b><div class="needchips">'+(needList.length?needList.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
+   '<div class="needs supplycheck"><b>Gather before you begin</b><p class="supplyhint">Tap anything you are missing. Tap it again to add it back.</p><div class="needchips">'+supplyButtons+'</div></div>'+
    (a.notes.length?'<p class="adj">'+a.notes.map(esc).join(" ")+' The steps already say so.</p>':"")+
-   cartOffer(r)+(unk?'<div class="ask"><span>Do you usually have '+esc(ASKN[unk[0]])+'?</span><button class="chip" data-own="'+unk[0]+':1">Yes</button><button class="chip" data-own="'+unk[0]+':0">No</button></div>':"")+
+   cartOffer(r)+
+   (a.notes.length?'<div class="supplyswap"><span class="label">Aura adapted it</span><p>'+a.notes.map(esc).join(" ")+'</p></div>':"")+
    whyNow(r,opts&&opts.why)+
-   '<div class="actions"><button class="btn btn-ink" data-begin="'+esc(r.id)+'"'+(opts&&opts.ctx?' data-ctx="'+opts.ctx+'"':"")+'>Begin the ritual</button>'+(ownable.length?'<button class="linkish dark" data-donthave="'+esc(r.id)+'">I don\'t have that</button>':'')+'</div>'+
-   (ownable.length?'<div class="dh" hidden data-dh="'+esc(r.id)+'"><span class="small">Tap what you don\'t have. Aura will rewrite the steps.</span><div class="chips">'+ownable.map(n=>'<button class="chip" data-own="'+n[0]+':0">'+esc(NOUN[n[0]])+'</button>').join("")+'</div></div>':'')+'</article>';
+   '<div class="actions"><button class="btn btn-ink" data-begin="'+esc(r.id)+'"'+(opts&&opts.ctx?' data-ctx="'+opts.ctx+'"':"")+'>Begin the ritual</button></div></article>';
 }
 /* ------------------------------------------------------------------
    INNER CIRCLE HEADLINERS
@@ -3339,15 +3847,20 @@ function weekChats(since,until){until=until||Infinity;const out=[];for(const k o
 function lastLetter(){return S.letters.slice().sort((a,b)=>b.ts-a.ts)[0]||null;}
 function letterSince(){const l=lastLetter();return l?l.ts:Date.now()-WEEK;}
 function firstActivity(){let f=Infinity;for(const e of S.entries)if(e.ts<f)f=e.ts;for(const a of (S.asks||[]))if(a.ts&&a.ts<f)f=a.ts;for(const k of ALL)for(const m of (S.chats[k]||[]))if(m.role==="me"&&m.ts&&m.ts<f)f=m.ts;return f===Infinity?0:f;}
-function contactPref(){return S.profile.contact||{enabled:null,cadence:"weekly",scope:"aura"};}
-function contactDays(){return {daily:1,"3days":3,weekly:7}[contactPref().cadence]||7;}
-function contactSettingsHTML(){
-  const c=contactPref(),on=c.enabled===true,off=c.enabled===false;
-  return '<details class="group contactprefs"><summary>Letters and check-ins</summary><p class="small muted">Choose whether Aura reaches out between visits, how often, and whether guardians can check in too. You can change this any time.</p>'+
-    '<div class="label" style="margin-top:10px">Reach out to me?</div><div class="chips"><button class="chip" data-contacton="1" aria-pressed="'+on+'">Yes</button><button class="chip" data-contacton="0" aria-pressed="'+off+'">No</button></div>'+
-    '<div class="label" style="margin-top:12px">How often?</div><div class="chips"><button class="chip" data-contactcad="daily" aria-pressed="'+(c.cadence==="daily")+'">Daily</button><button class="chip" data-contactcad="3days" aria-pressed="'+(c.cadence==="3days")+'">Every 3 days</button><button class="chip" data-contactcad="weekly" aria-pressed="'+(c.cadence==="weekly")+'">Weekly</button></div>'+
-    '<div class="label" style="margin-top:12px">Who can reach out?</div><div class="chips"><button class="chip" data-contactscope="aura" aria-pressed="'+(c.scope==="aura")+'">Aura only</button><button class="chip" data-contactscope="circle" aria-pressed="'+(c.scope==="circle")+'">Aura + guardians</button></div>'+
-    '<button class="btn btn-main full" id="contactSave" style="margin-top:12px">Save contact preferences</button></details>';
+function contactPref(){
+  const raw=S.profile.contact||{},cad=raw.enabled===false?"never":(raw.cadence||null);
+  return {enabled:cad!=="never"&&raw.enabled!==false,cadence:cad,scope:raw.scope||"circle",notify:raw.notify==null?(S.profile.push===true?true:null):raw.notify};
+}
+function contactDays(){return {"3xday":1/3,daily:1,"3days":3,weekly:7,monthly:30}[contactPref().cadence]||Infinity;}
+function contactSettingsHTML(open){
+  const c=contactPref(),cad=c.cadence||"",notify=c.notify;
+  const opts=[["3xday","Three times a day"],["daily","Every day"],["3days","Every 3 days"],["weekly","Every week"],["monthly","Every month"],["never","Never again"]];
+  return '<details class="group contactprefs"'+(open?' open':'')+'><summary>Letters and check-ins</summary><p class="small muted">Choose the rhythm. Letters can wait inside the app even if notifications are off.</p>'+
+    '<div class="label" style="margin-top:10px">How often should we write?</div><div class="chips">'+opts.map(o=>'<button class="chip" data-contactcad="'+o[0]+'" aria-pressed="'+(cad===o[0])+'">'+o[1]+'</button>').join("")+'</div>'+
+    '<div class="label" style="margin-top:12px">Notify me when one arrives?</div><div class="chips"><button class="chip" data-contactnotify="1" aria-pressed="'+(notify===true)+'">Yes, notify me</button><button class="chip" data-contactnotify="0" aria-pressed="'+(notify===false)+'">No notifications</button></div>'+
+    '<div class="label" style="margin-top:12px">Who can write?</div><div class="chips"><button class="chip" data-contactscope="aura" aria-pressed="'+(c.scope==="aura")+'">Aura only</button><button class="chip" data-contactscope="circle" aria-pressed="'+(c.scope==="circle")+'">Aura + relevant guardians</button></div>'+
+    '<p class="small muted" style="margin-top:7px">Relevant guardians means the ones you have actually worked with or whose work connects to what you have been carrying. You do not have to manage a list of nineteen people.</p>'+
+    '<button class="btn btn-main full" id="contactSave" style="margin-top:12px">Save my letter rhythm</button></details>';
 }
 function firstReturnLetter(){return (S.letters||[]).find(l=>l.kind==="first-return")||null;}
 /* Is she in the 30 days after her free week, when Aura still writes but the letters stay sealed? */
@@ -3357,7 +3870,7 @@ function graceActive(){
   const te=trialEnds();return te>0&&Date.now()>=te&&Date.now()<te+GRACE_DAYS*864e5;
 }
 function letterDue(){
-  if(contactPref().enabled!==true)return false;
+  if(contactPref().cadence==="never"||!Number.isFinite(contactDays()))return false;
   const l=lastLetter(),gap=contactDays()*864e5;
   if(!l)return false;
   if(Date.now()-l.ts<gap-6*36e5)return false;
@@ -3376,8 +3889,9 @@ function letterMaterial(since,until){
     "PAST LETTERS (do not repeat them): "+(S.letters.filter(l=>!l.sealed).slice(0,2).map(l=>l.title).join("; ")||"none")};
 }
 function namesList(ks){const nm=ks.map(g=>G[g].name);return nm.length>1?nm.slice(0,-1).join(", ")+" and "+nm[nm.length-1]:(nm[0]||"");}
-function localLetter(m){
-  const n=firstName(), es=m.es;
+function letterSender(m){if(contactPref().scope!=="circle")return "aura";const gs=[...m.es.map(e=>e.guardian),...m.ch.map(c=>c.g)].filter(g=>g&&g!=="aura"&&G[g]);return gs.length?gs[gs.length-1]:"aura";}
+function localLetter(m,sender){
+  const n=firstName(), es=m.es,voice=G[sender]||G.aura;
   const gs=[...new Set(es.map(e=>e.guardian).filter(g=>g&&g!=="aura"))];
   const good=es.filter(e=>GOOD.includes(e.after));
   const carried=es.map(e=>e.carrying).filter(Boolean);
@@ -3389,48 +3903,54 @@ function localLetter(m){
   t+="Before I write again, I'd like you to go back to "+G[next].name+". Not to fix anything. Just to keep the thread going.\n\nI'll be here.\nAura";
   return {title:"What I noticed",letter:t,next_guardian:next,intention:"Keep the thread going."};
 }
-async function composeLetter(m){
+async function composeLetter(m,sender){
   let out=null;
   try{
-    out=await aiJSON("You are Aura, the lead guardian of The Daily Alchemist, a ritual and reflection app. Warm, perceptive, grounded, a little mystical, never preachy. You write each member personal letters at the cadence she chose: daily, every three days or weekly. Look back only over the time since the last letter.\n\n"+m.text+"\n\n"+
+    const voice=G[sender]||G.aura;out=await aiJSON("You are "+voice.name+", "+voice.title+", writing a personal letter from The Daily Alchemist. Your domain: "+voice.domain+" Your voice: "+voice.voice+" Stay warm, perceptive and grounded. The member chose her own letter cadence. Look back only over the time since the last letter.\n\n"+m.text+"\n\n"+
       "Write a personal letter looking back since the last letter. 170 to 260 words. Address her by first name if you have it. Be specific: name what she actually carried, what she did, what helped and what didn't, using her own words where you can. Point out one pattern or shift you noticed. Suggest one guardian to spend time with before the next letter and why, and close with one simple intention until then. Sign it Aura. Plain words, short paragraphs, no em dashes, no bullet points, no diagnosing, no therapy language. Only use what is in the material.\n"+
       'Reply with ONLY JSON: {"title":"a short, warm title for the letter, under 7 words","letter":"the full letter with \\n\\n between paragraphs","next_guardian":"one key from: '+ALL.filter(k=>k!=="aura").join(", ")+'","intention":"one short line"}',null,{tier:"deep"});
   }catch(e){out=null;}
-  if(!out||!out.letter)out=localLetter(m);
+  if(!out||!out.letter)out=localLetter(m,sender);
   return {title:clean(String(out.title||"From Aura")).slice(0,80),text:clean(String(out.letter)),next:G[out.next_guardian]&&out.next_guardian!=="aura"?out.next_guardian:null,intention:clean(String(out.intention||"")).slice(0,160)};
 }
 async function writeLetter(){
-  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5);
-  const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),...(await composeLetter(letterMaterial(since)))};
+  const since=Math.max(letterSince(),Date.now()-contactDays()*864e5),m=letterMaterial(since),sender=letterSender(m);
+  const L={id:"let_"+Date.now(),ts:Date.now(),since,until:Date.now(),sender,...(await composeLetter(m,sender))};
   S.letters.unshift(L);S.letters=S.letters.slice(0,60);saveLocal();remotePut("prefs");
   return L;
 }
 function firstReturnText(){
   const n=firstName(),a=(S.asks||[]).find(x=>!x.noMem&&x.text),e=S.entries.find(usable),bits=[];
-  if(a&&a.thread)bits.push("I remember you left me holding "+a.thread.toLowerCase()+".");
+  if(a&&a.thread)bits.push("I still have the thread you left with me around "+a.thread.toLowerCase()+".");
   else if(e&&e.ritualTitle)bits.push("I remember you spent time with "+(G[e.guardian]||G.aura).name+" and "+e.ritualTitle+".");
-  else bits.push("I remember that you showed up and gave me something real to hold.");
-  return (n?n+",\n\n":"")+"You came back. Good. That is how this place becomes yours instead of just another app. "+bits.join(" ")+" I don't need you to start over.\n\nBefore I keep reaching for you between visits, I want you to decide how much of that you actually want. Daily, every few days, weekly, Aura only, or the whole Circle. You can change it whenever you want.\n\nI'll keep the thread either way.\n\nAura";
+  else bits.push("You do not have to prove anything before this place can remember you.");
+  return (n?n+",\n\n":"")+"You're back. I kept your place. "+bits.join(" ")+" I am not going to make a thing out of how long you were gone. The point is that you should never have to come back and start from zero.\n\nThis is also where you get to decide how the Circle keeps in touch. You can ask for a wrap-up three times a day, daily, every three days, weekly, monthly or never. Notifications are a separate choice. And if you want the wider Circle involved, the guardians who actually touch your story can write too.\n\nYou choose the rhythm. I keep the thread.\n\nAura";
 }
 function createFirstReturnLetter(){
   if(firstReturnLetter())return firstReturnLetter();
-  const L={id:"let_"+Date.now(),kind:"first-return",ts:Date.now(),since:firstActivity(),until:Date.now(),sealed:false,title:"You came back",text:firstReturnText(),intention:"Choose how you want us to reach you.",read:false};
+  const since=firstActivity()||S.firstAwayAt||Date.now(),L={id:"let_"+Date.now(),kind:"first-return",sender:"aura",ts:Date.now(),since,until:Date.now(),sealed:false,title:"I kept your place",text:firstReturnText(),intention:"Choose the rhythm that feels useful, not demanding.",read:false};
   S.letters.unshift(L);saveLocal();remotePut("prefs");return L;
 }
 let returnLetterBusy=false;
 function maybeFirstReturnLetter(){
-  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded||!firstActivity()||!S.firstAwayAt)return false;
-  if(Date.now()-S.firstAwayAt<3000)return false;
-  if($("#gate")||$("#intro")||$("#rite"))return false;
-  if($("#talk"))closeTalk();if($("#scrim"))closeSheet();
+  if(returnLetterBusy||firstReturnLetter()||!S.profile.onboarded)return false;
+  const now=Date.now(),first=firstActivity();
+  /* A return can be proven two ways: this device saw her leave, or her synced account
+     already contains activity from a previous calendar day. The latter matters after
+     sign-out, a new phone, reinstall or invitation/login flow, where firstAwayAt is local
+     and can be lost even though Aura still has yesterday's history. */
+  const leftHere=!!S.firstAwayAt&&now-S.firstAwayAt>=1000;
+  const priorDay=!!first&&dayKey(new Date(first))!==dayKey(new Date(now));
+  if(!leftHere&&!priorDay)return false;
+  if($("#gate")||$("#intro")||$("#rite")||$("#talk")||$("#scrim"))return false;
   returnLetterBusy=true;const L=createFirstReturnLetter();S.firstAwayAt=0;saveLocal();setTimeout(()=>{showLetter(L);returnLetterBusy=false;},120);return true;
 }
 function noteAppAway(){
-  if(!firstReturnLetter()&&firstActivity()){S.firstAwayAt=Date.now();saveLocal();}
+  if(!firstReturnLetter()&&S.profile.onboarded){S.firstAwayAt=Date.now();saveLocal();}
 }
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")noteAppAway();else if(document.visibilityState==="visible")setTimeout(maybeFirstReturnLetter,250);});
 window.addEventListener("pagehide",noteAppAway);
-setTimeout(maybeFirstReturnLetter,1800);
+setTimeout(maybeFirstReturnLetter,1200);
 /* During the 30 days after the free week: Aura still writes, but the letter stays sealed.
    Only the envelope is stored now. The words are written from that week's Archive when she joins and opens it. */
 function sealLetter(){
@@ -3443,7 +3963,7 @@ function sealLetter(){
 function sealedAbout(L){return L.gs&&L.gs.length?"I wrote about what you've been carrying, and your time with "+namesList(L.gs.slice(0,3))+".":"I wrote about what you've been carrying.";}
 async function unsealLetter(L){
   toast("Opening your letter...");
-  Object.assign(L,await composeLetter(letterMaterial(L.since,L.until)),{sealed:false});
+  const m=letterMaterial(L.since,L.until),sender=letterSender(m);Object.assign(L,{sender},await composeLetter(m,sender),{sealed:false});
   saveLocal();remotePut("prefs");
   return L;
 }
@@ -3469,13 +3989,15 @@ function letterCardHTML(){
 }
 function showLetter(L){
   track("letter_open");L.read=true;saveLocal();renderToday();renderArchive();
-  openSheet('<div class="stack"><div class="page letter"><div class="kicker">A letter from Aura · '+esc(fmtDate(L.ts))+'</div><h3>'+esc(L.title)+'</h3>'+
+  const who=(G[L.sender]||G.aura).name;
+  openSheet('<div class="stack letterstack"><article class="page letter"><div class="letterbrand">THE DAILY ALCHEMIST</div><div class="lettermeta">A letter from '+esc(who)+' · '+esc(fmtDate(L.ts))+'</div><h2>'+esc(L.title)+'</h2>'+
     L.text.split(/\n{2,}/).map(p=>'<p>'+esc(p).replace(/\n/g,"<br>")+'</p>').join("")+
-    (L.intention?'<div class="intent"><b>'+esc(L.kind==="first-return"?"From here":"This time")+'</b>'+esc(L.intention)+'</div>':"")+'</div>'+
-    (L.kind==="first-return"?contactSettingsHTML():"")+
+    (L.intention?'<div class="intent"><b>'+esc(L.kind==="first-return"?"From here":"This time")+'</b>'+esc(L.intention)+'</div>':"")+'<div class="lettersign">'+esc(who)+'</div></article>'+
+    (L.kind==="first-return"?contactSettingsHTML(true):"")+
     (L.next?'<button class="btn btn-main full" data-talk="'+L.next+'">Go to '+esc(G[L.next].name)+'</button>':"")+
-    '<button class="btn btn-ghost full" data-talk="aura">Write back to Aura</button><button class="btn btn-ghost full" data-tabgo="archive">Open my mailbox</button><p class="small muted" style="text-align:center">Every letter is kept in your mailbox, in the Archive.</p></div>');
+    '<button class="btn btn-ghost full" data-talk="aura">Write back to Aura</button><button class="linkish letterback" data-tabgo="archive">Return to my mailbox</button></div>');
 }
+
 async function openLetter(id){
   const L=S.letters.find(x=>x.id===id);if(!L)return;
   if(L.sealed){
@@ -3489,15 +4011,18 @@ async function openLetterFlow(btn){
   const L=await writeLetter();
   showLetter(L);
 }
-function letterRow(l){return '<button class="li" data-letter="'+l.id+'"><span>'+(l.sealed?"🔒 ":"")+esc(l.sealed?"Sealed letter":l.title)+'<br><span class="small muted">'+esc(fmtDate(l.ts))+(l.sealed?" · "+esc(sealedAbout(l)):"")+'</span></span><span class="small muted">'+(l.sealed?(isMember()?"Open":"Sealed"):"Read")+'</span></button>';}
+function letterRow(l){
+  const who=(G[l.sender]||G.aura).name,preview=(l.sealed?sealedAbout(l):(l.text||"").replace(/\s+/g," ").slice(0,96));
+  return '<button class="mailletter'+(!l.read?' unread':'')+'" data-letter="'+l.id+'"><span class="wax" aria-hidden="true"></span><span class="mailcopy"><span class="mailmeta">'+esc(l.sealed?"Sealed letter":"A letter from "+who)+'</span><strong>'+esc(l.sealed?"Waiting for you":l.title)+'</strong><span class="mailpreview">'+esc(preview)+(preview.length>=96?'…':'')+'</span><span class="maildate">'+esc(fmtDate(l.ts))+'</span></span><span class="mailopen">'+(l.sealed&&!isMember()?"Sealed":"Open")+' →</span></button>';
+}
 function lettersArchiveHTML(){
   const mem=isMember(), sc=sealedCount(),unread=S.letters.filter(l=>!l.read).length;
   if(!S.letters.length){
-    if(!mem)return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("In the Inner Circle, I write to you at the rhythm you choose about what you carried, what helped and where to go next. Every letter stays here.")+'<button class="btn btn-ghost" style="margin-top:10px" data-paywall="Letters from Aura">See the Inner Circle</button></div>';
-    return '<div class="card"><div class="label">Your mailbox</div>'+auraSays("My first letter comes when you return after your first visit. After that, you choose the rhythm. Every one I write stays here.")+'</div>';
+    if(!mem)return '<section class="mailbox empty-mail"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>Private correspondence</h3></div></div>'+auraSays("When there is something worth bringing back to you, I\'ll write. Every letter stays here.")+'<button class="btn btn-ghost" data-paywall="Letters from Aura">See the Inner Circle</button></section>';
+    return '<section class="mailbox empty-mail"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>Private correspondence</h3></div></div>'+auraSays("When there is something worth bringing back to you, I\'ll write. Your letters stay here.")+'</section>';
   }
-  return '<div class="card mailbox"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>'+S.letters.length+' letter'+(S.letters.length===1?"":"s")+(unread?" · "+unread+" unread":"")+'</h3></div></div><p class="small muted" style="margin:6px 0 10px">Everything Aura writes you stays here. Tap any letter to open it.</p>'+S.letters.slice(0,30).map(letterRow).join("")+
-    (!mem&&sc?'<div style="margin-top:10px">'+auraSays(sc===1?"One of these is sealed. It opens the moment you join.":sc+" of these are sealed. They all open the moment you join.")+'</div><button class="btn btn-main full" style="margin-top:10px" data-paywall="Open your letters">Open my letters</button>':"")+'</div>';
+  return '<section class="mailbox"><div class="mailhead">'+envelopeSVG(false)+'<div><div class="label">Your mailbox</div><h3>'+S.letters.length+' letter'+(S.letters.length===1?"":"s")+(unread?" · "+unread+" unread":"")+'</h3></div></div><p class="mailintro">Private correspondence from Aura and the Circle. Newest first.</p><div class="mailstack">'+S.letters.slice(0,30).map(letterRow).join("")+'</div>'+
+    (!mem&&sc?'<div class="sealednote">'+auraSays(sc===1?"One letter is sealed. It opens the moment you join.":sc+" letters are sealed. They open the moment you join.")+'<button class="btn btn-main full" data-paywall="Open your letters">Open my letters</button></div>':"")+'</section>';
 }
 
 /* Guardian check-ins: 1.5 to 6 days after you worked with a guardian, they come back and ask how it went. */
@@ -3569,34 +4094,30 @@ function openHow(){
 ------------------------------------------------------------------ */
 function ownerName(){return (window.DA_CONFIG&&window.DA_CONFIG.ownerName)||"Erica";}
 function isFriend(){return accountsOn()?(ACCT.lifetime&&ACCT.cohort==="friends"):!!S.previewFriend;}
-function isShared(){return accountsOn()&&ACCT.lifetime&&ACCT.cohort==="shared";}
-/* Friends you invited can each bring in 3 people, free for life. */
+function isShared(){return accountsOn()&&ACCT.lifetime&&(ACCT.cohort==="shared"||ACCT.cohort==="shared2");}
+function shareLimit(){if(!accountsOn())return S.previewFriend?3:0;if(!ACCT.lifetime)return 0;return ACCT.cohort==="friends"?3:ACCT.cohort==="shared"?1:0;}
+/* Controlled sharing tree: direct friends get 3 invitations, their invitees get 1, then sharing stops. */
 let SHARE=null;
 function shareURL(){return ((window.DA_CONFIG&&window.DA_CONFIG.siteUrl)||location.origin).replace(/\/$/,"")+"/?friend="+SHARE.code;}
 function shareHTML(){
-  if(accountsOn()&&ACCT.admin){return '<details class="group" open id="shareGroup"><summary>Your open link</summary><p class="small muted">One link, no limit. Everyone who joins with it gets lifetime access and their own link for 3 more.</p>'+(SHARE?'<p class="small" style="margin:8px 0">'+SHARE.uses+' joined so far</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div><div class="row" style="margin-top:8px"><button class="btn btn-ghost" id="shareText">Text it</button><button class="btn btn-ghost" id="shareEmail">Email it</button></div>':'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';}
-  if(!isFriend())return "";
-  if(!accountsOn())return '<details class="group" open><summary>Bring three people in</summary><p class="small muted">Share your own link with up to 3 people. They get everything, free for life, just like you. (This works on the live app.)</p></details>';
-  const left=SHARE?Math.max(0,SHARE.max-SHARE.uses):null;
-  return '<details class="group" open id="shareGroup"><summary>Bring three people in</summary><p class="small muted">Your own link, for up to 3 people you choose. They get everything, free for life, just like you.</p>'+
-    (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share my link</button><button class="btn btn-ghost" id="shareCopy">Copy</button></div><div class="row" style="margin-top:8px"><button class="btn btn-ghost" id="shareText">Text it</button><button class="btn btn-ghost" id="shareEmail">Email it</button></div>':'<p class="small" style="margin-top:8px">All 3 have come in. Thank you for bringing them.</p>')
-      :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';
+  if(accountsOn()&&ACCT.admin){return '<details class="group" open id="shareGroup"><summary>Your open link</summary><p class="small muted">One link, no limit. Everyone who joins with it gets lifetime access and can bring 3 people in. Each of those people can bring 1 more.</p>'+(SHARE?'<p class="small" style="margin:8px 0">'+SHARE.uses+' joined so far</p><div class="row"><button class="btn btn-main" id="shareGo">Share invitation</button><button class="btn btn-ghost" id="shareCopy">Copy link</button></div>':'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Get my link</button>')+'</details>';}
+  const limit=shareLimit();
+  if(!limit)return "";
+  if(!accountsOn())return '<details class="group" open><summary>Bring three people in</summary><p class="small muted">The app generates your invitation link. Share it however you like. Up to 3 people can use it. (This works on the live app.)</p></details>';
+  const left=SHARE?Math.max(0,SHARE.max-SHARE.uses):null,one=limit===1;
+  return '<details class="group" open id="shareGroup"><summary>'+(one?'Bring one person in':'Bring three people in')+'</summary><p class="small muted">Daily Alchemist generates the invitation link. Tap Share invitation to choose Messages, email or another app on your phone, or copy the link yourself. Daily Alchemist does not send a text message.</p>'+
+    (SHARE?(left?'<p class="small" style="margin:8px 0">'+left+' of '+SHARE.max+' left</p><div class="row"><button class="btn btn-main" id="shareGo">Share invitation</button><button class="btn btn-ghost" id="shareCopy">Copy link</button></div>':'<p class="small" style="margin-top:8px">Your '+(one?'invitation has':'3 invitations have')+' been used. Thank you for growing the circle.</p>')
+      :'<button class="btn btn-main full" id="shareGet" style="margin-top:8px">Generate my invitation link</button>')+'</details>';
 }
-async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error&&r.error!=="adult_confirmation_required")toast("I couldn't get your link just now. Try again in a minute.");return r;}
-const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and sign in with your email. You'll get a code, no password. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing which buttons you tap and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and sign in with your email. It sends you a code, no password. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing which buttons you tap, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
+async function loadShare(){const r=await api("/api/share",{});if(r&&r.code){SHARE=r;const g=$("#shareGroup");if(g)g.outerHTML=shareHTML();}else if(r&&r.error==="adult_confirmation_required"){openBirthday("Before I can make an invitation link, I need to confirm you're an adult. What's your birthday?");}else if(r&&r.error)toast("I couldn't get your link just now. Try again in a minute.");return r;}
+const INV_ERICA="It's Erica. I built an app called The Daily Alchemist, and I'd love for you to be one of the first people to try it. This is a real invitation from me, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist will email you a sign-in code. No password and no text messages from the app. Then just tell Aura, the app's guide, what's going on in your day. She'll bring you a small ritual or the right guardian to talk to. Play around and poke at everything.\n\nIt's free for you, for life. No card, nothing to pay.\n\nDuring your first week, the app will ask if you're okay with me seeing basic usage activity, like which parts you use and when, so I can tell what's confusing and what works. That's completely optional, you choose exactly what to share, and I never see what you write or say. Your words stay private.\n\nIf it's not your thing, no hard feelings at all. If you do try it, I'd be so grateful for your honest feedback. There's a feedback button right in the app.\n\nI'm really proud of this. Thank you for helping me make it better.",INV_FRIEND="My friend Erica built an app called The Daily Alchemist and I've been testing it for her. She gave me a few free invitations and I wanted you to have one. It's legit, not a scam or a phishing link.\n\nHow it works: open the link on your phone and enter your email. Daily Alchemist emails you a sign-in code. No password and no text messages from the app. Then tell Aura, the app's guide, what's going on in your day, and she'll bring you a small ritual or the right guardian to talk to.\n\nIt's free for life with this link. Nothing to pay. In your first week the app asks if you're okay with Erica seeing basic usage activity, never what you write or say. Totally optional.\n\nShe'd love honest feedback, and there's a button for it in the app.";
 function inviteText(){return SHARE&&SHARE.open?"Hi! "+INV_ERICA:"Hey! "+INV_FRIEND;}
-async function shareVia(kind){
-  if(!SHARE)await loadShare();if(!SHARE)return;
-  const url=shareURL(),text=inviteText()+"\n\n"+url;
-  track("share",{reason:kind});
-  location.href=kind==="text"?"sms:?&body="+encodeURIComponent(text):"mailto:?subject="+encodeURIComponent(SHARE.open?"An invitation from Erica to The Daily Alchemist":"A free invitation to The Daily Alchemist")+"&body="+encodeURIComponent(text);
-}
 async function doShare(copyOnly){
   if(!SHARE)await loadShare();if(!SHARE)return;
   const url=shareURL(),text=inviteText();
   track("share",{reason:copyOnly?"copy":"share"});
   if(!copyOnly&&navigator.share){try{await navigator.share({title:"The Daily Alchemist",text,url});return;}catch(e){if(e&&e.name==="AbortError")return;}}
-  try{await navigator.clipboard.writeText(url);toast(SHARE.open?"Link copied. Send it to anyone you like.":"Link copied. Send it to up to 3 people.");}catch(e){prompt("Copy your link:",url);}
+  try{await navigator.clipboard.writeText(url);const n=SHARE.open?null:SHARE.max;toast(SHARE.open?"Link copied. Share it however you like.":n===1?"Link copied. One person can use it.":"Link copied. Up to "+n+" people can use it.");}catch(e){prompt("Copy your invitation link:",url);}
 }
 function isLifetime(){return accountsOn()?ACCT.lifetime:!!S.previewFriend;}
 function openAdultCheck(){
@@ -3614,10 +4135,16 @@ async function confirmAdultNow(){
   else toast("I couldn't save that just now. Try again in a moment.");
 }
 async function redeemFriend(){
+  if(!S.friendCode||ACCT.lifetime)return true;
   const r=await api("/api/friend",{code:S.friendCode});
-  if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();}
-  else if(r&&r.error==="adult_confirmation_required"){return;}
-  else if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");}
+  if(r&&r.ok){S.friendCode=null;saveLocal();await refreshMe();return true;}
+  if(r&&r.error==="adult_confirmation_required"){
+    if(S.profile.onboarded&&!$("#scrim"))openBirthday("Before I can finish claiming your invitation, I need to confirm you're an adult. What's your birthday?");
+    return false;
+  }
+  if(r&&r.error==="bad_code"){S.friendCode=null;saveLocal();toast("That invitation has already been used up or has expired. Ask the person who sent it.");return false;}
+  if(r&&r.error){toast("I couldn't finish claiming your invitation. Your link is still saved. Try again in a moment.");return false;}
+  return false;
 }
 /* Friends Week sharing, by category. Nothing is on unless they tick it. Words are never shared. */
 const SHARE_OPTS=[
@@ -3631,7 +4158,7 @@ const SHARE_OPTS=[
   ["membership","When I look at the membership page"]];
 const EVCAT={open:"time",session:"time",tab:"pages",settings_open:"pages",how_open:"pages",cant_think:"pages",share:"pages",feedback:"pages",
   ritual_start:"rituals",ritual_step:"rituals",ritual_exit:"rituals",ritual:"rituals",reading:"readings",draw_pick:"readings",
-  chat_open:"chats",chat_send:"chats",letter_open:"letters",nudge_reply:"letters",nudge_later:"letters",hear:"sound",music:"sound",cycle_feature_used:"pages",bday_save_failed:"pages",focus_settle:"pages",paywall:"membership",checkout:"membership"};
+  chat_open:"chats",chat_send:"chats",letter_open:"letters",nudge_reply:"letters",nudge_later:"letters",hear:"sound",music:"sound",paywall:"membership",checkout:"membership"};
 function shareScope(){if(!accountsOn())return S.previewScope||SHARE_OPTS.map(o=>o[0]);return Array.isArray(ACCT.monitorScope)?ACCT.monitorScope:SHARE_OPTS.map(o=>o[0]);}
 function inFriendsWeek(){return (isFriend()||isShared())&&(!accountsOn()||!ACCT.trialUntil||Date.parse(ACCT.trialUntil)>Date.now());}
 function shareChecklist(sel){return '<div class="stack" id="shareList" style="gap:4px">'+SHARE_OPTS.map(o=>'<label class="switch" for="sc_'+o[0]+'"><span>'+esc(o[1])+'</span><input type="checkbox" id="sc_'+o[0]+'" data-scope="'+o[0]+'"'+(sel.includes(o[0])?" checked":"")+'></label>').join("")+'</div>';}
@@ -3642,7 +4169,7 @@ function openConsent(){
   S.seenPop=S.seenPop||{};S.seenPop.consent=Date.now();saveLocal();
   const o=esc(ownerName());
   openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Before we begin, one promise. <b>Everything you write, say, or tell me and the guardians is private.</b> It stays between you and your guardians. "+o+", who made me, never sees it. Not now, not ever.","Aura · your privacy")+
-    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only <b>what you tap and when</b>. Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
+    '<div class="card"><p style="margin:0">'+o+' is learning how people use the app this week. If you\'d like to help, tick anything you\'re comfortable sharing for the next 7 days. It\'s only basic usage activity: what you open or tap, how long a visit lasts, and how far you get in a ritual. <b>Never your words.</b> Ticking nothing is completely fine.</p><div style="margin-top:10px">'+shareChecklist([])+'</div></div>'+
     '<button class="btn btn-main full" id="consentSave">Share what I ticked</button><button class="btn btn-ghost full" data-consent="0">Don\'t share anything</button>'+
     '<p class="small muted" style="text-align:center">You can change this any time this week in Settings. It ends by itself after 7 days. Either way, everything stays open to you, for life.</p></div>');
 }
@@ -3651,15 +4178,15 @@ async function setConsent(yes,scope){
   closeSheet();
   if(!accountsOn()){S.previewMonitorAnswer=yes?"yes":"no";S.previewMonitor=yes?(S.previewMonitor&&S.previewMonitor>Date.now()?S.previewMonitor:Date.now()+7*864e5):0;S.previewScope=scope;saveLocal();}
   else{const r=await api("/api/monitor",{consent:!!yes,scope});if(r&&!r.error){ACCT.monitorAnswer=r.monitor_answer;ACCT.monitorUntil=r.monitor_until;ACCT.monitorScope=r.monitor_scope||scope;}}
-  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the taps you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
+  if(yes){track("open");toast("Thank you. "+ownerName()+" only sees the usage categories you ticked, never your words.");}else toast("Nothing is shared. Everything is still yours.");
   renderAll();setTimeout(auraPopup,600);
 }
 function sharingHTML(){
   if(inFriendsWeek()){const on=monitorOn(),sel=on?shareScope():[];
-    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only what you tap and when'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
+    return '<details class="group" open><summary>What you share with '+esc(ownerName())+'</summary><p class="small muted"><b>What you write, say, or tell Aura and the guardians is always private.</b> '+esc(ownerName())+' never sees it. Below is only the usage activity you chose to share'+(on?', until '+new Date(accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}):'')+'. Change it any time.</p><div style="margin-top:8px">'+shareChecklist(sel)+'</div><button class="btn btn-ghost full" id="scopeSave" style="margin-top:10px">Save my choices</button></details>';}
   if(!monitorOn())return "";
   const until=accountsOn()?Date.parse(ACCT.monitorUntil):S.previewMonitor;
-  return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see what you tap and when. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
+  return '<details class="group" open><summary>Sharing with '+esc(ownerName())+'</summary><p class="small muted">Until '+new Date(until).toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"})+', '+esc(ownerName())+' can see the usage activity you chose to share. Never what you write or say.</p><button class="btn btn-ghost full" data-consent="0">Stop sharing now</button></details>';
 }
 function auraPopup(){
   if($("#phoneOnly")||!S.profile.onboarded||$("#scrim")||$("#rite")||$("#talk"))return;
@@ -3667,10 +4194,11 @@ function auraPopup(){
   const nm=firstName(), te=trialEnds();
   let key=null,body="",label="Aura",btns="";
   if(isFriend()&&!S.seenPop["friend-welcome"]){S.seenPop["friend-welcome"]=Date.now();saveLocal();
-    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", you\'re":"You\'re")+" one of the first. Everything in the Inner Circle is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. You can bring in 3 people of your own, free for life too. Your link is in Settings. Thank you for helping me grow.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
+    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", you\'re":"You\'re")+" one of the first. Everything in the Inner Circle is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. You can bring in 3 people of your own, free for life too. Each of them can bring in 1 more. Your link is in Settings. Thank you for helping me grow.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
   if((isFriend()||isShared())&&!monitorAnswered()&&!S.seenPop.consent){if(isShared()&&!S.seenPop["shared-welcome"]){}else{openConsent();return;}}
   if(isShared()&&!S.seenPop["shared-welcome"]){S.seenPop["shared-welcome"]=Date.now();saveLocal();
-    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", a":"A")+" friend brought you in, so everything here is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you. I\'m so glad you\'re here.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
+    const pass=ACCT.cohort==="shared"?" You can bring one person in with your own invitation link in Settings.":"";
+    openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays((nm?esc(nm)+", a":"A")+" friend brought you in, so everything here is yours, for life: every chamber, every journey, my letters, and the guardians checking in on you."+pass+" I\'m so glad you\'re here.","Aura · lifetime access")+'<button class="btn btn-main full" id="'+(monitorAnswered()?'popClose':'toConsent')+'">'+(monitorAnswered()?'Let\'s begin':'Thank you')+'</button></div>');return;}
   if(accountsOn()&&ACCT.user&&!S.profile.push&&!S.seenPop["push-offer"]){S.seenPop["push-offer"]=Date.now();saveLocal();
     openSheet('<div class="stack auraPop"><div class="popseal">'+glyph("aura",64)+'</div>'+auraSays("Can I reach you? I\'d love to tell you when a letter from me arrives, and when a guardian checks in on you. Only when it means something, never nagging.","Aura · letters and check ins")+'<button class="btn btn-main full" id="pushOffer">Yes, let Aura reach me</button><button class="btn btn-ghost full" id="popClose">Not now</button><p class="small muted" style="text-align:center">You can change this any time in Settings.</p></div>');return;}
   if(isLifetime())return;
@@ -3708,7 +4236,8 @@ function plat(){if(isNative())return window.Capacitor.getPlatform();const u=navi
 function track(ev,meta){
   try{
     if(!monitorOn())return;
-    if(!shareScope().includes(EVCAT[ev]||"pages"))return;
+    const cat=EVCAT[ev];
+    if(!cat||!shareScope().includes(cat))return;
     evQ.push({ev,t:Date.now(),meta:{...(meta||{}),day:dayNum(),stage:typeof stage==="function"?stage():0,plat:plat()}});
     if(evQ.length>=40)flushEvents();else if(!evTimer)evTimer=setTimeout(flushEvents,8000);
   }catch(e){}
@@ -4034,7 +4563,7 @@ function chamberNudge(x){
 }
 /* The altar draw lives in 17d-tarot.js. drawPick is shared. */
 function drawPick(){const v=S.draws[dayKey(today)];if(v==null)return null;if(typeof v!=="object")return 0;if(Array.isArray(v.picks))return v.picks.length>=3?v.picks[1]:null;return v.pick==null?null:v.pick;}
-function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><g fill="none" stroke="#E7C45A" stroke-opacity=".75" stroke-width="1"><circle cx="56" cy="84" r="26"/><circle cx="56" cy="84" r="34" stroke-dasharray="2 4"/><path d="M56 44v80M16 84h80M30 58l52 52M82 58l-52 52" stroke-opacity=".3"/><path d="M62 70a14 14 0 1 0 0 28a11 11 0 1 1 0-28z" fill="#E7C45A" fill-opacity=".85" stroke="none"/></g><text x="56" y="152" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="10" fill="#E7C45A" letter-spacing="2">ALTAR</text></svg>';}
+function cardBack(){return '<svg viewBox="0 0 112 168" aria-hidden="true"><defs><radialGradient id="altarGlow" cx="50%" cy="42%" r="65%"><stop offset="0" stop-color="#4E3D7B"/><stop offset=".55" stop-color="#241A43"/><stop offset="1" stop-color="#100C20"/></radialGradient></defs><rect width="112" height="168" rx="12" fill="url(#altarGlow)"/><rect x="5" y="5" width="102" height="158" rx="9" fill="none" stroke="#E7C45A" stroke-opacity=".85"/><rect x="9" y="9" width="94" height="150" rx="7" fill="none" stroke="#E7C45A" stroke-opacity=".28"/><g fill="none" stroke="#E7C45A" stroke-linecap="round"><circle cx="56" cy="78" r="32" stroke-opacity=".62"/><circle cx="56" cy="78" r="24" stroke-dasharray="1.5 5" stroke-opacity=".52"/><path d="M56 36v84M14 78h84M27 49l58 58M85 49l-58 58" stroke-opacity=".16"/><path d="M63 61a18 18 0 1 0 0 34a14 14 0 1 1 0-34z" fill="#F4D778" fill-opacity=".92" stroke="none"/><path d="M56 26l2.5 5.8 5.8 2.5-5.8 2.5-2.5 5.8-2.5-5.8-5.8-2.5 5.8-2.5z" fill="#E7C45A" stroke="none"/></g><g fill="#E7C45A" opacity=".7"><circle cx="24" cy="30" r="1.2"/><circle cx="88" cy="38" r="1"/><circle cx="22" cy="119" r=".9"/><circle cx="91" cy="126" r="1.1"/></g><text x="56" y="147" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" fill="#F5E9B7" letter-spacing="2.4">THE ALTAR</text></svg>';}
 function resurface(){
   const old=S.entries.filter(e=>!e.private&&e.text&&(Date.now()-e.ts)>2*864e5);
   if(!old.length)return null;
@@ -4405,9 +4934,20 @@ function alchemySentence(d){
 
 /* The strip: compact at a glance, the deeper layer on tap. When her life is louder than the sky,
    the sky gets quiet (only the date, moon and season). */
+function fallbackLight(dp){return ({dawn:"golden",morning:"day-bright",afternoon:"day-bright",transition:"day-low",evening:"blue",deepnight:"night"})[dp]||"night";}
+function atmosphereMood(f,now){
+  const recent=(S.asks||[]).filter(a=>a&&a.text&&now-a.ts>=0&&now-a.ts<6*36e5).sort((a,b)=>b.ts-a.ts)[0],t=(recent&&recent.text||"").toLowerCase();
+  if(f.level<=2||/grief|grieving|sad|lonely|hurt|anxious|panic|overthink|heavy|scared|afraid/.test(t))return "held";
+  if(f.level===4||/tired|exhaust|drained|depleted|period|sick|ache|pain/.test(t))return "gentle";
+  if(/hopeful|excited|happy|good|proud|relieved|joy|grateful/.test(t))return "lifted";
+  return "open";
+}
 function renderSky(){
-  const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now);
-  document.documentElement.dataset.daypart=dp;document.documentElement.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
+  const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),w=typeof wxNow==="function"?wxNow():null,root=document.documentElement;
+  root.dataset.daypart=dp;
+  root.dataset.light=w&&w.solarPhase?w.solarPhase:fallbackLight(dp);
+  root.dataset.atmosphere=atmosphereMood(f,now.getTime());
+  root.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
   const quiet=f.level<=2;
   const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
   const meta=esc(M.name)+' · '+esc(se.name);
@@ -4733,7 +5273,7 @@ function cardNow(id,rev,d){
 }
 
 /* Card faces: original art. Majors carry a sigil, minors carry their pips like a real deck. */
-const INK="#3A2A1A",GOLD="#9A7414";
+const INK="#F6E9C8",GOLD="#E7C45A";
 function suitMark(s,x,y,sz){
   const k=sz/10,st='stroke="'+INK+'" stroke-width="'+(1.1)+'" fill="none" stroke-linecap="round" stroke-linejoin="round"';
   const T=(p)=>'<g transform="translate('+x+' '+y+') scale('+k+')">'+p+'</g>';
@@ -4776,14 +5316,13 @@ function cardSVG(id,rev){
   if(c.major)art=SIGIL[c.i]||"";
   else if(c.rank<10)art=(PIPS[c.rank+1]||[]).map(([x,y])=>suitMark(c.suit,x,y,c.rank===0?22:10)).join("");
   else art=COURT[c.rank]+suitMark(c.suit,50,110,11);
-  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#B55A36",cups:"#4D7F91",swords:"#6B668C",pentacles:"#7C7040"}[c.suit]||GOLD);
-  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true">'+
-    '<rect x="0" y="0" width="100" height="160" rx="8" fill="#F7EDCF"/><circle cx="50" cy="73" r="31" fill="'+accent+'" fill-opacity=".055"/>'+
-    '<path d="M12 14h12M76 14h12M12 146h12M76 146h12" stroke="'+accent+'" stroke-opacity=".65" stroke-width="1.2"/>'+
-    '<circle cx="16" cy="18" r="1.4" fill="'+accent+'"/><circle cx="84" cy="18" r="1.4" fill="'+accent+'"/><circle cx="16" cy="142" r="1.4" fill="'+accent+'"/><circle cx="84" cy="142" r="1.4" fill="'+accent+'"/>'+
-    '<rect x="3" y="3" width="94" height="154" rx="6" fill="none" stroke="'+GOLD+'" stroke-width="1.2"/><rect x="6.5" y="6.5" width="87" height="147" rx="4" fill="none" stroke="'+accent+'" stroke-opacity=".5" stroke-width=".8"/>'+
-    '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="9" letter-spacing="1.5" fill="'+GOLD+'">'+esc(c.num)+'</text>'+art+
-    '<path d="M14 128h72" stroke="'+GOLD+'" stroke-opacity=".5" stroke-width=".6"/><text x="50" y="142" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6.4:nm.length>12?7.4:8.4)+'" font-weight="600" fill="'+INK+'">'+esc(nm.toUpperCase())+'</text></svg>';
+  const nm=c.major?c.name.replace(/^The /,"THE "):c.name,accent=c.major?(G[holderOf(c)]||G.aura).color:({wands:"#E77C4A",cups:"#66B6C8",swords:"#AAA0F2",pentacles:"#C9B55D"}[c.suit]||GOLD),gid="cg_"+String(id).replace(/[^a-z0-9]/gi,"_");
+  return '<svg class="tcard'+(rev?' rev':'')+'" viewBox="0 0 100 160" aria-hidden="true"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#241937"/><stop offset=".5" stop-color="#16132A"/><stop offset="1" stop-color="#0C0918"/></linearGradient><radialGradient id="'+gid+'_a" cx="50%" cy="42%" r="48%"><stop offset="0" stop-color="'+accent+'" stop-opacity=".28"/><stop offset="1" stop-color="'+accent+'" stop-opacity="0"/></radialGradient></defs>'+
+    '<rect x=".8" y=".8" width="98.4" height="158.4" rx="9.5" fill="url(#'+gid+')" stroke="'+GOLD+'" stroke-width="1.3"/><rect x="5" y="5" width="90" height="150" rx="7" fill="none" stroke="'+accent+'" stroke-opacity=".62" stroke-width=".8"/><rect x="8" y="8" width="84" height="144" rx="5" fill="none" stroke="'+GOLD+'" stroke-opacity=".26" stroke-width=".55"/>'+
+    '<ellipse cx="50" cy="75" rx="35" ry="45" fill="url(#'+gid+'_a)"/><path d="M20 30Q50 18 80 30M20 118Q50 130 80 118" fill="none" stroke="'+GOLD+'" stroke-opacity=".32" stroke-width=".65"/>'+
+    '<g fill="'+GOLD+'" opacity=".65"><circle cx="17" cy="19" r="1"/><circle cx="83" cy="19" r="1"/><circle cx="14" cy="73" r=".7"/><circle cx="86" cy="73" r=".7"/><circle cx="21" cy="121" r=".8"/><circle cx="79" cy="121" r=".8"/></g>'+
+    '<text x="50" y="22" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="8.5" letter-spacing="1.6" fill="'+GOLD+'">'+esc(c.num)+'</text><g transform="translate(0 1)">'+art+'</g>'+
+    '<path d="M16 128h68" stroke="'+accent+'" stroke-opacity=".55" stroke-width=".7"/><text x="50" y="143" text-anchor="middle" font-family="Lora, Georgia, serif" font-size="'+(nm.length>16?6:nm.length>12?6.9:7.8)+'" font-weight="600" letter-spacing=".45" fill="#F8EDCF">'+esc(nm.toUpperCase())+'</text><text x="50" y="151" text-anchor="middle" font-family="Atkinson Hyperlegible, sans-serif" font-size="3.7" letter-spacing=".9" fill="'+accent+'">'+esc(c.major?"MAJOR ARCANA":SUITS[c.suit].el.toUpperCase())+'</text></svg>';
 }
 function cardFace(id){return cardSVG(id,cardRev(id));}
 function drawHTML(d){
@@ -4865,7 +5404,7 @@ function wxNow(){const w=S.wx;if(!w||!w.data||wxMode()==="off")return null;if(Da
 let wxBusy=false;
 async function wxRefresh(force){
   if(wxMode()==="off"||wxBusy)return;
-  if(!force&&S.wx&&Date.now()-S.wx.ts<60*60e3&&S.wx.mode===wxMode())return;
+  if(!force&&S.wx&&Date.now()-S.wx.ts<15*60e3&&S.wx.mode===wxMode())return;
   if(window.DA_WX_TEST){S.wx={ts:Date.now(),mode:wxMode(),data:window.DA_WX_TEST};wxApply();return;}
   if(MODE!=="web")return;
   wxBusy=true;
@@ -4889,9 +5428,12 @@ const WX_WORD={clear:"clear",clouds:"cloudy",rain:"rain",storm:"storms",snow:"sn
 const WX_OPEN={clear:"Clear skies",clouds:"Gray skies",rain:"Rain",storm:"A storm",snow:"Snow",fog:"Fog",wind:"Wind",hot:"Heat",cold:"Cold"};
 function wxApply(){
   const w=wxNow(),root=document.documentElement;
-  if(!w){delete root.dataset.weather;delete root.dataset.daylight;const l=$("#wxLayer");if(l)l.remove();return;}
+  if(!w){delete root.dataset.weather;delete root.dataset.daylight;delete root.dataset.sky;const l=$("#wxLayer");if(l)l.remove();if(typeof renderSky==="function"&&$("#sky"))renderSky();return;}
   root.dataset.weather=w.kind==="clear"?(w.isDay?"clear-day":"clear-night"):w.kind;
   root.dataset.daylight=w.isDay?"1":"0";
+  root.dataset.light=w.solarPhase||(w.isDay?"day-bright":"night");
+  const b=w.brightness==null?.8:w.brightness;
+  root.dataset.sky=b>=.88?"bright":b>=.64?"soft":"dim";
   if(!$("#wxLayer")){const l=document.createElement("div");l.id="wxLayer";l.setAttribute("aria-hidden","true");document.body.insertBefore(l,document.body.firstChild);}
   if(typeof renderSky==="function"&&$("#sky"))renderSky();
   if(typeof renderToday==="function"&&$("#v-today")&&!lastRead&&!$("#rite")&&!document.activeElement?.matches?.("textarea,input")&&root.dataset.wxShown!==root.dataset.weather){root.dataset.wxShown=root.dataset.weather;renderToday();}
@@ -4914,6 +5456,7 @@ function wxAIText(){
   return "WEATHER WHERE SHE IS: "+w.label+(w.isDay?" in daylight":" after dark")+". It's part of the natural rhythm (priority 7): let it shape the mood and keep her indoors when it's nasty, but do not turn it into a forecast and never let it outrank her life.\n";
 }
 setTimeout(()=>wxRefresh(),1500);
+setInterval(()=>wxRefresh(),10*60e3);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")wxRefresh();});
 /* ------------------------------------------------------------------
    GUARDIAN TRACKERS. Not dashboards for their own sake:
@@ -5016,17 +5559,22 @@ function resetNext(){
   const a=done.length?adaptAll(lastReset&&lastReset.after,next,lastReset?Math.max(0,daysSince(lastReset.ts)-1):0,next.reset):{r:next,note:""};
   return {base:next,...a,started:done.length>0};
 }
+function moonTrailMark(d,on){
+  const m=moon(d),r=8,k=Math.cos(2*Math.PI*m.f),rx=Math.max(.35,Math.abs(k)*r),outer=m.waxing?1:0,inner=m.waxing?(k>0?0:1):(k>0?1:0);
+  const p="M8,0 A"+r+","+r+" 0 0,"+outer+" 8,16 A"+rx+","+r+" 0 0,"+inner+" 8,0 Z";
+  return '<span class="moonday'+(on?' on':'')+'" title="'+esc(d.toDateString()+" · "+m.name)+'"><svg viewBox="-1 -1 18 18" aria-hidden="true"><circle cx="8" cy="8" r="8" fill="currentColor" opacity=".14"/><path d="'+p+'" fill="currentColor"/></svg></span>';
+}
 function addUpHTML(){
   const es=S.entries.filter(e=>e.ritualId||e.ritualTitle);
   const mins=es.reduce((a,e)=>a+((byId[e.ritualId]&&byId[e.ritualId].min)||e.min||5),0);
   const shown=new Set(es.map(e=>dayKey(new Date(e.ts))));for(const k of Object.keys(S.days||{}))if(Object.keys(S.days[k]).length)shown.add(k);
   const now=new Date(),tm=es.filter(e=>{const d=new Date(e.ts);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
   const lmD=new Date(now.getFullYear(),now.getMonth()-1,1),lm=es.filter(e=>{const d=new Date(e.ts);return d.getMonth()===lmD.getMonth()&&d.getFullYear()===lmD.getFullYear();}).length;
-  let dots="";for(let i=55;i>=0;i--){const d=new Date(now.getTime()-i*864e5);dots+='<i'+(shown.has(dayKey(d))?' class="on"':'')+' title="'+esc(d.toDateString())+'"></i>';}
+  let moons="";for(let i=28;i>=0;i--){const d=new Date(now.getTime()-i*864e5);moons+=moonTrailMark(d,shown.has(dayKey(d)));}
   const ins=rhythmInsight();
   return '<div class="card addup"><div class="label">Adding up</div>'+auraSays("Small rituals, kept daily, become who you are.","Aura")+
     '<div class="addnums"><div><b>'+es.length+'</b><span>rituals</span></div><div><b>'+(mins>=120?Math.round(mins/60)+" hr":mins+" min")+'</b><span>given to yourself</span></div><div><b>'+shown.size+'</b><span>days you showed up</span></div></div>'+
-    '<div class="dots" aria-label="The last eight weeks">'+dots+'</div><p class="small muted" style="margin-top:6px">The last eight weeks. Every lit day counts. Nothing resets.</p>'+
+    '<div class="moontrail" aria-label="The last lunar cycle">'+moons+'</div><p class="small muted" style="margin-top:6px">The last lunar cycle. A gold ring marks every day you showed up. Nothing resets.</p>'+
     (es.length?'<p class="small" style="margin-top:8px">This month: '+tm+(tm===1?" ritual":" rituals")+'. Last month: '+lm+'.</p>':'')+(ins?'<p class="why" style="margin-top:10px">'+esc(ins)+'</p>':'')+'</div>';
 }
 function renderJourneys(){
@@ -5040,7 +5588,7 @@ function renderJourneys(){
   }
   h+='</div>';
   h+='<div><div class="row between"><span class="label">Guided journeys</span>'+(isMember()?'':'<span class="badge">'+esc(PLAN.name)+'</span>')+'</div><h2 style="margin-top:4px">When one night isn\'t enough</h2><p class="muted" style="margin-top:6px">Seven days each, one ritual a night, in the voice of the guardian who leads it.</p></div><div class="entries">';
-  for(const j of JOURNEYS){const dn=journeyDays(j.id).length;h+='<button class="card link" data-journey="'+j.id+'"><div class="row">'+glyph(j.g,34)+'<div style="flex:1;min-width:0"><h3>'+(isMember()?'':'🔒 ')+esc(j.name)+'</h3><p class="small muted" style="margin-top:2px">With '+esc(G[j.g].name)+' · 7 days'+(dn?' · '+dn+' done':'')+'</p></div></div><p style="margin-top:8px;color:var(--glow-dim);font-size:15.5px">'+esc(j.d)+'</p>'+(dn?'<div class="progress" style="margin-top:10px"><i style="width:'+(dn/7*100)+'%"></i></div>':'')+'</button>';}
+  for(const j of JOURNEYS){const dn=journeyDays(j.id).length;h+='<div class="card journeycard"><div class="row journeyrow">'+guardianMark(j.g,42)+'<button class="journeyopen" data-journey="'+j.id+'"><h3>'+(isMember()?'':'🔒 ')+esc(j.name)+'</h3><p class="small muted">With '+esc(G[j.g].name)+' · 7 days'+(dn?' · '+dn+' done':'')+'</p></button></div><button class="journeybody" data-journey="'+j.id+'"><span>'+esc(j.d)+'</span>'+(dn?'<span class="progress" style="margin-top:10px"><i style="width:'+(dn/7*100)+'%"></i></span>':'')+'</button></div>';}
   h+='</div>';
   $("#v-journeys").innerHTML=h;
 }
@@ -5070,10 +5618,14 @@ function renderCircle(){
   const pi=drawPick(), sp=drawSpread();
   let h;
   if(pi==null){
-    const three=threeMode(),got=threePicks(),mid=(sp.length-1)/2;
-    h='<div><div class="label">The altar draw</div><h3 style="margin-top:6px">'+(three?(got.length?"Pick "+(3-got.length)+" more.":"Pick three cards."):"Pick a card.")+'</h3><p class="muted" style="margin-top:4px">'+(three?"Seven cards from the full 78 card deck. The first is what you're carrying, the second what's asking for your attention, the third what will help. Aura reads them together.":"Five cards from the full 78 card deck, one for you today. Trust your hand. Its question changes as your day moves.")+'</p><div class="spread'+(three?' seven':'')+'" id="spread">'+
-      sp.map((g,i)=>'<button class="tarot sp'+(got.includes(i)?' picked flipped':'')+'" data-pickcard="'+i+'" style="--i:'+(i-mid)+'" aria-label="Card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div>'+
-      (three?'':'<p class="small muted" style="margin-top:6px">In the Inner Circle you draw three cards, and Aura reads them together. <button class="linkish" data-paywall="Three card readings">See membership</button></p>')+'</div>';
+    const three=threeMode(),got=threePicks();
+    const nextPos=three&&got.length<3?SPREAD_POS[got.length][0]:"Your card";
+    h='<section class="altarstage"><div class="altarhead"><div class="label">The Altar</div><h2>'+(three?"Your three-card reading":"Your card for today")+'</h2>'+
+      (three?'<div class="altarpositions"><span class="'+(got.length>0?'done':'next')+'">1 · What you\'re carrying</span><span class="'+(got.length>1?'done':got.length===1?'next':'')+'">2 · What wants your attention</span><span class="'+(got.length>2?'done':got.length===2?'next':'')+'">3 · What may help</span></div><p class="altarhint">'+(got.length?"Choose the next card for <b>"+esc(nextPos.toLowerCase())+"</b>.":"Choose slowly. Aura will read the three together.")+'</p>':'<p class="altarhint">Choose slowly. Trust your hand.</p>')+
+      '</div><div class="spread'+(three?' seven':'')+'" id="spread">'+
+      sp.map((g,i)=>'<button class="tarot sp'+(got.includes(i)?' picked flipped':'')+'" data-pickcard="'+i+'" aria-label="Choose card '+(i+1)+'"><div class="inner"><div class="face back">'+cardBack()+'</div><div class="face front">'+cardFace(g)+'</div></div></button>').join("")+'</div>'+
+      '<p class="decknote">'+(three?"Swipe the deck if you want. Three choices, then the rest falls away.":"One card today. Its question changes as your day moves.")+'</p>'+
+      (three?'':'<p class="small muted">Inner Circle opens the three-card reading. <button class="linkish" data-paywall="Three card readings">See membership</button></p>')+'</section>';
   }else if(threeMode()&&threeDone()){
     h=threeSpreadHTML();
   }else{
@@ -5102,7 +5654,6 @@ function renderCircle(){
 }
 function baseOf(k){return R.some(r=>r.g===k)?k:(KIN[k]||k);}
 function openGuardian(k){
-  setTimeout(()=>{const s=$("#scrim");if(s){s._music=true;}musicFor(k);},0);
   const g=G[k], rs=R.filter(r=>r.g===k&&!r.reset).sort((a,b)=>(a.member?1:0)-(b.member?1:0)), c=CHAMBERS[k], usedN=S.entries.filter(e=>e.guardian===k).length;
   let h='<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label" style="color:'+g.color+'">'+esc(g.title)+' · '+esc(g.element)+'</div><h2 style="margin:2px 0 0">'+esc(g.name)+'</h2></div></div>'+
    '<p><b>'+esc(g.name)+'\'s job:</b> '+esc(JOB[k]||g.domain)+'</p><p class="small muted">'+esc(g.domain)+' '+esc(g.voice)+(usedN?" You have walked with "+esc(g.name)+" "+usedN+" time"+(usedN>1?"s":"")+".":"")+'</p>'+
@@ -5111,22 +5662,22 @@ function openGuardian(k){
   if(k==="iris")setTimeout(()=>cycleSync().then(rerenderIris),0);
   if(rs.length)h+='<div class="label">'+esc(g.name)+'\'s rituals</div>'+rs.map(r=>ritualCard(r)).join("");
   if(c)h+='<div class="card"><div class="row between"><h3>'+esc(c.name)+'</h3>'+(isMember()?'':'<span class="badge">Members</span>')+'</div><p class="small muted" style="margin-top:6px">'+esc(c.d)+'</p><button class="btn btn-ghost full" style="margin-top:12px" data-chamber="'+k+'">Open the chamber</button></div>';
-  openSheet(h+'</div>');
+  openSheet(h+'</div>',k);
 }
 function openChamber(k){
   const c=CHAMBERS[k], rs=R.filter(r=>r.g===k&&r.member);
   openSheet('<div class="stack"><div class="lead">'+glyph(k)+'<div><div class="label">'+esc(G[k].name)+'\'s chamber</div><h2 style="margin:2px 0 0">'+esc(c.name)+'</h2></div></div><p>'+esc(c.d)+'</p><p class="small muted">'+(isMember()?'Open. Aura also draws from this chamber when what you bring calls for '+esc(G[k].name)+'.':'Included with '+esc(PLAN.name)+'. Once you join, Aura starts pulling from it for you.')+'</p>'+
-   rs.map(r=>ritualCard(r)).join("")+(isMember()?'':'<button class="btn btn-main full" data-paywall="'+esc(c.name)+'">Join '+esc(PLAN.name)+'</button>')+'</div>');
+   rs.map(r=>ritualCard(r)).join("")+(isMember()?'':'<button class="btn btn-main full" data-paywall="'+esc(c.name)+'">Join '+esc(PLAN.name)+'</button>')+'</div>',k);
 }
 function openJourney(id){
   const j=JOURNEYS.find(x=>x.id===id); if(!j)return;
   const done=journeyDays(id), next=[1,2,3,4,5,6,7].find(n=>!done.includes(n));
-  let h='<div class="stack"><div class="lead">'+glyph(j.g)+'<div><div class="label">7 days with '+esc(G[j.g].name)+'</div><h2 style="margin:2px 0 0">'+esc(j.name)+'</h2></div></div><p>'+esc(j.d)+'</p><div class="days">';
+  let h='<div class="stack"><div class="lead journeyhead">'+guardianMark(j.g,64)+'<div><button class="journeyguardianname" data-guardian="'+j.g+'"><span class="label">7 days with '+esc(G[j.g].name)+'</span></button><h2 style="margin:2px 0 0">'+esc(j.name)+'</h2><span class="small muted">Tap '+esc(G[j.g].name)+' to open the chamber</span></div></div><p>'+esc(j.d)+'</p><div class="days">';
   let note="";
   j.days.forEach((d,i)=>{const n=i+1,isDone=done.includes(n),isNext=next===n,locked=!isMember()||(!isDone&&!isNext);let r=byId[d[0]];if(isNext&&isMember()){const a=journeyStep(j,n);r=a.r;note=a.note;window.__jsettle=!!a.settle;}
     h+='<button class="day'+(isDone?" done":"")+(isNext&&isMember()?" next":"")+'" '+(isMember()&&!locked?'data-jday="'+id+':'+n+'"':'')+(locked?" disabled":"")+'><span class="num">'+(isDone?"✓":n)+'</span><span><div class="t">'+esc(r.title)+'</div><div class="s">'+esc(d[1])+'</div></span><span class="st">'+(isDone?"Done":isNext&&isMember()?"Tonight":r.min+" min")+'</span></button>';});
   h+='</div>'+(note&&isMember()?'<p class="why">'+esc(note)+(window.__jsettle?' <button class="linkish" data-begin="two-minute-settle">Settle first</button>':'')+'</p>':'')+(isMember()?(next?'':'<p class="muted">Journey complete. You can start any day again from its guardian.</p>'):'<button class="btn btn-main full" data-paywall="'+esc(j.name)+'">Start with '+esc(PLAN.name)+'</button>')+'</div>';
-  openSheet(h);
+  openSheet(h,j.g);
 }
 
 /* ------------------------------------------------------------------
@@ -5205,48 +5756,47 @@ let run=null, tick=null;
 const ROMAN=["","I","II","III","IV","V","VI","VII","VIII","IX","X","XI","XII","XIII","XIV","XV"];
 const ORN='<svg class="orn" viewBox="0 0 220 20" aria-hidden="true"><path d="M4 10h78M138 10h78" stroke="#9A7414" stroke-width="1"/><path d="M82 10c8 0 12-6 18-6M138 10c-8 0-12-6-18-6M82 10c8 0 12 6 18 6M138 10c-8 0-12 6-18 6" fill="none" stroke="#9A7414" stroke-width="1"/><path d="M110 2l2.6 5.4L118 10l-5.4 2.6L110 18l-2.6-5.4L102 10l5.4-2.6z" fill="#BF1E73"/><circle cx="4" cy="10" r="1.6" fill="#9A7414"/><circle cx="216" cy="10" r="1.6" fill="#9A7414"/></svg>';
 function startRitual(r,ctx){
-  closeSheet();
-  run={r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
+  closeSheet(true);
+  run={base:r,r:adapt(r),i:-1,ctx:ctx||{},t0:Date.now()};MUSIC.started=true;track("ritual_start",{id:r.id,g:r.g,of:r.steps.length});musicFor(r.g);
   const el=document.createElement("div");el.className="rite";el.id="rite";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",r.title);
   el.style.setProperty("--gcol",G[r.g].color);document.body.appendChild(el);document.body.style.overflow="hidden";
   drawStep();
 }
-function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;if(talkG)musicFor(talkG);else musicBack();}
+function endRitual(){stopEyes();stopVoice();try{stopAudio();speechSynthesis.cancel();}catch(e){}musicDuck(false);clearInterval(tick);const el=$("#rite");if(el)el.remove();document.body.style.overflow="";run=null;musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}
 function drawStep(){
   clearInterval(tick);
   const {r,i}=run, total=r.steps.length, el=$("#rite"), g=G[r.g];
-  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Back">← <span>Back</span></button>'+guardianMark(r.g,32,true)+'<span class="t">· '+esc(r.title)+'</span><span class="sndbar"></span></div><div class="pips">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
+  const bar='<div class="bar"><button class="navback ritualback" id="riteX" aria-label="Exit ritual">× <span>Exit</span></button><div class="ritualwho">'+guardianMark(r.g,38,true)+'<span><b>'+esc(g.name)+'</b><small>'+esc(g.title)+'</small></span></div><span class="sndbar"></span></div><div class="pips" aria-label="Ritual progress">'+Array.from({length:total+1},(_,k)=>'<i class="'+(k<i?"on":k===i?"on now":"")+'"></i>').join("")+'</div>';
   if(i===-1){
-    const needs=ritualNeeds(r);
-    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+
-      '<div class="ritualintro">'+
-      '<div class="count"><span class="seal">✦</span><span>Before you begin</span></div><h2>'+esc(r.title)+'</h2>'+ORN+
-      '<p class="purpose">'+esc(r.purpose||"")+'</p>'+
-      '<div class="gatherbox"><span class="sayl">Gather everything now</span><div class="needchips">'+(needs.length?needs.map(n=>'<span>'+esc(n)+'</span>').join(""):'<span>Nothing but you</span>')+'</div></div>'+
-      '<p class="prepnote">You should not discover a new supply halfway through. If something is missing, go back and tell Aura before you start.</p>'+
-      '</div></div><div class="foot"><button class="btn btn-ink" id="nextBtn">I have what I need</button></div>';
+    const base=run.base||r,items=ritualNeedItems(base),chips=items.length?items.map(n=>{const miss=known().includes(n[0])&&!S.profile.have.includes(n[0]);return '<button class="needchip'+(miss?' missing':'')+'" data-ritualneed="'+n[0]+':'+(miss?'1':'0')+'" aria-pressed="'+(!miss)+'"><span class="needcheck">'+(miss?'＋':'✓')+'</span>'+esc(n[1])+'</button>';}).join(""):'<span class="needchip static">Nothing but you</span>';
+    el.innerHTML='<div class="wrap">'+bar+
+      '<main class="ritualintro luxe"><div class="ritualkicker">Before you begin</div><h1>'+esc(r.title)+'</h1><p class="purpose">'+esc(r.purpose||"")+'</p>'+
+      '<div class="ritualmeta"><span>'+r.min+' minutes</span><span>'+esc(g.element)+'</span><span>'+total+' step'+(total===1?'':'s')+'</span></div>'+
+      '<section class="gatherbox ritualtray"><div class="trayhead"><span class="sayl">Gather what you\'ll use</span><span class="small">Tap anything you don\'t have.</span></div><div class="needchips">'+chips+'</div><p class="supplyhint">Aura adapts the ritual now, before you begin. Nothing new will appear halfway through.</p></section>'+
+      (r.notes&&r.notes.length?'<div class="supplyswap"><span class="sayl">Adapted for you</span><p>'+r.notes.map(esc).join(" ")+'</p></div>':'')+
+      '</main></div><div class="foot prepfoot"><button class="btn btn-ink" id="nextBtn">Begin the ritual</button></div>';
     el.scrollTop=0;return;
   }
   if(i<total){
     const s=r.steps[i];
-    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal">'+ROMAN[i+1]+'</span><span>of '+ROMAN[total]+'</span></div><h2>'+esc(s.t)+'</h2>'+ORN+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
-      (s.say?'<div class="say"><span class="sayl">Say it aloud</span>"'+esc(s.say)+'"</div>':"")+
-      (!voiceEnabled()?'':'<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>')+
+    el.innerHTML='<div class="wrap">'+bar+'<main class="ritualstep"><div class="ritualkicker">Step '+(i+1)+' of '+total+'</div><h1>'+esc(s.t)+'</h1>'+(i===0&&r.purpose?'<p class="purpose">'+esc(r.purpose)+'</p>':"")+'<p class="text">'+esc(s.d)+'</p>'+
+      (s.say?'<blockquote class="say"><span class="sayl">Say it aloud</span>"'+esc(s.say)+'"</blockquote>':"")+
+      (!voiceEnabled()?'':'<div class="guide">'+(voiceOn?'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="true">Pause guidance</button><button class="btn btn-ghost sm" id="repeatBtn">Repeat</button><button class="btn btn-ghost sm" id="eyesBtn">Close my eyes</button>':'<button class="btn btn-ghost sm" id="voiceBtn" aria-pressed="false">Guide me aloud</button>')+'</div>')+
       (s.hold?'<div class="timer"><span class="clock" id="clock">'+mmss(s.hold)+'</span><button class="btn btn-ghost" id="holdBtn">Start timer</button></div>':"")+
       (i===total-1&&r.secret?'<p class="secret">'+esc(r.secret)+'</p>':"")+
-      '</div><div class="foot">'+(i>0?'<button class="btn btn-ghost" id="prevBtn">Back</button>':"")+'<button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
+      '</main></div><div class="foot ritualnav"><button class="btn btn-ghost" id="prevBtn">Back</button><button class="btn btn-ink" id="nextBtn">'+(i===total-1?"Finish":"Next")+'</button></div>';
   }else{
     const prompts=r.prompts||["What came up?"];
-    el.innerHTML='<div class="wm">'+glyph(r.g,340)+'</div><div class="wrap">'+bar+'<div class="count"><span class="seal done">✦</span><span>Ritual complete</span></div><h2>You did it. Write it down before it fades.</h2>'+ORN+'<p class="text">'+prompts.map(esc).join(" ")+'</p>'+
-      '<label class="sr" for="refl">Your reflection</label><textarea id="refl" style="min-height:160px" placeholder="A few honest lines is plenty."></textarea>'+
-      '<div class="field"><label for="outside" style="color:var(--ink-soft)">What changes outside the ritual?</label><input type="text" id="outside" placeholder="'+esc(OUTSIDE_HINT[r.g]||"One real thing you'll do")+'"><div class="chips" id="outWhen" style="margin-top:6px"><button class="chip" data-outwhen="1" aria-pressed="false">Check in tomorrow</button><button class="chip" data-outwhen="7" aria-pressed="true">In a week</button></div></div>'+
-      '<label class="switch" for="privateOnly" style="color:var(--ink)">For my eyes only. Aura won\'t read this.<input type="checkbox" id="privateOnly"></label>'+
-      '<div><div class="small" style="color:var(--ink-soft);margin-bottom:8px">Afterward I feel</div><div class="chips" id="afterChips">'+["Lighter","Clearer","Stirred up","Tender","Powerful","The same"].map(a=>'<button class="chip" data-after="'+a+'" aria-pressed="false">'+a+'</button>').join("")+'</div></div>'+
-      '</div><div class="foot"><button class="btn btn-ghost" id="skipSave">Skip writing</button><button class="btn btn-ink" id="saveBtn">Save to archive</button></div>';
+    el.innerHTML='<div class="wrap">'+bar+'<main class="ritualcomplete"><div class="ritualkicker">Ritual complete</div><h1>Done.</h1><p class="finishq">What changed, even a little?</p><div class="chips afterfeel" id="afterChips">'+["Lighter","Clearer","Stirred up","Tender","Powerful","The same"].map(a=>'<button class="chip" data-after="'+a+'" aria-pressed="false">'+a+'</button>').join("")+'</div>'+
+      '<details class="ritualnotes"><summary>Write something, if you want</summary><p class="small muted">'+prompts.map(esc).join(" ")+'</p><label class="sr" for="refl">Your reflection</label><textarea id="refl" placeholder="A few honest lines is plenty."></textarea>'+
+      '<div class="field"><label for="outside">What changes outside the ritual?</label><input type="text" id="outside" placeholder="'+esc(OUTSIDE_HINT[r.g]||"One real thing you'll do")+'"><div class="chips" id="outWhen"><button class="chip" data-outwhen="1" aria-pressed="false">Check in tomorrow</button><button class="chip" data-outwhen="7" aria-pressed="true">In a week</button></div></div>'+
+      '<label class="switch" for="privateOnly">For my eyes only. Aura won\'t read this.<input type="checkbox" id="privateOnly"></label></details>'+
+      '</main></div><div class="foot ritualnav" style="flex-wrap:wrap"><button class="btn btn-ghost" id="prevBtn" style="flex-basis:100%">Back to last step</button><button class="btn btn-ghost" id="skipSave">Finish without writing</button><button class="btn btn-ink" id="saveBtn">Save to Archive</button></div>';
   }
   el.scrollTop=0; const w=el.querySelector(".wrap"); if(w)w.scrollTop=0;
   speakStep();
 }
+
 const OUTSIDE_HINT={thistle:"Mute the thread tonight",rue:"Block the number",sage:"Say it to their face, or let it go",marigold:"Send the invoice",sol:"Put the first step on your calendar today",juniper:"Clear the entry table",fern:"In bed by 10",lily:"Close the laptop at 7",onyx:"Tell one person the truth",willow:"Call the person who remembers them too",vesper:"Say one want out loud to your person",iris:"Log how today actually felt",rowan:"Walk around the block after dinner",lumen:"Book the first appointment",aurora:"Phone stays off until after coffee",wren:"Write down the next sign",onora:"Ask about the family story"};
 function mmss(s){return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");}
 function saveEntry(text,after,extra){
@@ -5309,19 +5859,22 @@ let talkG=null, talkAbort=null;
 function openTalk(k){
   if(!allowedG(k)){closeSheet();vesperGate();return;}
   track("chat_open",{g:k});setTimeout(saveUI,0);MUSIC.started=true;
-  closeSheet();talkG=k;const g=G[k];musicFor(k);
+  closeSheet(true);talkG=k;const g=G[k];musicFor(k);
   const el=document.createElement("div");el.className="talk";el.id="talk";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Talk to "+g.name);
-  el.innerHTML='<div class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button>'+glyph(k)+'<div class="who"><div class="n">'+esc(g.name)+'</div><div class="t" style="color:'+g.color+'">'+esc(g.title)+'</div></div><span class="sndbar"></span></div><div class="msgs" id="msgs"></div>'+
-    '<div class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Talk to '+esc(g.name)+'"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></div>';
+  el.style.setProperty("--talk-accent",g.color);
+  el.innerHTML='<header class="hd"><button class="navback" id="talkX" aria-label="Back">← <span>Back</span></button><div class="talkportrait">'+glyph(k)+'</div><div class="who"><span class="talkeyebrow">Private conversation</span><div class="n">'+esc(g.name)+'</div><div class="t">'+esc(g.title)+'</div></div><span class="sndbar"></span></header><div class="msgs" id="msgs"></div>'+
+    '<footer class="ft"><div class="composer"><label class="sr" for="chatIn">Message '+esc(g.name)+'</label><textarea id="chatIn" rows="1" placeholder="Tell '+esc(g.name)+' what happened…"></textarea>'+micBtn("chatIn")+'</div><button class="send" id="chatSend" aria-label="Send">'+SEND+'</button></footer>';
   document.body.appendChild(el);document.body.style.overflow="hidden";
   drawMsgs();
 }
-function closeTalk(){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!run)musicBack();}
+
+function closeTalk(keepMusic){setTimeout(saveUI,0);if(talkG){const l=(S.chats[talkG]||[]);if(!S.led)S.led={};const since=l.slice(S.led[talkG]||0);const fresh=since.slice(-8);if(fresh.filter(m=>m.role==="me").length>=2){S.led[talkG]=l.length;saveLocal();updateLedger("Conversation with "+G[talkG].name+":\n"+fresh.map(m=>(m.role==="me"?"Her: ":G[talkG].name+": ")+m.text).join("\n"));}}if(talkAbort)talkAbort.abort();stopMic();const el=$("#talk");if(el)el.remove();document.body.style.overflow="";talkG=null;if(!keepMusic){musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}}
 function msgHTML(m,k){
-  if(m.role==="me")return '<div class="bub me">'+esc(m.text)+'</div>';
+  if(m.role==="me")return '<div class="bub me"><span class="msgwho">You</span><p>'+esc(m.text)+'</p></div>';
   const r=m.ritual&&byId[m.ritual];
-  return '<div class="bub them" style="border-color:'+G[k].color+'55">'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+(m.handoff&&G[m.handoff]?'<br><button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<br><button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<br><button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
+  return '<div class="bub them"><span class="msgwho">'+esc(G[k].name)+'</span><p>'+(voiceEnabled()?'<button class="hear" data-hear="'+k+'" aria-label="Hear '+esc(G[k].name)+'">'+HEAR_ICON+'</button>':'')+esc(m.text)+'</p>'+(m.handoff&&G[m.handoff]?'<button class="btn btn-main" data-handoff="'+m.handoff+'">Go to '+esc(G[m.handoff].name)+'</button>':"")+(m.upsell?'<button class="btn btn-main" data-paywall="More time with the circle">Join '+esc(PLAN.name)+'</button>':"")+(r?'<button class="btn btn-main" data-begin="'+esc(r.id)+'" data-ctx="talk">Begin '+esc(r.title)+' · '+r.min+' min</button>':"")+'</div>';
 }
+
 function guardianDaily(k){
   const own=R.filter(r=>r.g===k&&!r.reset&&canUse(r)), pool=own.length?own:R.filter(r=>r.g===(KIN[k]||k)&&canUse(r));
   if(!pool.length)return byId.anchor;
@@ -5361,7 +5914,7 @@ function introHTML(k){
 function drawMsgs(){
   const k=talkG,list=S.chats[k]||[],box=$("#msgs");if(!box)return;
   const hi=(S.profile.name?S.profile.name+". ":"")+(GREET[k]||G[k].phrases[0]+" Tell me what's going on.");
-  box.innerHTML=introHTML(k)+'<div class="bub them" style="border-color:'+G[k].color+'55">'+esc(hi)+'</div>'+list.map(m=>msgHTML(m,k)).join("");
+  box.innerHTML=introHTML(k)+'<div class="bub them"><span class="msgwho">'+esc(G[k].name)+'</span><p>'+esc(hi)+'</p></div>'+list.map(m=>msgHTML(m,k)).join("");
   box.scrollTop=box.scrollHeight;
 }
 function talkPrompt(k){
@@ -5501,15 +6054,17 @@ function toggleMic(btn){
 /* ------------------------------------------------------------------
    SHEETS + SETTINGS
 ------------------------------------------------------------------ */
-function openSheet(html){
-  closeSheet();
+function openSheet(html,musicG){
+  closeSheet(true);
   const s=document.createElement("div");s.className="scrim";s.id="scrim";
+  s._musicG=musicG||null;
   s.innerHTML='<div class="sheet" role="dialog" aria-modal="true"><div class="sheetnav"><button class="navback" id="sheetX" aria-label="Back">← <span>Back</span></button></div><div class="grab"></div>'+html+'</div>';
   $("#layer").appendChild(s);
   s.addEventListener("click",ev=>{if(ev.target===s)closeSheet();});
   const x=s.querySelector("#sheetX");x.focus({preventScroll:true});
+  if(musicG){MUSIC.started=true;musicFor(musicG);}else musicSyncSoon();
 }
-function closeSheet(){const s=$("#scrim");if(s){s.remove();if(s._music){s._music=false;musicBack();}}}
+function closeSheet(keepMusic){const s=$("#scrim");if(s){s.remove();if(!keepMusic){musicSyncSoon();setTimeout(maybeFirstReturnLetter,120);}}}
 function accountHTML(){
   if(!accountsOn())return '<div class="card"><div class="label">Membership preview</div><p class="small muted" style="margin-top:6px">You are seeing the app as a '+(isMember()?"member":"free user")+'. Real accounts and checkout run on DailyAlchemist.com.</p><button class="btn btn-ghost full" style="margin-top:10px" data-preview-member="1">'+(isMember()?"Preview as free":"Preview as a member")+'</button><button class="btn btn-ghost full" style="margin-top:8px" data-previewfriend="1">See what friends see</button>'+(S.previewFriend?'<button class="btn btn-ghost full" style="margin-top:8px" id="endFriendPreview">Stop friends preview</button>':'')+'</div>';
   if(!ACCT.sb)return '';
@@ -5539,7 +6094,9 @@ function openAltar(first){
    '<div class="field"><label for="pName">What should the circle call you?</label><input type="text" id="pName" value="'+esc(p.name)+'" placeholder="Your name" autocomplete="given-name"></div>';
   }
   if(!first){
-    h+='<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
+    h+=ACCT.user?'<div class="card accountquick"><div class="row between"><span><span class="label">Signed in</span><br><span class="small">'+esc(ACCT.email||"Your account")+'</span></span><button class="btn btn-ghost" id="signOutTop">Log out</button></div><p class="small muted" style="margin-top:8px">Log out only when you want to switch accounts. Otherwise, this device keeps you signed in.</p></div>':'';
+    h+='<details class="group" open><summary>Appearance and text</summary><p class="small muted">Auto follows the real light outside. Light and Dark stay where you put them until you change them.</p><div class="label" style="margin-top:10px">Appearance</div><div class="chips">'+[["auto","Auto"],["light","Light"],["dark","Dark"]].map(o=>'<button class="chip" data-appearance="'+o[0]+'" aria-pressed="'+((p.appearance||"auto")===o[0])+'">'+o[1]+'</button>').join("")+'</div><div class="label" style="margin-top:12px">Text size</div><div class="chips">'+[["standard","Standard"],["large","Large"],["xlarge","Extra large"]].map(o=>'<button class="chip" data-font="'+o[0]+'" aria-pressed="'+((p.fontSize||"standard")===o[0])+'">'+o[1]+'</button>').join("")+'</div></details>'+
+      '<div class="field"><span class="lbl">Time you usually have</span><div class="chips" id="pMins">'+[5,10,20,40].map(m=>'<button class="chip" data-pm="'+m+'" aria-pressed="'+(p.minutes===m)+'">'+m+(m===40?"+":"")+' min</button>').join("")+'</div></div>'+
      '<details class="group" open><summary>What you have</summary><p class="small muted">Tap what you own. Aura builds rituals around it and rewrites steps for what you don\'t.</p><div class="lbl" style="margin-top:10px">Everyday things</div>'+chipset("pHave",HAVE)+'<div class="lbl" style="margin-top:14px">More advanced tools</div>'+chipset("pAdv",HAVE_ADV)+'<div class="lbl" style="margin-top:14px">Your own</div>'+custom+'</details>'+
      ''+sharingHTML()+shareHTML()+(ACCT.admin?'<a class="btn btn-main full" href="/admin" style="margin:6px 0">Open your dashboard</a>':'')+'<details class="group"><summary>Share feedback</summary><p class="small muted">Tell me what confused you, what you loved, or what\'s missing. It goes straight to the person who made this app.</p><button class="btn btn-ghost full" id="fbOpen">Share a thought</button></details><details class="group"><summary>Dates that matter</summary><p class="small muted">Birthdays, move-in days, anniversaries, losses, fresh starts. Aura will remember and mark them with you.</p>'+S.dates.map(d=>'<div class="li"><span>'+esc(d.name)+'<br><span class="small muted">'+new Date(2000,d.month-1,d.day).toLocaleDateString(undefined,{month:"long",day:"numeric"})+(d.year?", "+d.year:"")+'</span></span><button class="x2" data-deldate="'+d.id+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="dateName">What happened</label><input type="text" id="dateName" placeholder="Moved into the house"><label class="sr" for="dateWhen">Date</label><input type="date" id="dateWhen"><button class="btn btn-ghost" id="dateAdd">Add</button></div></details>'+
      '<details class="group"><summary>What things mean to you</summary><p class="small muted">Aura uses your meanings over the traditional ones. If your grandmother grew lavender, lavender is hers.</p>'+S.corr.map((c,i)=>'<div class="li"><span><b style="font-weight:500">'+esc(c.symbol)+'</b> · '+esc(c.meaning)+'</span><button class="x2" data-delcorr="'+i+'" aria-label="Remove">×</button></div>').join("")+'<div class="addrow"><label class="sr" for="corrSym">Symbol</label><input type="text" id="corrSym" placeholder="Lavender"><label class="sr" for="corrMean">What it means to you</label><input type="text" id="corrMean" placeholder="My grandmother\'s garden"><button class="btn btn-ghost" id="corrAdd">Add</button></div></details>'+
@@ -5633,17 +6190,17 @@ document.addEventListener("click",async ev=>{
   if(d.cartdel){S.cart=S.cart.filter(c=>c.tag!==d.cartdel);persistAll();closeSheet();openAltar(false);return;}
   if(d.thread!==undefined){q=q===d.thread?"":d.thread;renderArchive();return;}
   if(t.id==="archAskBtn"){const qq=($("#archAsk").value||"").trim();if(!qq)return;t.disabled=true;$("#archAnswer").innerHTML='<p class="small muted" style="margin-top:10px">Reading your Archive...</p>';const a=await askArchive(qq);t.disabled=false;$("#archAnswer").innerHTML='<p style="margin-top:12px;font-size:18px">'+esc(a.answer)+'</p>'+(a.cites.length?'<div class="entries" style="margin-top:8px">'+a.cites.map(id=>{const e=S.entries.find(z=>z.id===id);return e?'<button class="entry" data-entry="'+esc(id)+'">'+glyph(e.guardian)+'<span><div class="t">'+esc(e.ritualTitle)+'</div><div class="m">'+fmtDate(e.ts)+'</div>'+(e.text?'<div class="x">'+esc(e.text)+'</div>':'')+'</span></button>':"";}).join("")+'</div>':'');return;}
-  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk();const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
+  if(d.handoff){const from=talkG,to=d.handoff;const last=(S.chats[from]||[]).filter(m=>m.role==="me").slice(-1)[0];closeTalk(true);const list=S.chats[to]=S.chats[to]||[];guardianOpens(list,{text:G[from].name+" sent you to me. "+(last?"You said: \""+last.text.slice(0,160)+"\" ":"")+G[to].phrases[0]});saveLocal();openTalk(to);return;}
   if(d.snd==="menu"){openSound();return;}
   if(d.sndset){const v=d.sndset;
-    if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want)MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});else musicPlay(MUSIC.want);renderSnd();}}
+    if(v==="music-on"){if(!musicOn())setMusic(true);else{MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);renderSnd();}}
     if(v==="music-off")setMusic(false);
     if(v==="vol-soft"||v==="vol-full"){S.prefMusicVol=v==="vol-soft"?"quiet":"normal";syncSnd();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),400);renderSnd();}
     if(v==="voice-on")setVoice(true);if(v==="voice-off")setVoice(false);
     track("music",{set:v});return;}
   if(d.snd){if(d.snd==="music"){
       /* If it says on but nothing is playing yet (phones block sound until a tap), this tap starts it instead of turning it off. */
-      if(musicOn()&&!musicAudible()){MUSIC.started=true;if(MUSIC.cur&&MUSIC.cur._g===MUSIC.want){MUSIC.cur.play().then(()=>fadeTo(MUSIC.cur,musicVol(),500)).catch(()=>{});}else musicPlay(MUSIC.want);renderSnd();toast("Music on.");}
+      if(musicOn()&&!musicAudible()){MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);renderSnd();toast("Music on.");}
       else{const on=!musicOn();setMusic(on);toast(on?"Music on.":"Music off. Tap the note to bring it back.");}}else{const on=voiceMuted();setVoice(on);toast(on?"Voices on.":"Voices off. Tap the speaker to hear them again.");}track("music",{set:d.snd+(d.snd==="music"?(musicOn()?"_on":"_off"):(voiceMuted()?"_off":"_on"))});return;}
   if(t.id==="voiceBtn"){voiceOn=!voiceOn;if(voiceOn){if(voiceMuted())setVoice(true);if(!naturalVoices()){voiceOn=false;toast("Guided voice needs you signed in on the live app. The steps are all here to read.");return;}startVoiceCommands();toast("Aura will guide you aloud. Say next, repeat or pause.");drawStep();}else{stopVoice();drawStep();}return;}
   if(d.own){const [tg,yn]=d.own.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);refreshCards();toast(yn==="1"?"Got it. Aura will remember.":"Got it. Aura rewrote it around what you have.");return;}
@@ -5672,13 +6229,20 @@ document.addEventListener("click",async ev=>{
   if(d.previewMember){S.previewMember=!isMember();saveLocal();closeSheet();renderAll();toast(isMember()?"Previewing as a member.":"Previewing as free.");return;}
   if(d.legal){openSheet('<div class="stack legal">'+LEGAL[d.legal]+'</div>');return;}
   if(t.id==="siOpen"){openSignIn();return;}
-  if(t.id==="siSwitch"){const f=$("#siForm");if(f)f.outerHTML=signInForm(t.dataset.gate==="1",f.dataset.by==="phone");return;}
-  if(t.id==="siSend"&&$("#siPhone")){const ph=normPhone($("#siPhone").value);if(!ph){$("#siMsg").textContent="Check that number. Include the area code.";return;}t.disabled=true;const {error}=await ACCT.sb.auth.signInWithOtp({phone:ph,options:{shouldCreateUser:true}});t.disabled=false;if(error){$("#siMsg").textContent="Couldn't text the code. Check the number, or use email instead.";return;}ACCT.pendingPhone=ph;ACCT.pendingEmail=null;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;t.hidden=true;$("#siMsg").textContent="Code texted to "+ph+". It can take a minute.";$("#siCode").focus();return;}
-  if(t.id==="siSend"){const em=($("#siEmail").value||"").trim();if(!/^\S+@\S+\.\S+$/.test(em)){$("#siMsg").textContent="Check that email address.";return;}t.disabled=true;const {error}=await ACCT.sb.auth.signInWithOtp({email:em,options:{shouldCreateUser:true}});t.disabled=false;if(error){$("#siMsg").textContent="Couldn't send the code. Try again in a minute.";return;}ACCT.pendingEmail=em;ACCT.pendingPhone=null;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;t.hidden=true;$("#siMsg").textContent="Code sent to "+em+". Check spam if it's not there in a minute.";$("#siCode").focus();return;}
-  if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");t.disabled=true;const {data,error}=await ACCT.sb.auth.verifyOtp(ACCT.pendingPhone?{phone:ACCT.pendingPhone,token:code,type:"sms"}:{email:ACCT.pendingEmail,token:code,type:"email"});t.disabled=false;if(error){$("#siMsg").textContent="That code didn't work. Check it, or send a new one.";return;}closeSheet();toast("Signed in. Your Archive is safe.");if(data&&data.session)await onSignedIn(data.session);return;}
+  if(t.id==="siSend"){const em=($("#siEmail").value||"").trim();if(!/^\S+@\S+\.\S+$/.test(em)){$("#siMsg").textContent="Check that email address.";return;}t.disabled=true;t.textContent="Sending...";const out=await api("/api/auth-code",{email:em});t.disabled=false;t.textContent="Email my code";if(!out||out.error){if(out&&out.error==="rate_limited"&&out.sent){ACCT.pendingEmail=em;t.hidden=true;$("#siEmailRow").hidden=true;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;$("#siMsg").innerHTML="A code was already sent to <b>"+esc(em)+"</b> less than a minute ago.<br>Enter that code below. You can request another after a minute.<br><br><button class=\"linkish\" id=\"siAgain\">Use a different email</button>";$("#siCode").focus();return;}$("#siMsg").textContent=out&&out.error==="supabase_rate_limited"?"Too many sign-in emails went out in the last hour. Wait a little while, then try again.":"I couldn't send the email. Nothing was sent. Please try again.";return;}ACCT.pendingEmail=em;t.hidden=true;$("#siEmailRow").hidden=true;$("#siCodeRow").hidden=false;$("#siVerify").hidden=false;$("#siMsg").innerHTML="Email accepted for delivery to <b>"+esc(em)+"</b>.<br>Enter the code from that email below.<br><br><button class=\"linkish\" id=\"siAgain\">Use a different email</button>";$("#siCode").focus();return;}
+  if(t.id==="siVerify"){const code=($("#siCode").value||"").replace(/\D/g,"");if(!ACCT.pendingEmail){$("#siMsg").textContent="Send a code first.";return;}if(code.length<6||code.length>10){$("#siMsg").textContent="Enter the whole code from the email.";$("#siCode").focus();return;}t.disabled=true;t.textContent="Signing in...";let out=null;try{out=await ACCT.sb.auth.verifyOtp({email:ACCT.pendingEmail,token:code,type:"email"});}catch(e){out={error:e};}t.disabled=false;t.textContent=$("#gate")?"Come in":"Sign in";if(!out||out.error){const msg=out&&out.error&&out.error.message?String(out.error.message):"";$("#siMsg").textContent=/expired/i.test(msg)?"That code expired. Use a different email or reopen this screen to request a fresh one.":"That code didn't work. Check the digits and try again.";return;}toast("Signed in.");if(out.data&&out.data.session&&(!ACCT.user||ACCT.user.id!==out.data.session.user.id))await onSignedIn(out.data.session);return;}
+  if(t.id==="siAgain"){ACCT.pendingEmail=null;const f=$("#siForm");if(f)f.outerHTML=signInForm(!!$("#gate"));return;}
   if(t.id==="checkoutBtn"){track("checkout",{plan:payPlan});if(!ACCT.user){openSignIn();return;}t.disabled=true;t.textContent="Opening checkout...";const r=await api("/api/checkout",{plan:payPlan});if(r.url){openExternal(r.url);}else{t.disabled=false;t.textContent="Join "+PLAN.name;toast("Checkout isn't available right now. Try again soon.");}return;}
   if(t.id==="portalBtn"){t.disabled=true;const r=await api("/api/portal",{});if(r.url)openExternal(r.url);else{t.disabled=false;toast("Couldn't open billing. Try again soon.");}return;}
-  if(t.id==="signOut"){await ACCT.sb.auth.signOut();ACCT.user=null;ACCT.member=false;closeSheet();renderAll();toast("Signed out.");return;}
+  if(t.id==="signOut"||t.id==="signOutTop"){if(ACCT.sb)await ACCT.sb.auth.signOut();try{localStorage.removeItem(KEY);}catch(e){}location.reload();return;}
+  if(d.appearance){S.profile.appearance=d.appearance;applyDisplayPrefs();persist("profile");t.parentElement.querySelectorAll("[data-appearance]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.font){S.profile.fontSize=d.font;applyDisplayPrefs();persist("profile");t.parentElement.querySelectorAll("[data-font]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactcad){S.profile.contact={...contactPref(),cadence:d.contactcad,enabled:d.contactcad!=="never"};t.parentElement.querySelectorAll("[data-contactcad]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactscope){S.profile.contact={...contactPref(),scope:d.contactscope};t.parentElement.querySelectorAll("[data-contactscope]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(d.contactnotify!=null){S.profile.contact={...contactPref(),notify:d.contactnotify==="1"};t.parentElement.querySelectorAll("[data-contactnotify]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
+  if(t.id==="contactSave"){const c=contactPref();persist("profile");if(c.notify===true&&!S.profile.push)await enablePush();toast(c.cadence==="never"?"Letters are off. You can turn them back on anytime.":"Your letter rhythm is saved.");return;}
+  if(d.ritualneed&&run){const [tg,yn]=d.ritualneed.split(":");setOwned(tg,yn==="1");if(yn!=="1")noteMiss(tg);run.r=adapt(run.base||run.r);drawStep();toast(yn==="1"?"Added back.":"Aura adapted the ritual around it.");return;}
+  if(t.id==="missingBtn"){const g=document.querySelector("#rite .gatherbox");if(g){g.classList.add("attention");g.scrollIntoView({behavior:"smooth",block:"center"});}toast("Tap the item you are missing. Tap it again if you need to undo it.");return;}
   if(d.talk){openTalk(d.talk);return;}
   if(d.gocircle){const b=document.querySelector('[data-tab="circle"]');if(b)b.click();window.scrollTo(0,0);return;}
   if(d.sleep||d.energy||d.moved!=null&&t.closest(".rhythm")||d.wind){
@@ -5697,7 +6261,7 @@ document.addEventListener("click",async ev=>{
     saveLocal();remotePut("chat",k,{kind:"chat",msgs:l});openTalk(k);return;}
   if(t.id==="popClose"){closeSheet();return;}
   if(d.hear){const holder=t.closest(".bub,.voice");if(t.classList.contains("on")){stopAudio();return;}const txt=holder?[...holder.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent).join(" ").trim():"";if(txt){stopAudio();t.classList.add("on");speak(txt,()=>t.classList.remove("on"),d.hear,false);track("hear",{g:d.hear});}return;}
-  if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});syncSnd();if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicPlay(MUSIC.want);if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}renderSnd();return;}
+  if(d.pmusic){S.prefMusic=d.pmusic==="off"?"off":"on";S.prefMusicVol=d.pmusic==="quiet"?"quiet":"normal";saveLocal();t.parentElement.querySelectorAll("[data-pmusic]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));track("music",{set:d.pmusic});syncSnd();if(d.pmusic==="off")musicStop();else{MUSIC.started=true;musicSyncContext();if(MUSIC.cur)fadeTo(MUSIC.cur,musicVol(),500);}renderSnd();return;}
   if(d.pvoice){if(d.pvoice==="off")setVoice(false);else{S.prefVoice=d.pvoice;setVoice(true);}t.parentElement.querySelectorAll("[data-pvoice]").forEach(b=>b.setAttribute("aria-pressed",String(b===t)));return;}
   if(t.id==="toConsent"){openConsent();return;}
   if(t.id==="consentSave"){const sc=checkedScope();setConsent(sc.length>0,sc);return;}
@@ -5744,7 +6308,7 @@ document.addEventListener("click",async ev=>{
     if(!r)return;
     if(!canUse(r)){closeTalk();if(r.adult21&&!vesperOK())vesperGate();else openPaywall(G[r.g].name+"'s chamber");return;}
     const ctx=(d.ctx==="read"&&lastRead)?{theme:lastRead.theme,carrying:lastRead.carrying,thread:lastRead.thread||""}:{};
-    if(d.ctx==="talk"){const lm=(S.chats[talkG]||[]).filter(m=>m.role==="me").pop();ctx.carrying=lm?lm.text:"";closeTalk();}
+    if(d.ctx==="talk"){const lm=(S.chats[talkG]||[]).filter(m=>m.role==="me").pop();ctx.carrying=lm?lm.text:"";closeTalk(true);}
     startRitual(r,ctx);return;
   }
   if(d.reset){const rn=resetNext();startRitual(rn&&rn.base.id===d.reset?rn.r:byId[d.reset],{theme:"reset",reset:true});return;}
@@ -5761,7 +6325,7 @@ document.addEventListener("click",async ev=>{
     setTimeout(renderCircle,1100);return;}
   if(d.cardask&&threeMode()&&threeDone()){const cs=drawnCards();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="My three cards today: "+cs.map(x=>SPREAD_POS[x.pos][1]+", "+x.title).join("; ")+". Help me understand what they mean for me right now.";sendTalk();}},350);return;}
   if(d.cardask){const dr=todayDraw();openTalk("aura");setTimeout(()=>{const ta=$("#chatIn");if(ta){ta.value="I drew "+dr.title+" today. It speaks of "+(dr.rev?dr.card.revTheme:dr.card.theme)+". What does it mean for me right now?";sendTalk();}},350);return;}
-  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk();openGuardian(d.guardian);return;}
+  if(d.guardian){if(t.closest("#rite"))endRitual();else if(t.closest("#talk"))closeTalk(true);openGuardian(d.guardian);return;}
   if(d.chamber){openChamber(d.chamber);return;}
   if(d.journey){openJourney(d.journey);return;}
   if(d.entry){openEntry(d.entry);return;}
@@ -5814,11 +6378,9 @@ document.addEventListener("click",async ev=>{
   if(d.fusave){const card=t.closest("#fuCard"),a=card&&S.asks.find(z=>z.id===card.dataset.fuid);if(a)saveFollow(a,d.fusave==="carry");return;}
   if(d.tabgo){tab(d.tabgo);return;}
   if(d.peek){const r=byId[d.peek];if(r)openSheet('<div class="stack">'+ritualCard(r,{why:true})+'</div>');return;}
-  if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";await loadShare();return;}
+  if(t.id==="shareGet"){t.disabled=true;t.textContent="Getting your link...";const r=await loadShare();if(!r||!r.code){t.disabled=false;t.textContent="Generate my invitation link";}return;}
   if(t.id==="shareGo"){doShare(false);return;}
   if(t.id==="shareCopy"){doShare(true);return;}
-  if(t.id==="shareText"){shareVia("text");return;}
-  if(t.id==="shareEmail"){shareVia("email");return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")&&!$("#age18").value){toast("Add your birthday to begin.");$("#age18").focus();return;}
   if((t.id==="pSave"||t.id==="pSkip")&&$("#age18")){const v=$("#age18").value,a=age21(v);if(a==null||a<0||a>120){toast("Choose your birthday.");return;}if(a<18){setBirthday(v);return;}if(!(await setBirthday(v)))return;}
   if(t.id==="pSave"||t.id==="pSkip"){
