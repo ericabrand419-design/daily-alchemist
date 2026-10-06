@@ -110,18 +110,46 @@ function atmosphereMood(f,now){
    so midday stops where white text still reads comfortably. Rain and heavy cloud dim it a little.
    "Light" and "Dark" in Settings turn this off and use their own fixed background. */
 const SKY_STOPS=[[0,"#0C0918"],[4.5,"#0E0B1E"],[5.5,"#241D40"],[6.5,"#4A3860"],[8,"#5C547F"],[10,"#686090"],[13,"#6E6794"],[16,"#675F8C"],[18,"#5A4266"],[19.5,"#3E3058"],[20.5,"#262B49"],[22,"#15112A"],[24,"#0C0918"]];
+/* The page moves with the sky, not just the background: each part of the day has its own accent
+   (borders, labels, links, highlights) and its own button color, and the cards take on the sky's hue. */
+const ACCENT_STOPS=[[0,"#9C86E0"],[4.5,"#9C86E0"],[6,"#F2A0BE"],[8,"#F6C383"],[11,"#7FD8C8"],[14,"#8FD3E8"],[16.5,"#E9C25E"],[18,"#F48A6C"],[19.5,"#E96FA8"],[20.5,"#86AEEE"],[22,"#A68EE6"],[24,"#9C86E0"]];
+const BUTTON_STOPS=[[0,"#7A2A8C"],[4.5,"#7A2A8C"],[6,"#C2357A"],[8,"#D2486A"],[11,"#B8327E"],[14,"#A63A92"],[16.5,"#C4466A"],[18,"#D2533F"],[19.5,"#B7276F"],[20.5,"#5B4BB0"],[22,"#6E2F95"],[24,"#7A2A8C"]];
 const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
-function skyColor(d,sky){
+const rgbHex=c=>"#"+c.map(v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0")).join("");
+function stopAt(stops,d){
   d=d||new Date();const t=d.getHours()+d.getMinutes()/60;
-  let i=0;while(i<SKY_STOPS.length-2&&SKY_STOPS[i+1][0]<=t)i++;
-  const [t0,c0]=SKY_STOPS[i],[t1,c1]=SKY_STOPS[i+1],k=(t-t0)/(t1-t0),a=hexRgb(c0),b=hexRgb(c1);
-  const dim=sky==="dim"?.82:sky==="soft"?.92:1,night=hexRgb("#0C0918");
-  return "#"+a.map((x,j)=>{const v=(x+(b[j]-x)*k);return Math.round(night[j]+(v-night[j])*dim).toString(16).padStart(2,"0");}).join("");
+  let i=0;while(i<stops.length-2&&stops[i+1][0]<=t)i++;
+  const [t0,c0]=stops[i],[t1,c1]=stops[i+1],k=(t-t0)/(t1-t0),a=hexRgb(c0),b=hexRgb(c1);
+  return a.map((x,j)=>x+(b[j]-x)*k);
 }
+function skyColor(d,sky){
+  const v=stopAt(SKY_STOPS,d),dim=sky==="dim"?.82:sky==="soft"?.92:1,night=hexRgb("#0C0918");
+  return rgbHex(v.map((x,j)=>night[j]+(x-night[j])*dim));
+}
+const SKIN=["--world-bg","--accent","--gold","--line","--card-edge","--fuchsia","--fuchsia-hi","--surface-card","--surface-card-2","--surface-aura-1","--surface-aura-2","--surface-reading","--surface-nav","--surface-sheet","--surface-input","--surface-tile"];
 function skyTick(){
-  const root=document.documentElement;
-  if(root.dataset.theme)root.style.removeProperty("--world-bg");
-  else root.style.setProperty("--world-bg",skyColor(new Date(),root.dataset.sky));
+  const root=document.documentElement,st=root.style;
+  if(root.dataset.theme){SKIN.forEach(k=>st.removeProperty(k));return;}
+  const now=new Date(),bg=hexRgb(skyColor(now,root.dataset.sky)),ac=stopAt(ACCENT_STOPS,now),bt=stopAt(BUTTON_STOPS,now);
+  const gold=hexRgb("#E7C45A"),mix=(a,b,k)=>a.map((x,j)=>x+(b[j]-x)*k),rgba=(c,a)=>"rgba("+c.map(Math.round).join(",")+","+a+")";
+  /* Cards: the sky's own hue, deepened so text on them always reads, with a breath of the accent. */
+  const card=mix(mix(bg,[10,8,22],.40),ac,.10),card2=mix(card,ac,.10),deep=mix(card,[8,6,18],.35);
+  st.setProperty("--world-bg",rgbHex(bg));
+  st.setProperty("--accent",rgbHex(ac));
+  st.setProperty("--gold",rgbHex(mix(gold,ac,.6)));
+  st.setProperty("--line",rgba(ac,.34));
+  st.setProperty("--card-edge",rgba(ac,.42));
+  st.setProperty("--fuchsia",rgbHex(bt));
+  st.setProperty("--fuchsia-hi",rgbHex(mix(bt,[255,255,255],.22)));
+  st.setProperty("--surface-card",rgba(card,.95));
+  st.setProperty("--surface-card-2",rgba(card2,.95));
+  st.setProperty("--surface-aura-1",rgba(mix(card,ac,.16),.97));
+  st.setProperty("--surface-aura-2",rgba(deep,.97));
+  st.setProperty("--surface-reading",rgba(mix(card,ac,.05),.96));
+  st.setProperty("--surface-nav",rgba(deep,.95));
+  st.setProperty("--surface-sheet",rgbHex(mix(card,[8,6,18],.15)));
+  st.setProperty("--surface-input",rgba(deep,.85));
+  st.setProperty("--surface-tile",rgba(card2,.93));
 }
 setInterval(skyTick,60e3);
 function renderSky(){
