@@ -2407,6 +2407,7 @@ function applyDisplayPrefs(){
   const font=["standard","large","xlarge"].includes(p.fontSize)?p.fontSize:"standard";
   root.dataset.appearance=appearance;root.dataset.font=font;
   if(appearance==="auto")delete root.dataset.theme;else root.dataset.theme=appearance;
+  setTimeout(()=>{if(typeof skyTick==="function")skyTick();},0);
 }
 applyDisplayPrefs();
 function col(){return cloud.db.collection("data/users/"+cloud.uid);}
@@ -4942,12 +4943,31 @@ function atmosphereMood(f,now){
   if(/hopeful|excited|happy|good|proud|relieved|joy|grateful/.test(t))return "lifted";
   return "open";
 }
+/* The sky moves with the clock, minute by minute: dark at night, lifting through dawn, brightest
+   around midday, warming at sunset, then sinking back into night. Text sits right on this color,
+   so midday stops where white text still reads comfortably. Rain and heavy cloud dim it a little.
+   "Light" and "Dark" in Settings turn this off and use their own fixed background. */
+const SKY_STOPS=[[0,"#0C0918"],[4.5,"#0E0B1E"],[5.5,"#241D40"],[6.5,"#4A3860"],[8,"#5C547F"],[10,"#686090"],[13,"#6E6794"],[16,"#675F8C"],[18,"#5A4266"],[19.5,"#3E3058"],[20.5,"#262B49"],[22,"#15112A"],[24,"#0C0918"]];
+const hexRgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function skyColor(d,sky){
+  d=d||new Date();const t=d.getHours()+d.getMinutes()/60;
+  let i=0;while(i<SKY_STOPS.length-2&&SKY_STOPS[i+1][0]<=t)i++;
+  const [t0,c0]=SKY_STOPS[i],[t1,c1]=SKY_STOPS[i+1],k=(t-t0)/(t1-t0),a=hexRgb(c0),b=hexRgb(c1);
+  const dim=sky==="dim"?.82:sky==="soft"?.92:1,night=hexRgb("#0C0918");
+  return "#"+a.map((x,j)=>{const v=(x+(b[j]-x)*k);return Math.round(night[j]+(v-night[j])*dim).toString(16).padStart(2,"0");}).join("");
+}
+function skyTick(){
+  const root=document.documentElement;
+  if(root.dataset.theme)root.style.removeProperty("--world-bg");
+  else root.style.setProperty("--world-bg",skyColor(new Date(),root.dataset.sky));
+}
+setInterval(skyTick,60e3);
 function renderSky(){
   const now=new Date(),dp=daypart(now),f=resolveCurrentFocus(now),se=plainSeason(now),pn=plantNow(now),w=typeof wxNow==="function"?wxNow():null,root=document.documentElement;
   root.dataset.daypart=dp;
   root.dataset.light=w&&w.solarPhase?w.solarPhase:fallbackLight(dp);
   root.dataset.atmosphere=atmosphereMood(f,now.getTime());
-  root.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));
+  root.style.setProperty("--moonglow",(0.35+0.65*M.ill).toFixed(2));skyTick();
   const quiet=f.level<=2;
   const date=esc(now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric"}));
   const meta=esc(M.name)+' · '+esc(se.name);

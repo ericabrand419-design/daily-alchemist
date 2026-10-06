@@ -25,6 +25,7 @@ function applyDisplayPrefs(){
   const font=["standard","large","xlarge"].includes(p.fontSize)?p.fontSize:"standard";
   root.dataset.appearance=appearance;root.dataset.font=font;
   if(appearance==="auto")delete root.dataset.theme;else root.dataset.theme=appearance;
+  setTimeout(()=>{if(typeof skyTick==="function")skyTick();},0);
 }
 applyDisplayPrefs();
 function col(){return cloud.db.collection("data/users/"+cloud.uid);}
